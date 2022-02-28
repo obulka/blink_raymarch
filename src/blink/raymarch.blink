@@ -1,6 +1,7 @@
 kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 {
     Image<eRead, eAccessPoint, eEdgeNone> src; // the input spheres positions.xyz radius.w
+    //Image<eRead, eAccessRandom, eEdgeNone> spheres;
     //Image<eRead, eAccessRandom, eEdgeNone> spheres; // the input spheres positions.xyz radius.w
 
     Image<eWrite> dst; // the output image
@@ -11,9 +12,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float farPlane;
         float focalLength;
         float4x4 cameraWorldMatrix;
+
         float width;
         float height;
 
+        float maxRayDistance;
+        float hitTolerance;
+
+        int numSpheres;
 
     local:
         // These local variables are not exposed to the user.
@@ -22,6 +28,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float4x4 inverseCameraProjectionMatrix;
         float3 cameraPosition;
         float aspect;
+        //float **spheres = {{0, 0, 0, 0.5, 1, 0, 0}};
 
 
     // Invert a 4x4 matrix
@@ -201,11 +208,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // In define(), parameters can be given labels and default values.
     void define()
     {
+        // Cmaera params
         defineParam(nearPlane, "Near Plane", 0.1f);
         defineParam(farPlane, "Far Plane", 10000.0f);
         defineParam(focalLength, "Focal Length", 50.0f);
-        defineParam(height, "Screen Height", 2160.0f);
-        defineParam(width, "Screen Width", 3840.0f);
         defineParam(
             cameraWorldMatrix,
             "Camera World Matrix",
@@ -216,6 +222,17 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 0, 0, 0, 1
             )
         );
+
+        // Image params
+        defineParam(height, "Screen Height", 2160.0f);
+        defineParam(width, "Screen Width", 3840.0f);
+
+        // Ray params
+        defineParam(maxRayDistance, "Max Ray Distance", 10000.0f);
+        defineParam(hitTolerance, "Hit Tolerance", 0.0001f);
+
+        // Scene params
+        defineParam(numSpheres, "Number of Spheres", 1);
     }
 
 
@@ -223,6 +240,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // Local variables can be initialized here.
     void init()
     {
+        // TODO use angles to allow -ve focal length like for latlongs
         aspect = height / width;
         fieldOfView = 2 * atan(1 / focalLength);
         cameraProjectionMatrix = float4x4(
@@ -234,6 +252,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         invert4x4(cameraProjectionMatrix, inverseCameraProjectionMatrix);
         positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);
     }
+
 
     void createCameraRay(float2 pos, float3 &rayOrigin, float3 &rayDirection)
     {
@@ -253,24 +272,62 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    float distanceToSphere(float3 spherePosition, float radius, float3 toPosition) {
+        return length(spherePosition - toPosition) - radius;
+    }
+
+
+    float getMinDistanceToObjectInScene(float3 rayOrigin)
+    {
+        float distance = maxRayDistance;
+
+        for (int i=0; i < numSpheres; i++)
+        {
+            distance = min(
+                distance,
+                distanceToSphere(
+                    float3(0, 0, 0),
+                    1,
+                    rayOrigin
+                )
+            );
+        }
+        return distance;
+    }
+
+
     void process(int2 pos)
     {
+        // Convert to UV coords
         float2 uv = float2(
             2 * pos.x / width - 1,
             2 * pos.y / height - 1
         );
 
-        // Read the input image
+        // Read the input to pass through
         SampleType(src) input = src();
         float4 resultPixel(input.x, input.y, input.z, input.w);
 
+        // Generate a ray from the camera
         float3 rayOrigin;
         float3 rayDirection;
         createCameraRay(uv, rayOrigin, rayDirection);
 
+        float totalDistance = 0;
+        while (totalDistance < maxRayDistance)
+        {
+            float stepDistance = getMinDistanceToObjectInScene(rayOrigin);
+            if (stepDistance <= hitTolerance)
+            {
+                resultPixel = float4(1, 0, 0, 1);
+                break;
+            }
+
+            rayOrigin += rayDirection * stepDistance;
+            totalDistance += stepDistance;
+        }
 
 
-
-        dst() = float4(rayDirection.x, rayDirection.y, rayDirection.z, rayOrigin.x);
+        dst() = resultPixel;
     }
 };
