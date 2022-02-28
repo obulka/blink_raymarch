@@ -1,0 +1,98 @@
+kernel ZDefocus : public ImageComputationKernel<ePixelWise> {
+    Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+    Image<eRead, eAccessPoint, eEdgeClamped> depth;
+    Image<eRead, eAccessRandom, eEdgeNone> filter;
+    Image<eWrite> dst;
+
+    param:
+        float focal_plane;
+        float f_stop;
+        float focal_length;
+        // float circle_of_confusion;
+        // float size;
+        // float maximum;
+        // int depth_layers;
+
+    local:
+        int2 _filter_offset;
+        float _blur_scale_const;
+
+    // In define(), parameters can be given labels and default values.
+    void define() {
+        defineParam(focal_plane, "focal plane", 0.5f); // S
+        defineParam(f_stop, "f/stop", 1.0f); // f
+        defineParam(focal_length, "focal length", 1.0f); // F
+        // defineParam(circle_of_confusion, "circle of confusion", 1.0f);
+        // defineParam(size, "size", 1.0f); // b_max
+        // defineParam(maximum, "maximum", 1.0f); // Clamps above this depth value / size
+        // defineParam(depth_layers, "depth layers", 10);
+        // defineParam(layer_curve, "layer curve", 1.0f);
+    }
+
+    void init() {
+        // Get the size of the filter input and store the radius.
+        int2 _filter_radius(
+            filter.bounds.width() / 2,
+            filter.bounds.height() / 2
+        );
+
+        _filter_offset = int2(
+            filter.bounds.x1 - _filter_radius.x,
+            filter.bounds.y1 - _filter_radius.y
+        );
+
+        float magnification = focal_length / (focal_plane - focal_length);
+
+        _blur_scale_const = focal_length * magnification / f_stop;
+
+        // Set up the access for the src image
+        src.setRange(
+            -_filter_radius.x,
+            -_filter_radius.y,
+            _filter_radius.x,
+            _filter_radius.y
+        );
+    }
+
+    void process() {
+        SampleType(src) value_sum(0);
+        ValueType(filter) filter_sum(0);
+
+        float depth_at_pixel = depth(0);
+
+        float blur_disk_size = (
+            _blur_scale_const
+            * fabs(depth_at_pixel - focal_plane)
+            / depth_at_pixel
+        );
+
+        // Iterate over the filter image
+        for(int j = filter.bounds.y1; j < filter.bounds.y2; j++) {
+            for(int i = filter.bounds.x1; i < filter.bounds.x2; i++) {
+                // Get the filter value
+                ValueType(filter) filter_val = filter(
+                    i, // Subtract from right edge to not rotate
+                    j, // Subtract from top edge to not rotate
+                    0                     // Red channel is depth
+                );
+
+                // Multiply the src value by the corresponding filter weight and accumulate
+                value_sum += filter_val * bilinear(
+                    src,
+                    (i + _filter_offset.x) * blur_disk_size,
+                    (j + _filter_offset.y) * blur_disk_size
+                );
+
+                // Update the filter sum with the current filter value
+                filter_sum += filter_val;
+            }
+        }
+
+        // Normalise the value sum, avoiding division by zero
+        if (filter_sum != 0) {
+            value_sum /= filter_sum;
+        }
+        
+        dst() = value_sum;
+    }
+};

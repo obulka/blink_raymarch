@@ -1,44 +1,276 @@
 kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 {
-  Image<eRead, eAccessPoint, eEdgeNone> rays; // the input spheres positions.xyz radius.w
-  Image<eRead, eAccessRandom, eEdgeNone> spheres; // the input spheres positions.xyz radius.w
-  Image<eWrite> dst; // the output image
+    Image<eRead, eAccessPoint, eEdgeNone> src; // the input spheres positions.xyz radius.w
+    //Image<eRead, eAccessRandom, eEdgeNone> spheres; // the input spheres positions.xyz radius.w
 
-  param:
-    float saturation; // This parameter is made available to the user.
+    Image<eWrite> dst; // the output image
 
-  local:
-    float3 coefficients;  // This local variable is not exposed to the user.
+    param:
+        // These parameters are made available to the user.
+        float nearPlane;
+        float farPlane;
+        float focalLength;
+        float4x4 cameraWorldMatrix;
+        float width;
+        float height;
 
-  // In define(), parameters can be given labels and default values.
-  void define() {
-    defineParam(saturation, "Saturation", 1.2f);
-  }
 
-  // The init() function is run before any calls to process().
-  // Local variables can be initialized here.
-  void init() {
-    // Initialise coefficients according to rec. 709 standard.
-    coefficients.x = 0.2126f;
-    coefficients.y = 0.7152f;
-    coefficients.z = 0.0722f;
-  }
+    local:
+        // These local variables are not exposed to the user.
+        float fieldOfView;
+        float4x4 cameraProjectionMatrix;
+        float4x4 inverseCameraProjectionMatrix;
+        float3 cameraPosition;
+        float aspect;
 
-  void process() {
-    // Read the input image
-    SampleType(src) input = src();
 
-    // Isolate the RGB components
-    float3 srcPixel(input.x, input.y, input.z);
+    // Invert a 4x4 matrix
+    bool invert4x4(const float4x4 &m, float4x4 &invOut)
+    {
+        float4x4 inv;
+        float det;
 
-    // Calculate luma
-    float luma = srcPixel.x * coefficients.x
-               + srcPixel.y * coefficients.y
-               + srcPixel.z * coefficients.z;
-    // Apply saturation
-    float3 saturatedPixel = (srcPixel - luma) * saturation + luma;
+        inv[0][0] =
+            m[1][1]  * m[2][2] * m[3][3] - 
+            m[1][1]  * m[2][3] * m[3][2] - 
+            m[2][1]  * m[1][2]  * m[3][3] + 
+            m[2][1]  * m[1][3]  * m[3][2] +
+            m[3][1] * m[1][2]  * m[2][3] - 
+            m[3][1] * m[1][3]  * m[2][2];
 
-    // Write the result to the output image
-    dst() = float4(saturatedPixel.x, saturatedPixel.y, saturatedPixel.z, input.w);
-  }
+        inv[1][0] =
+            -m[1][0]  * m[2][2] * m[3][3] + 
+            m[1][0]  * m[2][3] * m[3][2] + 
+            m[2][0]  * m[1][2]  * m[3][3] - 
+            m[2][0]  * m[1][3]  * m[3][2] - 
+            m[3][0] * m[1][2]  * m[2][3] + 
+            m[3][0] * m[1][3]  * m[2][2];
+
+        inv[2][0] =
+            m[1][0]  * m[2][1] * m[3][3] - 
+            m[1][0]  * m[2][3] * m[3][1] - 
+            m[2][0]  * m[1][1] * m[3][3] + 
+            m[2][0]  * m[1][3] * m[3][1] + 
+            m[3][0] * m[1][1] * m[2][3] - 
+            m[3][0] * m[1][3] * m[2][1];
+
+        inv[3][0] =
+            -m[1][0]  * m[2][1] * m[3][2] + 
+            m[1][0]  * m[2][2] * m[3][1] +
+            m[2][0]  * m[1][1] * m[3][2] - 
+            m[2][0]  * m[1][2] * m[3][1] - 
+            m[3][0] * m[1][1] * m[2][2] + 
+            m[3][0] * m[1][2] * m[2][1];
+
+        inv[0][1] =
+            -m[0][1]  * m[2][2] * m[3][3] + 
+            m[0][1]  * m[2][3] * m[3][2] + 
+            m[2][1]  * m[0][2] * m[3][3] - 
+            m[2][1]  * m[0][3] * m[3][2] - 
+            m[3][1] * m[0][2] * m[2][3] + 
+            m[3][1] * m[0][3] * m[2][2];
+
+        inv[1][1] =
+            m[0][0]  * m[2][2] * m[3][3] - 
+            m[0][0]  * m[2][3] * m[3][2] - 
+            m[2][0]  * m[0][2] * m[3][3] + 
+            m[2][0]  * m[0][3] * m[3][2] + 
+            m[3][0] * m[0][2] * m[2][3] - 
+            m[3][0] * m[0][3] * m[2][2];
+
+        inv[2][1] = 
+            m[0][0]  * m[2][1] * m[3][3] + 
+            m[0][0]  * m[2][3] * m[3][1] + 
+            m[2][0]  * m[0][1] * m[3][3] - 
+            m[2][0]  * m[0][3] * m[3][1] - 
+            m[3][0] * m[0][1] * m[2][3] + 
+            m[3][0] * m[0][3] * m[2][1];
+
+        inv[3][1] =
+            m[0][0]  * m[2][1] * m[3][2] - 
+            m[0][0]  * m[2][2] * m[3][1] - 
+            m[2][0]  * m[0][1] * m[3][2] + 
+            m[2][0]  * m[0][2] * m[3][1] + 
+            m[3][0] * m[0][1] * m[2][2] - 
+            m[3][0] * m[0][2] * m[2][1];
+
+        inv[0][2] =
+            m[0][1]  * m[1][2] * m[3][3] - 
+            m[0][1]  * m[1][3] * m[3][2] - 
+            m[1][1]  * m[0][2] * m[3][3] + 
+            m[1][1]  * m[0][3] * m[3][2] + 
+            m[3][1] * m[0][2] * m[1][3] - 
+            m[3][1] * m[0][3] * m[1][2];
+
+        inv[1][2] =
+            -m[0][0]  * m[1][2] * m[3][3] + 
+            m[0][0]  * m[1][3] * m[3][2] + 
+            m[1][0]  * m[0][2] * m[3][3] - 
+            m[1][0]  * m[0][3] * m[3][2] - 
+            m[3][0] * m[0][2] * m[1][3] + 
+            m[3][0] * m[0][3] * m[1][2];
+
+        inv[2][2] =
+            m[0][0]  * m[1][1] * m[3][3] - 
+            m[0][0]  * m[1][3] * m[3][1] - 
+            m[1][0]  * m[0][1] * m[3][3] + 
+            m[1][0]  * m[0][3] * m[3][1] + 
+            m[3][0] * m[0][1] * m[1][3] - 
+            m[3][0] * m[0][3] * m[1][1];
+
+        inv[3][2] =
+            -m[0][0]  * m[1][1] * m[3][2] + 
+            m[0][0]  * m[1][2] * m[3][1] + 
+            m[1][0]  * m[0][1] * m[3][2] - 
+            m[1][0]  * m[0][2] * m[3][1] - 
+            m[3][0] * m[0][1] * m[1][2] + 
+            m[3][0] * m[0][2] * m[1][1];
+
+        inv[0][3] =
+            -m[0][1] * m[1][2] * m[2][3] + 
+            m[0][1] * m[1][3] * m[2][2] + 
+            m[1][1] * m[0][2] * m[2][3] - 
+            m[1][1] * m[0][3] * m[2][2] - 
+            m[2][1] * m[0][2] * m[1][3] + 
+            m[2][1] * m[0][3] * m[1][2];
+
+        inv[1][3] =
+            m[0][0] * m[1][2] * m[2][3] - 
+            m[0][0] * m[1][3] * m[2][2] - 
+            m[1][0] * m[0][2] * m[2][3] + 
+            m[1][0] * m[0][3] * m[2][2] + 
+            m[2][0] * m[0][2] * m[1][3] - 
+            m[2][0] * m[0][3] * m[1][2];
+
+        inv[2][3] =
+            -m[0][0] * m[1][1] * m[2][3] + 
+            m[0][0] * m[1][3] * m[2][1] + 
+            m[1][0] * m[0][1] * m[2][3] - 
+            m[1][0] * m[0][3] * m[2][1] - 
+            m[2][0] * m[0][1] * m[1][3] + 
+            m[2][0] * m[0][3] * m[1][1];
+
+        inv[3][3] =
+            m[0][0] * m[1][1] * m[2][2] - 
+            m[0][0] * m[1][2] * m[2][1] - 
+            m[1][0] * m[0][1] * m[2][2] + 
+            m[1][0] * m[0][2] * m[2][1] + 
+            m[2][0] * m[0][1] * m[1][2] - 
+            m[2][0] * m[0][2] * m[1][1];
+
+        det = m[0][0] * inv[0][0] + m[0][1] * inv[1][0] + m[0][2] * inv[2][0] + m[0][3] * inv[3][0];
+
+        if (det == 0)
+            return false;
+
+        det = 1.0 / det;
+
+        for (int i=0; i < 4; i++)
+        {
+            for (int j=0; j < 4; j++)
+            {
+                invOut[i][j] = inv[i][j] * det;
+            }
+        }
+
+        return true;
+    }
+
+    void matmul(float4x4 m, float4 v, float4 &out)
+    {
+        for (int i=0; i < 4; i++)
+        {
+            out[i] = 0;
+
+            for (int j=0; j < 4; j++)
+            {
+                out[i] += m[i][j] * v[j];
+            }
+        }
+    }
+
+    void positionFromWorldMatrix(float4x4 worldMatrix, float3 &position)
+    {
+        position = float3(
+            worldMatrix[0][3],
+            worldMatrix[1][3],
+            worldMatrix[2][3]
+        );
+    }
+
+    // In define(), parameters can be given labels and default values.
+    void define()
+    {
+        defineParam(nearPlane, "Near Plane", 0.1f);
+        defineParam(farPlane, "Far Plane", 10000.0f);
+        defineParam(focalLength, "Focal Length", 50.0f);
+        defineParam(height, "Screen Height", 2160.0f);
+        defineParam(width, "Screen Width", 3840.0f);
+        defineParam(
+            cameraWorldMatrix,
+            "Camera World Matrix",
+            float4x4(
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            )
+        );
+    }
+
+
+    // The init() function is run before any calls to process().
+    // Local variables can be initialized here.
+    void init()
+    {
+        aspect = height / width;
+        fieldOfView = 2 * atan(1 / focalLength);
+        cameraProjectionMatrix = float4x4(
+            focalLength, 0, 0, 0,
+            0, focalLength / aspect, 0, 0,
+            0, 0, -(farPlane + nearPlane) / (farPlane - nearPlane), -2 * (farPlane * nearPlane) / (farPlane - nearPlane),
+            0, 0, -1, 0
+        );
+        invert4x4(cameraProjectionMatrix, inverseCameraProjectionMatrix);
+        positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);
+    }
+
+    void createCameraRay(float2 pos, float3 &rayOrigin, float3 &rayDirection)
+    {
+        rayOrigin = cameraPosition;
+        float4 direction;
+        matmul(
+            inverseCameraProjectionMatrix,
+            float4(pos.x, pos.y, 0, 1),
+            direction
+        );
+        matmul(
+            cameraWorldMatrix,
+            float4(direction.x, direction.y, direction.z, 0),
+            direction
+        );
+        rayDirection = normalize(float3(direction.x, direction.y, direction.z));
+    }
+
+
+    void process(int2 pos)
+    {
+        float2 uv = float2(
+            2 * pos.x / width - 1,
+            2 * pos.y / height - 1
+        );
+
+        // Read the input image
+        SampleType(src) input = src();
+        float4 resultPixel(input.x, input.y, input.z, input.w);
+
+        float3 rayOrigin;
+        float3 rayDirection;
+        createCameraRay(uv, rayOrigin, rayDirection);
+
+
+
+
+        dst() = float4(rayDirection.x, rayDirection.y, rayDirection.z, rayOrigin.x);
+    }
 };
