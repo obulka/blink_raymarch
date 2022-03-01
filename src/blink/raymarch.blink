@@ -239,10 +239,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Ray params
         defineParam(raysPerPixel, "Rays Per Pixel", 1);
-        defineParam(rayOffset, "Ray Offset", 0.00005f);
+        defineParam(rayOffset, "Ray Offset", 0.0001f);
         defineParam(maxRayDistance, "Max Ray Distance", 10000.0f);
         defineParam(maxBounces, "Max Bounces", 1);
-        defineParam(hitTolerance, "Hit Tolerance", 0.0001f);
+        defineParam(hitTolerance, "Hit Tolerance", 0.001f);
 
         // Scene params
         defineParam(spheresTextureHeight, "Spheres Texture Height", 0);
