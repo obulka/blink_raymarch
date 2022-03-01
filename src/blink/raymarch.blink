@@ -21,8 +21,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float formatHeight;
 
         // Ray params
+        int raysPerPixel;
+        int maxBounces;
         float maxRayDistance;
         float hitTolerance;
+        float rayOffset;
 
         // Scene params
         int spheresTextureWidth;
@@ -235,7 +238,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(formatWidth, "Screen Width", 3840.0f);
 
         // Ray params
+        defineParam(raysPerPixel, "Rays Per Pixel", 1);
+        defineParam(rayOffset, "Ray Offset", 0.00005f);
         defineParam(maxRayDistance, "Max Ray Distance", 10000.0f);
+        defineParam(maxBounces, "Max Bounces", 1);
         defineParam(hitTolerance, "Hit Tolerance", 0.0001f);
 
         // Scene params
@@ -248,39 +254,38 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // Local variables can be initialized here.
     void init()
     {
+        //formatWidth = formatWidth == 0 ? 1 : formatWidth;
+        //focalLength = focalLength == 0 ? 1 : focalLength;
+        //aspect = aspect == 0 ? 1 : aspect;
+        //horizontalAperture = horizontalAperture == 0 ? 1 : horizontalAperture;
+        //rayOffset = rayOffset == 0 ? 0.000001 : rayOffset;
+
+        float farMinusNear = farPlane - nearPlane;
+
         // TODO use angles to allow -ve focal length like for latlongs
         aspect = formatHeight / formatWidth;
         fieldOfView = 2 * atan(1 / focalLength);
         cameraProjectionMatrix = float4x4(
-            2 * focalLength / horizontalAperture,
-            0,
-            0,
-            0,
-            0,
-            2 * focalLength / horizontalAperture / aspect,
-            0,
-            0,
-            0,
-            0,
-            -(farPlane + nearPlane) / (farPlane - nearPlane),
-            -2 * (farPlane * nearPlane) / (farPlane - nearPlane),
-            0,
-            0,
-            -1,
-            0
+            2 * focalLength / horizontalAperture, 0, 0, 0,
+            0, 2 * focalLength / horizontalAperture / aspect, 0, 0,
+            0, 0, -(farPlane + nearPlane) / farMinusNear, -2 * (farPlane * nearPlane) / farMinusNear,
+            0, 0, -1, 0
         );
         invert4x4(cameraProjectionMatrix, inverseCameraProjectionMatrix);
         positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);
     }
 
 
-    void createCameraRay(float2 pos, float3 &rayOrigin, float3 &rayDirection)
+    /**
+     * Generate a ray out of the camera
+     */
+    void createCameraRay(float2 uvPosition, float3 &rayOrigin, float3 &rayDirection)
     {
         rayOrigin = cameraPosition;
         float4 direction;
         matmul(
             inverseCameraProjectionMatrix,
-            float4(pos.x, pos.y, 0, 1),
+            float4(uvPosition.x, uvPosition.y, 0, 1),
             direction
         );
         matmul(
@@ -291,15 +296,27 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         rayDirection = normalize(float3(direction.x, direction.y, direction.z));
     }
 
+    //
+    // Signed Distance Functions
+    //
 
+    /**
+     * Compute the signed distance from a point to a sphere
+     */
     float distanceToSphere(float3 spherePosition, float radius, float3 toPosition) {
         return length(spherePosition - toPosition) - radius;
     }
 
 
+    //
+    // Render Engine
+    //
+
+    /**
+     * Compute the minimum distance to an object in the scene
+     */
     float getMinDistanceToObjectInScene(float3 rayOrigin)
     {
-
         float distance = maxRayDistance;
 
         for (int i=0; i < spheresTextureHeight; i++)
@@ -321,37 +338,104 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * March a ray through the scene
+     */
+    void marchRay(
+            float3 rayOrigin,
+            float3 rayDirection,
+            int numRays,
+            int numBounces,
+            float rayDistance,
+            float4 rayMissColour,
+            float4 &resultColour
+        )
+    {
+        float3 origin = rayOrigin;
+        float3 direction = rayDirection;
+
+        float3 rayNormal = normalize(float3(direction.y, -direction.x, 0));
+        float radialOffset = rayOffset;
+        float angularOffset = 0;
+
+
+        for (int rayNum=0; rayNum < numRays; rayNum++)
+        {
+            int bounces = 0;
+            float distanceTravelled = 0;
+
+            while (distanceTravelled < rayDistance)
+            {
+                float stepDistance = getMinDistanceToObjectInScene(origin);
+                distanceTravelled += stepDistance;
+
+                if (stepDistance <= hitTolerance)
+                {
+                    bounces++;
+
+                    resultColour += float4(1, 0, 0, 1);
+
+                    break;
+                    // if (bounces == numBounces)
+                    // {
+                    //    break;
+                    //}
+                }
+
+                origin += direction * stepDistance;
+            }
+
+            origin = rayOrigin;
+
+            rayNormal = (
+                cos(angularOffset)
+                * rayNormal
+                + sin(angularOffset)
+                * cross(direction, rayNormal)
+            );
+
+            direction = radialOffset * rayNormal + rayDirection;
+
+            angularOffset = 90 * (1 - 0.5 * ((rayNum % 4) == 0));
+            radialOffset += rayOffset * ((rayNum % 8) == 0);
+
+            resultColour += rayMissColour * (bounces == 0);
+        }
+
+        resultColour /= raysPerPixel; // Normalize the output after multiple rays
+    }
+
+
+    /**
+     * Compute a raymarched pixel value
+     */
     void process(int2 pos)
     {
+        // Read the input to pass through
+        SampleType(bg) input = bg();
+        float4 resultPixel(0, 0, 0, 0);
+
         // Convert to UV coords
-        float2 uv = float2(
+        float2 uvPosition = float2(
             2 * pos.x / formatWidth - 1,
             2 * pos.y / formatHeight - 1
         );
-
-        // Read the input to pass through
-        SampleType(bg) input = bg();
-        float4 resultPixel(input.x, input.y, input.z, input.w);
+        float2 uvOffset = float2(0, 0); // Defocus??
 
         // Generate a ray from the camera
         float3 rayOrigin;
         float3 rayDirection;
-        createCameraRay(uv, rayOrigin, rayDirection);
+        createCameraRay(uvPosition + uvOffset, rayOrigin, rayDirection);
 
-        float totalDistance = 0;
-        while (totalDistance < maxRayDistance)
-        {
-            float stepDistance = getMinDistanceToObjectInScene(rayOrigin);
-            if (stepDistance <= hitTolerance)
-            {
-                resultPixel = float4(1, 0, 0, 1);
-                break;
-            }
-
-            rayOrigin += rayDirection * stepDistance;
-            totalDistance += stepDistance;
-        }
-
+        marchRay(
+            rayOrigin,
+            rayDirection,
+            raysPerPixel,
+            maxBounces,
+            maxRayDistance,
+            input,
+            resultPixel
+        );
 
         dst() = resultPixel;
     }
