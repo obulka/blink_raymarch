@@ -1,25 +1,32 @@
 kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 {
-    Image<eRead, eAccessPoint, eEdgeNone> src; // the input spheres positions.xyz radius.w
+    Image<eRead, eAccessPoint, eEdgeNone> bg; // the input spheres positions.xyz radius.w
+    Image<eRead, eAccessRandom, eEdgeNone> spheres; // the input spheres positions.xyz radius.w
     //Image<eRead, eAccessRandom, eEdgeNone> spheres;
-    //Image<eRead, eAccessRandom, eEdgeNone> spheres; // the input spheres positions.xyz radius.w
 
     Image<eWrite> dst; // the output image
 
     param:
         // These parameters are made available to the user.
+
+        // Camera params
+        float focalLength;
+        float horizontalAperture;
         float nearPlane;
         float farPlane;
-        float focalLength;
         float4x4 cameraWorldMatrix;
 
-        float width;
-        float height;
+        // Image params
+        float formatWidth;
+        float formatHeight;
 
+        // Ray params
         float maxRayDistance;
         float hitTolerance;
 
-        int numSpheres;
+        // Scene params
+        int spheresTextureWidth;
+        int spheresTextureHeight;
 
     local:
         // These local variables are not exposed to the user.
@@ -28,7 +35,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float4x4 inverseCameraProjectionMatrix;
         float3 cameraPosition;
         float aspect;
-        //float **spheres = {{0, 0, 0, 0.5, 1, 0, 0}};
 
 
     // Invert a 4x4 matrix
@@ -208,10 +214,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // In define(), parameters can be given labels and default values.
     void define()
     {
-        // Cmaera params
+        // Camera params
+        defineParam(focalLength, "Focal Length", 50.0f);
+        defineParam(horizontalAperture, "Horizontal Aperture", 24.576f);
         defineParam(nearPlane, "Near Plane", 0.1f);
         defineParam(farPlane, "Far Plane", 10000.0f);
-        defineParam(focalLength, "Focal Length", 50.0f);
         defineParam(
             cameraWorldMatrix,
             "Camera World Matrix",
@@ -224,15 +231,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         );
 
         // Image params
-        defineParam(height, "Screen Height", 2160.0f);
-        defineParam(width, "Screen Width", 3840.0f);
+        defineParam(formatHeight, "Screen Height", 2160.0f);
+        defineParam(formatWidth, "Screen Width", 3840.0f);
 
         // Ray params
         defineParam(maxRayDistance, "Max Ray Distance", 10000.0f);
         defineParam(hitTolerance, "Hit Tolerance", 0.0001f);
 
         // Scene params
-        defineParam(numSpheres, "Number of Spheres", 1);
+        defineParam(spheresTextureHeight, "Spheres Texture Height", 0);
+        defineParam(spheresTextureWidth, "Spheres Texture Width", 0);
     }
 
 
@@ -241,13 +249,25 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     void init()
     {
         // TODO use angles to allow -ve focal length like for latlongs
-        aspect = height / width;
+        aspect = formatHeight / formatWidth;
         fieldOfView = 2 * atan(1 / focalLength);
         cameraProjectionMatrix = float4x4(
-            focalLength, 0, 0, 0,
-            0, focalLength / aspect, 0, 0,
-            0, 0, -(farPlane + nearPlane) / (farPlane - nearPlane), -2 * (farPlane * nearPlane) / (farPlane - nearPlane),
-            0, 0, -1, 0
+            2 * focalLength / horizontalAperture,
+            0,
+            0,
+            0,
+            0,
+            2 * focalLength / horizontalAperture / aspect,
+            0,
+            0,
+            0,
+            0,
+            -(farPlane + nearPlane) / (farPlane - nearPlane),
+            -2 * (farPlane * nearPlane) / (farPlane - nearPlane),
+            0,
+            0,
+            -1,
+            0
         );
         invert4x4(cameraProjectionMatrix, inverseCameraProjectionMatrix);
         positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);
@@ -279,18 +299,23 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
     float getMinDistanceToObjectInScene(float3 rayOrigin)
     {
+
         float distance = maxRayDistance;
 
-        for (int i=0; i < numSpheres; i++)
+        for (int i=0; i < spheresTextureHeight; i++)
         {
-            distance = min(
-                distance,
-                distanceToSphere(
-                    float3(0, 0, 0),
-                    1,
-                    rayOrigin
-                )
-            );
+            for (int j=0; j < spheresTextureWidth; j++)
+            {
+                SampleType(spheres) sphere = spheres(j, i);
+                distance = min(
+                    distance,
+                    distanceToSphere(
+                        float3(sphere.x, sphere.y, sphere.z),
+                        sphere.w,
+                        rayOrigin
+                    )
+                );
+            }
         }
         return distance;
     }
@@ -300,12 +325,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     {
         // Convert to UV coords
         float2 uv = float2(
-            2 * pos.x / width - 1,
-            2 * pos.y / height - 1
+            2 * pos.x / formatWidth - 1,
+            2 * pos.y / formatHeight - 1
         );
 
         // Read the input to pass through
-        SampleType(src) input = src();
+        SampleType(bg) input = bg();
         float4 resultPixel(input.x, input.y, input.z, input.w);
 
         // Generate a ray from the camera
