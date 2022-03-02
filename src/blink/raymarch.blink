@@ -1,9 +1,12 @@
 kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 {
-    Image<eRead, eAccessPoint, eEdgeNone> bg; // the input spheres positions.xyz radius.w
-    Image<eRead, eAccessRandom, eEdgeNone> skyBox; // the input spheres positions.xyz radius.w
+    Image<eRead, eAccessPoint, eEdgeNone> bg; // the input for format, process called once per pixel
+    Image<eRead, eAccessRandom, eEdgeNone> skyBox; // the skybox
     Image<eRead, eAccessRandom, eEdgeNone> spheres; // the input spheres positions.xyz radius.w
-    //Image<eRead, eAccessRandom, eEdgeNone> spheres;
+    Image<eRead, eAccessRandom, eEdgeNone> rectPrisms; // the input rectPrisms positions.xyz radius.w
+    Image<eRead, eAccessRandom, eEdgeNone> tori; // the input tori positions.xyz radius.w
+    Image<eRead, eAccessRandom, eEdgeNone> triangularPrisms; // the input triangularPrisms positions.xyz radius.w
+    Image<eRead, eAccessRandom, eEdgeNone> cylinders; // the input cylinders positions.xyz radius.w
 
     Image<eWrite> dst; // the output image
 
@@ -21,7 +24,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float formatWidth;
         float formatHeight;
 
-        float2 skyBoxOffsetAngle;
+        float skyBoxOffsetAngle;
         int skyFormatWidth;
         int skyFormatHeight;
 
@@ -36,6 +39,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         // Scene params
         int spheresTextureWidth;
         int spheresTextureHeight;
+        int rectPrismsTextureWidth;
+        int rectPrismsTextureHeight;
+        int toriTextureHeight;
+        int toriTextureWidth;
+        int triangularPrismsTextureHeight;
+        int triangularPrismsTextureWidth;
+        int cylindersTextureHeight;
+        int cylindersTextureWidth;
 
     local:
         // These local variables are not exposed to the user.
@@ -49,6 +60,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float subdividedPixelSize;
 
         float2 skyBoxPixelSize;
+        float skyBoxOffsetRadians;
 
 
     // Invert a 4x4 matrix
@@ -247,7 +259,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         // Image params
         defineParam(formatHeight, "Screen Height", 2160.0f);
         defineParam(formatWidth, "Screen Width", 3840.0f);
-        defineParam(skyBoxOffsetAngle, "SkyBox Offset Angle", float2(0, 0));
+        defineParam(skyBoxOffsetAngle, "SkyBox Offset Angle", 0.0f);
         defineParam(skyFormatHeight, "SkyBox Height", 1024);
         defineParam(skyFormatWidth, "SkyBox Width", 2048);
 
@@ -264,6 +276,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         // Scene params
         defineParam(spheresTextureHeight, "Spheres Texture Height", 0);
         defineParam(spheresTextureWidth, "Spheres Texture Width", 0);
+        defineParam(rectPrismsTextureHeight, "Rectangular Prisms Texture Height", 0);
+        defineParam(rectPrismsTextureWidth, "Rectangular Prisms Texture Width", 0);
+        defineParam(toriTextureHeight, "Tori Texture Height", 0);
+        defineParam(toriTextureWidth, "Tori Texture Width", 0);
+        defineParam(triangularPrismsTextureHeight, "Triangular Prisms Texture Height", 0);
+        defineParam(triangularPrismsTextureWidth, "Triangular Prisms Texture Width", 0);
+        defineParam(cylindersTextureHeight, "Cylinders Texture Height", 0);
+        defineParam(cylindersTextureWidth, "Cylinders Texture Width", 0);
     }
 
 
@@ -294,29 +314,27 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         subdividedPixelSize = 1.0f / (float) numSubPixels;
 
         skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);
+        skyBoxOffsetRadians = skyBoxOffsetAngle * PI / 180.0f;
     }
 
     /**
-     * Get the value of sky th eray would hit at infinite distance
+     * Get the value of sky the ray would hit at infinite distance
      */
     float4 readSkyValue(float3 rayDirection)
     {
-        float rayAngleTheta = fmod(
-            atan2(rayDirection.z, rayDirection.x),
-            2 * PI
-        );
-        float rayAnglePhi = fmod(
-            acos(rayDirection.y),
-            PI
-        );
-
-        if (rayAngleTheta < 0)
-        {
-            rayAngleTheta += 2 * PI;
-        }
+        float rayAnglePhi = fmod(acos(rayDirection.y), PI);
         if (rayAnglePhi < 0)
         {
             rayAnglePhi += PI;
+        }
+
+        float rayAngleTheta = fmod(
+            atan2(rayDirection.z, rayDirection.x) + skyBoxOffsetRadians,
+            2 * PI
+        );
+        if (rayAngleTheta < 0)
+        {
+            rayAngleTheta += 2 * PI;
         }
 
         SampleType(skyBox) skyBoxPixel = bilinear(
@@ -359,9 +377,96 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
     /**
      * Compute the signed distance from a point to a sphere
+     *
+     * @arg distanceTo: The point to get the distance to from the object
+     * @arg centre: The object centre
+     * @arg radius: The radius of the sphere
+     *
+     * @returns: The minimum distance from the point to the shape
      */
-    float distanceToSphere(float3 spherePosition, float radius, float3 toPosition) {
-        return length(spherePosition - toPosition) - radius;
+    float distanceToSphere(float3 distanceTo, float3 centre, float radius) {
+        return length(centre - distanceTo) - radius;
+    }
+
+    /**
+     * Compute the signed distance from a point to a rectangular prism
+     *
+     * @arg distanceTo: The point to get the distance to from the object
+     * @arg centre: The object centre
+     * @arg size: The length, width, and depth of the prism
+     *
+     * @returns: The minimum distance from the point to the shape
+     */
+    float distanceToRectangularPrism(float3 distanceTo, float3 centre, float3 size) {
+        float3 boundingSphereVector = fabs(distanceTo - centre) - size;
+        float ud = length(max(boundingSphereVector, float3(0, 0, 0)));
+        float n = max(
+            max(min(boundingSphereVector.x, 0.0f), min(boundingSphereVector.y, 0.0f)),
+            min(boundingSphereVector.z, 0.0f)
+        );
+
+        return ud + n;
+    }
+
+    /**
+     * Compute the signed distance from a point to a torus
+     *
+     * @arg distanceTo: The point to get the distance to from the object
+     * @arg centre: The object centre
+     * @arg radii: The inner and outer radius of the torus
+     *
+     * @returns: The minimum distance from the point to the shape
+     */
+    float distanceToTorus(float3 distanceTo, float3 centre, float2 radii)
+    {
+        float3 centreVector = distanceTo - centre;
+        float2 centreXZ = float2(centreVector.x, centreVector.z);
+        float2 inner = float2(
+            length(centreXZ) - radii.y,
+            distanceTo.y - centre.y
+        );
+
+        return length(inner) - radii.x;
+    }
+
+    /**
+     * Compute the signed distance from a point to a triangular prism
+     *
+     * @arg distanceTo: The point to get the distance to from the object
+     * @arg centre: The object centre
+     * @arg size: The height and depth of the prism
+     *
+     * @returns: The minimum distance from the point to the shape
+     */
+    float distanceToTriangularPrism(float3 distanceTo, float3 centre, float2 size) {
+        float3 centreVector = fabs(distanceTo - centre);
+
+        return max(
+            centreVector.z - size.y,
+            max(
+                centreVector.x * 0.866025f + distanceTo.y * 0.5f,
+                -distanceTo.y
+            ) - size.x * 0.5f
+        );
+    }
+
+    /**
+     * Compute the signed distance from a point to a cylinder
+     *
+     * @arg distanceTo: The point to get the distance to from the object
+     * @arg centre: The object centre
+     * @arg size: The height and radius of the cylinder
+     *
+     * @returns: The minimum distance from the point to the shape
+     */
+    float distanceToCylinder(float3 distanceTo, float3 centre, float2 size) {
+        float3 centreVector = fabs(distanceTo - centre);
+
+        float2 distanceToXZ = float2(centreVector.x, centreVector.z);
+
+        float2 d = fabs(float2(length(distanceToXZ), centreVector.y)) - size;
+
+        return length(max(d, float2(0, 0))) + min(max(d.x, d.y), 0.0f);
     }
 
 
@@ -384,13 +489,78 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 distance = min(
                     distance,
                     distanceToSphere(
+                        rayOrigin,
                         float3(sphere.x, sphere.y, sphere.z),
-                        sphere.w,
-                        rayOrigin
+                        sphere.w
                     )
                 );
             }
         }
+
+        for (int i=0; i < rectPrismsTextureHeight; i++)
+        {
+            for (int j=0; j < rectPrismsTextureWidth; j++)
+            {
+                SampleType(rectPrisms) rectPrism = rectPrisms(j, i);
+                distance = min(
+                    distance,
+                    distanceToRectangularPrism(
+                        rayOrigin,
+                        float3(rectPrism.x, rectPrism.y, rectPrism.z),
+                        float3(rectPrism.w, rectPrism.w / 2.0f, rectPrism.w / 3.0f)
+                    )
+                );
+            }
+        }
+
+        for (int i=0; i < toriTextureHeight; i++)
+        {
+            for (int j=0; j < toriTextureWidth; j++)
+            {
+                SampleType(tori) torus = tori(j, i);
+                distance = min(
+                    distance,
+                    distanceToTorus(
+                        rayOrigin,
+                        float3(torus.x, torus.y, torus.z),
+                        float2(torus.w / 2.0f, torus.w)
+                    )
+                );
+            }
+        }
+
+        for (int i=0; i < triangularPrismsTextureHeight; i++)
+        {
+            for (int j=0; j < triangularPrismsTextureWidth; j++)
+            {
+                SampleType(triangularPrisms) triangularPrism = triangularPrisms(j, i);
+                distance = min(
+                    distance,
+                    distanceToTriangularPrism(
+                        rayOrigin,
+                        float3(triangularPrism.x, triangularPrism.y, triangularPrism.z),
+                        float2(triangularPrism.w, triangularPrism.w / 2.0f)
+                    )
+                );
+            }
+        }
+
+        for (int i=0; i < cylindersTextureHeight; i++)
+        {
+            for (int j=0; j < cylindersTextureWidth; j++)
+            {
+                SampleType(cylinders) cylinder = cylinders(j, i);
+                distance = min(
+                    distance,
+                    distanceToCylinder(
+                        rayOrigin,
+                        float3(cylinder.x, cylinder.y, cylinder.z),
+                        float2(cylinder.w / 2.0f, cylinder.w)
+                    )
+                );
+            }
+        }
+
         return distance;
     }
 
