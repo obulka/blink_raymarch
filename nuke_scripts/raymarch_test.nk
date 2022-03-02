@@ -1,0 +1,336 @@
+#! /usr/local/Nuke13.0v2/libnuke-13.0.2.so -nx
+version 13.0 v2
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="1976" y="188" w="2504" h="1376" maximized="1" screen="0">
+        <splitter orientation="1">
+            <split size="40"/>
+            <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                <page id="Toolbar.1"/>
+            </dock>
+            <split size="1841" stretch="1"/>
+            <splitter orientation="2">
+                <split size="783"/>
+                <dock id="" activePageId="Viewer.1">
+                    <page id="Viewer.1"/>
+                </dock>
+                <split size="550"/>
+                <dock id="" activePageId="DAG.1" focus="true">
+                    <page id="DAG.1"/>
+                    <page id="Curve Editor.1"/>
+                    <page id="DopeSheet.1"/>
+                    <page id="DAG.2"/>
+                </dock>
+            </splitter>
+            <split size="615"/>
+            <dock id="" activePageId="Properties.1">
+                <page id="Properties.1"/>
+                <page id="uk.co.thefoundry.backgroundrenderview.1"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name /home/ob1/software/nuke/dev/raymarch/nuke_scripts/raymarch_test.nk
+ frame 50
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ colorManagement Nuke
+ workingSpaceLUT linear
+ monitorLut sRGB
+ monitorOutLUT rec709
+ int8Lut sRGB
+ int16Lut sRGB
+ logLut Cineon
+ floatLut linear
+}
+BackdropNode {
+ inputs 0
+ name Lights
+ xpos 14278
+ ypos 766
+ bdwidth 256
+ bdheight 388
+}
+BackdropNode {
+ inputs 0
+ name Spheres
+ xpos 13968
+ ypos 764
+ bdwidth 256
+ bdheight 388
+}
+BackdropNode {
+ inputs 0
+ name SurfaceShader
+ xpos 14578
+ ypos 761
+ bdwidth 256
+ bdheight 388
+}
+Constant {
+ inputs 0
+ channels rgb
+ format "4 5 0 0 4 5 1 test"
+ name Constant3
+ xpos 14362
+ ypos 822
+}
+Ramp {
+ p0 {0 0}
+ p1 {4 1}
+ color {5 5 5 3}
+ name Ramp4
+ xpos 14362
+ ypos 950
+}
+Multiply {
+ name Multiply3
+ xpos 14362
+ ypos 989
+}
+Add {
+ channels alpha
+ value 0.2
+ name Add3
+ xpos 14362
+ ypos 1092
+}
+Constant {
+ inputs 0
+ channels rgb
+ format "4 5 0 0 4 5 1 test"
+ name Constant1
+ xpos 14052
+ ypos 820
+}
+Ramp {
+ p0 {0 0}
+ p1 {4 1}
+ color {5 5 5 3}
+ name Ramp1
+ xpos 14052
+ ypos 948
+}
+Multiply {
+ name Multiply1
+ xpos 14052
+ ypos 987
+}
+Add {
+ channels alpha
+ value 0.2
+ name Add1
+ xpos 14052
+ ypos 1049
+}
+Camera3 {
+ inputs 0
+ translate {0 0 20}
+ focal 5.65
+ name Camera6
+ xpos 13647
+ ypos 1035
+}
+Dot {
+ name Dot2
+ xpos 13671
+ ypos 1170
+}
+Read {
+ inputs 0
+ file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/ninomaru_teien_4k.exr
+ format "4096 2048 0 0 4096 2048 1 4K_LatLong"
+ origset true
+ name Read1
+ selected true
+ xpos 13853
+ ypos 964
+}
+Group {
+ inputs 3
+ name RayMarcher
+ xpos 13877
+ ypos 1166
+}
+ Constant {
+  inputs 0
+  channels rgb
+  format "1 1 0 0 1 1 1 empty"
+  name Constant2
+  xpos 294
+  ypos 122
+ }
+ Input {
+  inputs 0
+  name spheres
+  xpos 158
+  ypos -3
+  number 2
+ }
+ Merge2 {
+  inputs 2
+  name Merge2
+  xpos 158
+  ypos 145
+ }
+ Constant {
+  inputs 0
+  channels rgb
+  format "2048 1024 0 0 2048 1024 1 2K_LatLong"
+  name Constant3
+  xpos -106
+  ypos -64
+ }
+ Input {
+  inputs 0
+  name sky
+  xpos 0
+  ypos -54
+ }
+ Merge2 {
+  inputs 2
+  name Merge1
+  xpos 0
+  ypos 62
+ }
+ Constant {
+  inputs 0
+  channels rgb
+  name Constant1
+  xpos -247
+  ypos -99
+ }
+ Dot {
+  name Dot1
+  xpos -213
+  ypos 5
+ }
+ BlinkScript {
+  inputs 3
+  kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/raymarch.blink
+  recompileCount 223
+  ProgramGroup 1
+  KernelDescription "2 \"RayMarchKernel\" iterate pixelWise 2c1ddda193c5fb1eda25a6de4d775f57f8911750f15d212de733d21a78405042 4 \"bg\" Read Point \"skyBox\" Read Random \"spheres\" Read Random \"dst\" Write Point 18 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"SkyBox Offset Angle\" Float 2 AAAAAAAAAAA= \"SkyBox Width\" Int 1 AAgAAA== \"SkyBox Height\" Int 1 AAQAAA== \"Pixel Subdivisions\" Int 1 AAAAAA== \"Rays Per Pixel\" Int 1 AQAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AEAcRg== \"Hit Tolerance\" Float 1 bxKDOg== \"Ray Offset\" Float 1 F7fROA== \"Spheres Texture Width\" Int 1 AAAAAA== \"Spheres Texture Height\" Int 1 AAAAAA== 18 \"focalLength\" 1 1 \"horizontalAperture\" 1 1 \"nearPlane\" 1 1 \"farPlane\" 1 1 \"cameraWorldMatrix\" 16 1 \"formatWidth\" 1 1 \"formatHeight\" 1 1 \"skyBoxOffsetAngle\" 2 1 \"skyFormatWidth\" 1 1 \"skyFormatHeight\" 1 1 \"subdivisions\" 1 1 \"raysPerPixel\" 1 1 \"maxBounces\" 1 1 \"maxRayDistance\" 1 1 \"hitTolerance\" 1 1 \"rayOffset\" 1 1 \"spheresTextureWidth\" 1 1 \"spheresTextureHeight\" 1 1 8 \"fieldOfView\" Float 1 1 AAAAAA== \"cameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"cameraPosition\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"aspect\" Float 1 1 AAAAAA== \"numSubPixels\" Int 1 1 AAAAAA== \"subdividedPixelSize\" Float 1 1 AAAAAA== \"skyBoxPixelSize\" Float 2 1 AAAAAAAAAAA="
+  kernelSource "kernel RayMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessPoint, eEdgeNone> bg; // the input spheres positions.xyz radius.w\n    Image<eRead, eAccessRandom, eEdgeNone> skyBox; // the input spheres positions.xyz radius.w\n    Image<eRead, eAccessRandom, eEdgeNone> spheres; // the input spheres positions.xyz radius.w\n    //Image<eRead, eAccessRandom, eEdgeNone> spheres;\n\n    Image<eWrite> dst; // the output image\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float focalLength;\n        float horizontalAperture;\n        float nearPlane;\n        float farPlane;\n        float4x4 cameraWorldMatrix;\n\n        // Image params\n        float formatWidth;\n        float formatHeight;\n\n        float2 skyBoxOffsetAngle;\n        int skyFormatWidth;\n        int skyFormatHeight;\n\n        // Ray params\n        int subdivisions;\n        int raysPerPixel;\n        int maxBounces;\n        float maxRayDistance;\n        float hitTolerance;\n        float rayOffset;\n\n        // Scene params\n        int spheresTextureWidth;\n        int spheresTextureHeight;\n\n    local:\n        // These local variables are not exposed to the user.\n        float fieldOfView;\n        float4x4 cameraProjectionMatrix;\n        float4x4 inverseCameraProjectionMatrix;\n        float3 cameraPosition;\n        float aspect;\n\n        int numSubPixels;\n        float subdividedPixelSize;\n\n        float2 skyBoxPixelSize;\n\n\n    // Invert a 4x4 matrix\n    bool invert4x4(const float4x4 &m, float4x4 &invOut)\n    \{\n        float4x4 inv;\n        float det;\n\n        inv\[0]\[0] =\n            m\[1]\[1]  * m\[2]\[2] * m\[3]\[3] - \n            m\[1]\[1]  * m\[2]\[3] * m\[3]\[2] - \n            m\[2]\[1]  * m\[1]\[2]  * m\[3]\[3] + \n            m\[2]\[1]  * m\[1]\[3]  * m\[3]\[2] +\n            m\[3]\[1] * m\[1]\[2]  * m\[2]\[3] - \n            m\[3]\[1] * m\[1]\[3]  * m\[2]\[2];\n\n        inv\[1]\[0] =\n            -m\[1]\[0]  * m\[2]\[2] * m\[3]\[3] + \n            m\[1]\[0]  * m\[2]\[3] * m\[3]\[2] + \n            m\[2]\[0]  * m\[1]\[2]  * m\[3]\[3] - \n            m\[2]\[0]  * m\[1]\[3]  * m\[3]\[2] - \n            m\[3]\[0] * m\[1]\[2]  * m\[2]\[3] + \n            m\[3]\[0] * m\[1]\[3]  * m\[2]\[2];\n\n        inv\[2]\[0] =\n            m\[1]\[0]  * m\[2]\[1] * m\[3]\[3] - \n            m\[1]\[0]  * m\[2]\[3] * m\[3]\[1] - \n            m\[2]\[0]  * m\[1]\[1] * m\[3]\[3] + \n            m\[2]\[0]  * m\[1]\[3] * m\[3]\[1] + \n            m\[3]\[0] * m\[1]\[1] * m\[2]\[3] - \n            m\[3]\[0] * m\[1]\[3] * m\[2]\[1];\n\n        inv\[3]\[0] =\n            -m\[1]\[0]  * m\[2]\[1] * m\[3]\[2] + \n            m\[1]\[0]  * m\[2]\[2] * m\[3]\[1] +\n            m\[2]\[0]  * m\[1]\[1] * m\[3]\[2] - \n            m\[2]\[0]  * m\[1]\[2] * m\[3]\[1] - \n            m\[3]\[0] * m\[1]\[1] * m\[2]\[2] + \n            m\[3]\[0] * m\[1]\[2] * m\[2]\[1];\n\n        inv\[0]\[1] =\n            -m\[0]\[1]  * m\[2]\[2] * m\[3]\[3] + \n            m\[0]\[1]  * m\[2]\[3] * m\[3]\[2] + \n            m\[2]\[1]  * m\[0]\[2] * m\[3]\[3] - \n            m\[2]\[1]  * m\[0]\[3] * m\[3]\[2] - \n            m\[3]\[1] * m\[0]\[2] * m\[2]\[3] + \n            m\[3]\[1] * m\[0]\[3] * m\[2]\[2];\n\n        inv\[1]\[1] =\n            m\[0]\[0]  * m\[2]\[2] * m\[3]\[3] - \n            m\[0]\[0]  * m\[2]\[3] * m\[3]\[2] - \n            m\[2]\[0]  * m\[0]\[2] * m\[3]\[3] + \n            m\[2]\[0]  * m\[0]\[3] * m\[3]\[2] + \n            m\[3]\[0] * m\[0]\[2] * m\[2]\[3] - \n            m\[3]\[0] * m\[0]\[3] * m\[2]\[2];\n\n        inv\[2]\[1] = \n            m\[0]\[0]  * m\[2]\[1] * m\[3]\[3] + \n            m\[0]\[0]  * m\[2]\[3] * m\[3]\[1] + \n            m\[2]\[0]  * m\[0]\[1] * m\[3]\[3] - \n            m\[2]\[0]  * m\[0]\[3] * m\[3]\[1] - \n            m\[3]\[0] * m\[0]\[1] * m\[2]\[3] + \n            m\[3]\[0] * m\[0]\[3] * m\[2]\[1];\n\n        inv\[3]\[1] =\n            m\[0]\[0]  * m\[2]\[1] * m\[3]\[2] - \n            m\[0]\[0]  * m\[2]\[2] * m\[3]\[1] - \n            m\[2]\[0]  * m\[0]\[1] * m\[3]\[2] + \n            m\[2]\[0]  * m\[0]\[2] * m\[3]\[1] + \n            m\[3]\[0] * m\[0]\[1] * m\[2]\[2] - \n            m\[3]\[0] * m\[0]\[2] * m\[2]\[1];\n\n        inv\[0]\[2] =\n            m\[0]\[1]  * m\[1]\[2] * m\[3]\[3] - \n            m\[0]\[1]  * m\[1]\[3] * m\[3]\[2] - \n            m\[1]\[1]  * m\[0]\[2] * m\[3]\[3] + \n            m\[1]\[1]  * m\[0]\[3] * m\[3]\[2] + \n            m\[3]\[1] * m\[0]\[2] * m\[1]\[3] - \n            m\[3]\[1] * m\[0]\[3] * m\[1]\[2];\n\n        inv\[1]\[2] =\n            -m\[0]\[0]  * m\[1]\[2] * m\[3]\[3] + \n            m\[0]\[0]  * m\[1]\[3] * m\[3]\[2] + \n            m\[1]\[0]  * m\[0]\[2] * m\[3]\[3] - \n            m\[1]\[0]  * m\[0]\[3] * m\[3]\[2] - \n            m\[3]\[0] * m\[0]\[2] * m\[1]\[3] + \n            m\[3]\[0] * m\[0]\[3] * m\[1]\[2];\n\n        inv\[2]\[2] =\n            m\[0]\[0]  * m\[1]\[1] * m\[3]\[3] - \n            m\[0]\[0]  * m\[1]\[3] * m\[3]\[1] - \n            m\[1]\[0]  * m\[0]\[1] * m\[3]\[3] + \n            m\[1]\[0]  * m\[0]\[3] * m\[3]\[1] + \n            m\[3]\[0] * m\[0]\[1] * m\[1]\[3] - \n            m\[3]\[0] * m\[0]\[3] * m\[1]\[1];\n\n        inv\[3]\[2] =\n            -m\[0]\[0]  * m\[1]\[1] * m\[3]\[2] + \n            m\[0]\[0]  * m\[1]\[2] * m\[3]\[1] + \n            m\[1]\[0]  * m\[0]\[1] * m\[3]\[2] - \n            m\[1]\[0]  * m\[0]\[2] * m\[3]\[1] - \n            m\[3]\[0] * m\[0]\[1] * m\[1]\[2] + \n            m\[3]\[0] * m\[0]\[2] * m\[1]\[1];\n\n        inv\[0]\[3] =\n            -m\[0]\[1] * m\[1]\[2] * m\[2]\[3] + \n            m\[0]\[1] * m\[1]\[3] * m\[2]\[2] + \n            m\[1]\[1] * m\[0]\[2] * m\[2]\[3] - \n            m\[1]\[1] * m\[0]\[3] * m\[2]\[2] - \n            m\[2]\[1] * m\[0]\[2] * m\[1]\[3] + \n            m\[2]\[1] * m\[0]\[3] * m\[1]\[2];\n\n        inv\[1]\[3] =\n            m\[0]\[0] * m\[1]\[2] * m\[2]\[3] - \n            m\[0]\[0] * m\[1]\[3] * m\[2]\[2] - \n            m\[1]\[0] * m\[0]\[2] * m\[2]\[3] + \n            m\[1]\[0] * m\[0]\[3] * m\[2]\[2] + \n            m\[2]\[0] * m\[0]\[2] * m\[1]\[3] - \n            m\[2]\[0] * m\[0]\[3] * m\[1]\[2];\n\n        inv\[2]\[3] =\n            -m\[0]\[0] * m\[1]\[1] * m\[2]\[3] + \n            m\[0]\[0] * m\[1]\[3] * m\[2]\[1] + \n            m\[1]\[0] * m\[0]\[1] * m\[2]\[3] - \n            m\[1]\[0] * m\[0]\[3] * m\[2]\[1] - \n            m\[2]\[0] * m\[0]\[1] * m\[1]\[3] + \n            m\[2]\[0] * m\[0]\[3] * m\[1]\[1];\n\n        inv\[3]\[3] =\n            m\[0]\[0] * m\[1]\[1] * m\[2]\[2] - \n            m\[0]\[0] * m\[1]\[2] * m\[2]\[1] - \n            m\[1]\[0] * m\[0]\[1] * m\[2]\[2] + \n            m\[1]\[0] * m\[0]\[2] * m\[2]\[1] + \n            m\[2]\[0] * m\[0]\[1] * m\[1]\[2] - \n            m\[2]\[0] * m\[0]\[2] * m\[1]\[1];\n\n        det = m\[0]\[0] * inv\[0]\[0] + m\[0]\[1] * inv\[1]\[0] + m\[0]\[2] * inv\[2]\[0] + m\[0]\[3] * inv\[3]\[0];\n\n        if (det == 0)\n            return false;\n\n        det = 1.0 / det;\n\n        for (int i=0; i < 4; i++)\n        \{\n            for (int j=0; j < 4; j++)\n            \{\n                invOut\[i]\[j] = inv\[i]\[j] * det;\n            \}\n        \}\n\n        return true;\n    \}\n\n    void matmul(float4x4 m, float4 v, float4 &out)\n    \{\n        for (int i=0; i < 4; i++)\n        \{\n            out\[i] = 0;\n\n            for (int j=0; j < 4; j++)\n            \{\n                out\[i] += m\[i]\[j] * v\[j];\n            \}\n        \}\n    \}\n\n    void positionFromWorldMatrix(float4x4 worldMatrix, float3 &position)\n    \{\n        position = float3(\n            worldMatrix\[0]\[3],\n            worldMatrix\[1]\[3],\n            worldMatrix\[2]\[3]\n        );\n    \}\n\n    // In define(), parameters can be given labels and default values.\n    void define()\n    \{\n        // Camera params\n        defineParam(focalLength, \"Focal Length\", 50.0f);\n        defineParam(horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(nearPlane, \"Near Plane\", 0.1f);\n        defineParam(farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n\n        // Image params\n        defineParam(formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(skyBoxOffsetAngle, \"SkyBox Offset Angle\", float2(0, 0));\n        defineParam(skyFormatHeight, \"SkyBox Height\", 1024);\n        defineParam(skyFormatWidth, \"SkyBox Width\", 2048);\n\n        // Ray params\n        defineParam(subdivisions, \"Pixel Subdivisions\", 0);\n        defineParam(maxRayDistance, \"Max Ray Distance\", 10000.0f);\n        defineParam(maxBounces, \"Max Bounces\", 1);\n        defineParam(hitTolerance, \"Hit Tolerance\", 0.001f);\n\n        // Shader params TODO make these surface spawn rays\n        defineParam(raysPerPixel, \"Rays Per Pixel\", 1);\n        defineParam(rayOffset, \"Ray Offset\", 0.0001f);\n\n        // Scene params\n        defineParam(spheresTextureHeight, \"Spheres Texture Height\", 0);\n        defineParam(spheresTextureWidth, \"Spheres Texture Width\", 0);\n    \}\n\n\n    // The init() function is run before any calls to process().\n    // Local variables can be initialized here.\n    void init()\n    \{\n        //formatWidth = formatWidth == 0 ? 1 : formatWidth;\n        //focalLength = focalLength == 0 ? 1 : focalLength;\n        //aspect = aspect == 0 ? 1 : aspect;\n        //horizontalAperture = horizontalAperture == 0 ? 1 : horizontalAperture;\n        //rayOffset = rayOffset == 0 ? 0.000001 : rayOffset;\n        float farMinusNear = farPlane - nearPlane;\n\n        // TODO use angles to allow -ve focal length like for latlongs\n        aspect = formatHeight / formatWidth;\n        fieldOfView = 2 * atan(1 / focalLength);\n        cameraProjectionMatrix = float4x4(\n            2 * focalLength / horizontalAperture, 0, 0, 0,\n            0, 2 * focalLength / horizontalAperture / aspect, 0, 0,\n            0, 0, -(farPlane + nearPlane) / farMinusNear, -2 * (farPlane * nearPlane) / farMinusNear,\n            0, 0, -1, 0\n        );\n        invert4x4(cameraProjectionMatrix, inverseCameraProjectionMatrix);\n        positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);\n\n        numSubPixels = pow(2, abs(subdivisions));\n        subdividedPixelSize = 1.0f / (float) numSubPixels;\n\n        skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);\n    \}\n\n    /**\n     * Get the value of sky th eray would hit at infinite distance\n     */\n    float4 readSkyValue(float3 rayDirection)\n    \{\n        float rayAngleTheta = fmod(\n            atan2(rayDirection.z, rayDirection.x),\n            2 * PI\n        );\n        float rayAnglePhi = fmod(\n            acos(rayDirection.y),\n            PI\n        );\n\n        if (rayAngleTheta < 0)\n        \{\n            rayAngleTheta += 2 * PI;\n        \}\n        if (rayAnglePhi < 0)\n        \{\n            rayAnglePhi += PI;\n        \}\n\n        SampleType(skyBox) skyBoxPixel = bilinear(\n            skyBox,\n            skyBoxPixelSize.x * rayAngleTheta,\n            skyFormatHeight - (skyBoxPixelSize.y * rayAnglePhi)\n        );\n\n        return skyBoxPixel;\n    \}\n\n\n    /**\n     * Generate a ray out of the camera\n     */\n    void createCameraRay(float2 pixelLocation, float3 &rayOrigin, float3 &rayDirection)\n    \{\n        float2 uvPosition = float2(\n            2 * pixelLocation.x / formatWidth - 1,\n            2 * pixelLocation.y / formatHeight - 1\n        );\n        rayOrigin = cameraPosition;\n        float4 direction;\n        matmul(\n            inverseCameraProjectionMatrix,\n            float4(uvPosition.x, uvPosition.y, 0, 1),\n            direction\n        );\n        matmul(\n            cameraWorldMatrix,\n            float4(direction.x, direction.y, direction.z, 0),\n            direction\n        );\n        rayDirection = normalize(float3(direction.x, direction.y, direction.z));\n    \}\n\n    //\n    // Signed Distance Functions\n    //\n\n    /**\n     * Compute the signed distance from a point to a sphere\n     */\n    float distanceToSphere(float3 spherePosition, float radius, float3 toPosition) \{\n        return length(spherePosition - toPosition) - radius;\n    \}\n\n\n    //\n    // Render Engine\n    //\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     */\n    float getMinDistanceToObjectInScene(float3 rayOrigin)\n    \{\n        float distance = maxRayDistance;\n\n        for (int i=0; i < spheresTextureHeight; i++)\n        \{\n            for (int j=0; j < spheresTextureWidth; j++)\n            \{\n                SampleType(spheres) sphere = spheres(j, i);\n                distance = min(\n                    distance,\n                    distanceToSphere(\n                        float3(sphere.x, sphere.y, sphere.z),\n                        sphere.w,\n                        rayOrigin\n                    )\n                );\n            \}\n        \}\n        return distance;\n    \}\n\n\n    /**\n     * March a ray through the scene\n     */\n    void marchRay(\n            float3 rayOrigin,\n            float3 rayDirection,\n            int numRays,\n            int numBounces,\n            float rayDistance,\n            float4 &resultColour\n        )\n    \{\n        float3 origin = rayOrigin;\n        float3 direction = rayDirection;\n\n        float3 rayNormal = normalize(float3(direction.y, -direction.x, 0));\n        float radialOffset = rayOffset;\n        float angularOffset = 0;\n\n\n        for (int rayNum=0; rayNum < numRays; rayNum++)\n        \{\n            int bounces = 0;\n            float distanceTravelled = 0;\n\n            while (distanceTravelled < rayDistance)\n            \{\n                float stepDistance = getMinDistanceToObjectInScene(origin);\n                distanceTravelled += stepDistance;\n\n                if (stepDistance <= hitTolerance)\n                \{\n                    bounces++;\n\n                    resultColour += float4(1, 0, 0, 1);\n\n                    break;\n                    // if (bounces == numBounces)\n                    // \{\n                    //    break;\n                    //\}\n                \}\n\n                origin += direction * stepDistance;\n            \}\n            resultColour += bounces == 0 ? readSkyValue(direction) : float4(0, 0, 0, 0);\n\n            origin = rayOrigin;\n\n            rayNormal = (\n                cos(angularOffset)\n                * rayNormal\n                + sin(angularOffset)\n                * cross(direction, rayNormal)\n            );\n\n            direction = radialOffset * rayNormal + rayDirection;\n\n            angularOffset = 90 * (1 - 0.5 * ((rayNum % 4) == 0));\n            radialOffset += rayOffset * ((rayNum % 8) == 0);\n        \}\n\n        resultColour /= raysPerPixel; // Normalize the output after multiple rays\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value\n     */\n    void process(int2 pos)\n    \{\n        // Read the input to pass through\n        float4 resultPixel(0, 0, 0, 0);\n\n        float2 pixelLocation = float2((float) pos.x, (float) pos.y);\n\n        float2 pixelOffset;\n        for (\n            pixelOffset.x = 0.0f;\n            pixelOffset.x < 1.0f;\n            pixelOffset.x += subdividedPixelSize\n        ) \{\n            for (\n                pixelOffset.y = 0.0f;\n                pixelOffset.y < 1.0f;\n                pixelOffset.y += subdividedPixelSize\n            ) \{\n                // Generate a ray from the camera\n                float3 rayOrigin;\n                float3 rayDirection;\n                createCameraRay(pixelLocation + pixelOffset, rayOrigin, rayDirection);\n\n                marchRay(\n                    rayOrigin,\n                    rayDirection,\n                    raysPerPixel,\n                    maxBounces,\n                    maxRayDistance,\n                    resultPixel\n                );\n            \}\n        \}\n\n        dst() = resultPixel / numSubPixels / numSubPixels;\n    \}\n\};\n"
+  rebuild ""
+  "RayMarchKernel_Focal Length" {{parent.DummyCam.focal}}
+  "RayMarchKernel_Horizontal Aperture" {{parent.DummyCam.haperture}}
+  "RayMarchKernel_Near Plane" {{parent.DummyCam.near}}
+  "RayMarchKernel_Far Plane" {{parent.DummyCam.far}}
+  "RayMarchKernel_Camera World Matrix" {
+      {{parent.DummyCam.world_matrix.0} {parent.DummyCam.world_matrix.1} {parent.DummyCam.world_matrix.2} {parent.DummyCam.world_matrix.3}}
+      {{parent.DummyCam.world_matrix.4} {parent.DummyCam.world_matrix.5} {parent.DummyCam.world_matrix.6} {parent.DummyCam.world_matrix.7}}
+      {{parent.DummyCam.world_matrix.8} {parent.DummyCam.world_matrix.9} {parent.DummyCam.world_matrix.10} {parent.DummyCam.world_matrix.11}}
+      {{parent.DummyCam.world_matrix.12} {parent.DummyCam.world_matrix.13} {parent.DummyCam.world_matrix.14} {parent.DummyCam.world_matrix.15}}
+    }
+  "RayMarchKernel_Screen Width" {{input0.width}}
+  "RayMarchKernel_Screen Height" {{input0.height}}
+  "RayMarchKernel_SkyBox Width" {{input1.width}}
+  "RayMarchKernel_SkyBox Height" {{input1.height}}
+  "RayMarchKernel_Max Bounces" 3
+  "RayMarchKernel_Spheres Texture Width" {{input2.width}}
+  "RayMarchKernel_Spheres Texture Height" {{input2.height}}
+  format "2048 1024 0 0 2048 1024 1 2K_LatLong"
+  rebuild_finalise ""
+  name BlinkScript1
+  xpos 0
+  ypos 139
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 300
+ }
+ Input {
+  inputs 0
+  name cam
+  xpos -247
+  ypos 45
+  number 1
+ }
+ Camera {
+  projection_mode {{"\[expression \[value the_cam]projection_mode(\[value the_frame])]"}}
+  focal {{"\[expression \[value the_cam]focal(\[value the_frame])]"}}
+  haperture {{"\[expression \[value the_cam]haperture(\[value the_frame])]"}}
+  vaperture {{"\[expression \[value the_cam]vaperture(\[value the_frame])]"}}
+  near {{"\[expression \[value the_cam]near(\[value the_frame])]"}}
+  far {{"\[expression \[value the_cam]far(\[value the_frame])]"}}
+  win_translate {{"\[expression \[value the_cam]win_translate.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_translate.v(\[value the_frame])]"}}
+  win_scale {{"\[expression \[value the_cam]win_scale.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_scale.v(\[value the_frame])]"}}
+  winroll {{"\[expression \[value the_cam]winroll(\[value the_frame])]"}}
+  focal_point {{"\[expression \[value the_cam]focal_point(\[value the_frame])]"}}
+  fstop {{"\[expression \[value the_cam]fstop(\[value the_frame])]"}}
+  name DummyCam
+  help "DummyCam by Adrian Pueyo\n\nCamera that apart from the matrices also grabs all the \"Projection\" values from the upstream camera that it's connected to. Turns into a default Camera if no Camera connected. Can also be used inside of groups and gizmos, as many levels deep as you want :D All using live and super fast TCL.\n\nUpdated v1.1: Now grabs the correct frame too (thanks Erwan Leroy for the idea).\n\nUpdated v1.3: Now accepts Nuke13's Camera3\n\nadrianpueyo.com, 2019-2021"
+  onCreate "n = nuke.thisNode()\nfor k in \[\"projection_mode\",\"focal\",\"haperture\",\"vaperture\",\"near\",\"far\",\"win_translate\",\"win_scale\",\"winroll\",\"focal_point\",\"fstop\"]:\n    n\[k].setFlag(0x0000000010000000)"
+  xpos -237
+  ypos 123
+  addUserKnob {20 DummyCam l Defaults}
+  addUserKnob {43 the_cam +INVISIBLE}
+  the_cam "\[\n#DummyCam v1.3 - Updated 5 May 2021.\nset starting_point \"this.input0\"\nset default \"this.d_\"\n\n# If cam has no inputs, return the default.\nif \{\[exists \$starting_point]\} \{\n    set x \[node \$starting_point]\n\} \{ \n    return \$default\n\}\n\nset finished 0\nwhile \{\$finished != 1\} \{\n\n    # First look for a Cam or Input or topnode.\n    while \{\[class \$x] != \"Camera3\" && \[class \$x] != \"Camera2\" && \[class \$x] != \"Camera\" && \[class \$x] != \"Input\" && \$x != \[topnode \$x]\} \{\n        set x \[node \$x.input0]\n    \}\n\n    # Then, check if node is a cam (and return), and otherwise, if it's an input, see if the parent exists and move to it.\n    if \{\[class \$x]==\"Camera3\"||\[class \$x]==\"Camera2\"||\[class \$x]==\"Camera\"\} \{\n        set x \[append x \".\"]\n        return \$x\n    \} \{ \n        if \{ \[class \$x]==\"Input\" \} \{ \n            set inp \"\$x.parent.input\"\n            set inputNum \[value \$x.number]\n            set inp \[append inp \$inputNum]\n            if \{ \[exists \$inp] \} \{\n                set x \[node \$inp]\n            \} \{ \n                set finished 1\n            \}\n        \} \{ \n            set finished 1\n        \}\n    \}\n\}\nreturn \$default\n]"
+  addUserKnob {43 the_frame +INVISIBLE}
+  the_frame "\[\nset the_camera \[string trimright \[value the_cam] .]\nif \{\[exists \$the_camera]\} \{\n    return \[value \$the_camera.frame]\n\} \{ \n    return \[frame]\n\}\n]"
+  addUserKnob {4 d_projection_mode l projection M {perspective orthographic uv spherical ""}}
+  addUserKnob {7 d_focal l "focal length" R 0 100}
+  d_focal 50
+  addUserKnob {7 d_haperture l "horiz aperture" R 0 50}
+  d_haperture 24.576
+  addUserKnob {7 d_vaperture l "vert aperture" R 0 50}
+  d_vaperture 18.672
+  addUserKnob {7 d_near l near R 0 10}
+  d_near 0.1
+  addUserKnob {7 d_far l far R 0 10000}
+  d_far 10000
+  addUserKnob {30 d_win_translate l "window translate"}
+  addUserKnob {30 d_win_scale l "window scale"}
+  d_win_scale {1 1}
+  addUserKnob {7 d_winroll l "window roll" R 0 45}
+  addUserKnob {7 d_focal_point l "focal distance" R 0 10}
+  d_focal_point 2
+  addUserKnob {7 d_fstop l fstop R 0 30}
+  d_fstop 16
+  addUserKnob {26 version l " " t "Updated 5 May 2021" T "<span style=\"color:#666\"><br/><b>DummyCam v1.3</b> - <a href=\"http://www.adrianpueyo.com\" style=\"color:#666;text-decoration: none;\">adrianpueyo.com</a>, 2019-2021</span>"}
+ }
+end_group
+set Na802f200 [stack 0]
+push $Na802f200
+Viewer {
+ inputs 2
+ frame_range 1-100
+ name Viewer1
+ xpos 13877
+ ypos 1368
+}
+Constant {
+ inputs 0
+ channels rgb
+ format "4 5 0 0 4 5 1 test"
+ name Constant2
+ xpos 14662
+ ypos 817
+}
+Ramp {
+ p0 {0 0}
+ p1 {4 1}
+ color {5 5 5 3}
+ name Ramp2
+ xpos 14662
+ ypos 945
+}
+Multiply {
+ name Multiply2
+ xpos 14662
+ ypos 984
+}
+Add {
+ channels alpha
+ value 0.2
+ name Add2
+ xpos 14662
+ ypos 1087
+}

@@ -1,6 +1,7 @@
 kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 {
     Image<eRead, eAccessPoint, eEdgeNone> bg; // the input spheres positions.xyz radius.w
+    Image<eRead, eAccessRandom, eEdgeNone> skyBox; // the input spheres positions.xyz radius.w
     Image<eRead, eAccessRandom, eEdgeNone> spheres; // the input spheres positions.xyz radius.w
     //Image<eRead, eAccessRandom, eEdgeNone> spheres;
 
@@ -20,7 +21,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float formatWidth;
         float formatHeight;
 
+        float2 skyBoxOffsetAngle;
+        int skyFormatWidth;
+        int skyFormatHeight;
+
         // Ray params
+        int subdivisions;
         int raysPerPixel;
         int maxBounces;
         float maxRayDistance;
@@ -38,6 +44,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float4x4 inverseCameraProjectionMatrix;
         float3 cameraPosition;
         float aspect;
+
+        int numSubPixels;
+        float subdividedPixelSize;
+
+        float2 skyBoxPixelSize;
 
 
     // Invert a 4x4 matrix
@@ -236,13 +247,19 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         // Image params
         defineParam(formatHeight, "Screen Height", 2160.0f);
         defineParam(formatWidth, "Screen Width", 3840.0f);
+        defineParam(skyBoxOffsetAngle, "SkyBox Offset Angle", float2(0, 0));
+        defineParam(skyFormatHeight, "SkyBox Height", 1024);
+        defineParam(skyFormatWidth, "SkyBox Width", 2048);
 
         // Ray params
-        defineParam(raysPerPixel, "Rays Per Pixel", 1);
-        defineParam(rayOffset, "Ray Offset", 0.0001f);
+        defineParam(subdivisions, "Pixel Subdivisions", 0);
         defineParam(maxRayDistance, "Max Ray Distance", 10000.0f);
         defineParam(maxBounces, "Max Bounces", 1);
         defineParam(hitTolerance, "Hit Tolerance", 0.001f);
+
+        // Shader params TODO make these surface spawn rays
+        defineParam(raysPerPixel, "Rays Per Pixel", 1);
+        defineParam(rayOffset, "Ray Offset", 0.0001f);
 
         // Scene params
         defineParam(spheresTextureHeight, "Spheres Texture Height", 0);
@@ -259,7 +276,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         //aspect = aspect == 0 ? 1 : aspect;
         //horizontalAperture = horizontalAperture == 0 ? 1 : horizontalAperture;
         //rayOffset = rayOffset == 0 ? 0.000001 : rayOffset;
-
         float farMinusNear = farPlane - nearPlane;
 
         // TODO use angles to allow -ve focal length like for latlongs
@@ -273,14 +289,55 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         );
         invert4x4(cameraProjectionMatrix, inverseCameraProjectionMatrix);
         positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);
+
+        numSubPixels = pow(2, abs(subdivisions));
+        subdividedPixelSize = 1.0f / (float) numSubPixels;
+
+        skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);
+    }
+
+    /**
+     * Get the value of sky th eray would hit at infinite distance
+     */
+    float4 readSkyValue(float3 rayDirection)
+    {
+        float rayAngleTheta = fmod(
+            atan2(rayDirection.z, rayDirection.x),
+            2 * PI
+        );
+        float rayAnglePhi = fmod(
+            acos(rayDirection.y),
+            PI
+        );
+
+        if (rayAngleTheta < 0)
+        {
+            rayAngleTheta += 2 * PI;
+        }
+        if (rayAnglePhi < 0)
+        {
+            rayAnglePhi += PI;
+        }
+
+        SampleType(skyBox) skyBoxPixel = bilinear(
+            skyBox,
+            skyBoxPixelSize.x * rayAngleTheta,
+            skyFormatHeight - (skyBoxPixelSize.y * rayAnglePhi)
+        );
+
+        return skyBoxPixel;
     }
 
 
     /**
      * Generate a ray out of the camera
      */
-    void createCameraRay(float2 uvPosition, float3 &rayOrigin, float3 &rayDirection)
+    void createCameraRay(float2 pixelLocation, float3 &rayOrigin, float3 &rayDirection)
     {
+        float2 uvPosition = float2(
+            2 * pixelLocation.x / formatWidth - 1,
+            2 * pixelLocation.y / formatHeight - 1
+        );
         rayOrigin = cameraPosition;
         float4 direction;
         matmul(
@@ -347,7 +404,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             int numRays,
             int numBounces,
             float rayDistance,
-            float4 rayMissColour,
             float4 &resultColour
         )
     {
@@ -384,6 +440,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                 origin += direction * stepDistance;
             }
+            resultColour += bounces == 0 ? readSkyValue(direction) : float4(0, 0, 0, 0);
 
             origin = rayOrigin;
 
@@ -398,8 +455,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             angularOffset = 90 * (1 - 0.5 * ((rayNum % 4) == 0));
             radialOffset += rayOffset * ((rayNum % 8) == 0);
-
-            resultColour += rayMissColour * (bounces == 0);
         }
 
         resultColour /= raysPerPixel; // Normalize the output after multiple rays
@@ -412,31 +467,37 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     void process(int2 pos)
     {
         // Read the input to pass through
-        SampleType(bg) input = bg();
         float4 resultPixel(0, 0, 0, 0);
 
-        // Convert to UV coords
-        float2 uvPosition = float2(
-            2 * pos.x / formatWidth - 1,
-            2 * pos.y / formatHeight - 1
-        );
-        float2 uvOffset = float2(0, 0); // Defocus??
+        float2 pixelLocation = float2((float) pos.x, (float) pos.y);
 
-        // Generate a ray from the camera
-        float3 rayOrigin;
-        float3 rayDirection;
-        createCameraRay(uvPosition + uvOffset, rayOrigin, rayDirection);
+        float2 pixelOffset;
+        for (
+            pixelOffset.x = 0.0f;
+            pixelOffset.x < 1.0f;
+            pixelOffset.x += subdividedPixelSize
+        ) {
+            for (
+                pixelOffset.y = 0.0f;
+                pixelOffset.y < 1.0f;
+                pixelOffset.y += subdividedPixelSize
+            ) {
+                // Generate a ray from the camera
+                float3 rayOrigin;
+                float3 rayDirection;
+                createCameraRay(pixelLocation + pixelOffset, rayOrigin, rayDirection);
 
-        marchRay(
-            rayOrigin,
-            rayDirection,
-            raysPerPixel,
-            maxBounces,
-            maxRayDistance,
-            input,
-            resultPixel
-        );
+                marchRay(
+                    rayOrigin,
+                    rayDirection,
+                    raysPerPixel,
+                    maxBounces,
+                    maxRayDistance,
+                    resultPixel
+                );
+            }
+        }
 
-        dst() = resultPixel;
+        dst() = resultPixel / numSubPixels / numSubPixels;
     }
 };
