@@ -1,3 +1,8 @@
+#include "colour.h"
+#include "mmath.h"
+#include "sdfs.h"
+
+
 kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 {
     Image<eRead, eAccessPoint, eEdgeNone> bg; // the input for format, process called once per pixel
@@ -7,6 +12,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessRandom, eEdgeNone> tori; // the input tori positions.xyz radius.w
     Image<eRead, eAccessRandom, eEdgeNone> triangularPrisms; // the input triangularPrisms positions.xyz radius.w
     Image<eRead, eAccessRandom, eEdgeNone> cylinders; // the input cylinders positions.xyz radius.w
+    Image<eRead, eAccessRandom, eEdgeNone> directionalLights; // the input directional lights direction.xyz intensity.w
+    Image<eRead, eAccessRandom, eEdgeNone> pointLights; // the input point lights positions.xyz intensity.w
 
     Image<eWrite> dst; // the output image
 
@@ -30,13 +37,17 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Ray params
         int subdivisions;
-        int raysPerPixel;
         int maxBounces;
         float maxRayDistance;
         float hitTolerance;
+
+        // Shader params
+        float shadowBias;
+        int raysPerPixel;
         float rayOffset;
 
         // Scene params
+        // Shape Textures
         int spheresTextureWidth;
         int spheresTextureHeight;
         int rectPrismsTextureWidth;
@@ -48,8 +59,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int cylindersTextureHeight;
         int cylindersTextureWidth;
 
+        // Light textures
+        int pointLightTextureHeight;
+        int pointLightTextureWidth;
+        int directionalLightTextureHeight;
+        int directionalLightTextureWidth;
+
     local:
         // These local variables are not exposed to the user.
+
         float fieldOfView;
         float4x4 cameraProjectionMatrix;
         float4x4 inverseCameraProjectionMatrix;
@@ -62,180 +80,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float2 skyBoxPixelSize;
         float skyBoxOffsetRadians;
 
-
-    // Invert a 4x4 matrix
-    bool invert4x4(const float4x4 &m, float4x4 &invOut)
-    {
-        float4x4 inv;
-        float det;
-
-        inv[0][0] =
-            m[1][1]  * m[2][2] * m[3][3] - 
-            m[1][1]  * m[2][3] * m[3][2] - 
-            m[2][1]  * m[1][2]  * m[3][3] + 
-            m[2][1]  * m[1][3]  * m[3][2] +
-            m[3][1] * m[1][2]  * m[2][3] - 
-            m[3][1] * m[1][3]  * m[2][2];
-
-        inv[1][0] =
-            -m[1][0]  * m[2][2] * m[3][3] + 
-            m[1][0]  * m[2][3] * m[3][2] + 
-            m[2][0]  * m[1][2]  * m[3][3] - 
-            m[2][0]  * m[1][3]  * m[3][2] - 
-            m[3][0] * m[1][2]  * m[2][3] + 
-            m[3][0] * m[1][3]  * m[2][2];
-
-        inv[2][0] =
-            m[1][0]  * m[2][1] * m[3][3] - 
-            m[1][0]  * m[2][3] * m[3][1] - 
-            m[2][0]  * m[1][1] * m[3][3] + 
-            m[2][0]  * m[1][3] * m[3][1] + 
-            m[3][0] * m[1][1] * m[2][3] - 
-            m[3][0] * m[1][3] * m[2][1];
-
-        inv[3][0] =
-            -m[1][0]  * m[2][1] * m[3][2] + 
-            m[1][0]  * m[2][2] * m[3][1] +
-            m[2][0]  * m[1][1] * m[3][2] - 
-            m[2][0]  * m[1][2] * m[3][1] - 
-            m[3][0] * m[1][1] * m[2][2] + 
-            m[3][0] * m[1][2] * m[2][1];
-
-        inv[0][1] =
-            -m[0][1]  * m[2][2] * m[3][3] + 
-            m[0][1]  * m[2][3] * m[3][2] + 
-            m[2][1]  * m[0][2] * m[3][3] - 
-            m[2][1]  * m[0][3] * m[3][2] - 
-            m[3][1] * m[0][2] * m[2][3] + 
-            m[3][1] * m[0][3] * m[2][2];
-
-        inv[1][1] =
-            m[0][0]  * m[2][2] * m[3][3] - 
-            m[0][0]  * m[2][3] * m[3][2] - 
-            m[2][0]  * m[0][2] * m[3][3] + 
-            m[2][0]  * m[0][3] * m[3][2] + 
-            m[3][0] * m[0][2] * m[2][3] - 
-            m[3][0] * m[0][3] * m[2][2];
-
-        inv[2][1] = 
-            m[0][0]  * m[2][1] * m[3][3] + 
-            m[0][0]  * m[2][3] * m[3][1] + 
-            m[2][0]  * m[0][1] * m[3][3] - 
-            m[2][0]  * m[0][3] * m[3][1] - 
-            m[3][0] * m[0][1] * m[2][3] + 
-            m[3][0] * m[0][3] * m[2][1];
-
-        inv[3][1] =
-            m[0][0]  * m[2][1] * m[3][2] - 
-            m[0][0]  * m[2][2] * m[3][1] - 
-            m[2][0]  * m[0][1] * m[3][2] + 
-            m[2][0]  * m[0][2] * m[3][1] + 
-            m[3][0] * m[0][1] * m[2][2] - 
-            m[3][0] * m[0][2] * m[2][1];
-
-        inv[0][2] =
-            m[0][1]  * m[1][2] * m[3][3] - 
-            m[0][1]  * m[1][3] * m[3][2] - 
-            m[1][1]  * m[0][2] * m[3][3] + 
-            m[1][1]  * m[0][3] * m[3][2] + 
-            m[3][1] * m[0][2] * m[1][3] - 
-            m[3][1] * m[0][3] * m[1][2];
-
-        inv[1][2] =
-            -m[0][0]  * m[1][2] * m[3][3] + 
-            m[0][0]  * m[1][3] * m[3][2] + 
-            m[1][0]  * m[0][2] * m[3][3] - 
-            m[1][0]  * m[0][3] * m[3][2] - 
-            m[3][0] * m[0][2] * m[1][3] + 
-            m[3][0] * m[0][3] * m[1][2];
-
-        inv[2][2] =
-            m[0][0]  * m[1][1] * m[3][3] - 
-            m[0][0]  * m[1][3] * m[3][1] - 
-            m[1][0]  * m[0][1] * m[3][3] + 
-            m[1][0]  * m[0][3] * m[3][1] + 
-            m[3][0] * m[0][1] * m[1][3] - 
-            m[3][0] * m[0][3] * m[1][1];
-
-        inv[3][2] =
-            -m[0][0]  * m[1][1] * m[3][2] + 
-            m[0][0]  * m[1][2] * m[3][1] + 
-            m[1][0]  * m[0][1] * m[3][2] - 
-            m[1][0]  * m[0][2] * m[3][1] - 
-            m[3][0] * m[0][1] * m[1][2] + 
-            m[3][0] * m[0][2] * m[1][1];
-
-        inv[0][3] =
-            -m[0][1] * m[1][2] * m[2][3] + 
-            m[0][1] * m[1][3] * m[2][2] + 
-            m[1][1] * m[0][2] * m[2][3] - 
-            m[1][1] * m[0][3] * m[2][2] - 
-            m[2][1] * m[0][2] * m[1][3] + 
-            m[2][1] * m[0][3] * m[1][2];
-
-        inv[1][3] =
-            m[0][0] * m[1][2] * m[2][3] - 
-            m[0][0] * m[1][3] * m[2][2] - 
-            m[1][0] * m[0][2] * m[2][3] + 
-            m[1][0] * m[0][3] * m[2][2] + 
-            m[2][0] * m[0][2] * m[1][3] - 
-            m[2][0] * m[0][3] * m[1][2];
-
-        inv[2][3] =
-            -m[0][0] * m[1][1] * m[2][3] + 
-            m[0][0] * m[1][3] * m[2][1] + 
-            m[1][0] * m[0][1] * m[2][3] - 
-            m[1][0] * m[0][3] * m[2][1] - 
-            m[2][0] * m[0][1] * m[1][3] + 
-            m[2][0] * m[0][3] * m[1][1];
-
-        inv[3][3] =
-            m[0][0] * m[1][1] * m[2][2] - 
-            m[0][0] * m[1][2] * m[2][1] - 
-            m[1][0] * m[0][1] * m[2][2] + 
-            m[1][0] * m[0][2] * m[2][1] + 
-            m[2][0] * m[0][1] * m[1][2] - 
-            m[2][0] * m[0][2] * m[1][1];
-
-        det = m[0][0] * inv[0][0] + m[0][1] * inv[1][0] + m[0][2] * inv[2][0] + m[0][3] * inv[3][0];
-
-        if (det == 0)
-            return false;
-
-        det = 1.0 / det;
-
-        for (int i=0; i < 4; i++)
-        {
-            for (int j=0; j < 4; j++)
-            {
-                invOut[i][j] = inv[i][j] * det;
-            }
-        }
-
-        return true;
-    }
-
-    void matmul(float4x4 m, float4 v, float4 &out)
-    {
-        for (int i=0; i < 4; i++)
-        {
-            out[i] = 0;
-
-            for (int j=0; j < 4; j++)
-            {
-                out[i] += m[i][j] * v[j];
-            }
-        }
-    }
-
-    void positionFromWorldMatrix(float4x4 worldMatrix, float3 &position)
-    {
-        position = float3(
-            worldMatrix[0][3],
-            worldMatrix[1][3],
-            worldMatrix[2][3]
-        );
-    }
 
     // In define(), parameters can be given labels and default values.
     void define()
@@ -270,10 +114,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(hitTolerance, "Hit Tolerance", 0.001f);
 
         // Shader params TODO make these surface spawn rays
+        defineParam(shadowBias, "Shadow Bias", 0.05f);
         defineParam(raysPerPixel, "Rays Per Pixel", 1);
         defineParam(rayOffset, "Ray Offset", 0.0001f);
 
         // Scene params
+
+        // Shape Counts
         defineParam(spheresTextureHeight, "Spheres Texture Height", 0);
         defineParam(spheresTextureWidth, "Spheres Texture Width", 0);
         defineParam(rectPrismsTextureHeight, "Rectangular Prisms Texture Height", 0);
@@ -284,6 +131,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(triangularPrismsTextureWidth, "Triangular Prisms Texture Width", 0);
         defineParam(cylindersTextureHeight, "Cylinders Texture Height", 0);
         defineParam(cylindersTextureWidth, "Cylinders Texture Width", 0);
+
+        // Light Counts
+        defineParam(directionalLightTextureHeight, "Directional Light Texture Height", 0);
+        defineParam(directionalLightTextureWidth, "Directional Light Texture Width", 0);
+        defineParam(pointLightTextureHeight, "Point Light Texture Height", 0);
+        defineParam(pointLightTextureWidth, "Point Light Texture Width", 0);
     }
 
 
@@ -310,8 +163,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         invert4x4(cameraProjectionMatrix, inverseCameraProjectionMatrix);
         positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);
 
-        numSubPixels = pow(2, abs(subdivisions));
-        subdividedPixelSize = 1.0f / (float) numSubPixels;
+        int subPixelDivisions = pow(2, abs(subdivisions));
+        subdividedPixelSize = 1.0f / (float) subPixelDivisions;
+        numSubPixels = pow(subPixelDivisions, 2);
 
         skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);
         skyBoxOffsetRadians = skyBoxOffsetAngle * PI / 180.0f;
@@ -323,19 +177,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float4 readSkyValue(float3 rayDirection)
     {
         float rayAnglePhi = fmod(acos(rayDirection.y), PI);
-        if (rayAnglePhi < 0)
-        {
-            rayAnglePhi += PI;
-        }
+        rayAnglePhi += PI * (rayAnglePhi < 0);
 
         float rayAngleTheta = fmod(
             atan2(rayDirection.z, rayDirection.x) + skyBoxOffsetRadians,
             2 * PI
         );
-        if (rayAngleTheta < 0)
-        {
-            rayAngleTheta += 2 * PI;
-        }
+        rayAngleTheta += 2 * PI * (rayAngleTheta < 0);
 
         SampleType(skyBox) skyBoxPixel = bilinear(
             skyBox,
@@ -369,104 +217,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             direction
         );
         rayDirection = normalize(float3(direction.x, direction.y, direction.z));
-    }
-
-    //
-    // Signed Distance Functions
-    //
-
-    /**
-     * Compute the signed distance from a point to a sphere
-     *
-     * @arg distanceTo: The point to get the distance to from the object
-     * @arg centre: The object centre
-     * @arg radius: The radius of the sphere
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToSphere(float3 distanceTo, float3 centre, float radius) {
-        return length(centre - distanceTo) - radius;
-    }
-
-    /**
-     * Compute the signed distance from a point to a rectangular prism
-     *
-     * @arg distanceTo: The point to get the distance to from the object
-     * @arg centre: The object centre
-     * @arg size: The length, width, and depth of the prism
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToRectangularPrism(float3 distanceTo, float3 centre, float3 size) {
-        float3 boundingSphereVector = fabs(distanceTo - centre) - size;
-        float ud = length(max(boundingSphereVector, float3(0, 0, 0)));
-        float n = max(
-            max(min(boundingSphereVector.x, 0.0f), min(boundingSphereVector.y, 0.0f)),
-            min(boundingSphereVector.z, 0.0f)
-        );
-
-        return ud + n;
-    }
-
-    /**
-     * Compute the signed distance from a point to a torus
-     *
-     * @arg distanceTo: The point to get the distance to from the object
-     * @arg centre: The object centre
-     * @arg radii: The inner and outer radius of the torus
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToTorus(float3 distanceTo, float3 centre, float2 radii)
-    {
-        float3 centreVector = distanceTo - centre;
-        float2 centreXZ = float2(centreVector.x, centreVector.z);
-        float2 inner = float2(
-            length(centreXZ) - radii.y,
-            distanceTo.y - centre.y
-        );
-
-        return length(inner) - radii.x;
-    }
-
-    /**
-     * Compute the signed distance from a point to a triangular prism
-     *
-     * @arg distanceTo: The point to get the distance to from the object
-     * @arg centre: The object centre
-     * @arg size: The height and depth of the prism
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToTriangularPrism(float3 distanceTo, float3 centre, float2 size) {
-        float3 centreVector = fabs(distanceTo - centre);
-
-        return max(
-            centreVector.z - size.y,
-            max(
-                centreVector.x * 0.866025f + distanceTo.y * 0.5f,
-                -distanceTo.y
-            ) - size.x * 0.5f
-        );
-    }
-
-    /**
-     * Compute the signed distance from a point to a cylinder
-     *
-     * @arg distanceTo: The point to get the distance to from the object
-     * @arg centre: The object centre
-     * @arg size: The height and radius of the cylinder
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToCylinder(float3 distanceTo, float3 centre, float2 size) {
-        float3 centreVector = fabs(distanceTo - centre);
-
-        float2 distanceToXZ = float2(centreVector.x, centreVector.z);
-
-        float2 d = fabs(float2(length(distanceToXZ), centreVector.y)) - size;
-
-        return length(max(d, float2(0, 0))) + min(max(d.x, d.y), 0.0f);
     }
 
 
@@ -566,11 +316,90 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     * Estimate the surface normal at the closest point on the closest
+     * object to a point
+     *
+     * @arg point: The point near which to get the surface normal
+     *
+     * @returns: The normalized surface normal
+     */
+    float3 estimateSurfaceNormal(const float3 &point) {
+        return normalize(float3(
+            getMinDistanceToObjectInScene(float3(
+                point.x + hitTolerance,
+                point.y,
+                point.z
+            )) - getMinDistanceToObjectInScene(float3(
+                point.x - hitTolerance,
+                point.y,
+                point.z
+            )),
+            getMinDistanceToObjectInScene(float3(
+                point.x,
+                point.y + hitTolerance,
+                point.z
+            )) - getMinDistanceToObjectInScene(float3(
+                point.x,
+                point.y - hitTolerance,
+                point.z
+            )),
+            getMinDistanceToObjectInScene(float3(
+                point.x,
+                point.y,
+                point.z+hitTolerance
+            )) - getMinDistanceToObjectInScene(float3(
+                point.x,
+                point.y,
+                point.z - hitTolerance
+            ))
+        ));
+    }
+
+
+    float computeLightIntensityOnSurface(const float3 &surfacePoint, const float3 &surfaceNormal)
+    {
+        float lightIntensity = 0;
+
+        for (int i=0; i < directionalLightTextureHeight; i++)
+        {
+            for (int j=0; j < directionalLightTextureWidth; j++)
+            {
+                SampleType(directionalLights) directionalLight = directionalLights(j, i);
+
+                lightIntensity += saturate(
+                    dot(
+                        surfaceNormal,
+                        -normalize(float3(directionalLight.x, directionalLight.y, directionalLight.z))
+                    ) * directionalLight.w
+                );
+            }
+        }
+
+        for (int i=0; i < pointLightTextureHeight; i++)
+        {
+            for (int j=0; j < pointLightTextureWidth; j++)
+            {
+                SampleType(pointLights) pointLight = pointLights(j, i);
+
+                lightIntensity += saturate(
+                    dot(
+                        surfaceNormal,
+                        normalize(float3(pointLight.x, pointLight.y, pointLight.z) - surfacePoint)
+                    ) * pointLight.w
+                );
+            }
+        }
+
+        return saturate(lightIntensity);
+    }
+
+
+    /**
      * March a ray through the scene
      */
     void marchRay(
-            float3 rayOrigin,
-            float3 rayDirection,
+            const float3 &rayOrigin,
+            const float3 &rayDirection,
             int numRays,
             int numBounces,
             float rayDistance,
@@ -599,7 +428,17 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 {
                     bounces++;
 
-                    resultColour += float4(1, 0, 0, 1);
+                    float3 pointOnSurface = origin + rayDirection * stepDistance;
+                    float3 surfaceNormal = estimateSurfaceNormal(
+                        pointOnSurface - rayDirection * hitTolerance
+                    );
+
+                    float lightIntensity = computeLightIntensityOnSurface(
+                        origin,
+                        surfaceNormal
+                    );
+
+                    resultColour += float4(lightIntensity, 0, 0, 1);
 
                     break;
                     // if (bounces == numBounces)
@@ -610,8 +449,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                 origin += direction * stepDistance;
             }
+
+            // If the ray missed, grab the skybox colour
             resultColour += bounces == 0 ? readSkyValue(direction) : float4(0, 0, 0, 0);
 
+            // Update the ray direction to send a scattered cluster of rays
+            // TODO these shouldnt diverge more and more the more rays you add
             origin = rayOrigin;
 
             rayNormal = (
@@ -668,6 +511,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             }
         }
 
-        dst() = resultPixel / numSubPixels / numSubPixels;
+        dst() = resultPixel / numSubPixels;
     }
 };
