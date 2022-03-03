@@ -356,8 +356,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    float computeLightIntensityOnSurface(const float3 &surfacePoint, const float3 &surfaceNormal)
+    float computeLightIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)
     {
+        float3 offsetPos = pointOnSurface + surfaceNormal * shadowBias;
+
+        float shadowIntensity = 0;
         float lightIntensity = 0;
 
         for (int i=0; i < directionalLightTextureHeight; i++)
@@ -384,13 +387,27 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 lightIntensity += saturate(
                     dot(
                         surfaceNormal,
-                        normalize(float3(pointLight.x, pointLight.y, pointLight.z) - surfacePoint)
+                        normalize(float3(pointLight.x, pointLight.y, pointLight.z) - pointOnSurface)
                     ) * pointLight.w
                 );
             }
         }
 
         return saturate(lightIntensity);
+    }
+
+
+    float computeShadowIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)
+    {
+        //float3 dirToLight = (positionLight)?normalize(_Light- offsetPos):-_Light;
+
+        //ray.origin = offsetPos;
+        //ray.direction = dirToLight;
+
+        //float dstToLight = (positionLight)?distance(offsetPos,_Light):maxDst;
+        //float shadow = CalculateShadow(ray, dstToLight);
+
+        return 1;//shadow;
     }
 
 
@@ -434,11 +451,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     );
 
                     float lightIntensity = computeLightIntensityOnSurface(
-                        origin,
+                        pointOnSurface,
                         surfaceNormal
                     );
 
-                    resultColour += float4(lightIntensity, 0, 0, 1);
+                    resultColour += float4(lightIntensity, lightIntensity / 2, lightIntensity, 1);
 
                     break;
                     // if (bounces == numBounces)

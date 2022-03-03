@@ -123,9 +123,10 @@ BackdropNode {
 }
 Constant {
  inputs 0
- color {5 5 5 1}
+ color {-5 1 5 0.5}
  format "1 1 0 0 1 1 1 empty"
  name Point_Light
+ selected true
  xpos 13782
  ypos 604
 }
@@ -136,10 +137,9 @@ Dot {
 }
 Constant {
  inputs 0
- color {-5 -5 0 1}
+ color {-5 -5 0 0.1}
  format "1 1 0 0 1 1 1 empty"
  name Directional_Light
- selected true
  xpos 13467
  ypos 601
 }
@@ -602,6 +602,7 @@ Group {
     }
   "RayMarchKernel_Screen Width" {{input0.width}}
   "RayMarchKernel_Screen Height" {{input0.height}}
+  "RayMarchKernel_SkyBox Offset Angle" 50
   "RayMarchKernel_SkyBox Width" {{input1.width}}
   "RayMarchKernel_SkyBox Height" {{input1.height}}
   "RayMarchKernel_Pixel Subdivisions" 1
