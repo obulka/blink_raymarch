@@ -11,11 +11,11 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <split size="1841" stretch="1"/>
             <splitter orientation="2">
                 <split size="783"/>
-                <dock id="" activePageId="Viewer.1" focus="true">
+                <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
                 <split size="550"/>
-                <dock id="" activePageId="DAG.1">
+                <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
@@ -34,7 +34,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/nuke_scripts/raymarch_test.nk
- frame 50
+ frame 30
  format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
  proxy_type scale
  proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
@@ -49,182 +49,172 @@ Root {
 }
 BackdropNode {
  inputs 0
- name Cylinders
- xpos 15327
- ypos 554
- bdwidth 256
- bdheight 388
-}
-BackdropNode {
- inputs 0
- name Directional_Lights
- xpos 13383
- ypos 547
- bdwidth 256
- bdheight 388
+ name Light
+ xpos 14348
+ ypos 565
+ bdwidth 275
+ bdheight 393
 }
 BackdropNode {
  inputs 0
  name Lights
- xpos 13307
- ypos 494
+ xpos 14298
+ ypos 517
  appearance Border
- bdwidth 704
- bdheight 504
+ bdwidth 369
+ bdheight 506
 }
 BackdropNode {
  inputs 0
- name Point_Lights
- xpos 13698
- ypos 548
- bdwidth 256
- bdheight 388
+ name Object_Properties
+ xpos 15163
+ ypos 567
+ bdwidth 421
+ bdheight 389
 }
 BackdropNode {
  inputs 0
- name Rectangular_Prisms
- xpos 14417
- ypos 559
- bdwidth 256
- bdheight 388
+ name Objects
+ xpos 14728
+ ypos 566
+ bdwidth 413
+ bdheight 386
 }
 BackdropNode {
  inputs 0
  name Shapes
- xpos 14070
- ypos 497
+ xpos 14700
+ ypos 515
  appearance Border
- bdwidth 1566
- bdheight 498
+ bdwidth 926
+ bdheight 507
 }
-BackdropNode {
+Read {
  inputs 0
- name Spheres
- xpos 14107
- ypos 557
- bdwidth 256
- bdheight 388
-}
-BackdropNode {
- inputs 0
- name Tori
- xpos 14720
- ypos 558
- bdwidth 256
- bdheight 388
-}
-BackdropNode {
- inputs 0
- name Triangular_Prisms
- xpos 15031
- ypos 558
- bdwidth 256
- bdheight 388
-}
-Constant {
- inputs 0
- color {-5 1 5 0.5}
- format "1 1 0 0 1 1 1 empty"
- name Point_Light
- selected true
- xpos 13782
- ypos 604
-}
-Dot {
- name Dot8
- xpos 13816
- ypos 909
-}
-Constant {
- inputs 0
- color {-5 -5 0 0.1}
- format "1 1 0 0 1 1 1 empty"
- name Directional_Light
- xpos 13467
- ypos 601
+ file_type tiff
+ file /home/ob1/software/nuke/dev/raymarch/images/light_properties.tif
+ format "2 1 0 0 2 1 1 lights"
+ origset true
+ name Read5
+ xpos 14503
+ ypos 607
 }
 Dot {
  name Dot7
- xpos 13501
- ypos 908
+ xpos 14537
+ ypos 926
 }
-Constant {
+Read {
  inputs 0
- color {-2 2 3 1}
- format "1 1 0 0 1 1 1 empty"
- name Constant5
- xpos 15411
- ypos 610
+ file_type tiff
+ file /home/ob1/software/nuke/dev/raymarch/images/lights.tif
+ format "2 1 0 0 2 1 1 lights"
+ origset true
+ name Read4
+ xpos 14380
+ ypos 609
+}
+Dot {
+ name Dot8
+ xpos 14414
+ ypos 923
+}
+Read {
+ inputs 0
+ file_type tiff
+ file /home/ob1/software/nuke/dev/raymarch/images/shape.tif
+ format "3 2 0 0 3 2 1 "
+ origset true
+ name Read2
+ xpos 15324
+ ypos 614
 }
 Dot {
  name Dot1
- xpos 15445
- ypos 912
-}
-Constant {
- inputs 0
- color {-7 0 0 2}
- format "1 1 0 0 1 1 1 empty"
- name Constant4
- xpos 15115
- ypos 610
+ xpos 15358
+ ypos 919
 }
 Dot {
- name Dot3
- xpos 15149
- ypos 916
-}
-Constant {
  inputs 0
- color {0 3 0 1}
- format "1 1 0 0 1 1 1 empty"
- name Constant2
- xpos 14804
+ name Dot5
+ xpos 15487
+ ypos 920
+}
+Read {
+ inputs 0
+ file_type tiff
+ file /home/ob1/software/nuke/dev/raymarch/images/colours.tif
+ format "3 2 0 0 3 2 1 "
+ origset true
+ name Read6
+ xpos 15187
  ypos 613
+}
+Dot {
+ name Dot13
+ xpos 15221
+ ypos 918
+}
+Read {
+ inputs 0
+ file_type tiff
+ file /home/ob1/software/nuke/dev/raymarch/images/size.tif
+ format "3 2 0 0 3 2 1 "
+ origset true
+ name Read3
+ xpos 15015
+ ypos 612
+}
+Multiply {
+ value 0.09
+ name Multiply1
+ xpos 15015
+ ypos 730
 }
 Dot {
  name Dot4
- xpos 14838
+ xpos 15049
  ypos 921
 }
-Constant {
+Dot {
  inputs 0
- color {5 0 0 1}
- format "1 1 0 0 1 1 1 empty"
- name Constant3
- xpos 14501
- ypos 615
+ name Dot12
+ xpos 14912
+ ypos 922
+}
+Read {
+ inputs 0
+ file_type tiff
+ file /home/ob1/software/nuke/dev/raymarch/images/pos.tif
+ format "3 2 0 0 3 2 1 "
+ origset true
+ name positions
+ xpos 14755
+ ypos 611
+}
+Multiply {
+ value 0.9
+ name Multiply2
+ xpos 14757
+ ypos 728
 }
 Dot {
- name Dot5
- xpos 14535
- ypos 920
-}
-Constant {
- inputs 0
- color {0 0 0 1}
- format "1 1 0 0 1 1 1 empty"
- name Constant1
- xpos 14191
- ypos 613
-}
-Dot {
- name Dot6
- xpos 14225
- ypos 918
+ name Dot3
+ xpos 14789
+ ypos 921
 }
 Camera3 {
  inputs 0
- translate {-2 8 7}
- rotate {-41 0 0}
- focal 13.8
+ translate {0 10 10}
+ rotate {-48 0 0}
+ focal 80
  name Camera1
- xpos 13182
- ypos 1088
+ xpos 14126
+ ypos 605
 }
 Dot {
  name Dot2
- xpos 13206
+ xpos 14150
  ypos 1256
 }
 Read {
@@ -235,94 +225,344 @@ Read {
  origset true
  name Read1
  xpos 15693
- ypos 763
+ ypos 613
 }
 Group {
- inputs 9
- name RayMarcher
+ inputs 10
+ name RayMarcher1
  xpos 15693
  ypos 1252
 }
  BackdropNode {
   inputs 0
-  name BackdropNode1
-  xpos -391
-  ypos -374
+  name Light
+  xpos -498
+  ypos -377
   appearance Border
-  bdwidth 550
-  bdheight 356
+  bdwidth 544
+  bdheight 336
  }
  BackdropNode {
   inputs 0
-  name Cylinders
-  xpos 1344
-  ypos -316
-  bdwidth 250
-  bdheight 240
- }
- BackdropNode {
-  inputs 0
-  name Directional_Lights
-  xpos -357
-  ypos -313
-  bdwidth 225
-  bdheight 240
+  name Lights
+  xpos -466
+  ypos -333
+  bdwidth 479
+  bdheight 250
  }
  BackdropNode {
   inputs 0
   name Objects
   note_font_color 0x590000ff
-  xpos 201
-  ypos -375
+  xpos 79
+  ypos -376
   appearance Border
-  bdwidth 1435
-  bdheight 357
+  bdwidth 1563
+  bdheight 336
  }
  BackdropNode {
   inputs 0
-  name Point_Lights
-  xpos -107
-  ypos -313
-  bdwidth 225
-  bdheight 240
+  name Surface_Characteristics
+  xpos 109
+  ypos -329
+  bdwidth 750
+  bdheight 251
  }
  BackdropNode {
   inputs 0
-  name Rectangular_Prisms
-  xpos 507
-  ypos -318
-  bdwidth 251
-  bdheight 242
+  name Transform
+  xpos 891
+  ypos -329
+  bdwidth 720
+  bdheight 251
  }
- BackdropNode {
+ Constant {
   inputs 0
-  name Spheres
-  xpos 260
-  ypos -318
-  bdwidth 225
-  bdheight 240
+  channels rgb
+  format "1 1 0 0 1 1 1 empty"
+  name Constant9
+  xpos -450
+  ypos -246
  }
- BackdropNode {
+ Input {
   inputs 0
-  name Tori
-  xpos 784
-  ypos -317
-  bdwidth 252
-  bdheight 240
+  name light_props
+  xpos -340
+  ypos -296
+  number 9
  }
- BackdropNode {
+ Merge2 {
+  inputs 2
+  name Merge8
+  xpos -340
+  ypos -223
+ }
+ Dot {
+  name Dot8
+  xpos -306
+  ypos -123
+ }
+ Constant {
   inputs 0
-  name Triangular_Prisms
-  xpos 1065
-  ypos -316
-  bdwidth 248
-  bdheight 240
+  channels rgb
+  format {{{Constant9.format}}}
+  name Constant8
+  xpos -225
+  ypos -244
+ }
+ Input {
+  inputs 0
+  name light
+  xpos -115
+  ypos -300
+  number 8
+ }
+ Merge2 {
+  inputs 2
+  name Merge7
+  xpos -115
+  ypos -221
+ }
+ Dot {
+  name Dot7
+  xpos -81
+  ypos -109
+ }
+ Constant {
+  inputs 0
+  channels rgb
+  format {{{DefaultPos.format}}}
+  name Constant4
+  xpos 356
+  ypos -236
+ }
+ Input {
+  inputs 0
+  name surface
+  xpos 488
+  ypos -287
+  number 6
+ }
+ Merge2 {
+  inputs 2
+  name Merge3
+  xpos 488
+  ypos -213
+ }
+ Dot {
+  name Dot2
+  xpos 522
+  ypos -104
+ }
+ Constant {
+  inputs 0
+  channels rgb
+  format {{{DefaultPos.format}}}
+  name Constant5
+  xpos 590
+  ypos -232
+ }
+ Input {
+  inputs 0
+  name shape
+  xpos 744
+  ypos -288
+  number 7
+ }
+ Merge2 {
+  inputs 2
+  name Merge4
+  xpos 744
+  ypos -209
+ }
+ Dot {
+  name Dot4
+  xpos 778
+  ypos -109
+ }
+ Constant {
+  inputs 0
+  channels rgb
+  format {{{DefaultPos.format}}}
+  name Constant6
+  xpos 124
+  ypos -237
+ }
+ Input {
+  inputs 0
+  name colour
+  xpos 253
+  ypos -292
+  number 5
+ }
+ Merge2 {
+  inputs 2
+  name Merge5
+  xpos 253
+  ypos -214
+ }
+ Dot {
+  name Dot5
+  xpos 287
+  ypos -118
+ }
+ Constant {
+  inputs 0
+  channels rgb
+  format {{{DefaultPos.format}}}
+  name Constant11
+  xpos 1382
+  ypos -236
+ }
+ Input {
+  inputs 0
+  name scale
+  xpos 1511
+  ypos -286
+  number 4
+ }
+ Merge2 {
+  inputs 2
+  name Merge10
+  xpos 1511
+  ypos -213
+ }
+ Dot {
+  name Dot10
+  xpos 1545
+  ypos -117
+ }
+ Constant {
+  inputs 0
+  channels rgb
+  format {{{DefaultPos.format}}}
+  name Constant10
+  xpos 1153
+  ypos -236
+ }
+ Input {
+  inputs 0
+  name rot
+  xpos 1280
+  ypos -287
+  number 3
+ }
+ Merge2 {
+  inputs 2
+  name Merge9
+  xpos 1280
+  ypos -213
+ }
+ Dot {
+  name Dot9
+  xpos 1314
+  ypos -115
+ }
+ Constant {
+  inputs 0
+  channels rgb
+  format "1 1 0 0 1 1 1 empty"
+  name DefaultPos
+  xpos 916
+  ypos -241
+ }
+ Input {
+  inputs 0
+  name pos
+  xpos 1043
+  ypos -287
+  number 2
+ }
+ Merge2 {
+  inputs 2
+  name Merge6
+  xpos 1043
+  ypos -218
+ }
+ Dot {
+  name Dot6
+  xpos 1077
+  ypos -120
+ }
+ Constant {
+  inputs 0
+  channels rgb
+  format "2048 1024 0 0 2048 1024 1 2K_LatLong"
+  name Constant3
+  xpos 1682
+  ypos -230
+ }
+ Input {
+  inputs 0
+  name sky
+  xpos 1792
+  ypos -335
+ }
+ Merge2 {
+  inputs 2
+  name Merge1
+  xpos 1792
+  ypos -207
+ }
+ Constant {
+  inputs 0
+  channels rgb
+  name Constant1
+  xpos 1971
+  ypos 200
+ }
+ Dot {
+  name Dot1
+  xpos 2005
+  ypos 304
+ }
+ BlinkScript {
+  inputs 10
+  kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/raymarch.blink
+  recompileCount 334
+  ProgramGroup 1
+  KernelDescription "2 \"RayMarchKernel\" iterate pixelWise ba21ce60da8ba6800110e2f073b18bd7621b67a7e915ff03743120139ff02b82 11 \"bg\" Read Point \"skyBox\" Read Random \"positions\" Read Random \"rotations\" Read Random \"scales\" Read Random \"colours\" Read Random \"shapeProperties\" Read Random \"surfaceProperties\" Read Random \"lights\" Read Random \"lightProperties\" Read Random \"dst\" Write Point 21 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"SkyBox Offset Angle\" Float 1 AAAAAA== \"SkyBox Width\" Int 1 AAgAAA== \"SkyBox Height\" Int 1 AAQAAA== \"Pixel Subdivisions\" Int 1 AAAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AEAcRg== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 zcxMPQ== \"Rays Per Pixel\" Int 1 AQAAAA== \"Ray Offset\" Float 1 F7fROA== \"Object Texture Height\" Int 1 AAAAAA== \"Object Texture Width\" Int 1 AAAAAA== \"Directional Light Texture Height\" Int 1 AAAAAA== \"Directional Light Texture Width\" Int 1 AAAAAA== 21 \"focalLength\" 1 1 \"horizontalAperture\" 1 1 \"nearPlane\" 1 1 \"farPlane\" 1 1 \"cameraWorldMatrix\" 16 1 \"formatWidth\" 1 1 \"formatHeight\" 1 1 \"skyBoxOffsetAngle\" 1 1 \"skyFormatWidth\" 1 1 \"skyFormatHeight\" 1 1 \"subdivisions\" 1 1 \"maxBounces\" 1 1 \"maxRayDistance\" 1 1 \"hitTolerance\" 1 1 \"shadowBias\" 1 1 \"raysPerPixel\" 1 1 \"rayOffset\" 1 1 \"objectTextureHeight\" 1 1 \"objectTextureWidth\" 1 1 \"lightTextureHeight\" 1 1 \"lightTextureWidth\" 1 1 9 \"fieldOfView\" Float 1 1 AAAAAA== \"cameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"cameraPosition\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"aspect\" Float 1 1 AAAAAA== \"numSubPixels\" Int 1 1 AAAAAA== \"subdividedPixelSize\" Float 1 1 AAAAAA== \"skyBoxPixelSize\" Float 2 1 AAAAAAAAAAA= \"skyBoxOffsetRadians\" Float 1 1 AAAAAA=="
+  kernelSource "#include \"colour.h\"\n#include \"mmath.h\"\n#include \"sdfs.h\"\n\n\nkernel RayMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    // the input for format, process called once per pixel\n    Image<eRead, eAccessPoint, eEdgeNone> bg;\n\n    // the skybox in latlong format\n    Image<eRead, eAccessRandom, eEdgeNone> skyBox;\n\n\n    // the shape positons.xyz\n    Image<eRead, eAccessRandom, eEdgeNone> positions;\n    // the shape rotations (TODO)\n    Image<eRead, eAccessRandom, eEdgeNone> rotations;\n    // the shape scales.xyz (some shapes may not use all channels)\n    Image<eRead, eAccessRandom, eEdgeNone> scales;\n    // the shape colours.xyz\n    Image<eRead, eAccessRandom, eEdgeNone> colours;\n\n    // shape type.x, operation.y, numChildren.z, blend strength.w\n    // x in \[0, 1) sphere\n    // x in \[1, 2) rectangular prism\n    // x in \[2, 3) cylinder\n    // x in \[3, 4) triangular prism\n    // x in \[4, inf) torus\n    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;\n    // reflection.x, transmission.y, emission.z, roughness.w (TODO)\n    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;\n\n    // the input directional lights direction.xyz intensity.w\n    Image<eRead, eAccessRandom, eEdgeNone> lights;\n    // colour.xyz, type.w\n    // w in \[0, 1) = directional, \[1, inf) = point\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties;\n\n    // the output image\n    Image<eWrite> dst;\n\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float focalLength;\n        float horizontalAperture;\n        float nearPlane;\n        float farPlane;\n        float4x4 cameraWorldMatrix;\n\n        // Image params\n        float formatWidth;\n        float formatHeight;\n\n        float skyBoxOffsetAngle;\n        int skyFormatWidth;\n        int skyFormatHeight;\n\n        // Ray params\n        int subdivisions;\n        int maxBounces;\n        float maxRayDistance;\n        float hitTolerance;\n\n        // Shader params\n        float shadowBias;\n        int raysPerPixel;\n        float rayOffset;\n\n        // Scene params\n        // Shape Textures\n        int objectTextureHeight;\n        int objectTextureWidth;\n\n        // Light textures\n        int lightTextureHeight;\n        int lightTextureWidth;\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float fieldOfView;\n        float4x4 cameraProjectionMatrix;\n        float4x4 inverseCameraProjectionMatrix;\n        float3 cameraPosition;\n        float aspect;\n\n        int numSubPixels;\n        float subdividedPixelSize;\n\n        float2 skyBoxPixelSize;\n        float skyBoxOffsetRadians;\n\n\n    // In define(), parameters can be given labels and default values.\n    void define()\n    \{\n        // Camera params\n        defineParam(focalLength, \"Focal Length\", 50.0f);\n        defineParam(horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(nearPlane, \"Near Plane\", 0.1f);\n        defineParam(farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n\n        // Image params\n        defineParam(formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(skyBoxOffsetAngle, \"SkyBox Offset Angle\", 0.0f);\n        defineParam(skyFormatHeight, \"SkyBox Height\", 1024);\n        defineParam(skyFormatWidth, \"SkyBox Width\", 2048);\n\n        // Ray params\n        defineParam(subdivisions, \"Pixel Subdivisions\", 0);\n        defineParam(maxRayDistance, \"Max Ray Distance\", 10000.0f);\n        defineParam(maxBounces, \"Max Bounces\", 1);\n        defineParam(hitTolerance, \"Hit Tolerance\", 0.001f);\n\n        // Shader params TODO make these surface spawn rays\n        defineParam(shadowBias, \"Shadow Bias\", 0.05f);\n        defineParam(raysPerPixel, \"Rays Per Pixel\", 1);\n        defineParam(rayOffset, \"Ray Offset\", 0.0001f);\n\n        // Scene params\n\n        // Shape Counts\n        defineParam(objectTextureHeight, \"Object Texture Height\", 0);\n        defineParam(objectTextureWidth, \"Object Texture Width\", 0);\n\n        // Light Counts\n        defineParam(lightTextureHeight, \"Directional Light Texture Height\", 0);\n        defineParam(lightTextureWidth, \"Directional Light Texture Width\", 0);\n    \}\n\n\n    // The init() function is run before any calls to process().\n    // Local variables can be initialized here.\n    void init()\n    \{\n        //formatWidth = formatWidth == 0 ? 1 : formatWidth;\n        //focalLength = focalLength == 0 ? 1 : focalLength;\n        //aspect = aspect == 0 ? 1 : aspect;\n        //horizontalAperture = horizontalAperture == 0 ? 1 : horizontalAperture;\n        //rayOffset = rayOffset == 0 ? 0.000001 : rayOffset;\n        float farMinusNear = farPlane - nearPlane;\n\n        // TODO use angles to allow -ve focal length like for latlongs\n        aspect = formatHeight / formatWidth;\n        fieldOfView = 2 * atan(1 / focalLength);\n        cameraProjectionMatrix = float4x4(\n            2 * focalLength / horizontalAperture, 0, 0, 0,\n            0, 2 * focalLength / horizontalAperture / aspect, 0, 0,\n            0, 0, -(farPlane + nearPlane) / farMinusNear, -2 * (farPlane * nearPlane) / farMinusNear,\n            0, 0, -1, 0\n        );\n        invert4x4(cameraProjectionMatrix, inverseCameraProjectionMatrix);\n        positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);\n\n        int subPixelDivisions = pow(2, abs(subdivisions));\n        subdividedPixelSize = 1.0f / (float) subPixelDivisions;\n        numSubPixels = pow(subPixelDivisions, 2);\n\n        skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);\n        skyBoxOffsetRadians = skyBoxOffsetAngle * PI / 180.0f;\n    \}\n\n    /**\n     * Get the value of sky the ray would hit at infinite distance\n     */\n    float4 readSkyValue(float3 rayDirection)\n    \{\n        float rayAnglePhi = fmod(acos(rayDirection.y), PI);\n        rayAnglePhi += PI * (rayAnglePhi < 0);\n\n        float rayAngleTheta = fmod(\n            atan2(rayDirection.z, rayDirection.x) + skyBoxOffsetRadians,\n            2 * PI\n        );\n        rayAngleTheta += 2 * PI * (rayAngleTheta < 0);\n\n        SampleType(skyBox) skyBoxPixel = bilinear(\n            skyBox,\n            skyBoxPixelSize.x * rayAngleTheta,\n            skyFormatHeight - (skyBoxPixelSize.y * rayAnglePhi)\n        );\n\n        return skyBoxPixel;\n    \}\n\n\n    /**\n     * Generate a ray out of the camera\n     */\n    void createCameraRay(float2 pixelLocation, float3 &rayOrigin, float3 &rayDirection)\n    \{\n        float2 uvPosition = float2(\n            2 * pixelLocation.x / formatWidth - 1,\n            2 * pixelLocation.y / formatHeight - 1\n        );\n        rayOrigin = cameraPosition;\n        float4 direction;\n        matmul(\n            inverseCameraProjectionMatrix,\n            float4(uvPosition.x, uvPosition.y, 0, 1),\n            direction\n        );\n        matmul(\n            cameraWorldMatrix,\n            float4(direction.x, direction.y, direction.z, 0),\n            direction\n        );\n        rayDirection = normalize(float3(direction.x, direction.y, direction.z));\n    \}\n\n\n    //\n    // Render Engine\n    //\n\n\n    float distanceToObject(\n            const float3 &position,\n            const int shapeType,\n            const float3 &objectPosition,\n            const float3 &scale)\n    \{\n        if (shapeType == 0)\n        \{\n            return distanceToSphere(position, objectPosition, scale.x);\n        \}\n        if (shapeType == 1)\n        \{\n            return distanceToRectangularPrism(position, objectPosition, scale);\n        \}\n\n        float2 size = float2(scale.x, scale.y);\n        if (shapeType == 2)\n        \{\n            return distanceToCylinder(position, objectPosition, size);\n        \}\n        if (shapeType == 3)\n        \{\n            return distanceToTriangularPrism(position, objectPosition, size);\n        \}\n        return distanceToTorus(position, objectPosition, size);\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     */\n    float getMinDistanceToObjectInScene(float3 rayOrigin)\n    \{\n        float distance = maxRayDistance;\n\n        for (int i=0; i < objectTextureHeight; i++)\n        \{\n            for (int j=0; j < objectTextureWidth; j++)\n            \{\n                SampleType(positions) position = positions(j, i);\n                //SampleType(spheres) rotation = spheres(j, i);\n                SampleType(scales) scale = scales(j, i);\n                SampleType(colours) colour = colours(j, i);\n                SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);\n                //SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);\n\n                distance = min(\n                    distance,\n                    distanceToObject(\n                        rayOrigin,\n                        (int) shapeProperty.x,\n                        float3(position.x, position.y, position.z),\n                        float3(scale.x, scale.y, scale.z)\n                    )\n                );\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     *\n     * @returns: The normalized surface normal\n     */\n    float3 estimateSurfaceNormal(const float3 &point) \{\n        return normalize(float3(\n            getMinDistanceToObjectInScene(float3(\n                point.x + hitTolerance,\n                point.y,\n                point.z\n            )) - getMinDistanceToObjectInScene(float3(\n                point.x - hitTolerance,\n                point.y,\n                point.z\n            )),\n            getMinDistanceToObjectInScene(float3(\n                point.x,\n                point.y + hitTolerance,\n                point.z\n            )) - getMinDistanceToObjectInScene(float3(\n                point.x,\n                point.y - hitTolerance,\n                point.z\n            )),\n            getMinDistanceToObjectInScene(float3(\n                point.x,\n                point.y,\n                point.z+hitTolerance\n            )) - getMinDistanceToObjectInScene(float3(\n                point.x,\n                point.y,\n                point.z - hitTolerance\n            ))\n        ));\n    \}\n\n\n    float lightIntensityOnSurface(\n            const float3 &pointOnSurface,\n            const float3 &surfaceNormal,\n            const int lightType,\n            const float3 light,\n            const float intensity)\n    \{\n        float3 lightDirection;\n        if (lightType == 0)\n        \{\n            // directional\n            lightDirection = -light;\n        \}\n        else\n        \{\n            // point\n            lightDirection = light - pointOnSurface;\n        \}\n\n        return saturate(dot(surfaceNormal, normalize(lightDirection)) * intensity);\n    \}\n\n\n    float computeLightIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)\n    \{\n        float3 offsetPos = pointOnSurface + surfaceNormal * shadowBias;\n\n        float shadowIntensity = 0;\n        float lightIntensity = 0;\n\n        for (int i=0; i < lightTextureHeight; i++)\n        \{\n            for (int j=0; j < lightTextureWidth; j++)\n            \{\n                SampleType(lights) light = lights(j, i);\n                SampleType(lightProperties) lightProperty = lightProperties(j, i);\n\n                lightIntensity += lightIntensityOnSurface(\n                    pointOnSurface,\n                    surfaceNormal,\n                    (int) lightProperty.w,\n                    float3(light.x, light.y, light.z),\n                    light.w\n                );\n            \}\n        \}\n\n        return saturate(lightIntensity);\n    \}\n\n\n    float computeShadowIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)\n    \{\n        //float3 dirToLight = (positionLight)?normalize(_Light- offsetPos):-_Light;\n\n        //ray.origin = offsetPos;\n        //ray.direction = dirToLight;\n\n        //float dstToLight = (positionLight)?distance(offsetPos,_Light):maxDst;\n        //float shadow = CalculateShadow(ray, dstToLight);\n\n        return 1;//shadow;\n    \}\n\n\n    /**\n     * March a ray through the scene\n     */\n    void marchRay(\n            const float3 &rayOrigin,\n            const float3 &rayDirection,\n            int numRays,\n            int numBounces,\n            float rayDistance,\n            float4 &resultColour\n        )\n    \{\n        float3 origin = rayOrigin;\n        float3 direction = rayDirection;\n\n        float3 rayNormal = normalize(float3(direction.y, -direction.x, 0));\n        float radialOffset = rayOffset;\n        float angularOffset = 0;\n\n\n        for (int rayNum=0; rayNum < numRays; rayNum++)\n        \{\n            int bounces = 0;\n            float distanceTravelled = 0;\n\n            while (distanceTravelled < rayDistance)\n            \{\n                float stepDistance = getMinDistanceToObjectInScene(origin);\n                distanceTravelled += stepDistance;\n\n                if (stepDistance <= hitTolerance)\n                \{\n                    bounces++;\n\n                    float3 pointOnSurface = origin + rayDirection * stepDistance;\n                    float3 surfaceNormal = estimateSurfaceNormal(\n                        pointOnSurface - rayDirection * hitTolerance\n                    );\n\n                    float lightIntensity = computeLightIntensityOnSurface(\n                        pointOnSurface,\n                        surfaceNormal\n                    );\n\n                    resultColour += float4(lightIntensity, lightIntensity / 2, lightIntensity, 1);\n\n                    break;\n                    // if (bounces == numBounces)\n                    // \{\n                    //    break;\n                    //\}\n                \}\n\n                origin += direction * stepDistance;\n            \}\n\n            // If the ray missed, grab the skybox colour\n            resultColour += bounces == 0 ? readSkyValue(direction) : float4(0, 0, 0, 0);\n\n            // Update the ray direction to send a scattered cluster of rays\n            // TODO these shouldnt diverge more and more the more rays you add\n            origin = rayOrigin;\n\n            rayNormal = (\n                cos(angularOffset)\n                * rayNormal\n                + sin(angularOffset)\n                * cross(direction, rayNormal)\n            );\n\n            direction = radialOffset * rayNormal + rayDirection;\n\n            angularOffset = 90 * (1 - 0.5 * ((rayNum % 4) == 0));\n            radialOffset += rayOffset * ((rayNum % 8) == 0);\n        \}\n\n        resultColour /= raysPerPixel; // Normalize the output after multiple rays\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value\n     */\n    void process(int2 pos)\n    \{\n        // Read the input to pass through\n        float4 resultPixel(0, 0, 0, 0);\n\n        float2 pixelLocation = float2((float) pos.x, (float) pos.y);\n\n        float2 pixelOffset;\n        for (\n            pixelOffset.x = 0.0f;\n            pixelOffset.x < 1.0f;\n            pixelOffset.x += subdividedPixelSize\n        ) \{\n            for (\n                pixelOffset.y = 0.0f;\n                pixelOffset.y < 1.0f;\n                pixelOffset.y += subdividedPixelSize\n            ) \{\n                // Generate a ray from the camera\n                float3 rayOrigin;\n                float3 rayDirection;\n                createCameraRay(pixelLocation + pixelOffset, rayOrigin, rayDirection);\n\n                marchRay(\n                    rayOrigin,\n                    rayDirection,\n                    raysPerPixel,\n                    maxBounces,\n                    maxRayDistance,\n                    resultPixel\n                );\n            \}\n        \}\n\n        dst() = resultPixel / numSubPixels;\n    \}\n\};\n"
+  rebuild ""
+  "RayMarchKernel_Focal Length" {{parent.DummyCam.focal}}
+  "RayMarchKernel_Horizontal Aperture" {{parent.DummyCam.haperture}}
+  "RayMarchKernel_Near Plane" {{parent.DummyCam.near}}
+  "RayMarchKernel_Far Plane" {{parent.DummyCam.far}}
+  "RayMarchKernel_Camera World Matrix" {
+      {{parent.DummyCam.world_matrix.0} {parent.DummyCam.world_matrix.1} {parent.DummyCam.world_matrix.2} {parent.DummyCam.world_matrix.3}}
+      {{parent.DummyCam.world_matrix.4} {parent.DummyCam.world_matrix.5} {parent.DummyCam.world_matrix.6} {parent.DummyCam.world_matrix.7}}
+      {{parent.DummyCam.world_matrix.8} {parent.DummyCam.world_matrix.9} {parent.DummyCam.world_matrix.10} {parent.DummyCam.world_matrix.11}}
+      {{parent.DummyCam.world_matrix.12} {parent.DummyCam.world_matrix.13} {parent.DummyCam.world_matrix.14} {parent.DummyCam.world_matrix.15}}
+    }
+  "RayMarchKernel_Screen Width" {{input0.width}}
+  "RayMarchKernel_Screen Height" {{input0.height}}
+  "RayMarchKernel_SkyBox Offset Angle" 50
+  "RayMarchKernel_SkyBox Width" {{input1.width}}
+  "RayMarchKernel_SkyBox Height" {{input1.height}}
+  "RayMarchKernel_Pixel Subdivisions" 1
+  "RayMarchKernel_Max Bounces" 3
+  "RayMarchKernel_Max Ray Distance" 100
+  "RayMarchKernel_Hit Tolerance" 0.0001
+  "RayMarchKernel_Object Texture Height" {{input2.height}}
+  "RayMarchKernel_Object Texture Width" {{input2.width}}
+  "RayMarchKernel_Directional Light Texture Height" {{input8.height}}
+  "RayMarchKernel_Directional Light Texture Width" {{input8.width}}
+  format "2048 1024 0 0 2048 1024 1 2K_LatLong"
+  rebuild_finalise ""
+  name BlinkScript1
+  xpos 1792
+  ypos 294
+ }
+ Output {
+  name Output1
+  xpos 1792
+  ypos 625
  }
  Input {
   inputs 0
   name cam
-  xpos 776
-  ypos 211
+  xpos -293
+  ypos 137
   number 1
  }
  Camera {
@@ -340,8 +580,8 @@ Group {
   name DummyCam
   help "DummyCam by Adrian Pueyo\n\nCamera that apart from the matrices also grabs all the \"Projection\" values from the upstream camera that it's connected to. Turns into a default Camera if no Camera connected. Can also be used inside of groups and gizmos, as many levels deep as you want :D All using live and super fast TCL.\n\nUpdated v1.1: Now grabs the correct frame too (thanks Erwan Leroy for the idea).\n\nUpdated v1.3: Now accepts Nuke13's Camera3\n\nadrianpueyo.com, 2019-2021"
   onCreate "n = nuke.thisNode()\nfor k in \[\"projection_mode\",\"focal\",\"haperture\",\"vaperture\",\"near\",\"far\",\"win_translate\",\"win_scale\",\"winroll\",\"focal_point\",\"fstop\"]:\n    n\[k].setFlag(0x0000000010000000)"
-  xpos 786
-  ypos 253
+  xpos -283
+  ypos 245
   addUserKnob {20 DummyCam l Defaults}
   addUserKnob {43 the_cam +INVISIBLE}
   the_cam "\[\n#DummyCam v1.3 - Updated 5 May 2021.\nset starting_point \"this.input0\"\nset default \"this.d_\"\n\n# If cam has no inputs, return the default.\nif \{\[exists \$starting_point]\} \{\n    set x \[node \$starting_point]\n\} \{ \n    return \$default\n\}\n\nset finished 0\nwhile \{\$finished != 1\} \{\n\n    # First look for a Cam or Input or topnode.\n    while \{\[class \$x] != \"Camera3\" && \[class \$x] != \"Camera2\" && \[class \$x] != \"Camera\" && \[class \$x] != \"Input\" && \$x != \[topnode \$x]\} \{\n        set x \[node \$x.input0]\n    \}\n\n    # Then, check if node is a cam (and return), and otherwise, if it's an input, see if the parent exists and move to it.\n    if \{\[class \$x]==\"Camera3\"||\[class \$x]==\"Camera2\"||\[class \$x]==\"Camera\"\} \{\n        set x \[append x \".\"]\n        return \$x\n    \} \{ \n        if \{ \[class \$x]==\"Input\" \} \{ \n            set inp \"\$x.parent.input\"\n            set inputNum \[value \$x.number]\n            set inp \[append inp \$inputNum]\n            if \{ \[exists \$inp] \} \{\n                set x \[node \$inp]\n            \} \{ \n                set finished 1\n            \}\n        \} \{ \n            set finished 1\n        \}\n    \}\n\}\nreturn \$default\n]"
@@ -368,276 +608,10 @@ Group {
   d_fstop 16
   addUserKnob {26 version l " " t "Updated 5 May 2021" T "<span style=\"color:#666\"><br/><b>DummyCam v1.3</b> - <a href=\"http://www.adrianpueyo.com\" style=\"color:#666;text-decoration: none;\">adrianpueyo.com</a>, 2019-2021</span>"}
  }
- Constant {
-  inputs 0
-  channels rgb
-  format "1 1 0 0 1 1 1 empty"
-  name Constant9
-  xpos -91
-  ypos -226
- }
- Input {
-  inputs 0
-  name point_lights
-  xpos 19
-  ypos -293
-  number 8
- }
- Merge2 {
-  inputs 2
-  name Merge8
-  xpos 19
-  ypos -203
- }
- Dot {
-  name Dot8
-  xpos 53
-  ypos -91
- }
- Constant {
-  inputs 0
-  channels rgb
-  format "1 1 0 0 1 1 1 empty"
-  name Constant8
-  xpos -341
-  ypos -226
- }
- Input {
-  inputs 0
-  name dir_lights
-  xpos -231
-  ypos -293
-  number 7
- }
- Merge2 {
-  inputs 2
-  name Merge7
-  xpos -231
-  ypos -203
- }
- Dot {
-  name Dot7
-  xpos -197
-  ypos -91
- }
- Constant {
-  inputs 0
-  channels rgb
-  format "1 1 0 0 1 1 1 empty"
-  name Constant7
-  xpos 1369
-  ypos -228
- }
- Input {
-  inputs 0
-  name cylinders
-  xpos 1496
-  ypos -295
-  number 6
- }
- Merge2 {
-  inputs 2
-  name Merge6
-  xpos 1496
-  ypos -205
- }
- Dot {
-  name Dot6
-  xpos 1530
-  ypos -107
- }
- Constant {
-  inputs 0
-  channels rgb
-  format "1 1 0 0 1 1 1 empty"
-  name Constant6
-  xpos 1088
-  ypos -224
- }
- Input {
-  inputs 0
-  name prisms
-  xpos 1217
-  ypos -291
-  number 5
- }
- Merge2 {
-  inputs 2
-  name Merge5
-  xpos 1217
-  ypos -201
- }
- Dot {
-  name Dot5
-  xpos 1251
-  ypos -105
- }
- Constant {
-  inputs 0
-  channels rgb
-  format "1 1 0 0 1 1 1 empty"
-  name Constant5
-  xpos 805
-  ypos -225
- }
- Input {
-  inputs 0
-  name tori
-  xpos 936
-  ypos -292
-  number 4
- }
- Merge2 {
-  inputs 2
-  name Merge4
-  xpos 936
-  ypos -202
- }
- Dot {
-  name Dot4
-  xpos 970
-  ypos -104
- }
- Constant {
-  inputs 0
-  channels rgb
-  format "1 1 0 0 1 1 1 empty"
-  name Constant4
-  xpos 527
-  ypos -226
- }
- Input {
-  inputs 0
-  name rects
-  xpos 659
-  ypos -293
-  number 3
- }
- Merge2 {
-  inputs 2
-  name Merge3
-  xpos 659
-  ypos -203
- }
- Dot {
-  name Dot2
-  xpos 693
-  ypos -94
- }
- Constant {
-  inputs 0
-  channels rgb
-  format "1 1 0 0 1 1 1 empty"
-  name Constant2
-  xpos 276
-  ypos -227
- }
- Input {
-  inputs 0
-  name spheres
-  xpos 386
-  ypos -294
-  number 2
- }
- Merge2 {
-  inputs 2
-  name Merge2
-  xpos 386
-  ypos -204
- }
- Dot {
-  name Dot3
-  xpos 420
-  ypos -92
- }
- Constant {
-  inputs 0
-  channels rgb
-  format "2048 1024 0 0 2048 1024 1 2K_LatLong"
-  name Constant3
-  xpos 1682
-  ypos -230
- }
- Input {
-  inputs 0
-  name sky
-  xpos 1792
-  ypos -323
- }
- Merge2 {
-  inputs 2
-  name Merge1
-  xpos 1792
-  ypos -207
- }
- Constant {
-  inputs 0
-  channels rgb
-  name Constant1
-  xpos 2143
-  ypos 200
- }
- Dot {
-  name Dot1
-  xpos 2177
-  ypos 304
- }
- BlinkScript {
-  inputs 9
-  kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/raymarch.blink
-  recompileCount 320
-  ProgramGroup 1
-  KernelDescription "2 \"RayMarchKernel\" iterate pixelWise fcc7d44b282a45c5ce7c2dc057f28b67f16679565ee6ef20d79ba5c1ebdc7d03 10 \"bg\" Read Point \"skyBox\" Read Random \"spheres\" Read Random \"rectPrisms\" Read Random \"tori\" Read Random \"triangularPrisms\" Read Random \"cylinders\" Read Random \"directionalLights\" Read Random \"pointLights\" Read Random \"dst\" Write Point 31 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"SkyBox Offset Angle\" Float 1 AAAAAA== \"SkyBox Width\" Int 1 AAgAAA== \"SkyBox Height\" Int 1 AAQAAA== \"Pixel Subdivisions\" Int 1 AAAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AEAcRg== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 zcxMPQ== \"Rays Per Pixel\" Int 1 AQAAAA== \"Ray Offset\" Float 1 F7fROA== \"Spheres Texture Width\" Int 1 AAAAAA== \"Spheres Texture Height\" Int 1 AAAAAA== \"Rectangular Prisms Texture Width\" Int 1 AAAAAA== \"Rectangular Prisms Texture Height\" Int 1 AAAAAA== \"Tori Texture Height\" Int 1 AAAAAA== \"Tori Texture Width\" Int 1 AAAAAA== \"Triangular Prisms Texture Height\" Int 1 AAAAAA== \"Triangular Prisms Texture Width\" Int 1 AAAAAA== \"Cylinders Texture Height\" Int 1 AAAAAA== \"Cylinders Texture Width\" Int 1 AAAAAA== \"Point Light Texture Height\" Int 1 AAAAAA== \"Point Light Texture Width\" Int 1 AAAAAA== \"Directional Light Texture Height\" Int 1 AAAAAA== \"Directional Light Texture Width\" Int 1 AAAAAA== 31 \"focalLength\" 1 1 \"horizontalAperture\" 1 1 \"nearPlane\" 1 1 \"farPlane\" 1 1 \"cameraWorldMatrix\" 16 1 \"formatWidth\" 1 1 \"formatHeight\" 1 1 \"skyBoxOffsetAngle\" 1 1 \"skyFormatWidth\" 1 1 \"skyFormatHeight\" 1 1 \"subdivisions\" 1 1 \"maxBounces\" 1 1 \"maxRayDistance\" 1 1 \"hitTolerance\" 1 1 \"shadowBias\" 1 1 \"raysPerPixel\" 1 1 \"rayOffset\" 1 1 \"spheresTextureWidth\" 1 1 \"spheresTextureHeight\" 1 1 \"rectPrismsTextureWidth\" 1 1 \"rectPrismsTextureHeight\" 1 1 \"toriTextureHeight\" 1 1 \"toriTextureWidth\" 1 1 \"triangularPrismsTextureHeight\" 1 1 \"triangularPrismsTextureWidth\" 1 1 \"cylindersTextureHeight\" 1 1 \"cylindersTextureWidth\" 1 1 \"pointLightTextureHeight\" 1 1 \"pointLightTextureWidth\" 1 1 \"directionalLightTextureHeight\" 1 1 \"directionalLightTextureWidth\" 1 1 9 \"fieldOfView\" Float 1 1 AAAAAA== \"cameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"cameraPosition\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"aspect\" Float 1 1 AAAAAA== \"numSubPixels\" Int 1 1 AAAAAA== \"subdividedPixelSize\" Float 1 1 AAAAAA== \"skyBoxPixelSize\" Float 2 1 AAAAAAAAAAA= \"skyBoxOffsetRadians\" Float 1 1 AAAAAA=="
-  kernelSource "#include \"colour.h\"\n#include \"mmath.h\"\n#include \"sdfs.h\"\n\n\nkernel RayMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessPoint, eEdgeNone> bg; // the input for format, process called once per pixel\n    Image<eRead, eAccessRandom, eEdgeNone> skyBox; // the skybox\n    Image<eRead, eAccessRandom, eEdgeNone> spheres; // the input spheres positions.xyz radius.w\n    Image<eRead, eAccessRandom, eEdgeNone> rectPrisms; // the input rectPrisms positions.xyz radius.w\n    Image<eRead, eAccessRandom, eEdgeNone> tori; // the input tori positions.xyz radius.w\n    Image<eRead, eAccessRandom, eEdgeNone> triangularPrisms; // the input triangularPrisms positions.xyz radius.w\n    Image<eRead, eAccessRandom, eEdgeNone> cylinders; // the input cylinders positions.xyz radius.w\n    Image<eRead, eAccessRandom, eEdgeNone> directionalLights; // the input directional lights direction.xyz intensity.w\n    Image<eRead, eAccessRandom, eEdgeNone> pointLights; // the input point lights positions.xyz intensity.w\n\n    Image<eWrite> dst; // the output image\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float focalLength;\n        float horizontalAperture;\n        float nearPlane;\n        float farPlane;\n        float4x4 cameraWorldMatrix;\n\n        // Image params\n        float formatWidth;\n        float formatHeight;\n\n        float skyBoxOffsetAngle;\n        int skyFormatWidth;\n        int skyFormatHeight;\n\n        // Ray params\n        int subdivisions;\n        int maxBounces;\n        float maxRayDistance;\n        float hitTolerance;\n\n        // Shader params\n        float shadowBias;\n        int raysPerPixel;\n        float rayOffset;\n\n        // Scene params\n        // Shape Textures\n        int spheresTextureWidth;\n        int spheresTextureHeight;\n        int rectPrismsTextureWidth;\n        int rectPrismsTextureHeight;\n        int toriTextureHeight;\n        int toriTextureWidth;\n        int triangularPrismsTextureHeight;\n        int triangularPrismsTextureWidth;\n        int cylindersTextureHeight;\n        int cylindersTextureWidth;\n\n        // Light textures\n        int pointLightTextureHeight;\n        int pointLightTextureWidth;\n        int directionalLightTextureHeight;\n        int directionalLightTextureWidth;\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float fieldOfView;\n        float4x4 cameraProjectionMatrix;\n        float4x4 inverseCameraProjectionMatrix;\n        float3 cameraPosition;\n        float aspect;\n\n        int numSubPixels;\n        float subdividedPixelSize;\n\n        float2 skyBoxPixelSize;\n        float skyBoxOffsetRadians;\n\n\n    // In define(), parameters can be given labels and default values.\n    void define()\n    \{\n        // Camera params\n        defineParam(focalLength, \"Focal Length\", 50.0f);\n        defineParam(horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(nearPlane, \"Near Plane\", 0.1f);\n        defineParam(farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n\n        // Image params\n        defineParam(formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(skyBoxOffsetAngle, \"SkyBox Offset Angle\", 0.0f);\n        defineParam(skyFormatHeight, \"SkyBox Height\", 1024);\n        defineParam(skyFormatWidth, \"SkyBox Width\", 2048);\n\n        // Ray params\n        defineParam(subdivisions, \"Pixel Subdivisions\", 0);\n        defineParam(maxRayDistance, \"Max Ray Distance\", 10000.0f);\n        defineParam(maxBounces, \"Max Bounces\", 1);\n        defineParam(hitTolerance, \"Hit Tolerance\", 0.001f);\n\n        // Shader params TODO make these surface spawn rays\n        defineParam(shadowBias, \"Shadow Bias\", 0.05f);\n        defineParam(raysPerPixel, \"Rays Per Pixel\", 1);\n        defineParam(rayOffset, \"Ray Offset\", 0.0001f);\n\n        // Scene params\n\n        // Shape Counts\n        defineParam(spheresTextureHeight, \"Spheres Texture Height\", 0);\n        defineParam(spheresTextureWidth, \"Spheres Texture Width\", 0);\n        defineParam(rectPrismsTextureHeight, \"Rectangular Prisms Texture Height\", 0);\n        defineParam(rectPrismsTextureWidth, \"Rectangular Prisms Texture Width\", 0);\n        defineParam(toriTextureHeight, \"Tori Texture Height\", 0);\n        defineParam(toriTextureWidth, \"Tori Texture Width\", 0);\n        defineParam(triangularPrismsTextureHeight, \"Triangular Prisms Texture Height\", 0);\n        defineParam(triangularPrismsTextureWidth, \"Triangular Prisms Texture Width\", 0);\n        defineParam(cylindersTextureHeight, \"Cylinders Texture Height\", 0);\n        defineParam(cylindersTextureWidth, \"Cylinders Texture Width\", 0);\n\n        // Light Counts\n        defineParam(directionalLightTextureHeight, \"Directional Light Texture Height\", 0);\n        defineParam(directionalLightTextureWidth, \"Directional Light Texture Width\", 0);\n        defineParam(pointLightTextureHeight, \"Point Light Texture Height\", 0);\n        defineParam(pointLightTextureWidth, \"Point Light Texture Width\", 0);\n    \}\n\n\n    // The init() function is run before any calls to process().\n    // Local variables can be initialized here.\n    void init()\n    \{\n        //formatWidth = formatWidth == 0 ? 1 : formatWidth;\n        //focalLength = focalLength == 0 ? 1 : focalLength;\n        //aspect = aspect == 0 ? 1 : aspect;\n        //horizontalAperture = horizontalAperture == 0 ? 1 : horizontalAperture;\n        //rayOffset = rayOffset == 0 ? 0.000001 : rayOffset;\n        float farMinusNear = farPlane - nearPlane;\n\n        // TODO use angles to allow -ve focal length like for latlongs\n        aspect = formatHeight / formatWidth;\n        fieldOfView = 2 * atan(1 / focalLength);\n        cameraProjectionMatrix = float4x4(\n            2 * focalLength / horizontalAperture, 0, 0, 0,\n            0, 2 * focalLength / horizontalAperture / aspect, 0, 0,\n            0, 0, -(farPlane + nearPlane) / farMinusNear, -2 * (farPlane * nearPlane) / farMinusNear,\n            0, 0, -1, 0\n        );\n        invert4x4(cameraProjectionMatrix, inverseCameraProjectionMatrix);\n        positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);\n\n        int subPixelDivisions = pow(2, abs(subdivisions));\n        subdividedPixelSize = 1.0f / (float) subPixelDivisions;\n        numSubPixels = pow(subPixelDivisions, 2);\n\n        skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);\n        skyBoxOffsetRadians = skyBoxOffsetAngle * PI / 180.0f;\n    \}\n\n    /**\n     * Get the value of sky the ray would hit at infinite distance\n     */\n    float4 readSkyValue(float3 rayDirection)\n    \{\n        float rayAnglePhi = fmod(acos(rayDirection.y), PI);\n        rayAnglePhi += PI * (rayAnglePhi < 0);\n\n        float rayAngleTheta = fmod(\n            atan2(rayDirection.z, rayDirection.x) + skyBoxOffsetRadians,\n            2 * PI\n        );\n        rayAngleTheta += 2 * PI * (rayAngleTheta < 0);\n\n        SampleType(skyBox) skyBoxPixel = bilinear(\n            skyBox,\n            skyBoxPixelSize.x * rayAngleTheta,\n            skyFormatHeight - (skyBoxPixelSize.y * rayAnglePhi)\n        );\n\n        return skyBoxPixel;\n    \}\n\n\n    /**\n     * Generate a ray out of the camera\n     */\n    void createCameraRay(float2 pixelLocation, float3 &rayOrigin, float3 &rayDirection)\n    \{\n        float2 uvPosition = float2(\n            2 * pixelLocation.x / formatWidth - 1,\n            2 * pixelLocation.y / formatHeight - 1\n        );\n        rayOrigin = cameraPosition;\n        float4 direction;\n        matmul(\n            inverseCameraProjectionMatrix,\n            float4(uvPosition.x, uvPosition.y, 0, 1),\n            direction\n        );\n        matmul(\n            cameraWorldMatrix,\n            float4(direction.x, direction.y, direction.z, 0),\n            direction\n        );\n        rayDirection = normalize(float3(direction.x, direction.y, direction.z));\n    \}\n\n\n    //\n    // Render Engine\n    //\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     */\n    float getMinDistanceToObjectInScene(float3 rayOrigin)\n    \{\n        float distance = maxRayDistance;\n\n        for (int i=0; i < spheresTextureHeight; i++)\n        \{\n            for (int j=0; j < spheresTextureWidth; j++)\n            \{\n                SampleType(spheres) sphere = spheres(j, i);\n                distance = min(\n                    distance,\n                    distanceToSphere(\n                        rayOrigin,\n                        float3(sphere.x, sphere.y, sphere.z),\n                        sphere.w\n                    )\n                );\n            \}\n        \}\n\n        for (int i=0; i < rectPrismsTextureHeight; i++)\n        \{\n            for (int j=0; j < rectPrismsTextureWidth; j++)\n            \{\n                SampleType(rectPrisms) rectPrism = rectPrisms(j, i);\n                distance = min(\n                    distance,\n                    distanceToRectangularPrism(\n                        rayOrigin,\n                        float3(rectPrism.x, rectPrism.y, rectPrism.z),\n                        float3(rectPrism.w, rectPrism.w / 2.0f, rectPrism.w / 3.0f)\n                    )\n                );\n            \}\n        \}\n\n        for (int i=0; i < toriTextureHeight; i++)\n        \{\n            for (int j=0; j < toriTextureWidth; j++)\n            \{\n                SampleType(tori) torus = tori(j, i);\n                distance = min(\n                    distance,\n                    distanceToTorus(\n                        rayOrigin,\n                        float3(torus.x, torus.y, torus.z),\n                        float2(torus.w / 2.0f, torus.w)\n                    )\n                );\n            \}\n        \}\n\n        for (int i=0; i < triangularPrismsTextureHeight; i++)\n        \{\n            for (int j=0; j < triangularPrismsTextureWidth; j++)\n            \{\n                SampleType(triangularPrisms) triangularPrism = triangularPrisms(j, i);\n                distance = min(\n                    distance,\n                    distanceToTriangularPrism(\n                        rayOrigin,\n                        float3(triangularPrism.x, triangularPrism.y, triangularPrism.z),\n                        float2(triangularPrism.w, triangularPrism.w / 2.0f)\n                    )\n                );\n            \}\n        \}\n\n        for (int i=0; i < cylindersTextureHeight; i++)\n        \{\n            for (int j=0; j < cylindersTextureWidth; j++)\n            \{\n                SampleType(cylinders) cylinder = cylinders(j, i);\n                distance = min(\n                    distance,\n                    distanceToCylinder(\n                        rayOrigin,\n                        float3(cylinder.x, cylinder.y, cylinder.z),\n                        float2(cylinder.w / 2.0f, cylinder.w)\n                    )\n                );\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     *\n     * @returns: The normalized surface normal\n     */\n    float3 estimateSurfaceNormal(const float3 &point) \{\n        return normalize(float3(\n            getMinDistanceToObjectInScene(float3(\n                point.x + hitTolerance,\n                point.y,\n                point.z\n            )) - getMinDistanceToObjectInScene(float3(\n                point.x - hitTolerance,\n                point.y,\n                point.z\n            )),\n            getMinDistanceToObjectInScene(float3(\n                point.x,\n                point.y + hitTolerance,\n                point.z\n            )) - getMinDistanceToObjectInScene(float3(\n                point.x,\n                point.y - hitTolerance,\n                point.z\n            )),\n            getMinDistanceToObjectInScene(float3(\n                point.x,\n                point.y,\n                point.z+hitTolerance\n            )) - getMinDistanceToObjectInScene(float3(\n                point.x,\n                point.y,\n                point.z - hitTolerance\n            ))\n        ));\n    \}\n\n\n    float computeLightIntensityOnSurface(const float3 &surfacePoint, const float3 &surfaceNormal)\n    \{\n        float lightIntensity = 0;\n\n        for (int i=0; i < directionalLightTextureHeight; i++)\n        \{\n            for (int j=0; j < directionalLightTextureWidth; j++)\n            \{\n                SampleType(directionalLights) directionalLight = directionalLights(j, i);\n\n                lightIntensity += saturate(\n                    dot(\n                        surfaceNormal,\n                        -normalize(float3(directionalLight.x, directionalLight.y, directionalLight.z))\n                    ) * directionalLight.w\n                );\n            \}\n        \}\n\n        for (int i=0; i < pointLightTextureHeight; i++)\n        \{\n            for (int j=0; j < pointLightTextureWidth; j++)\n            \{\n                SampleType(pointLights) pointLight = pointLights(j, i);\n\n                lightIntensity += saturate(\n                    dot(\n                        surfaceNormal,\n                        normalize(float3(pointLight.x, pointLight.y, pointLight.z) - surfacePoint)\n                    ) * pointLight.w\n                );\n            \}\n        \}\n\n        return saturate(lightIntensity);\n    \}\n\n\n    /**\n     * March a ray through the scene\n     */\n    void marchRay(\n            const float3 &rayOrigin,\n            const float3 &rayDirection,\n            int numRays,\n            int numBounces,\n            float rayDistance,\n            float4 &resultColour\n        )\n    \{\n        float3 origin = rayOrigin;\n        float3 direction = rayDirection;\n\n        float3 rayNormal = normalize(float3(direction.y, -direction.x, 0));\n        float radialOffset = rayOffset;\n        float angularOffset = 0;\n\n\n        for (int rayNum=0; rayNum < numRays; rayNum++)\n        \{\n            int bounces = 0;\n            float distanceTravelled = 0;\n\n            while (distanceTravelled < rayDistance)\n            \{\n                float stepDistance = getMinDistanceToObjectInScene(origin);\n                distanceTravelled += stepDistance;\n\n                if (stepDistance <= hitTolerance)\n                \{\n                    bounces++;\n\n                    float3 pointOnSurface = origin + rayDirection * stepDistance;\n                    float3 surfaceNormal = estimateSurfaceNormal(\n                        pointOnSurface - rayDirection * hitTolerance\n                    );\n\n                    float lightIntensity = computeLightIntensityOnSurface(\n                        origin,\n                        surfaceNormal\n                    );\n\n                    resultColour += float4(lightIntensity, 0, 0, 1);\n\n                    break;\n                    // if (bounces == numBounces)\n                    // \{\n                    //    break;\n                    //\}\n                \}\n\n                origin += direction * stepDistance;\n            \}\n\n            // If the ray missed, grab the skybox colour\n            resultColour += bounces == 0 ? readSkyValue(direction) : float4(0, 0, 0, 0);\n\n            // Update the ray direction to send a scattered cluster of rays\n            // TODO these shouldnt diverge more and more the more rays you add\n            origin = rayOrigin;\n\n            rayNormal = (\n                cos(angularOffset)\n                * rayNormal\n                + sin(angularOffset)\n                * cross(direction, rayNormal)\n            );\n\n            direction = radialOffset * rayNormal + rayDirection;\n\n            angularOffset = 90 * (1 - 0.5 * ((rayNum % 4) == 0));\n            radialOffset += rayOffset * ((rayNum % 8) == 0);\n        \}\n\n        resultColour /= raysPerPixel; // Normalize the output after multiple rays\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value\n     */\n    void process(int2 pos)\n    \{\n        // Read the input to pass through\n        float4 resultPixel(0, 0, 0, 0);\n\n        float2 pixelLocation = float2((float) pos.x, (float) pos.y);\n\n        float2 pixelOffset;\n        for (\n            pixelOffset.x = 0.0f;\n            pixelOffset.x < 1.0f;\n            pixelOffset.x += subdividedPixelSize\n        ) \{\n            for (\n                pixelOffset.y = 0.0f;\n                pixelOffset.y < 1.0f;\n                pixelOffset.y += subdividedPixelSize\n            ) \{\n                // Generate a ray from the camera\n                float3 rayOrigin;\n                float3 rayDirection;\n                createCameraRay(pixelLocation + pixelOffset, rayOrigin, rayDirection);\n\n                marchRay(\n                    rayOrigin,\n                    rayDirection,\n                    raysPerPixel,\n                    maxBounces,\n                    maxRayDistance,\n                    resultPixel\n                );\n            \}\n        \}\n\n        dst() = resultPixel / numSubPixels;\n    \}\n\};\n"
-  rebuild ""
-  "RayMarchKernel_Focal Length" {{parent.DummyCam.focal}}
-  "RayMarchKernel_Horizontal Aperture" {{parent.DummyCam.haperture}}
-  "RayMarchKernel_Near Plane" {{parent.DummyCam.near}}
-  "RayMarchKernel_Far Plane" {{parent.DummyCam.far}}
-  "RayMarchKernel_Camera World Matrix" {
-      {{parent.DummyCam.world_matrix.0} {parent.DummyCam.world_matrix.1} {parent.DummyCam.world_matrix.2} {parent.DummyCam.world_matrix.3}}
-      {{parent.DummyCam.world_matrix.4} {parent.DummyCam.world_matrix.5} {parent.DummyCam.world_matrix.6} {parent.DummyCam.world_matrix.7}}
-      {{parent.DummyCam.world_matrix.8} {parent.DummyCam.world_matrix.9} {parent.DummyCam.world_matrix.10} {parent.DummyCam.world_matrix.11}}
-      {{parent.DummyCam.world_matrix.12} {parent.DummyCam.world_matrix.13} {parent.DummyCam.world_matrix.14} {parent.DummyCam.world_matrix.15}}
-    }
-  "RayMarchKernel_Screen Width" {{input0.width}}
-  "RayMarchKernel_Screen Height" {{input0.height}}
-  "RayMarchKernel_SkyBox Offset Angle" 50
-  "RayMarchKernel_SkyBox Width" {{input1.width}}
-  "RayMarchKernel_SkyBox Height" {{input1.height}}
-  "RayMarchKernel_Pixel Subdivisions" 1
-  "RayMarchKernel_Max Bounces" 3
-  "RayMarchKernel_Max Ray Distance" 100
-  "RayMarchKernel_Hit Tolerance" 0.0001
-  "RayMarchKernel_Spheres Texture Width" {{input2.width}}
-  "RayMarchKernel_Spheres Texture Height" {{input2.height}}
-  "RayMarchKernel_Rectangular Prisms Texture Width" {{input3.width}}
-  "RayMarchKernel_Rectangular Prisms Texture Height" {{input3.height}}
-  "RayMarchKernel_Tori Texture Height" {{input4.height}}
-  "RayMarchKernel_Tori Texture Width" {{input4.width}}
-  "RayMarchKernel_Triangular Prisms Texture Height" {{input5.height}}
-  "RayMarchKernel_Triangular Prisms Texture Width" {{input5.width}}
-  "RayMarchKernel_Cylinders Texture Height" {{input6.height}}
-  "RayMarchKernel_Cylinders Texture Width" {{input6.width}}
-  "RayMarchKernel_Point Light Texture Height" {{input7.height}}
-  "RayMarchKernel_Point Light Texture Width" {{input7.width}}
-  "RayMarchKernel_Directional Light Texture Height" {{input8.height}}
-  "RayMarchKernel_Directional Light Texture Width" {{input8.width}}
-  format "2048 1024 0 0 2048 1024 1 2K_LatLong"
-  rebuild_finalise ""
-  name BlinkScript1
-  xpos 1792
-  ypos 294
- }
- Output {
-  name Output1
-  xpos 1792
-  ypos 625
- }
 end_group
 Viewer {
  frame_range 1-100
  name Viewer1
  xpos 15693
- ypos 1456
+ ypos 1430
 }
