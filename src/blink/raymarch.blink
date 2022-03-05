@@ -66,7 +66,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float hitTolerance;
 
         // Shader params
-        float shadowBias;
+        float intensityInShadow;
         int raysPerPixel;
         float rayOffset;
 
@@ -128,7 +128,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(hitTolerance, "Hit Tolerance", 0.001f);
 
         // Shader params TODO make these surface spawn rays
-        defineParam(shadowBias, "Shadow Bias", 0.05f);
+        defineParam(intensityInShadow, "Intensity in Shadows", 1.0f);
         defineParam(raysPerPixel, "Rays Per Pixel", 1);
         defineParam(rayOffset, "Ray Offset", 0.0001f);
 
@@ -665,76 +665,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    float computeShadow(float3 rayOrigin, float3 rayDirection, float dstToShadePoint) {
-        float rayDst = 0;
-        int marchSteps = 0;
-        float shadowIntensity = .2;
-        float brightness = 1;
-
-        while (rayDst < dstToShadePoint) {
-            marchSteps ++;
-            float dst = getMinDistanceToObjectInScene(rayOrigin);
-
-            if (dst <= hitTolerance) {
-                return shadowIntensity;
-            }
-
-            brightness = min(brightness, dst * 200);
-
-            rayOrigin += rayDirection * dst;
-            rayDst += dst;
-        }
-
-        return shadowIntensity + (1 - shadowIntensity) * brightness;
-    }
-
-
-    float lightIntensityOnSurface(
-            const float3 &pointOnSurface,
-            const float3 &surfaceNormal,
-            const int lightType,
-            const float3 light,
-            const float intensity)
-    {
-        float3 offsetPos = pointOnSurface + surfaceNormal * shadowBias;
-
-        float distanceToLight;
-        float3 lightDirection;
-        float3 shadowOffsetLightDirection;
-        if (lightType == 0)
-        {
-            // directional
-            lightDirection = -light;
-            shadowOffsetLightDirection = lightDirection;
-
-            distanceToLight = maxRayDistance;
-        }
-        else
-        {
-            // point
-            lightDirection = light - pointOnSurface;
-            shadowOffsetLightDirection = light - offsetPos;
-
-            distanceToLight = length(shadowOffsetLightDirection);
-        }
-
-        float lightIntensity = saturate(
-            dot(surfaceNormal, normalize(lightDirection)) * intensity
-        );
-
-        float shadow = computeShadow(
-            offsetPos,
-            normalize(shadowOffsetLightDirection),
-            distanceToLight
-        );
-
-        return lightIntensity * shadow;
-    }
-
-
     float computeLightIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)
     {
-        float lightIntensity = 0;
+        float2 lightIntensity = float2(0, 0);
 
         for (int i=0; i < lightTextureHeight; i++)
         {
@@ -753,7 +686,81 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             }
         }
 
-        return saturate(lightIntensity);
+        return saturate(lightIntensity.x * lightIntensity.y);
+    }
+
+
+    float computeShadow(float3 rayOrigin, float3 rayDirection, float distanceToShadePoint)
+    {
+        float distanceTravelled = 0;
+        while (distanceTravelled < distanceToShadePoint)
+        {
+            float stepDistance = getMinDistanceToObjectInScene(rayOrigin);
+
+            if (stepDistance < hitTolerance)
+            {
+                return intensityInShadow;
+            }
+
+            rayOrigin += rayDirection * stepDistance;
+            distanceTravelled += stepDistance;
+        }
+
+        return 1 - intensityInShadow;
+    }
+
+
+    static void offsetPoint(
+            const float3 &point,
+            const float3 &direction,
+            const float offset,
+            float3 &offsetPoint)
+    {
+        offsetPoint = offset * direction + point;
+    }
+
+
+    float2 lightIntensityOnSurface(
+            const float3 &pointOnSurface,
+            const float3 &surfaceNormal,
+            const int lightType,
+            const float3 light,
+            const float intensity)
+    {
+        float3 surfaceOffset;
+
+        float distanceToLight;
+        float3 lightDirection;
+        float3 shadowOffsetLightDirection;
+        if (lightType == 0)
+        {
+            // directional
+            lightDirection = -light;
+            offsetPoint(pointOnSurface, lightDirection, hitTolerance, surfaceOffset);
+            shadowOffsetLightDirection = lightDirection;
+
+            distanceToLight = maxRayDistance;
+        }
+        else
+        {
+            // point
+            lightDirection = light - pointOnSurface;
+            offsetPoint(pointOnSurface, lightDirection, hitTolerance, surfaceOffset);
+            shadowOffsetLightDirection = light - surfaceOffset;
+
+            distanceToLight = length(shadowOffsetLightDirection);
+        }
+
+        surfaceOffset += surfaceNormal * hitTolerance;
+
+        return float2(
+            saturate(dot(surfaceNormal, normalize(lightDirection)) * intensity),
+            computeShadow(
+                surfaceOffset,
+                normalize(shadowOffsetLightDirection),
+                distanceToLight
+            )
+        );
     }
 
 
@@ -787,7 +794,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 float stepDistance = getMinDistanceToObjectInScene(origin);
                 distanceTravelled += stepDistance;
 
-                if (stepDistance <= hitTolerance)
+                if (stepDistance < hitTolerance)
                 {
                     bounces++;
 
@@ -842,10 +849,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      */
     void process(int2 pos)
     {
-        // Read the input to pass through
         float4 resultPixel(0, 0, 0, 0);
 
-        float2 pixelLocation = float2((float) pos.x, (float) pos.y);
+        float2 pixelLocation = float2(pos.x, pos.y);
 
         float2 pixelOffset;
         for (
