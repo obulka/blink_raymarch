@@ -14,12 +14,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
     // the shape positons.xyz
     Image<eRead, eAccessRandom, eEdgeNone> positions;
+
     // the shape rotations (TODO)
     Image<eRead, eAccessRandom, eEdgeNone> rotations;
+
     // the shape scales.xyz (some shapes may not use all channels)
     Image<eRead, eAccessRandom, eEdgeNone> scales;
+
     // the shape colours.xyz
     Image<eRead, eAccessRandom, eEdgeNone> colours;
+
 
     // shape type.x, operation.y, numChildren.z, blend strength.w
     // x in [0, 1) sphere
@@ -28,11 +32,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // x in [3, 4) triangular prism
     // x in [4, inf) torus
     Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;
+
     // reflection.x, transmission.y, emission.z, roughness.w (TODO)
     Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;
 
+
     // the input directional lights direction.xyz intensity.w
     Image<eRead, eAccessRandom, eEdgeNone> lights;
+
     // colour.xyz, type.w
     // w in [0, 1) = directional, [1, inf) = point
     Image<eRead, eAccessRandom, eEdgeNone> lightProperties;
@@ -123,7 +130,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Ray params
         defineParam(subdivisions, "Pixel Subdivisions", 0);
-        defineParam(maxRayDistance, "Max Ray Distance", 10000.0f);
+        defineParam(maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(maxBounces, "Max Bounces", 1);
         defineParam(hitTolerance, "Hit Tolerance", 0.001f);
 
@@ -153,6 +160,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         //aspect = aspect == 0 ? 1 : aspect;
         //horizontalAperture = horizontalAperture == 0 ? 1 : horizontalAperture;
         //rayOffset = rayOffset == 0 ? 0.000001 : rayOffset;
+
         float farMinusNear = farPlane - nearPlane;
 
         // TODO use angles to allow -ve focal length like for latlongs
@@ -593,7 +601,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     /**
      * Compute the minimum distance to an object in the scene
      */
-    float getMinDistanceToObjectInScene(const float3 rayOrigin, float4 &colourHit)
+    float getMinDistanceToObjectInScene(
+            const float3 rayOrigin,
+            float4 &colour,
+            float4 &surface)
     {
         float distance = maxRayDistance;
 
@@ -604,9 +615,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 SampleType(positions) position = positions(j, i);
                 //SampleType(spheres) rotation = spheres(j, i);
                 SampleType(scales) scale = scales(j, i);
-                SampleType(colours) colour = colours(j, i);
                 SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);
-                SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);
 
                 float nextDistance = distanceToObject(
                     rayOrigin,
@@ -618,7 +627,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 if (nextDistance < distance)
                 {
                     distance = nextDistance;
-                    colourHit = colour;
+
+                    SampleType(colours) surfaceColour = colours(j, i);
+                    SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);
+
+                    colour = float4(surfaceColour);
+                    surface = float4(surfaceProperty);
                 }
             }
         }
@@ -637,6 +651,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float3 estimateSurfaceNormal(const float3 &point) {
         float4 colour;
+        float4 surface;
         return normalize(
             float3(
                 getMinDistanceToObjectInScene(
@@ -645,14 +660,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         point.y,
                         point.z
                     ),
-                    colour
+                    colour,
+                    surface
                 ) - getMinDistanceToObjectInScene(
                     float3(
                         point.x - hitTolerance,
                         point.y,
                         point.z
                     ),
-                    colour
+                    colour,
+                    surface
                 ),
                 getMinDistanceToObjectInScene(
                     float3(
@@ -660,14 +677,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         point.y + hitTolerance,
                         point.z
                     ),
-                    colour
+                    colour,
+                    surface
                 ) - getMinDistanceToObjectInScene(
                     float3(
                         point.x,
                         point.y - hitTolerance,
                         point.z
                     ),
-                    colour
+                    colour,
+                    surface
                 ),
                 getMinDistanceToObjectInScene(
                     float3(
@@ -675,14 +694,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         point.y,
                         point.z+hitTolerance
                     ),
-                    colour
+                    colour,
+                    surface
                 ) - getMinDistanceToObjectInScene(
                     float3(
                         point.x,
                         point.y,
                         point.z - hitTolerance
                     ),
-                    colour
+                    colour,
+                    surface
                 )
         ));
     }
@@ -692,9 +713,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     {
         float distanceTravelled = 0;
         float4 colour;
+        float4 surface;
         while (distanceTravelled < distanceToShadePoint)
         {
-            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour);
+            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
 
             if (stepDistance < hitTolerance)
             {
@@ -709,13 +731,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    static void offsetPoint(
+    static float3 offsetPoint(
             const float3 &point,
             const float3 &direction,
-            const float offset,
-            float3 &offsetPoint)
+            const float offset)
     {
-        offsetPoint = offset * direction + point;
+        return offset * direction + point;
     }
 
 
@@ -729,11 +750,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float &distanceToLight)
     {
         lightDirection = -light;
-        offsetPoint(
+        surfaceOffset = offsetPoint(
             pointOnSurface,
             lightDirection + surfaceNormal,
-            hitTolerance,
-            surfaceOffset
+            hitTolerance
         );
         shadowOffsetLightDirection = lightDirection;
 
@@ -751,11 +771,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float &distanceToLight)
     {
         lightDirection = light - pointOnSurface;
-        offsetPoint(
+        surfaceOffset = offsetPoint(
             pointOnSurface,
             lightDirection + surfaceNormal,
-            hitTolerance,
-            surfaceOffset
+            hitTolerance
         );
         shadowOffsetLightDirection = light - surfaceOffset;
 
@@ -813,6 +832,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Get the intensity of the light on the surface of an object
+     *
+     *
+     */
     float computeLightIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)
     {
         float2 lightIntensity = float2(0, 0);
@@ -838,19 +862,93 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    float3 reflectRayOffSurface(
+        const float3 &incidentRayDirection,
+        const float3 &surfaceNormalDirection)
+    {
+        return (
+            incidentRayDirection
+            - 2 * dot(incidentRayDirection, surfaceNormalDirection) * surfaceNormalDirection
+        );
+    }
+
     /**
      * March a ray through the scene
+     *
+     * @returns: The ray colour
      */
-    void marchRay(
+    float4 marchRay(
             const float3 &rayOrigin,
             const float3 &rayDirection,
-            int numRays,
-            int numBounces,
-            float rayDistance,
-            float4 &resultColour
-        )
+            const int numBounces,
+            const float rayDistance)
     {
         float3 origin = rayOrigin;
+        float3 direction = rayDirection;
+        float4 colour;
+        float4 surface;
+
+        int bounces = 0;
+        float distanceTravelled = 0;
+
+        float lightIntensity = 1;
+
+        float4 rayColour = float4(0, 0, 0, 0);
+
+        while (distanceTravelled < rayDistance)
+        {
+            float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);
+            distanceTravelled += stepDistance;
+            origin += direction * stepDistance;
+
+            if (stepDistance < hitTolerance)
+            {
+                bounces++;
+
+                float3 surfaceNormal = estimateSurfaceNormal(
+                    origin - direction * hitTolerance
+                );
+
+                lightIntensity = computeLightIntensityOnSurface(
+                    origin,
+                    surfaceNormal
+                );
+
+                if (bounces >= numBounces)
+                {
+                    return (rayColour + lightIntensity * colour) / numBounces;
+                }
+
+                direction = reflectRayOffSurface(
+                    direction,
+                    surfaceNormal
+                );
+                origin = offsetPoint(
+                    origin,
+                    direction + surfaceNormal,
+                    hitTolerance
+                );
+
+                rayColour += lightIntensity * (colour + surface.x * rayColour) / 2.0f;
+            }
+        }
+
+        // If the ray missed, grab the skybox colour
+        return bounces == 0 ? readSkyValue(direction) : rayColour;
+    }
+
+
+    /**
+     * March rays through the scene
+     */
+    void marchRays(
+            const float3 &rayOrigin,
+            const float3 &rayDirection,
+            const int numRays,
+            const int numBounces,
+            const float rayDistance,
+            float4 &resultColour)
+    {
         float3 direction = rayDirection;
 
         float3 rayNormal = normalize(float3(direction.y, -direction.x, 0));
@@ -861,47 +959,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         for (int rayNum=0; rayNum < numRays; rayNum++)
         {
-            int bounces = 0;
-            float distanceTravelled = 0;
-
-            while (distanceTravelled < rayDistance)
-            {
-                float stepDistance = getMinDistanceToObjectInScene(origin, colour);
-                distanceTravelled += stepDistance;
-
-                if (stepDistance < hitTolerance)
-                {
-                    bounces++;
-
-                    float3 pointOnSurface = origin + rayDirection * stepDistance;
-                    float3 surfaceNormal = estimateSurfaceNormal(
-                        pointOnSurface - rayDirection * hitTolerance
-                    );
-
-                    float lightIntensity = computeLightIntensityOnSurface(
-                        pointOnSurface,
-                        surfaceNormal
-                    );
-
-                    resultColour += lightIntensity * colour;
-
-                    break;
-                    // if (bounces == numBounces)
-                    // {
-                    //    break;
-                    //}
-                }
-
-                origin += direction * stepDistance;
-            }
-
-            // If the ray missed, grab the skybox colour
-            resultColour += bounces == 0 ? readSkyValue(direction) : float4(0, 0, 0, 0);
+            resultColour += marchRay(
+                rayOrigin,
+                direction,
+                numBounces,
+                rayDistance
+            );
 
             // Update the ray direction to send a scattered cluster of rays
             // TODO these shouldnt diverge more and more the more rays you add
-            origin = rayOrigin;
-
             rayNormal = (
                 cos(angularOffset)
                 * rayNormal
@@ -915,7 +981,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             radialOffset += rayOffset * ((rayNum % 8) == 0);
         }
 
-        resultColour /= raysPerPixel; // Normalize the output after multiple rays
+        // Normalize the output after multiple rays
+        resultColour /= numRays;
     }
 
 
@@ -944,7 +1011,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 float3 rayDirection;
                 createCameraRay(pixelLocation + pixelOffset, rayOrigin, rayDirection);
 
-                marchRay(
+                marchRays(
                     rayOrigin,
                     rayDirection,
                     raysPerPixel,
