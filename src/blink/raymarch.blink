@@ -593,7 +593,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     /**
      * Compute the minimum distance to an object in the scene
      */
-    float getMinDistanceToObjectInScene(float3 rayOrigin)
+    float getMinDistanceToObjectInScene(const float3 rayOrigin, float4 &colourHit)
     {
         float distance = maxRayDistance;
 
@@ -606,17 +606,20 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 SampleType(scales) scale = scales(j, i);
                 SampleType(colours) colour = colours(j, i);
                 SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);
-                //SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);
+                SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);
 
-                distance = min(
-                    distance,
-                    distanceToObject(
-                        rayOrigin,
-                        (int) shapeProperty.x,
-                        float3(position.x, position.y, position.z),
-                        float3(scale.x, scale.y, scale.z)
-                    )
+                float nextDistance = distanceToObject(
+                    rayOrigin,
+                    (int) shapeProperty.x,
+                    float3(position.x, position.y, position.z),
+                    float3(scale.x, scale.y, scale.z)
                 );
+
+                if (nextDistance < distance)
+                {
+                    distance = nextDistance;
+                    colourHit = colour;
+                }
             }
         }
 
@@ -633,34 +636,54 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      * @returns: The normalized surface normal
      */
     float3 estimateSurfaceNormal(const float3 &point) {
-        return normalize(float3(
-            getMinDistanceToObjectInScene(float3(
-                point.x + hitTolerance,
-                point.y,
-                point.z
-            )) - getMinDistanceToObjectInScene(float3(
-                point.x - hitTolerance,
-                point.y,
-                point.z
-            )),
-            getMinDistanceToObjectInScene(float3(
-                point.x,
-                point.y + hitTolerance,
-                point.z
-            )) - getMinDistanceToObjectInScene(float3(
-                point.x,
-                point.y - hitTolerance,
-                point.z
-            )),
-            getMinDistanceToObjectInScene(float3(
-                point.x,
-                point.y,
-                point.z+hitTolerance
-            )) - getMinDistanceToObjectInScene(float3(
-                point.x,
-                point.y,
-                point.z - hitTolerance
-            ))
+        float4 colour;
+        return normalize(
+            float3(
+                getMinDistanceToObjectInScene(
+                    float3(
+                        point.x + hitTolerance,
+                        point.y,
+                        point.z
+                    ),
+                    colour
+                ) - getMinDistanceToObjectInScene(
+                    float3(
+                        point.x - hitTolerance,
+                        point.y,
+                        point.z
+                    ),
+                    colour
+                ),
+                getMinDistanceToObjectInScene(
+                    float3(
+                        point.x,
+                        point.y + hitTolerance,
+                        point.z
+                    ),
+                    colour
+                ) - getMinDistanceToObjectInScene(
+                    float3(
+                        point.x,
+                        point.y - hitTolerance,
+                        point.z
+                    ),
+                    colour
+                ),
+                getMinDistanceToObjectInScene(
+                    float3(
+                        point.x,
+                        point.y,
+                        point.z+hitTolerance
+                    ),
+                    colour
+                ) - getMinDistanceToObjectInScene(
+                    float3(
+                        point.x,
+                        point.y,
+                        point.z - hitTolerance
+                    ),
+                    colour
+                )
         ));
     }
 
@@ -668,9 +691,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float computeShadow(float3 rayOrigin, float3 rayDirection, float distanceToShadePoint)
     {
         float distanceTravelled = 0;
+        float4 colour;
         while (distanceTravelled < distanceToShadePoint)
         {
-            float stepDistance = getMinDistanceToObjectInScene(rayOrigin);
+            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour);
 
             if (stepDistance < hitTolerance)
             {
@@ -833,6 +857,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float radialOffset = rayOffset;
         float angularOffset = 0;
 
+        float4 colour;
 
         for (int rayNum=0; rayNum < numRays; rayNum++)
         {
@@ -841,7 +866,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             while (distanceTravelled < rayDistance)
             {
-                float stepDistance = getMinDistanceToObjectInScene(origin);
+                float stepDistance = getMinDistanceToObjectInScene(origin, colour);
                 distanceTravelled += stepDistance;
 
                 if (stepDistance < hitTolerance)
@@ -858,7 +883,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         surfaceNormal
                     );
 
-                    resultColour += float4(lightIntensity, lightIntensity / 2, lightIntensity, 1);
+                    resultColour += lightIntensity * colour;
 
                     break;
                     // if (bounces == numBounces)
