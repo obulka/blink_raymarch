@@ -95,6 +95,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float3 cameraPosition;
         float aspect;
 
+        int bouncesPerRay;
+
         int numSubPixels;
         float subdividedPixelSize;
 
@@ -160,6 +162,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         //aspect = aspect == 0 ? 1 : aspect;
         //horizontalAperture = horizontalAperture == 0 ? 1 : horizontalAperture;
         //rayOffset = rayOffset == 0 ? 0.000001 : rayOffset;
+
+        bouncesPerRay = maxBounces <= 0 ? 1 : maxBounces;
 
         float farMinusNear = farPlane - nearPlane;
 
@@ -727,7 +731,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             distanceTravelled += stepDistance;
         }
 
-        return 1 - intensityInShadow;
+        return 1;
     }
 
 
@@ -895,6 +899,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         float4 rayColour = float4(0, 0, 0, 0);
 
+        float4 lastHitSurface = float4(0, 0, 0, 1);
+
         while (distanceTravelled < rayDistance)
         {
             float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);
@@ -914,10 +920,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     surfaceNormal
                 );
 
+                rayColour += (1 - surface.x) * lightIntensity * colour;
+
                 if (bounces >= numBounces)
                 {
-                    return (rayColour + lightIntensity * colour) / numBounces;
+                    return rayColour / (float) numBounces;
                 }
+
+                lastHitSurface = surface;
 
                 direction = reflectRayOffSurface(
                     direction,
@@ -928,13 +938,19 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     direction + surfaceNormal,
                     hitTolerance
                 );
-
-                rayColour += lightIntensity * (colour + surface.x * rayColour) / 2.0f;
             }
         }
 
         // If the ray missed, grab the skybox colour
-        return bounces == 0 ? readSkyValue(direction) : rayColour;
+        float4 skyColour = readSkyValue(direction);
+        if (bounces <= 0)
+        {
+            return skyColour;
+        }
+
+        rayColour += lightIntensity * lastHitSurface.x * skyColour;
+
+        return rayColour / (float) (bounces + 1);
     }
 
 
@@ -1015,7 +1031,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     rayOrigin,
                     rayDirection,
                     raysPerPixel,
-                    maxBounces,
+                    bouncesPerRay,
                     maxRayDistance,
                     resultPixel
                 );

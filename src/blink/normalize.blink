@@ -1,0 +1,18 @@
+
+kernel NormalizationKernel : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessPoint, eEdgeNone> src; // the input image
+  Image<eWrite> dst; // the output image
+
+  void process() {
+    // Read the input image
+    SampleType(src) input = src();
+
+    // Isolate the RGB components
+    float3 dstRGBPixel = float3(input.x, input.y, input.z);
+    dstRGBPixel = dstRGBPixel / length(dstRGBPixel);
+
+    // Write the result to the output image
+    dst() = float4(dstRGBPixel.x, dstRGBPixel.y, dstRGBPixel.z, input.w);
+  }
+};
