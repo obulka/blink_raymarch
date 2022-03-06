@@ -899,9 +899,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         float4 rayColour = float4(0, 0, 0, 0);
 
-        float4 lastHitSurface = float4(0, 0, 0, 1);
+        float rayStrength = 1;
 
-        while (distanceTravelled < rayDistance)
+        while (distanceTravelled < rayDistance && rayStrength > 0)
         {
             float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);
             distanceTravelled += stepDistance;
@@ -920,14 +920,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     surfaceNormal
                 );
 
-                rayColour += (1 - surface.x) * lightIntensity * colour;
+
+                rayColour += rayStrength * (1 - surface.x) * lightIntensity * colour;
 
                 if (bounces >= numBounces)
                 {
                     return rayColour / (float) numBounces;
                 }
 
-                lastHitSurface = surface;
+                rayStrength *= surface.x;
 
                 direction = reflectRayOffSurface(
                     direction,
@@ -948,7 +949,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             return skyColour;
         }
 
-        rayColour += lightIntensity * lastHitSurface.x * skyColour;
+        rayColour += rayStrength * lightIntensity * skyColour;
 
         return rayColour / (float) (bounces + 1);
     }
