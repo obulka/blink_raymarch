@@ -219,27 +219,27 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     /**
      * Compute the signed distance from a point to a sphere
      *
-     * @arg distanceTo: The point to get the distance to from the object
+     * @arg position: The point to get the distance to from the object
      * @arg centre: The object centre
      * @arg radius: The radius of the sphere
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToSphere(float3 distanceTo, float3 centre, float radius) {
-        return length(centre - distanceTo) - radius;
+    float distanceToSphere(float3 position, float3 centre, float radius) {
+        return length(centre - position) - radius;
     }
 
     /**
      * Compute the signed distance from a point to a rectangular prism
      *
-     * @arg distanceTo: The point to get the distance to from the object
+     * @arg position: The point to get the distance to from the object
      * @arg centre: The object centre
      * @arg size: The length, width, and depth of the prism
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToRectangularPrism(float3 distanceTo, float3 centre, float3 size) {
-        float3 boundingSphereVector = fabs(distanceTo - centre) - size;
+    float distanceToRectangularPrism(float3 position, float3 centre, float3 size) {
+        float3 boundingSphereVector = fabs(position - centre) - size;
         float ud = length(max(boundingSphereVector, float3(0, 0, 0)));
         float n = max(
             max(min(boundingSphereVector.x, 0.0f), min(boundingSphereVector.y, 0.0f)),
@@ -252,19 +252,19 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     /**
      * Compute the signed distance from a point to a torus
      *
-     * @arg distanceTo: The point to get the distance to from the object
+     * @arg position: The point to get the distance to from the object
      * @arg centre: The object centre
      * @arg radii: The inner and outer radius of the torus
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToTorus(float3 distanceTo, float3 centre, float2 radii)
+    float distanceToTorus(float3 position, float3 centre, float2 radii)
     {
-        float3 centreVector = distanceTo - centre;
+        float3 centreVector = position - centre;
         float2 centreXZ = float2(centreVector.x, centreVector.z);
         float2 inner = float2(
             length(centreXZ) - radii.y,
-            distanceTo.y - centre.y
+            position.y - centre.y
         );
 
         return length(inner) - radii.x;
@@ -273,20 +273,20 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     /**
      * Compute the signed distance from a point to a triangular prism
      *
-     * @arg distanceTo: The point to get the distance to from the object
+     * @arg position: The point to get the distance to from the object
      * @arg centre: The object centre
      * @arg size: The height and depth of the prism
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToTriangularPrism(float3 distanceTo, float3 centre, float2 size) {
-        float3 centreVector = fabs(distanceTo - centre);
+    float distanceToTriangularPrism(float3 position, float3 centre, float2 size) {
+        float3 centreVector = fabs(position - centre);
 
         return max(
             centreVector.z - size.y,
             max(
-                centreVector.x * 0.866025f + distanceTo.y * 0.5f,
-                -distanceTo.y
+                centreVector.x * 0.866025f + position.y * 0.5f,
+                -position.y
             ) - size.x * 0.5f
         );
     }
@@ -294,14 +294,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     /**
      * Compute the signed distance from a point to a cylinder
      *
-     * @arg distanceTo: The point to get the distance to from the object
+     * @arg position: The point to get the distance to from the object
      * @arg centre: The object centre
      * @arg size: The height and radius of the cylinder
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToCylinder(float3 distanceTo, float3 centre, float2 size) {
-        float3 centreVector = fabs(distanceTo - centre);
+    float distanceToCylinder(float3 position, float3 centre, float2 size) {
+        float3 centreVector = fabs(position - centre);
 
         float2 distanceToXZ = float2(centreVector.x, centreVector.z);
 
@@ -309,6 +309,54 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         return length(max(d, float2(0, 0))) + min(max(d.x, d.y), 0.0f);
     }
+
+
+    /**
+     * Compute the signed distance from a point to a mandelbulb
+     *
+     * @arg position: The point to get the distance to from the object
+     *
+     * @returns: The minimum distance from the point to the shape
+     */
+    float distanceToMandelbulb(float3 position, float power) {
+        return 1000;
+        /*
+        float3 z = position;
+        float dr = 1;
+        float r = 0;
+        int iterations = 0;
+
+        for (int i = 0; i < 0 ; i++) {
+            iterations = i;
+            r = length(z);
+
+            if (r > 2) {
+                break;
+            }
+
+            // convert to polar coordinates
+            float theta = acos(z.z / r);
+            float phi = atan2(z.y, z.x);
+            dr = pow(r, power - 1.0f) * power * dr + 1.0f;
+
+            // scale and rotate the point
+            float zr = pow(r, power);
+            theta = theta * power;
+            phi = phi * power;
+
+            // convert back to cartesian coordinates
+            z = zr * float3(
+                sin(theta) * cos(phi),
+                sin(phi) * sin(theta),
+                cos(theta)
+            );
+            z += position;
+        }
+
+        return 0.5f * log(r) * r / dr;
+        */
+    }
+
 
 
     //
@@ -598,7 +646,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         {
             return distanceToTriangularPrism(position, objectPosition, size);
         }
-        return distanceToTorus(position, objectPosition, size);
+        if (shapeType >= 4)
+        {
+            return distanceToTorus(position, objectPosition, size);
+        }
+
+        //size.x = ((int) size.x) == 0 ? 1.0f : size.x;
+        return distanceToMandelbulb(position, size.x);
     }
 
 
@@ -929,7 +983,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     return rayColour;
                 }
 
-                rayStrength *= surface.x;
+                rayStrength *= surface.x * lightIntensity;
 
                 direction = reflectRayOffSurface(
                     direction,
