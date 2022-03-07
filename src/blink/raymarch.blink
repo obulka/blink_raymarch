@@ -337,8 +337,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToMandelbulb(const float3 &position, const float power) {
-        float3 currentPosition = position;
+    float distanceToMandelbulb(
+            const float3 &position,
+            const float3 &centre,
+            const float power)
+    {
+        float3 centreVector = fabs(position - centre);
+        float3 currentPosition = centreVector;
         float dradius = 1;
         float radius = 0;
 
@@ -361,7 +366,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 sin(phi) * sin(theta),
                 cos(theta)
             );
-            currentPosition += position;
+            currentPosition += centreVector;
         }
 
         return 0.5f * log(radius) * radius / dradius;
@@ -660,7 +665,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             return distanceToTorus(position, objectPosition, size);
         }
 
-        return distanceToMandelbulb(position, size.x);
+        return distanceToMandelbulb(position, objectPosition, size.x);
     }
 
 
