@@ -951,6 +951,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         );
     }
 
+
+    float4 blend(const float4 &colour0, const float4 &colour1, const float weight)
+    {
+        return weight * colour0 + (1 - weight) * colour1;
+    }
+
+
     /**
      * March a ray through the scene
      *
@@ -975,11 +982,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float4 rayColour = float4(0, 0, 0, 0);
 
         float rayStrength = 1;
-        float colourStrength;
-        float hazeStrength;
 
-        float haze = 0;
-
+        int iterations = 1;
         while (distanceTravelled < rayDistance && rayStrength > 0)
         {
             float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);
@@ -999,13 +1003,20 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     surfaceNormal
                 );
 
-                hazeStrength = distanceTravelled * hazeAmount / rayDistance;
-                colourStrength = rayStrength * (1 - surface.x) * lightIntensity;
-                rayColour = hazeStrength * hazeColour + (1 - hazeStrength) * rayColour;
-                rayColour = colourStrength * colour + (1 - colourStrength) * rayColour;
+                rayColour = blend(
+                    hazeColour,
+                    rayColour,
+                    distanceTravelled * hazeAmount / rayDistance
+                );
+                rayColour = blend(
+                    colour,
+                    rayColour,
+                    rayStrength * (1 - surface.x) * lightIntensity
+                );
 
                 if (bounces >= numBounces)
                 {
+                    rayColour = blend(hazeColour, rayColour, 0.001f * iterations);
                     return rayColour;
                 }
 
@@ -1021,17 +1032,18 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     hitTolerance
                 );
             }
+            iterations++;
         }
 
         // If the ray missed, grab the skybox colour
-        float4 skyColour = (1 - hazeAmount) * readSkyValue(direction) + hazeAmount * hazeColour;
+        float4 skyColour = blend(hazeColour, readSkyValue(direction), hazeAmount);
         if (bounces == 0)
         {
-            return skyColour;
+            return blend(hazeColour, skyColour, 0.001f * iterations);
         }
 
-        colourStrength = rayStrength * lightIntensity;
-        rayColour = colourStrength * skyColour + (1 - colourStrength) * rayColour;
+        rayColour = blend(hazeColour, rayColour, 0.001f * iterations);
+        rayColour = blend(skyColour, rayColour, rayStrength * lightIntensity);
 
         return rayColour;
     }
