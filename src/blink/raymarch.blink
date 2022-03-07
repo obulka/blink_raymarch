@@ -71,6 +71,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int maxBounces;
         float maxRayDistance;
         float hitTolerance;
+        float shadowBias;
 
         // Shader params
         float intensityInShadow;
@@ -85,6 +86,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         // Light textures
         int lightTextureHeight;
         int lightTextureWidth;
+
+        float hazeAmount;
+        float4 hazeColour;
 
     local:
         // These local variables are not exposed to the user.
@@ -135,6 +139,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(maxBounces, "Max Bounces", 1);
         defineParam(hitTolerance, "Hit Tolerance", 0.001f);
+        defineParam(shadowBias, "Shadow Bias", 1.0f);
 
         // Shader params TODO make these surface spawn rays
         defineParam(intensityInShadow, "Intensity in Shadows", 1.0f);
@@ -150,6 +155,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         // Light Counts
         defineParam(lightTextureHeight, "Directional Light Texture Height", 0);
         defineParam(lightTextureWidth, "Directional Light Texture Width", 0);
+
+        defineParam(hazeAmount, "Haze Amount", 0.25f);
+        defineParam(hazeColour, "Haze Colour", float4(1, 1, 1, 1));
     }
 
 
@@ -823,7 +831,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         lightDirection = -light;
         surfaceOffset = offsetPoint(
             pointOnSurface,
-            lightDirection + surfaceNormal,
+            shadowBias * (lightDirection + surfaceNormal),
             hitTolerance
         );
         shadowOffsetLightDirection = lightDirection;
@@ -844,7 +852,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         lightDirection = light - pointOnSurface;
         surfaceOffset = offsetPoint(
             pointOnSurface,
-            lightDirection + surfaceNormal,
+            shadowBias * (lightDirection + surfaceNormal),
             hitTolerance
         );
         shadowOffsetLightDirection = light - surfaceOffset;
@@ -968,6 +976,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         float rayStrength = 1;
         float colourStrength;
+        float hazeStrength;
+
+        float haze = 0;
 
         while (distanceTravelled < rayDistance && rayStrength > 0)
         {
@@ -988,7 +999,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     surfaceNormal
                 );
 
+                hazeStrength = distanceTravelled * hazeAmount / rayDistance;
                 colourStrength = rayStrength * (1 - surface.x) * lightIntensity;
+                rayColour = hazeStrength * hazeColour + (1 - hazeStrength) * rayColour;
                 rayColour = colourStrength * colour + (1 - colourStrength) * rayColour;
 
                 if (bounces >= numBounces)
@@ -1011,7 +1024,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         // If the ray missed, grab the skybox colour
-        float4 skyColour = readSkyValue(direction);
+        float4 skyColour = (1 - hazeAmount) * readSkyValue(direction) + hazeAmount * hazeColour;
         if (bounces == 0)
         {
             return skyColour;
