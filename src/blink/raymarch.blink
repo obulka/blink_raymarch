@@ -225,7 +225,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToSphere(float3 position, float3 centre, float radius) {
+    float distanceToSphere(
+            const float3 &position,
+            const float3 &centre,
+            const float radius)
+    {
         return length(centre - position) - radius;
     }
 
@@ -238,7 +242,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToRectangularPrism(float3 position, float3 centre, float3 size) {
+    float distanceToRectangularPrism(
+            const float3 &position,
+            const float3 &centre,
+            const float3 &size)
+    {
         float3 boundingSphereVector = fabs(position - centre) - size;
         float ud = length(max(boundingSphereVector, float3(0, 0, 0)));
         float n = max(
@@ -254,11 +262,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @arg position: The point to get the distance to from the object
      * @arg centre: The object centre
-     * @arg radii: The inner and outer radius of the torus
+     * @arg radii: The inner and outer radii of the torus
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToTorus(float3 position, float3 centre, float2 radii)
+    float distanceToTorus(
+            const float3 &position,
+            const float3 &centre,
+            const float2 &radii)
     {
         float3 centreVector = position - centre;
         float2 centreXZ = float2(centreVector.x, centreVector.z);
@@ -279,7 +290,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToTriangularPrism(float3 position, float3 centre, float2 size) {
+    float distanceToTriangularPrism(
+            const float3 &position,
+            const float3 &centre,
+            const float2 &size)
+    {
         float3 centreVector = fabs(position - centre);
 
         return max(
@@ -300,7 +315,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToCylinder(float3 position, float3 centre, float2 size) {
+    float distanceToCylinder(
+            const float3 &position,
+            const float3 &centre,
+            const float2 &size)
+    {
         float3 centreVector = fabs(position - centre);
 
         float2 distanceToXZ = float2(centreVector.x, centreVector.z);
@@ -318,16 +337,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The minimum distance from the point to the shape
      */
-    float distanceToMandelbulb(float3 position, float power) {
-        return 1000;
-        /*
+    float distanceToMandelbulb(const float3 &position, const float power) {
         float3 z = position;
         float dr = 1;
         float r = 0;
-        int iterations = 0;
 
-        for (int i = 0; i < 0 ; i++) {
-            iterations = i;
+        for (int i = 0; i < 15; i++) {
             r = length(z);
 
             if (r > 2) {
@@ -354,9 +369,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         return 0.5f * log(r) * r / dr;
-        */
     }
-
 
 
     //
@@ -646,12 +659,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         {
             return distanceToTriangularPrism(position, objectPosition, size);
         }
-        if (shapeType >= 4)
+        if (shapeType == 4)
         {
             return distanceToTorus(position, objectPosition, size);
         }
 
-        //size.x = ((int) size.x) == 0 ? 1.0f : size.x;
         return distanceToMandelbulb(position, size.x);
     }
 
