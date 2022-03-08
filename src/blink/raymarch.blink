@@ -195,7 +195,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             0, 0, -(farPlane + nearPlane) / farMinusNear, -2 * (farPlane * nearPlane) / farMinusNear,
             0, 0, -1, 0
         );
-        invert4x4(cameraProjectionMatrix, inverseCameraProjectionMatrix);
+        inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();
         positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);
 
         int subPixelDivisions = pow(2, abs(subdivisions));
@@ -361,7 +361,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &centre,
             const float power)
     {
-        float3 centreVector = fabs(position - centre);
+        float3 centreVector = position - centre;
         float3 currentPosition = centreVector;
         float dradius = 1;
         float radius = 0;
@@ -389,6 +389,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         return 0.5f * log(radius) * radius / dradius;
+    }
+
+
+    float3 positionToInfiniteRepetition(const float3 &position, const float3 &spacing)
+    {
+        return fmod(position + 0.5f * spacing, spacing) - 0.5f * spacing;
     }
 
 
@@ -444,166 +450,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 out[i] += m[i][j] * v[j];
             }
         }
-    }
-
-
-    /**
-     * Invert a 4x4 matrix
-     *
-     * @arg m: The matrix to invert
-     * @arg invOut: The location to store the inverted matrix
-     *
-     * @returns: true if it was possible to invert the matrix, flase otherwise
-     */
-    bool invert4x4(const float4x4 &m, float4x4 &invOut)
-    {
-        float4x4 inv;
-        float det;
-
-        inv[0][0] =
-            m[1][1]  * m[2][2] * m[3][3] - 
-            m[1][1]  * m[2][3] * m[3][2] - 
-            m[2][1]  * m[1][2]  * m[3][3] + 
-            m[2][1]  * m[1][3]  * m[3][2] +
-            m[3][1] * m[1][2]  * m[2][3] - 
-            m[3][1] * m[1][3]  * m[2][2];
-
-        inv[1][0] =
-            -m[1][0]  * m[2][2] * m[3][3] + 
-            m[1][0]  * m[2][3] * m[3][2] + 
-            m[2][0]  * m[1][2]  * m[3][3] - 
-            m[2][0]  * m[1][3]  * m[3][2] - 
-            m[3][0] * m[1][2]  * m[2][3] + 
-            m[3][0] * m[1][3]  * m[2][2];
-
-        inv[2][0] =
-            m[1][0]  * m[2][1] * m[3][3] - 
-            m[1][0]  * m[2][3] * m[3][1] - 
-            m[2][0]  * m[1][1] * m[3][3] + 
-            m[2][0]  * m[1][3] * m[3][1] + 
-            m[3][0] * m[1][1] * m[2][3] - 
-            m[3][0] * m[1][3] * m[2][1];
-
-        inv[3][0] =
-            -m[1][0]  * m[2][1] * m[3][2] + 
-            m[1][0]  * m[2][2] * m[3][1] +
-            m[2][0]  * m[1][1] * m[3][2] - 
-            m[2][0]  * m[1][2] * m[3][1] - 
-            m[3][0] * m[1][1] * m[2][2] + 
-            m[3][0] * m[1][2] * m[2][1];
-
-        inv[0][1] =
-            -m[0][1]  * m[2][2] * m[3][3] + 
-            m[0][1]  * m[2][3] * m[3][2] + 
-            m[2][1]  * m[0][2] * m[3][3] - 
-            m[2][1]  * m[0][3] * m[3][2] - 
-            m[3][1] * m[0][2] * m[2][3] + 
-            m[3][1] * m[0][3] * m[2][2];
-
-        inv[1][1] =
-            m[0][0]  * m[2][2] * m[3][3] - 
-            m[0][0]  * m[2][3] * m[3][2] - 
-            m[2][0]  * m[0][2] * m[3][3] + 
-            m[2][0]  * m[0][3] * m[3][2] + 
-            m[3][0] * m[0][2] * m[2][3] - 
-            m[3][0] * m[0][3] * m[2][2];
-
-        inv[2][1] = 
-            m[0][0]  * m[2][1] * m[3][3] + 
-            m[0][0]  * m[2][3] * m[3][1] + 
-            m[2][0]  * m[0][1] * m[3][3] - 
-            m[2][0]  * m[0][3] * m[3][1] - 
-            m[3][0] * m[0][1] * m[2][3] + 
-            m[3][0] * m[0][3] * m[2][1];
-
-        inv[3][1] =
-            m[0][0]  * m[2][1] * m[3][2] - 
-            m[0][0]  * m[2][2] * m[3][1] - 
-            m[2][0]  * m[0][1] * m[3][2] + 
-            m[2][0]  * m[0][2] * m[3][1] + 
-            m[3][0] * m[0][1] * m[2][2] - 
-            m[3][0] * m[0][2] * m[2][1];
-
-        inv[0][2] =
-            m[0][1]  * m[1][2] * m[3][3] - 
-            m[0][1]  * m[1][3] * m[3][2] - 
-            m[1][1]  * m[0][2] * m[3][3] + 
-            m[1][1]  * m[0][3] * m[3][2] + 
-            m[3][1] * m[0][2] * m[1][3] - 
-            m[3][1] * m[0][3] * m[1][2];
-
-        inv[1][2] =
-            -m[0][0]  * m[1][2] * m[3][3] + 
-            m[0][0]  * m[1][3] * m[3][2] + 
-            m[1][0]  * m[0][2] * m[3][3] - 
-            m[1][0]  * m[0][3] * m[3][2] - 
-            m[3][0] * m[0][2] * m[1][3] + 
-            m[3][0] * m[0][3] * m[1][2];
-
-        inv[2][2] =
-            m[0][0]  * m[1][1] * m[3][3] - 
-            m[0][0]  * m[1][3] * m[3][1] - 
-            m[1][0]  * m[0][1] * m[3][3] + 
-            m[1][0]  * m[0][3] * m[3][1] + 
-            m[3][0] * m[0][1] * m[1][3] - 
-            m[3][0] * m[0][3] * m[1][1];
-
-        inv[3][2] =
-            -m[0][0]  * m[1][1] * m[3][2] + 
-            m[0][0]  * m[1][2] * m[3][1] + 
-            m[1][0]  * m[0][1] * m[3][2] - 
-            m[1][0]  * m[0][2] * m[3][1] - 
-            m[3][0] * m[0][1] * m[1][2] + 
-            m[3][0] * m[0][2] * m[1][1];
-
-        inv[0][3] =
-            -m[0][1] * m[1][2] * m[2][3] + 
-            m[0][1] * m[1][3] * m[2][2] + 
-            m[1][1] * m[0][2] * m[2][3] - 
-            m[1][1] * m[0][3] * m[2][2] - 
-            m[2][1] * m[0][2] * m[1][3] + 
-            m[2][1] * m[0][3] * m[1][2];
-
-        inv[1][3] =
-            m[0][0] * m[1][2] * m[2][3] - 
-            m[0][0] * m[1][3] * m[2][2] - 
-            m[1][0] * m[0][2] * m[2][3] + 
-            m[1][0] * m[0][3] * m[2][2] + 
-            m[2][0] * m[0][2] * m[1][3] - 
-            m[2][0] * m[0][3] * m[1][2];
-
-        inv[2][3] =
-            -m[0][0] * m[1][1] * m[2][3] + 
-            m[0][0] * m[1][3] * m[2][1] + 
-            m[1][0] * m[0][1] * m[2][3] - 
-            m[1][0] * m[0][3] * m[2][1] - 
-            m[2][0] * m[0][1] * m[1][3] + 
-            m[2][0] * m[0][3] * m[1][1];
-
-        inv[3][3] =
-            m[0][0] * m[1][1] * m[2][2] - 
-            m[0][0] * m[1][2] * m[2][1] - 
-            m[1][0] * m[0][1] * m[2][2] + 
-            m[1][0] * m[0][2] * m[2][1] + 
-            m[2][0] * m[0][1] * m[1][2] - 
-            m[2][0] * m[0][2] * m[1][1];
-
-        det = m[0][0] * inv[0][0] + m[0][1] * inv[1][0] + m[0][2] * inv[2][0] + m[0][3] * inv[3][0];
-
-        if (det == 0)
-            return false;
-
-        det = 1.0 / det;
-
-        for (int i=0; i < 4; i++)
-        {
-            for (int j=0; j < 4; j++)
-            {
-                invOut[i][j] = inv[i][j] * det;
-            }
-        }
-
-        return true;
     }
 
 
@@ -683,7 +529,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         {
             return distanceToTorus(position, objectPosition, size);
         }
-
         return distanceToMandelbulb(position, objectPosition, size.x);
     }
 
