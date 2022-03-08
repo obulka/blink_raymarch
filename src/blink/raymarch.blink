@@ -88,7 +88,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int lightTextureWidth;
 
         float hazeAmount;
+        float hazeStart;
+        float hazeDistance;
         float4 hazeColour;
+
+        float iterGlowAmount;
+        float4 iterGlowColour;
 
     local:
         // These local variables are not exposed to the user.
@@ -106,6 +111,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         float2 skyBoxPixelSize;
         float skyBoxOffsetRadians;
+
 
 
     // In define(), parameters can be given labels and default values.
@@ -156,8 +162,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(lightTextureHeight, "Directional Light Texture Height", 0);
         defineParam(lightTextureWidth, "Directional Light Texture Width", 0);
 
-        defineParam(hazeAmount, "Haze Amount", 0.25f);
+        defineParam(hazeAmount, "Haze Amount", 0.0f);
+        defineParam(hazeStart, "Haze Start", 0.0f);
+        defineParam(hazeDistance, "Haze Distance", 1000.0f);
         defineParam(hazeColour, "Haze Colour", float4(1, 1, 1, 1));
+
+        defineParam(iterGlowAmount, "Iter Glow Amount", 0.0f);
+        defineParam(iterGlowColour, "Iter Glow Colour", float4(1, 1, 1, 1));
     }
 
 
@@ -957,6 +968,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         return weight * colour0 + (1 - weight) * colour1;
     }
 
+    float getHazeAmount(const float distance)
+    {
+        return saturate(hazeAmount * (distance - hazeStart) / hazeDistance);
+    }
+
 
     /**
      * March a ray through the scene
@@ -1004,19 +1020,21 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 rayColour = blend(
-                    hazeColour,
-                    rayColour,
-                    distanceTravelled * hazeAmount / rayDistance
-                );
-                rayColour = blend(
-                    colour,
-                    rayColour,
-                    rayStrength * (1 - surface.x) * lightIntensity
+                    iterGlowColour,
+                    blend(
+                        hazeColour,
+                        blend(
+                            colour,
+                            rayColour,
+                            rayStrength * (1 - surface.x) * lightIntensity
+                        ),
+                        getHazeAmount(distanceTravelled)
+                    ),
+                    iterGlowAmount * iterations
                 );
 
                 if (bounces >= numBounces)
                 {
-                    rayColour = blend(hazeColour, rayColour, 0.001f * iterations);
                     return rayColour;
                 }
 
@@ -1035,17 +1053,19 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             iterations++;
         }
 
-        // If the ray missed, grab the skybox colour
-        float4 skyColour = blend(hazeColour, readSkyValue(direction), hazeAmount);
-        if (bounces == 0)
-        {
-            return blend(hazeColour, skyColour, 0.001f * iterations);
-        }
-
-        rayColour = blend(hazeColour, rayColour, 0.001f * iterations);
-        rayColour = blend(skyColour, rayColour, rayStrength * lightIntensity);
-
-        return rayColour;
+        return blend(
+            blend(
+                iterGlowColour,
+                blend(
+                    hazeColour,
+                    readSkyValue(direction),
+                    getHazeAmount(distanceTravelled)
+                ),
+                iterGlowAmount * iterations
+            ),
+            rayColour,
+            rayStrength * lightIntensity
+        );
     }
 
 
