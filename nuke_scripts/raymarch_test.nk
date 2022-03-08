@@ -10,12 +10,12 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             </dock>
             <split size="1771" stretch="1"/>
             <splitter orientation="2">
-                <split size="629"/>
+                <split size="739"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="704"/>
-                <dock id="" activePageId="DAG.1" focus="true">
+                <split size="594"/>
+                <dock id="" activePageId="DAG.1">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
@@ -25,7 +25,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                 </dock>
             </splitter>
             <split size="685"/>
-            <dock id="" activePageId="Properties.1">
+            <dock id="" activePageId="Properties.1" focus="true">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
             </dock>
@@ -1710,7 +1710,6 @@ Group {
   "RayMarchKernel_Haze Start" 0.5
   "RayMarchKernel_Haze Distance" 3
   "RayMarchKernel_Haze Colour" {0.1 1 1 1}
-  "RayMarchKernel_Iter Glow Amount" 0.0001
   "RayMarchKernel_Iter Glow Colour" {0.1 1 1 1}
   format "2048 1024 0 0 2048 1024 1 2K_LatLong"
   rebuild_finalise ""
