@@ -44,6 +44,19 @@ float saturate(float value)
 
 
 /**
+ * Saturate a value ie. clamp between 0 and 1
+ *
+ * @args value: The value to saturate
+ *
+ * @returns: The clamped value
+ */
+float2 saturate(const float2 &value)
+{
+    return float2(saturate(value.x), saturate(value.y));
+}
+
+
+/**
  * Get the position component of a world matrix.
  *
  * @arg worldMatrix: The world matrix
@@ -104,53 +117,6 @@ void createCameraRay(
         direction
     );
     rayDirection = normalize(float3(direction.x, direction.y, direction.z));
-}
-
-
-void directionalLightShadow(
-        const float3 &pointOnSurface,
-        const float3 &surfaceNormal,
-        const float3 &light,
-        const float hitTolerance,
-        const float maxRayDistance,
-        const float shadowBias,
-        float3 &lightDirection,
-        float3 &surfaceOffset,
-        float3 &shadowOffsetLightDirection,
-        float &distanceToLight)
-{
-    lightDirection = -light;
-    surfaceOffset = offsetPoint(
-        pointOnSurface,
-        shadowBias * (lightDirection + surfaceNormal),
-        hitTolerance
-    );
-    shadowOffsetLightDirection = lightDirection;
-
-    distanceToLight = maxRayDistance;
-}
-
-
-void pointLightShadow(
-        const float3 &pointOnSurface,
-        const float3 &surfaceNormal,
-        const float3 &light,
-        const float hitTolerance,
-        const float shadowBias,
-        float3 &lightDirection,
-        float3 &surfaceOffset,
-        float3 &shadowOffsetLightDirection,
-        float &distanceToLight)
-{
-    lightDirection = light - pointOnSurface;
-    surfaceOffset = offsetPoint(
-        pointOnSurface,
-        shadowBias * (lightDirection + surfaceNormal),
-        hitTolerance
-    );
-    shadowOffsetLightDirection = light - surfaceOffset;
-
-    distanceToLight = length(shadowOffsetLightDirection);
 }
 
 
