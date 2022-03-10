@@ -1,6 +1,8 @@
-//#include "colour.h"
-//#include "mmath.h"
-//#include "sdfs.h"
+#include "camera.h"
+#include "colour.h"
+#include "mmath.h"
+#include "sdfs.h"
+#include "sdfTransforms.h"
 
 
 kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
@@ -98,11 +100,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     local:
         // These local variables are not exposed to the user.
 
-        float fieldOfView;
-        float4x4 cameraProjectionMatrix;
         float4x4 inverseCameraProjectionMatrix;
-        float3 cameraPosition;
-        float aspect;
 
         int bouncesPerRay;
 
@@ -184,19 +182,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         bouncesPerRay = maxBounces <= 0 ? 1 : maxBounces;
 
-        float farMinusNear = farPlane - nearPlane;
-
         // TODO use angles to allow -ve focal length like for latlongs
-        aspect = formatHeight / formatWidth;
-        fieldOfView = 2 * atan(1 / focalLength);
-        cameraProjectionMatrix = float4x4(
-            2 * focalLength / horizontalAperture, 0, 0, 0,
-            0, 2 * focalLength / horizontalAperture / aspect, 0, 0,
-            0, 0, -(farPlane + nearPlane) / farMinusNear, -2 * (farPlane * nearPlane) / farMinusNear,
-            0, 0, -1, 0
+        float aspect = aspectRatio(formatHeight, formatWidth);
+        float4x4 cameraProjectionMatrix = projectionMatrix(
+            focalLength,
+            horizontalAperture,
+            aspect,
+            nearPlane,
+            farPlane
         );
         inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();
-        positionFromWorldMatrix(cameraWorldMatrix, cameraPosition);
 
         int subPixelDivisions = pow(2, abs(subdivisions));
         subdividedPixelSize = 1.0f / (float) subPixelDivisions;
@@ -206,24 +201,18 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         skyBoxOffsetRadians = skyBoxOffsetAngle * PI / 180.0f;
     }
 
+
     /**
      * Get the value of sky the ray would hit at infinite distance
      */
     float4 readSkyValue(float3 rayDirection)
     {
-        float rayAnglePhi = fmod(acos(rayDirection.y), PI);
-        rayAnglePhi += PI * (rayAnglePhi < 0);
-
-        float rayAngleTheta = fmod(
-            atan2(rayDirection.z, rayDirection.x) + skyBoxOffsetRadians,
-            2 * PI
-        );
-        rayAngleTheta += 2 * PI * (rayAngleTheta < 0);
+        float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);
 
         SampleType(skyBox) skyBoxPixel = bilinear(
             skyBox,
-            skyBoxPixelSize.x * rayAngleTheta,
-            skyFormatHeight - (skyBoxPixelSize.y * rayAnglePhi)
+            skyBoxPixelSize.x * angles.x,
+            skyFormatHeight - (skyBoxPixelSize.y * angles.y)
         );
 
         return skyBoxPixel;
@@ -231,306 +220,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     //
-    // Signed Distance Functions
-    //
-
-
-    /**
-     * Compute the signed distance from a point to a sphere
-     *
-     * @arg position: The point to get the distance to from the object
-     * @arg centre: The object centre
-     * @arg radius: The radius of the sphere
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToSphere(
-            const float3 &position,
-            const float3 &centre,
-            const float radius)
-    {
-        return length(centre - position) - radius;
-    }
-
-    /**
-     * Compute the signed distance from a point to a rectangular prism
-     *
-     * @arg position: The point to get the distance to from the object
-     * @arg centre: The object centre
-     * @arg size: The length, width, and depth of the prism
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToRectangularPrism(
-            const float3 &position,
-            const float3 &centre,
-            const float3 &size)
-    {
-        float3 boundingSphereVector = fabs(position - centre) - size;
-        float ud = length(max(boundingSphereVector, float3(0, 0, 0)));
-        float n = max(
-            max(min(boundingSphereVector.x, 0.0f), min(boundingSphereVector.y, 0.0f)),
-            min(boundingSphereVector.z, 0.0f)
-        );
-
-        return ud + n;
-    }
-
-    /**
-     * Compute the signed distance from a point to a torus
-     *
-     * @arg position: The point to get the distance to from the object
-     * @arg centre: The object centre
-     * @arg radii: The inner and outer radii of the torus
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToTorus(
-            const float3 &position,
-            const float3 &centre,
-            const float2 &radii)
-    {
-        float3 centreVector = position - centre;
-        float2 centreXZ = float2(centreVector.x, centreVector.z);
-        float2 inner = float2(
-            length(centreXZ) - radii.y,
-            position.y - centre.y
-        );
-
-        return length(inner) - radii.x;
-    }
-
-    /**
-     * Compute the signed distance from a point to a triangular prism
-     *
-     * @arg position: The point to get the distance to from the object
-     * @arg centre: The object centre
-     * @arg size: The height and depth of the prism
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToTriangularPrism(
-            const float3 &position,
-            const float3 &centre,
-            const float2 &size)
-    {
-        float3 centreVector = fabs(position - centre);
-
-        return max(
-            centreVector.z - size.y,
-            max(
-                centreVector.x * 0.866025f + position.y * 0.5f,
-                -position.y
-            ) - size.x * 0.5f
-        );
-    }
-
-    /**
-     * Compute the signed distance from a point to a cylinder
-     *
-     * @arg position: The point to get the distance to from the object
-     * @arg centre: The object centre
-     * @arg size: The height and radius of the cylinder
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToCylinder(
-            const float3 &position,
-            const float3 &centre,
-            const float2 &size)
-    {
-        float3 centreVector = fabs(position - centre);
-
-        float2 distanceToXZ = float2(centreVector.x, centreVector.z);
-
-        float2 d = fabs(float2(length(distanceToXZ), centreVector.y)) - size;
-
-        return length(max(d, float2(0, 0))) + min(max(d.x, d.y), 0.0f);
-    }
-
-
-    /**
-     * Compute the signed distance from a point to a mandelbulb
-     *
-     * @arg position: The point to get the distance to from the object
-     *
-     * @returns: The minimum distance from the point to the shape
-     */
-    float distanceToMandelbulb(
-            const float3 &position,
-            const float3 &centre,
-            const float power)
-    {
-        float3 centreVector = position - centre;
-        float3 currentPosition = centreVector;
-        float dradius = 1;
-        float radius = 0;
-
-        for (int i = 0; i < 15; i++) {
-            radius = length(currentPosition);
-
-            if (radius > 2) {
-                break;
-            }
-
-            float theta = acos(currentPosition.z / radius);
-            float phi = atan2(currentPosition.y, currentPosition.x);
-            dradius = pow(radius, power - 1.0f) * power * dradius + 1.0f;
-
-            theta = theta * power;
-            phi = phi * power;
-
-            currentPosition = pow(radius, power) * float3(
-                sin(theta) * cos(phi),
-                sin(phi) * sin(theta),
-                cos(theta)
-            );
-            currentPosition += centreVector;
-        }
-
-        return 0.5f * log(radius) * radius / dradius;
-    }
-
-
-    float3 positionToInfiniteRepetition(const float3 &position, const float3 &spacing)
-    {
-        return fmod(position + 0.5f * spacing, spacing) - 0.5f * spacing;
-    }
-
-
-    //
-    // Matrix and vector math operations
-    //
-
-
-    /**
-     * Saturate a value ie. clamp between 0 and 1
-     *
-     * @args value: The value to saturate
-     *
-     * @returns: The clamped value
-     */
-    float saturate(float value)
-    {
-        return clamp(value, 0.0f, 1.0f);
-    }
-
-
-    /**
-     * Get the position component of a world matrix.
-     *
-     * @arg worldMatrix: The world matrix
-     * @arg position: The location to store the position
-     */
-    void positionFromWorldMatrix(const float4x4 &worldMatrix, float3 &position)
-    {
-        position = float3(
-            worldMatrix[0][3],
-            worldMatrix[1][3],
-            worldMatrix[2][3]
-        );
-    }
-
-
-    /**
-     * Multiply a 4d vector by a 4x4 matrix.
-     *
-     * @arg m: The matrix that will transform the vector
-     * @arg v: The vector to transform
-     * @arg out: The location to store the resulting vector
-     */
-    void matmul(const float4x4 &m, const float4 &v, float4 &out)
-    {
-        for (int i=0; i < 4; i++)
-        {
-            out[i] = 0;
-
-            for (int j=0; j < 4; j++)
-            {
-                out[i] += m[i][j] * v[j];
-            }
-        }
-    }
-
-
-    //
-    // Colour functions
-    //
-
-
-    float2 smoothMinN(float colour0, float colour1, float blendSize, float exponent)
-    {
-        float m = 0.5f * pow(
-            max(blendSize - fabs(colour0 - colour1), 0.0f) / blendSize,
-            exponent
-        );
-
-        float s = m * blendSize / exponent;
-
-        return (colour0 < colour1) ? float2(colour0 - s, m) : float2(colour1 - s, m - 1.0f);
-    }
-
-
-    /**
-     * Generate a ray out of the camera
-     */
-    void createCameraRay(float2 pixelLocation, float3 &rayOrigin, float3 &rayDirection)
-    {
-        float2 uvPosition = float2(
-            2 * pixelLocation.x / formatWidth - 1,
-            2 * pixelLocation.y / formatHeight - 1
-        );
-        rayOrigin = cameraPosition;
-        float4 direction;
-        matmul(
-            inverseCameraProjectionMatrix,
-            float4(uvPosition.x, uvPosition.y, 0, 1),
-            direction
-        );
-        matmul(
-            cameraWorldMatrix,
-            float4(direction.x, direction.y, direction.z, 0),
-            direction
-        );
-        rayDirection = normalize(float3(direction.x, direction.y, direction.z));
-    }
-
-
-    //
     // Render Engine
     //
-
-
-    float distanceToObject(
-            const float3 &position,
-            const int shapeType,
-            const float3 &objectPosition,
-            const float3 &scale)
-    {
-        if (shapeType == 0)
-        {
-            return distanceToSphere(position, objectPosition, scale.x);
-        }
-        if (shapeType == 1)
-        {
-            return distanceToRectangularPrism(position, objectPosition, scale);
-        }
-
-        float2 size = float2(scale.x, scale.y);
-        if (shapeType == 2)
-        {
-            return distanceToCylinder(position, objectPosition, size);
-        }
-        if (shapeType == 3)
-        {
-            return distanceToTriangularPrism(position, objectPosition, size);
-        }
-        if (shapeType == 4)
-        {
-            return distanceToTorus(position, objectPosition, size);
-        }
-        return distanceToMandelbulb(position, objectPosition, size.x);
-    }
 
 
     /**
@@ -573,6 +264,133 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         return distance;
+    }
+
+
+    float computeShadow(
+            const float3 &rayDirection,
+            const float distanceToShadePoint,
+            float3 rayOrigin)
+    {
+        float distanceTravelled = 0;
+        float4 colour;
+        float4 surface;
+        while (distanceTravelled < distanceToShadePoint)
+        {
+            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
+
+            if (stepDistance < hitTolerance)
+            {
+                return intensityInShadow;
+            }
+
+            rayOrigin += rayDirection * stepDistance;
+            distanceTravelled += stepDistance;
+        }
+
+        return 1;
+    }
+
+
+    float2 lightIntensityOnSurface(
+            const float3 &pointOnSurface,
+            const float3 &surfaceNormal,
+            const float3 &light,
+            const int lightType,
+            const float intensity)
+    {
+        float3 surfaceOffset;
+
+        float distanceToLight;
+        float3 lightDirection;
+        float3 shadowOffsetLightDirection;
+        if (lightType == 0)
+        {
+            // directional
+            directionalLightShadow(
+                pointOnSurface,
+                surfaceNormal,
+                light,
+                hitTolerance,
+                maxRayDistance,
+                shadowBias,
+                lightDirection,
+                surfaceOffset,
+                shadowOffsetLightDirection,
+                distanceToLight
+            );
+        }
+        else
+        {
+            // point
+            pointLightShadow(
+                pointOnSurface,
+                surfaceNormal,
+                light,
+                hitTolerance,
+                shadowBias,
+                lightDirection,
+                surfaceOffset,
+                shadowOffsetLightDirection,
+                distanceToLight
+            );
+        }
+
+        return float2(
+            saturate(dot(surfaceNormal, normalize(lightDirection)) * intensity),
+            computeShadow(
+                normalize(shadowOffsetLightDirection),
+                distanceToLight,
+                surfaceOffset
+            )
+        );
+    }
+
+
+    /**
+     * Get the intensity of the light on the surface of an object
+     *
+     *
+     */
+    float computeLightIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)
+    {
+        float2 lightIntensity = float2(0, 0);
+
+        for (int i=0; i < lightTextureHeight; i++)
+        {
+            for (int j=0; j < lightTextureWidth; j++)
+            {
+                SampleType(lights) light = lights(j, i);
+                SampleType(lightProperties) lightProperty = lightProperties(j, i);
+
+                lightIntensity += lightIntensityOnSurface(
+                    pointOnSurface,
+                    surfaceNormal,
+                    float3(light.x, light.y, light.z),
+                    (int) lightProperty.w,
+                    light.w
+                );
+            }
+        }
+
+        return saturate(lightIntensity.x * lightIntensity.y);
+    }
+
+
+    float3 reflectRayOffSurface(
+        const float3 &incidentRayDirection,
+        const float3 &surfaceNormalDirection)
+    {
+        return (
+            incidentRayDirection
+            - 2 * dot(incidentRayDirection, surfaceNormalDirection) * surfaceNormalDirection
+        );
+    }
+
+
+    float getHazeAmount(const float distance)
+    {
+        return saturate(hazeAmount * (distance - hazeStart) / hazeDistance);
     }
 
 
@@ -641,181 +459,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     surface
                 )
         ));
-    }
-
-
-    float computeShadow(float3 rayOrigin, float3 rayDirection, float distanceToShadePoint)
-    {
-        float distanceTravelled = 0;
-        float4 colour;
-        float4 surface;
-        while (distanceTravelled < distanceToShadePoint)
-        {
-            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
-
-            if (stepDistance < hitTolerance)
-            {
-                return intensityInShadow;
-            }
-
-            rayOrigin += rayDirection * stepDistance;
-            distanceTravelled += stepDistance;
-        }
-
-        return 1;
-    }
-
-
-    static float3 offsetPoint(
-            const float3 &point,
-            const float3 &direction,
-            const float offset)
-    {
-        return offset * direction + point;
-    }
-
-
-    void computeDirectionalLightShadow(
-        const float3 &pointOnSurface,
-        const float3 &surfaceNormal,
-        const float3 &light,
-        float3 &lightDirection,
-        float3 &surfaceOffset,
-        float3 &shadowOffsetLightDirection,
-        float &distanceToLight)
-    {
-        lightDirection = -light;
-        surfaceOffset = offsetPoint(
-            pointOnSurface,
-            shadowBias * (lightDirection + surfaceNormal),
-            hitTolerance
-        );
-        shadowOffsetLightDirection = lightDirection;
-
-        distanceToLight = maxRayDistance;
-    }
-
-
-    void computePointLightShadow(
-        const float3 &pointOnSurface,
-        const float3 &surfaceNormal,
-        const float3 &light,
-        float3 &lightDirection,
-        float3 &surfaceOffset,
-        float3 &shadowOffsetLightDirection,
-        float &distanceToLight)
-    {
-        lightDirection = light - pointOnSurface;
-        surfaceOffset = offsetPoint(
-            pointOnSurface,
-            shadowBias * (lightDirection + surfaceNormal),
-            hitTolerance
-        );
-        shadowOffsetLightDirection = light - surfaceOffset;
-
-        distanceToLight = length(shadowOffsetLightDirection);
-    }
-
-
-    float2 lightIntensityOnSurface(
-            const float3 &pointOnSurface,
-            const float3 &surfaceNormal,
-            const float3 &light,
-            const int lightType,
-            const float intensity)
-    {
-        float3 surfaceOffset;
-
-        float distanceToLight;
-        float3 lightDirection;
-        float3 shadowOffsetLightDirection;
-        if (lightType == 0)
-        {
-            // directional
-            computeDirectionalLightShadow(
-                pointOnSurface,
-                surfaceNormal,
-                light,
-                lightDirection,
-                surfaceOffset,
-                shadowOffsetLightDirection,
-                distanceToLight
-            );
-        }
-        else
-        {
-            // point
-            computePointLightShadow(
-                pointOnSurface,
-                surfaceNormal,
-                light,
-                lightDirection,
-                surfaceOffset,
-                shadowOffsetLightDirection,
-                distanceToLight
-            );
-        }
-
-        return float2(
-            saturate(dot(surfaceNormal, normalize(lightDirection)) * intensity),
-            computeShadow(
-                surfaceOffset,
-                normalize(shadowOffsetLightDirection),
-                distanceToLight
-            )
-        );
-    }
-
-
-    /**
-     * Get the intensity of the light on the surface of an object
-     *
-     *
-     */
-    float computeLightIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)
-    {
-        float2 lightIntensity = float2(0, 0);
-
-        for (int i=0; i < lightTextureHeight; i++)
-        {
-            for (int j=0; j < lightTextureWidth; j++)
-            {
-                SampleType(lights) light = lights(j, i);
-                SampleType(lightProperties) lightProperty = lightProperties(j, i);
-
-                lightIntensity += lightIntensityOnSurface(
-                    pointOnSurface,
-                    surfaceNormal,
-                    float3(light.x, light.y, light.z),
-                    (int) lightProperty.w,
-                    light.w
-                );
-            }
-        }
-
-        return saturate(lightIntensity.x * lightIntensity.y);
-    }
-
-
-    float3 reflectRayOffSurface(
-        const float3 &incidentRayDirection,
-        const float3 &surfaceNormalDirection)
-    {
-        return (
-            incidentRayDirection
-            - 2 * dot(incidentRayDirection, surfaceNormalDirection) * surfaceNormalDirection
-        );
-    }
-
-
-    float4 blend(const float4 &colour0, const float4 &colour1, const float weight)
-    {
-        return weight * colour0 + (1 - weight) * colour1;
-    }
-
-    float getHazeAmount(const float distance)
-    {
-        return saturate(hazeAmount * (distance - hazeStart) / hazeDistance);
     }
 
 
@@ -985,7 +628,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 // Generate a ray from the camera
                 float3 rayOrigin;
                 float3 rayDirection;
-                createCameraRay(pixelLocation + pixelOffset, rayOrigin, rayDirection);
+                createCameraRay(
+                    cameraWorldMatrix,
+                    inverseCameraProjectionMatrix,
+                    pixelsToUV(
+                        pixelLocation + pixelOffset,
+                        float2(formatWidth, formatHeight)
+                    ),
+                    rayOrigin,
+                    rayDirection
+                );
 
                 marchRays(
                     rayOrigin,

@@ -3,6 +3,33 @@
 //
 
 
+float3 offsetPoint(
+        const float3 &point,
+        const float3 &direction,
+        const float offset)
+{
+    return offset * direction + point;
+}
+
+
+/**
+ * Get the value of sky the ray would hit at infinite distance
+ */
+float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float thetaOffset)
+{
+    float rayAnglePhi = fmod(acos(rayDirection.y), PI);
+    rayAnglePhi += PI * (rayAnglePhi < 0);
+
+    float rayAngleTheta = fmod(
+        atan2(rayDirection.z, rayDirection.x) + thetaOffset,
+        2 * PI
+    );
+    rayAngleTheta += 2 * PI * (rayAngleTheta < 0);
+
+    return float2(rayAngleTheta, rayAnglePhi);
+}
+
+
 /**
  * Saturate a value ie. clamp between 0 and 1
  *
@@ -50,6 +77,80 @@ void matmul(const float4x4 &m, const float4 &v, float4 &out)
             out[i] += m[i][j] * v[j];
         }
     }
+}
+
+
+
+/**
+ * Generate a ray out of the camera
+ */
+void createCameraRay(
+        const float4x4 &cameraWorldMatrix,
+        const float4x4 &inverseProjectionMatrix,
+        const float2 &uvPosition,
+        float3 &rayOrigin,
+        float3 &rayDirection)
+{
+    positionFromWorldMatrix(cameraWorldMatrix, rayOrigin);
+    float4 direction;
+    matmul(
+        inverseProjectionMatrix,
+        float4(uvPosition.x, uvPosition.y, 0, 1),
+        direction
+    );
+    matmul(
+        cameraWorldMatrix,
+        float4(direction.x, direction.y, direction.z, 0),
+        direction
+    );
+    rayDirection = normalize(float3(direction.x, direction.y, direction.z));
+}
+
+
+void directionalLightShadow(
+        const float3 &pointOnSurface,
+        const float3 &surfaceNormal,
+        const float3 &light,
+        const float hitTolerance,
+        const float maxRayDistance,
+        const float shadowBias,
+        float3 &lightDirection,
+        float3 &surfaceOffset,
+        float3 &shadowOffsetLightDirection,
+        float &distanceToLight)
+{
+    lightDirection = -light;
+    surfaceOffset = offsetPoint(
+        pointOnSurface,
+        shadowBias * (lightDirection + surfaceNormal),
+        hitTolerance
+    );
+    shadowOffsetLightDirection = lightDirection;
+
+    distanceToLight = maxRayDistance;
+}
+
+
+void pointLightShadow(
+        const float3 &pointOnSurface,
+        const float3 &surfaceNormal,
+        const float3 &light,
+        const float hitTolerance,
+        const float shadowBias,
+        float3 &lightDirection,
+        float3 &surfaceOffset,
+        float3 &shadowOffsetLightDirection,
+        float &distanceToLight)
+{
+    lightDirection = light - pointOnSurface;
+    surfaceOffset = offsetPoint(
+        pointOnSurface,
+        shadowBias * (lightDirection + surfaceNormal),
+        hitTolerance
+    );
+    shadowOffsetLightDirection = light - surfaceOffset;
+
+    distanceToLight = length(shadowOffsetLightDirection);
 }
 
 
