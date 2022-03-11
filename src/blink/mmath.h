@@ -93,6 +93,16 @@ void matmul(const float4x4 &m, const float4 &v, float4 &out)
 }
 
 
+float3 reflectRayOffSurface(
+    const float3 &incidentRayDirection,
+    const float3 &surfaceNormalDirection)
+{
+    return (
+        incidentRayDirection
+        - 2 * dot(incidentRayDirection, surfaceNormalDirection) * surfaceNormalDirection
+    );
+}
+
 
 /**
  * Generate a ray out of the camera

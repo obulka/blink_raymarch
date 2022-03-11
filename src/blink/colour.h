@@ -20,3 +20,28 @@ float4 blend(const float4 &colour0, const float4 &colour1, const float weight)
 {
     return weight * colour0 + (1 - weight) * colour1;
 }
+
+
+float4 blend(
+    const float4 &colour0,
+    const float weight0,
+    const float4 &colour1,
+    const float weight1,
+    const float4 &colour2,
+    const float weight2,
+    const float4 &colour3)
+{
+    return blend(
+        colour0,
+        blend(
+            colour1,
+            blend(
+                colour2,
+                colour3,
+                weight2
+            ),
+            weight1
+        ),
+        weight0
+    );
+}

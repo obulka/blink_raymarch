@@ -364,20 +364,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    float3 reflectRayOffSurface(
-        const float3 &incidentRayDirection,
-        const float3 &surfaceNormalDirection)
-    {
-        return (
-            incidentRayDirection
-            - 2 * dot(incidentRayDirection, surfaceNormalDirection) * surfaceNormalDirection
-        );
-    }
-
-
     float getHazeAmount(const float distance)
     {
-        return saturate(hazeAmount * (distance - hazeStart) / hazeDistance);
+        return hazeAmount * saturate((distance - hazeStart) / hazeDistance);
     }
 
 
@@ -467,6 +456,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         int bounces = 0;
         float distanceTravelled = 0;
+        float lastHitDistance = distanceTravelled;
 
         float lightIntensity = 1;
 
@@ -503,7 +493,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             rayColour,
                             rayStrength * (1 - surface.x) * lightIntensity
                         ),
-                        getHazeAmount(distanceTravelled)
+                        getHazeAmount(distanceTravelled - lastHitDistance)
                     ),
                     iterGlowAmount * iterations
                 );
@@ -524,6 +514,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     direction + surfaceNormal,
                     hitTolerance
                 );
+
+                lastHitDistance = distanceTravelled;
             }
             iterations++;
         }
@@ -534,12 +526,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 blend(
                     hazeColour,
                     readSkyValue(direction),
-                    getHazeAmount(distanceTravelled)
+                    getHazeAmount(distanceTravelled - lastHitDistance)
                 ),
                 iterGlowAmount * iterations
             ),
             rayColour,
-            rayStrength * lightIntensity
+            rayStrength
         );
     }
 
