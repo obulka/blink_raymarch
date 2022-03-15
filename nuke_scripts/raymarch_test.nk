@@ -1,29 +1,27 @@
 #! /usr/local/Nuke12.1v5/libnuke-12.1.5.so -nx
-#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/fractal_test/test_0.%04d.exr" format:"2048 1556 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 280" fps:"0" colorspace:"default (linear)" datatype:"16 bit half" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 12.1 v5
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="3840" y="0" w="1920" h="1043" maximized="1" screen="1">
+    <window x="1976" y="188" w="2504" h="1376" maximized="1" screen="0">
         <splitter orientation="1">
             <split size="40"/>
             <dock id="" hideTitles="1" activePageId="Toolbar.1">
                 <page id="Toolbar.1"/>
             </dock>
-            <split size="1346" stretch="1"/>
+            <split size="1841" stretch="1"/>
             <splitter orientation="2">
-                <split size="587"/>
+                <split size="978"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="413"/>
-                <dock id="" activePageId="DAG.2" focus="true">
+                <split size="355"/>
+                <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
-                    <page id="DAG.2"/>
                 </dock>
             </splitter>
-            <split size="526"/>
+            <split size="615"/>
             <dock id="" activePageId="Properties.1">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
@@ -35,7 +33,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/nuke_scripts/raymarch_test.nk
- frame 120
+ frame 217
  last_frame 280
  format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
  proxy_type scale
@@ -756,7 +754,7 @@ Dot {
  xpos 16677
  ypos 921
 }
-set N814d2a0 [stack 0]
+set N853f9d0 [stack 0]
 Grade {
  multiply 0
  black_clamp false
@@ -793,7 +791,7 @@ Dot {
  xpos 16554
  ypos 918
 }
-set N819a780 [stack 0]
+set N858ceb0 [stack 0]
 Grade {
  multiply 0
  black_clamp false
@@ -821,7 +819,7 @@ Dot {
  xpos 17498
  ypos 914
 }
-set N81c4440 [stack 0]
+set N85b7010 [stack 0]
 Constant {
  inputs 0
  channels rgb
@@ -836,7 +834,7 @@ Dot {
  xpos 17627
  ypos 915
 }
-set N81d1f50 [stack 0]
+set N85c4b20 [stack 0]
 Constant {
  inputs 0
  channels rgb
@@ -861,7 +859,7 @@ Dot {
  xpos 17361
  ypos 913
 }
-set N8bcdc60 [stack 0]
+set N85e3f80 [stack 0]
 Grade {
  multiply 0
  name Grade2
@@ -887,14 +885,14 @@ Dot {
  xpos 17189
  ypos 916
 }
-set N8bf8580 [stack 0]
+set N860ee70 [stack 0]
 Dot {
  inputs 0
  name Dot16
  xpos 17052
  ypos 917
 }
-set N8bfd240 [stack 0]
+set N8613b30 [stack 0]
 Constant {
  inputs 0
  channels rgb
@@ -908,7 +906,7 @@ Dot {
  xpos 16929
  ypos 916
 }
-set N8c0ae40 [stack 0]
+set N8621730 [stack 0]
 Axis2 {
  inputs 0
  rotate {{curve x1 -20 x47 -22.42105263 l x96 -25 x120 -26.2631579 x220 -37 x280 -20} {curve x1 -15 x47 -18.87368421 L l x96 -23 x120 -25.02105254 x220 -40 x280 -15} 0}
@@ -928,7 +926,7 @@ Dot {
  xpos 16290
  ypos 1251
 }
-set N8c3af40 [stack 0]
+set N8651df0 [stack 0]
 Read {
  inputs 0
  file_type exr
@@ -954,7 +952,7 @@ Dot {
  xpos 17867
  ypos 949
 }
-set N8c736c0 [stack 0]
+set N868a280 [stack 0]
 Group {
  inputs 10
  name RayMarcher3
@@ -1375,20 +1373,19 @@ ZDefocus2 {
  xpos 18275
  ypos 1414
 }
-push $N814d2a0
-push $N819a780
-push $N81c4440
-push $N81d1f50
-push $N8bcdc60
-push $N8bf8580
-push $N8bfd240
-push $N8c0ae40
-push $N8c3af40
-push $N8c736c0
+push $N853f9d0
+push $N858ceb0
+push $N85b7010
+push $N85c4b20
+push $N85e3f80
+push $N860ee70
+push $N8613b30
+push $N8621730
+push $N8651df0
+push $N868a280
 Group {
  inputs 10
  name RayMarcher2
- selected true
  xpos 17787
  ypos 1232
 }
@@ -1781,14 +1778,73 @@ Write {
  write_ACES_compliant_EXR true
  first_part rgba
  checkHashOnRead false
- version 12
+ version 15
  name Write1
- xpos 17606
+ xpos 17604
  ypos 1367
 }
-Viewer {
+Read {
  inputs 0
- frame 120
+ file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/fractal_test/test_0.####.exr
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ last 280
+ origlast 280
+ origset true
+ name Read10
+ xpos 17429
+ ypos 1426
+}
+set N954da40 [stack 0]
+VectorGenerator {
+ motionEstimation Regularized
+ name VectorGenerator1
+ xpos 17440
+ ypos 1584
+}
+push 0
+push 0
+push $N954da40
+MotionBlur {
+ inputs 4
+ shutterSamples 5
+ shutterTime 0.1
+ motionEstimation Regularized
+ name MotionBlur1
+ xpos 17610
+ ypos 1583
+}
+Write {
+ file /home/ob1/software/nuke/dev/raymarch/images/fractal_loop.mov
+ file_type mov
+ mov64_format "mov (QuickTime / MOV)"
+ mov64_codec ap4x
+ mov64_pixel_format {{0}}
+ mov64_bitrate 20000
+ mov64_bitrate_tolerance 40000000
+ mov64_quality_min 2
+ mov64_quality_max 31
+ mov64_gop_size 12
+ mov64_b_frames 0
+ checkHashOnRead false
+ version 1
+ name Write2
+ xpos 17774
+ ypos 1581
+}
+Read {
+ inputs 0
+ file /home/ob1/software/nuke/dev/raymarch/images/fractal_loop.mov
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ last 280
+ origlast 280
+ origset true
+ name Read11
+ xpos 17792
+ ypos 1410
+}
+Viewer {
+ frame 217
  frame_range 84-96
  colour_sample_bbox {0.21875 -0.0625 0.220703125 -0.060546875}
  name Viewer1
