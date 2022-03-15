@@ -134,7 +134,7 @@ float distanceToMandelbulb(
     float dradius = 1;
     float radius = 0;
 
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < 13; i++) {
         radius = length(currentPosition);
 
         if (radius > 2) {
