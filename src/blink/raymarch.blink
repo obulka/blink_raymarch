@@ -4,6 +4,7 @@
 #include "mmath.h"
 #include "sdfs.h"
 #include "sdfTransforms.h"
+#include "sdTransforms.h"
 
 
 kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
@@ -18,10 +19,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // the shape positons.xyz
     Image<eRead, eAccessRandom, eEdgeNone> positions;
 
-    // the shape rotations (TODO)
+    // the shape rotations
     Image<eRead, eAccessRandom, eEdgeNone> rotations;
 
-    // the shape scales.xyz (some shapes may not use all channels)
+    // the shape dimensions.xyz scale.w (some shapes may not use all channels, all use w)
     Image<eRead, eAccessRandom, eEdgeNone> scales;
 
     // the shape colours.xyz
@@ -235,21 +236,29 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     {
         float distance = maxRayDistance;
 
+        float3x3 rotMatrix;
+        float3 transformedRay;
         for (int i=0; i < objectTextureHeight; i++)
         {
             for (int j=0; j < objectTextureWidth; j++)
             {
                 SampleType(positions) position = positions(j, i);
-                //SampleType(spheres) rotation = spheres(j, i);
+                SampleType(rotations) rotation = rotations(j, i);
                 SampleType(scales) scale = scales(j, i);
                 SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);
 
-                float nextDistance = distanceToObject(
-                    rayOrigin,
-                    (int) shapeProperty.x,
-                    float3(position.x, position.y, position.z),
-                    float3(scale.x, scale.y, scale.z)
+                rotationMatrix(float3(rotation.x, rotation.y, rotation.z), rotMatrix);
+                matmul(
+                    rotMatrix.invert(),
+                    rayOrigin - float3(position.x, position.y, position.z),
+                    transformedRay
                 );
+
+                float nextDistance = distanceToObject(
+                    transformedRay / scale.w,
+                    (int) shapeProperty.x,
+                    float3(scale.x, scale.y, scale.z)
+                ) * scale.w;
 
                 if (nextDistance < distance)
                 {

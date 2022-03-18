@@ -1,6 +1,8 @@
 //
 // SDF Modifiers
 //
+// These modify the ray position before computing the SD
+//
 
 
 float3 positionToInfiniteRepetition(const float3 &position, const float3 &spacing)

@@ -93,6 +93,23 @@ void matmul(const float4x4 &m, const float4 &v, float4 &out)
 }
 
 
+/**
+ * Multiply a 3d vector by a 3x3 matrix.
+ *
+ * @arg m: The matrix that will transform the vector
+ * @arg v: The vector to transform
+ * @arg out: The location to store the resulting vector
+ */
+void matmul(const float3x3 &m, const float3 &v, float3 &out)
+{
+    out = float3(
+        m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z,
+        m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z,
+        m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z
+    );
+}
+
+
 float3 reflectRayOffSurface(
     const float3 &incidentRayDirection,
     const float3 &surfaceNormalDirection)
@@ -101,6 +118,21 @@ float3 reflectRayOffSurface(
         incidentRayDirection
         - 2 * dot(incidentRayDirection, surfaceNormalDirection) * surfaceNormalDirection
     );
+}
+
+
+void rotationMatrix(const float3 &angles, float3x3 &out)
+{
+    // Why tf cant you init a float3x3 normally??
+    out[0][0] = cos(angles.y) * cos(angles.z);
+    out[0][1] = sin(angles.x) * sin(angles.y) * cos(angles.z) - cos(angles.x) * sin(angles.z);
+    out[0][2] = cos(angles.x) * sin(angles.y) * cos(angles.z) + sin(angles.x) * sin(angles.z);
+    out[1][0] = cos(angles.y) * sin(angles.z);
+    out[1][1] = sin(angles.x) * sin(angles.y) * sin(angles.z) + cos(angles.x) * cos(angles.z);
+    out[1][2] = cos(angles.x) * sin(angles.y) * sin(angles.z) - sin(angles.x) * cos(angles.z);
+    out[2][0] = -sin(angles.y);
+    out[2][1] = sin(angles.x) * cos(angles.y);
+    out[2][2] = cos(angles.x) * cos(angles.y);
 }
 
 

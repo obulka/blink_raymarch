@@ -12,12 +12,9 @@
  *
  * @returns: The minimum distance from the point to the shape
  */
-float distanceToSphere(
-        const float3 &position,
-        const float3 &centre,
-        const float radius)
+float distanceToSphere(const float3 &position, const float radius)
 {
-    return length(centre - position) - radius;
+    return length(position) - radius;
 }
 
 /**
@@ -29,12 +26,9 @@ float distanceToSphere(
  *
  * @returns: The minimum distance from the point to the shape
  */
-float distanceToRectangularPrism(
-        const float3 &position,
-        const float3 &centre,
-        const float3 &size)
+float distanceToRectangularPrism(const float3 &position, const float3 &size)
 {
-    const float3 boundingSphereVector = fabs(position - centre) - size;
+    const float3 boundingSphereVector = fabs(position) - size;
     float ud = length(max(boundingSphereVector, float3(0, 0, 0)));
     float n = max(
         max(min(boundingSphereVector.x, 0.0f), min(boundingSphereVector.y, 0.0f)),
@@ -53,16 +47,12 @@ float distanceToRectangularPrism(
  *
  * @returns: The minimum distance from the point to the shape
  */
-float distanceToTorus(
-        const float3 &position,
-        const float3 &centre,
-        const float2 &radii)
+float distanceToTorus(const float3 &position, const float2 &radii)
 {
-    const float3 centreVector = position - centre;
-    float2 centreXZ = float2(centreVector.x, centreVector.z);
+    float2 positionXZ = float2(position.x, position.z);
     float2 inner = float2(
-        length(centreXZ) - radii.y,
-        position.y - centre.y
+        length(positionXZ) - radii.y,
+        position.y
     );
 
     return length(inner) - radii.x;
@@ -77,12 +67,9 @@ float distanceToTorus(
  *
  * @returns: The minimum distance from the point to the shape
  */
-float distanceToTriangularPrism(
-        const float3 &position,
-        const float3 &centre,
-        const float2 &size)
+float distanceToTriangularPrism(const float3 &position, const float2 &size)
 {
-    const float3 centreVector = fabs(position - centre);
+    const float3 centreVector = fabs(position);
 
     return max(
         centreVector.z - size.y,
@@ -102,12 +89,9 @@ float distanceToTriangularPrism(
  *
  * @returns: The minimum distance from the point to the shape
  */
-float distanceToCylinder(
-        const float3 &position,
-        const float3 &centre,
-        const float2 &size)
+float distanceToCylinder(const float3 &position, const float2 &size)
 {
-    const float3 centreVector = fabs(position - centre);
+    const float3 centreVector = fabs(position);
 
     float2 distanceToXZ = float2(centreVector.x, centreVector.z);
 
@@ -124,13 +108,9 @@ float distanceToCylinder(
  *
  * @returns: The minimum distance from the point to the shape
  */
-float distanceToMandelbulb(
-        const float3 &position,
-        const float3 &centre,
-        const float power)
+float distanceToMandelbulb(const float3 &position, const float power)
 {
-    const float3 centreVector = position - centre;
-    float3 currentPosition = centreVector;
+    float3 currentPosition = position;
     float dradius = 1;
     float radius = 0;
 
@@ -153,40 +133,36 @@ float distanceToMandelbulb(
             sin(phi) * sin(theta),
             cos(theta)
         );
-        currentPosition += centreVector;
+        currentPosition += position;
     }
 
     return 0.5f * log(radius) * radius / dradius;
 }
 
 
-float distanceToObject(
-        const float3 &position,
-        const int shapeType,
-        const float3 &objectPosition,
-        const float3 &scale)
+float distanceToObject(const float3 &position, const int shapeType, const float3 &scale)
 {
     if (shapeType == 0)
     {
-        return distanceToSphere(position, objectPosition, scale.x);
+        return distanceToSphere(position, scale.x);
     }
     if (shapeType == 1)
     {
-        return distanceToRectangularPrism(position, objectPosition, scale);
+        return distanceToRectangularPrism(position, scale);
     }
 
     float2 size = float2(scale.x, scale.y);
     if (shapeType == 2)
     {
-        return distanceToCylinder(position, objectPosition, size);
+        return distanceToCylinder(position, size);
     }
     if (shapeType == 3)
     {
-        return distanceToTriangularPrism(position, objectPosition, size);
+        return distanceToTriangularPrism(position, size);
     }
     if (shapeType == 4)
     {
-        return distanceToTorus(position, objectPosition, size);
+        return distanceToTorus(position, size);
     }
-    return distanceToMandelbulb(position, objectPosition, size.x);
+    return distanceToMandelbulb(position, size.x);
 }
