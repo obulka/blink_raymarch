@@ -40,7 +40,8 @@ float distanceToRectangularPrism(const float3 &position, const float3 &size)
  * Compute the signed distance from a point to a torus
  *
  * @arg position: The point to get the distance to from the object
- * @arg radii: The inner and outer radii of the torus
+ * @arg radii: The radius of the 'tube' of the torus, and the radius of
+ *     the 'ring' itself
  *
  * @returns: The minimum distance from the point to the shape
  */
@@ -140,7 +141,8 @@ float distanceToMandelbulb(const float3 &position, const float power)
 
 
 /**
- * Compute the signed distance from a point to a rectangular prism
+ * Compute the signed distance from a point to the frame of a
+ * rectangular prism
  *
  * @arg position: The point to get the distance to from the object
  * @arg dims: The length, width, depth, and thickness of the prism
@@ -162,6 +164,34 @@ float distanceToRectangularPrismFrame(const float3 &position, const float4 &dims
         length(max(float3(internal.x, internal.y, external.z), float3(0)))
             + min(max(internal.x, max(internal.y, external.z)), 0.0f)
     );
+}
+
+
+/**
+ * Compute the signed distance from a point to a capped torus
+ *
+ * @arg position: The point to get the distance to from the object
+ * @arg dims: The radius of the 'tube' of the torus, the radius of
+ *     the 'ring' itself, and the angle to cap at in range (0-PI)
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToCappedTorus(const float3 &position, const float3 &dims)
+{
+    float2 cap = float2(sin(dims.z), cos(dims.z));
+    float3 pos = float3(fabs(position.x), position.y, position.z);
+    float2 posXY = float2(pos.x, pos.y);
+
+    float k;
+    if (cap.y * pos.x > cap.x * pos.y)
+    {
+        k = dot(posXY, float2(cap.x, cap.y));
+    }
+    else
+    {
+        k = length(posXY);
+    }
+    return sqrt(dot(pos, pos) + dims.x * dims.x - 2.0f * dims.x * k) - dims.y;
 }
 
 
@@ -200,11 +230,11 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
     {
         return distanceToRectangularPrismFrame(position, dimensions);
     }
-    /*
-    if (shapeType == 5)
+    if (shapeType == 7)
     {
-        return distanceToMandelbulb(position, dim1);
+        return distanceToCappedTorus(position, dim3);
     }
+    /*
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dim1);
