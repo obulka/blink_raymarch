@@ -7,7 +7,6 @@
  * Compute the signed distance from a point to a sphere
  *
  * @arg position: The point to get the distance to from the object
- * @arg centre: The object centre
  * @arg radius: The radius of the sphere
  *
  * @returns: The minimum distance from the point to the shape
@@ -21,7 +20,6 @@ float distanceToSphere(const float3 &position, const float radius)
  * Compute the signed distance from a point to a rectangular prism
  *
  * @arg position: The point to get the distance to from the object
- * @arg centre: The object centre
  * @arg size: The length, width, and depth of the prism
  *
  * @returns: The minimum distance from the point to the shape
@@ -42,39 +40,36 @@ float distanceToRectangularPrism(const float3 &position, const float3 &size)
  * Compute the signed distance from a point to a torus
  *
  * @arg position: The point to get the distance to from the object
- * @arg centre: The object centre
  * @arg radii: The inner and outer radii of the torus
  *
  * @returns: The minimum distance from the point to the shape
  */
 float distanceToTorus(const float3 &position, const float2 &radii)
 {
-    float2 positionXZ = float2(position.x, position.z);
-    float2 inner = float2(
-        length(positionXZ) - radii.y,
-        position.y
-    );
-
-    return length(inner) - radii.x;
+    return length(
+        float2(
+            length(float2(position.x, position.z)) - radii.y,
+            position.y
+        )
+    ) - radii.x;
 }
 
 /**
  * Compute the signed distance from a point to a triangular prism
  *
  * @arg position: The point to get the distance to from the object
- * @arg centre: The object centre
  * @arg size: The height and depth of the prism
  *
  * @returns: The minimum distance from the point to the shape
  */
 float distanceToTriangularPrism(const float3 &position, const float2 &size)
 {
-    const float3 centreVector = fabs(position);
+    const float3 absPosition = fabs(position);
 
     return max(
-        centreVector.z - size.y,
+        absPosition.z - size.y,
         max(
-            centreVector.x * 0.866025f + position.y * 0.5f,
+            absPosition.x * 0.866025f + position.y * 0.5f,
             -position.y
         ) - size.x * 0.5f
     );
@@ -84,18 +79,22 @@ float distanceToTriangularPrism(const float3 &position, const float2 &size)
  * Compute the signed distance from a point to a cylinder
  *
  * @arg position: The point to get the distance to from the object
- * @arg centre: The object centre
  * @arg size: The height and radius of the cylinder
  *
  * @returns: The minimum distance from the point to the shape
  */
 float distanceToCylinder(const float3 &position, const float2 &size)
 {
-    const float3 centreVector = fabs(position);
+    const float3 absPosition = fabs(position);
 
-    float2 distanceToXZ = float2(centreVector.x, centreVector.z);
+    float2 absPositionXZ = float2(absPosition.x, absPosition.z);
 
-    float2 d = fabs(float2(length(distanceToXZ), centreVector.y)) - size;
+    float2 d = fabs(
+        float2(
+            length(float2(absPosition.x, absPosition.z)),
+            absPosition.y
+        )
+    ) - size;
 
     return length(max(d, float2(0, 0))) + min(max(d.x, d.y), 0.0f);
 }
@@ -140,29 +139,85 @@ float distanceToMandelbulb(const float3 &position, const float power)
 }
 
 
-float distanceToObject(const float3 &position, const int shapeType, const float3 &scale)
+/**
+ * Compute the signed distance from a point to a rectangular prism
+ *
+ * @arg position: The point to get the distance to from the object
+ * @arg dims: The length, width, depth, and thickness of the prism
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToRectangularPrismFrame(const float3 &position, const float4 &dims)
 {
+    float3 external = fabs(position) - float3(dims.x, dims.y, dims.z);
+    float3 internal = fabs(external + dims.w) - dims.w;
+
+    return min(
+        min(
+            length(max(float3(external.x, internal.y, internal.z), float3(0)))
+                + min(max(external.x, max(internal.y, internal.z)), 0.0f),
+            length(max(float3(internal.x, external.y, internal.z), float3(0)))
+                + min(max(internal.x, max(external.y, internal.z)), 0.0f)
+        ),
+        length(max(float3(internal.x, internal.y, external.z), float3(0)))
+            + min(max(internal.x, max(internal.y, external.z)), 0.0f)
+    );
+}
+
+
+float distanceToObject(const float3 &position, const int shapeType, const float4 &dimensions)
+{
+    float dim1 = dimensions.x;
     if (shapeType == 0)
     {
-        return distanceToSphere(position, scale.x);
-    }
-    if (shapeType == 1)
-    {
-        return distanceToRectangularPrism(position, scale);
+        return distanceToSphere(position, dim1);
     }
 
-    float2 size = float2(scale.x, scale.y);
+    float3 dim3 = float3(dimensions.x, dimensions.y, dimensions.z);
+    if (shapeType == 1)
+    {
+        return distanceToRectangularPrism(position, dim3);
+    }
+
+    float2 dim2 = float2(dimensions.x, dimensions.y);
     if (shapeType == 2)
     {
-        return distanceToCylinder(position, size);
+        return distanceToCylinder(position, dim2);
     }
     if (shapeType == 3)
     {
-        return distanceToTriangularPrism(position, size);
+        return distanceToTriangularPrism(position, dim2);
     }
     if (shapeType == 4)
     {
-        return distanceToTorus(position, size);
+        return distanceToTorus(position, dim2);
     }
-    return distanceToMandelbulb(position, size.x);
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dim1);
+    }
+    if (shapeType == 6)
+    {
+        return distanceToRectangularPrismFrame(position, dimensions);
+    }
+    /*
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dim1);
+    }
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dim1);
+    }
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dim1);
+    }
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dim1);
+    }
+    */
+
+    return 0;
 }

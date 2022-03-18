@@ -23,7 +23,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessRandom, eEdgeNone> rotations;
 
     // the shape dimensions.xyz scale.w (some shapes may not use all channels, all use w)
-    Image<eRead, eAccessRandom, eEdgeNone> scales;
+    Image<eRead, eAccessRandom, eEdgeNone> dimensions;
 
     // the shape colours.xyz
     Image<eRead, eAccessRandom, eEdgeNone> colours;
@@ -244,7 +244,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             {
                 SampleType(positions) position = positions(j, i);
                 SampleType(rotations) rotation = rotations(j, i);
-                SampleType(scales) scale = scales(j, i);
+                SampleType(dimensions) dimension = dimensions(j, i);
                 SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);
 
                 rotationMatrix(float3(rotation.x, rotation.y, rotation.z), rotMatrix);
@@ -255,10 +255,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 float nextDistance = distanceToObject(
-                    transformedRay / scale.w,
+                    transformedRay / position.w,
                     (int) shapeProperty.x,
-                    float3(scale.x, scale.y, scale.z)
-                ) * scale.w;
+                    dimension
+                ) * position.w;
 
                 if (nextDistance < distance)
                 {
