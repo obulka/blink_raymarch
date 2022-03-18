@@ -265,6 +265,23 @@ float distanceToLink(
 
 
 /**
+ * Compute the signed distance from a point to a chain link
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg radius: The radius (xz-plane) of the cylinder
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToInfiniteCylinder(
+        const float3 &position,
+        const float radius)
+{
+    return length(float2(position.x, position.z)) - radius;
+}
+
+
+
+/**
  * Compute the signed distance from a point to a capped torus
  *
  * @arg position: The point to get the distance to, from the object
@@ -335,11 +352,11 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
-    /*
-    if (shapeType == 5)
+    if (shapeType == 9)
     {
-        return distanceToMandelbulb(position, dimX);
+        return distanceToInfiniteCylinder(position, dimensions.x);
     }
+    /*
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
