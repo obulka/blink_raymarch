@@ -236,32 +236,32 @@ float distanceToCappedTorus(
 
 
 /**
- * Compute the signed distance from a point to a capped torus
+ * Compute the signed distance from a point to a chain link
  *
  * @arg position: The point to get the distance to, from the object
- * @arg dims: The radius of the 'tube' of the torus, the radius of
- *     the 'ring', and the angle to cap at in range (0-PI)
+ * @arg width: The width (x-axis) of the link,
+ *     measured from origin to center of the 'tube'
+ * @arg height: The height (y-axis) of the link
+ *     measured from origin to the base of the cap (ie. 0 is a torus)
+ * @arg tubeRadius: The radius of the tube that makes the link
  *
  * @returns: The minimum distance from the point to the shape
-float distanceToLink(const float3 &position, const float3 &dims)
-{
-    float2 cap = float2(sin(dims.z), cos(dims.z));
-    float3 pos = float3(fabs(position.x), position.y, position.z);
-    float2 posXY = float2(pos.x, pos.y);
-
-    float k;
-    if (cap.y * pos.x > cap.x * pos.y)
-    {
-        k = dot(posXY, float2(cap.x, cap.y));
-    }
-    else
-    {
-        k = length(posXY);
-    }
-    return sqrt(dot(pos, pos) + dims.x * dims.x - 2.0f * dims.x * k) - dims.y;
-}
  */
+float distanceToLink(
+        const float3 &position,
+        const float width,
+        const float height,
+        const float tubeRadius)
+{
+    float2 transformedPositionXY = float2(
+        position.x,
+        max(fabs(position.y) - height, 0.0f)
+    );
 
+    return length(
+        float2(length(transformedPositionXY) - width, position.z)
+    ) - tubeRadius;
+}
 
 
 /**
@@ -326,7 +326,6 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
-    /*
     if (shapeType == 8)
     {
         return distanceToLink(
@@ -336,6 +335,7 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
+    /*
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
