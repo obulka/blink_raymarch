@@ -56,6 +56,17 @@ float3 offsetPoint(
 
 /**
  * Get the value of sky the ray would hit at infinite distance
+ *
+ * @returns: Cylindrical coordinates without angle, (r, h)
+ */
+float2 cartesianToCylindrical(const float3 &coordinates)
+{
+    return float2(length(float2(coordinates.x, coordinates.z)), coordinates.y);
+}
+
+
+/**
+ * Get the value of sky the ray would hit at infinite distance
  */
 float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float thetaOffset)
 {

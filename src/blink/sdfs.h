@@ -298,7 +298,7 @@ float distanceToInfiniteCylinder(const float3 &position, const float radius)
 
 
 /**
- * Compute the min distance from a point to a chain link
+ * Compute the min distance from a point to a cone
  * (y-axis aligned) The tip of the cone is at the origin, and it opens
  * up the y-axis
  *
@@ -311,31 +311,63 @@ float distanceToInfiniteCylinder(const float3 &position, const float radius)
  */
 float distanceToCone(const float3 &position, const float angle, const float height)
 {
-    // Dimensions of the cone
-    float coneBaseRadius = fabs(height * tan(angle));
-    // The corner of the 2D triangle making up the cone
     // Cylindrical coordinates (r, h), ignoring the angle due to symmetry
-    float2 coneExtent = float2(coneBaseRadius, height);
+    float2 cylindricalPosition = cartesianToCylindrical(position);
 
-    float positionHeight = position.y;
-    float positionRadius = length(float2(position.x, position.z));
-    float2 cylindricalPosition = float2(positionRadius, positionHeight);
+    // The cylindrical coordinates of the edge of the cone base
+    float2 cylindricalBound = float2(fabs(height * tan(angle)), height);
 
-    float2 a = (
-        cylindricalPosition - coneExtent * saturate(
-            dot(cylindricalPosition, coneExtent)
-            / dot(coneExtent, coneExtent)
+    float2 coneEdgeToPosition = (
+        cylindricalPosition - cylindricalBound * saturate(
+            dot(cylindricalPosition, cylindricalBound)
+            / dot(cylindricalBound, cylindricalBound)
         )
     );
-    float2 b = cylindricalPosition - float2(
-        coneExtent * saturate(positionRadius / coneBaseRadius),
-        coneExtent
+    float2 coneRadialToPosition = cylindricalPosition - cylindricalBound * float2(
+        saturate(cylindricalPosition.x / cylindricalBound.x),
+        1
     );
 
-    float k = sign(height);
-    float d = min(dot(a, a), dot(b, b));
-    float s = max(k * (positionRadius * height - positionHeight * coneBaseRadius), k * (positionHeight - height));
-    return sqrt(d) * sign(s);
+    float heightSign = sign(height);
+    float inside = sign(max(
+        heightSign * (cylindricalPosition.x * height - cylindricalPosition.y * cylindricalBound.x),
+        heightSign * (cylindricalPosition.y - height)
+    ));
+    return inside * sqrt(min(
+        dot(coneEdgeToPosition, coneEdgeToPosition),
+        dot(coneRadialToPosition, coneRadialToPosition)
+    ));
+}
+
+
+/**
+ * Compute the min distance from a point to an infinite cone
+ * (y-axis aligned) The tip of the cone is at the origin, and it opens
+ * up the y-axis
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg angle: The angle between the tip and base of the cone [0-PI/2)
+ *     measured between the y-axis and wall of the cone
+ * 
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToInfiniteCone(const float3 &position, const float angle)
+{
+    // The normalized cylindrical coordinates of the edge of the cone base
+    float2 cylindricalBound = float2(sin(angle), cos(angle));
+
+    // Cylindrical coordinates (r, h), ignoring the angle due to symmetry
+    float2 cylindricalPosition = cartesianToCylindrical(position);
+
+    float inside = sign(
+        cylindricalPosition.x * cylindricalBound.y
+        - cylindricalPosition.y * cylindricalBound.x
+    );
+
+    return inside * length(
+        cylindricalPosition
+        - cylindricalBound * positivePart(dot(cylindricalPosition, cylindricalBound))
+    );
 }
 
 
@@ -418,13 +450,13 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
     {
         return distanceToCone(position, dimensions.x, dimensions.y);
     }
-
-    /*
-    if (shapeType == 5)
+    if (shapeType == 11)
     {
-        return distanceToMandelbulb(position, dimX);
+        return distanceToInfiniteCone(position, dimensions.x);
     }
 
+
+    /*
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
