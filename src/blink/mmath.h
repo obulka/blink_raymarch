@@ -105,7 +105,33 @@ float saturate(float value)
  */
 float2 saturate(const float2 &value)
 {
-    return float2(saturate(value.x), saturate(value.y));
+    return clamp(value, float2(0), float2(1));
+}
+
+
+/**
+ * Saturate a value ie. clamp between 0 and 1
+ *
+ * @args value: The value to saturate
+ *
+ * @returns: The clamped value
+ */
+float3 saturate(const float3 &value)
+{
+    return clamp(value, float3(0), float3(1));
+}
+
+
+/**
+ * Saturate a value ie. clamp between 0 and 1
+ *
+ * @args value: The value to saturate
+ *
+ * @returns: The clamped value
+ */
+float4 saturate(const float4 &value)
+{
+    return clamp(value, float4(0), float4(1));
 }
 
 

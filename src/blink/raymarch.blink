@@ -217,7 +217,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             skyFormatHeight - (skyBoxPixelSize.y * angles.y)
         );
 
-        return skyBoxPixel;
+        return saturate(skyBoxPixel);
     }
 
 
@@ -537,7 +537,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     readSkyValue(direction),
                     getHazeAmount(distanceTravelled - lastHitDistance)
                 ),
-                iterGlowAmount * iterations
+                saturate(iterGlowAmount * iterations)
             ),
             rayColour,
             rayStrength

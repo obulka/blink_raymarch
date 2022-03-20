@@ -373,6 +373,8 @@ float distanceToInfiniteCone(const float3 &position, const float angle)
 
 /**
  * Compute the min distance from a point to a plane
+ * Anything underneath the plane, as defined by the normal direction
+ * pointing above, will be considered inside
  *
  * @arg position: The point to get the distance to, from the object
  * @arg normal: The normal direction of the plane
