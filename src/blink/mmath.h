@@ -3,6 +3,48 @@
 //
 
 
+float maxComponent(const float3 &vector)
+{
+    return max(vector.x, max(vector.y, vector.z));
+}
+
+
+float3 positivePart(const float3 &vector)
+{
+    return max(vector, float3(0));
+}
+
+
+float2 positivePart(const float2 &vector)
+{
+    return max(vector, float2(0));
+}
+
+
+float positivePart(const float value)
+{
+    return max(value, 0.0f);
+}
+
+
+float3 negativePart(const float3 &vector)
+{
+    return -min(vector, float3(0));
+}
+
+
+float2 negativePart(const float2 &vector)
+{
+    return -min(vector, float2(0));
+}
+
+
+float negativePart(const float value)
+{
+    return -min(value, 0.0f);
+}
+
+
 float3 offsetPoint(
         const float3 &point,
         const float3 &direction,
