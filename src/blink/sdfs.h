@@ -372,6 +372,20 @@ float distanceToInfiniteCone(const float3 &position, const float angle)
 
 
 /**
+ * Compute the min distance from a point to a plane
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg normal: The normal direction of the plane
+ * 
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToPlane(const float3 &position, const float3 &normal)
+{
+    return dot(position, normal);
+}
+
+
+/**
  * Compute the min distance from a point to a capped torus
  *
  * @arg position: The point to get the distance to, from the object
@@ -454,14 +468,17 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
     {
         return distanceToInfiniteCone(position, dimensions.x);
     }
+    if (shapeType == 12)
+    {
+        return distanceToPlane(
+            position,
+            normalize(float3(dimensions.x, dimensions.y, dimensions.z))
+        );
+    }
+
 
 
     /*
-    if (shapeType == 5)
-    {
-        return distanceToMandelbulb(position, dimX);
-    }
-
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
