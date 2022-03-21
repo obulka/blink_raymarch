@@ -218,17 +218,17 @@ float distanceToCone(const float3 &position, const float angle, const float heig
     // The cylindrical coordinates of the edge of the cone base
     float2 cylindricalBound = float2(fabs(height * tan(angle)), height);
 
+    // Vector from the top surface of the cone to the position given
+    float2 coneTopToPosition = cylindricalPosition - cylindricalBound * float2(
+        saturate(cylindricalPosition.x / cylindricalBound.x),
+        1
+    );
     // Vector from the edge of the cone to the position given
     float2 coneEdgeToPosition = (
         cylindricalPosition - cylindricalBound * saturate(
             dot(cylindricalPosition, cylindricalBound)
             / dot(cylindricalBound, cylindricalBound)
         )
-    );
-    // Vector from the top surface of the cone to the position given
-    float2 coneTopToPosition = cylindricalPosition - cylindricalBound * float2(
-        saturate(cylindricalPosition.x / cylindricalBound.x),
-        1
     );
 
     float heightSign = sign(height);
@@ -304,14 +304,15 @@ float distanceToCappedCone(
     // projected onto the xy-plane
     float2 upperCorner = float2(upperRadius, halfHeight);
     float2 lowerToUpperCorner = float2(upperRadius - lowerRadius, height);
-    float2 ca = float2(
+
+    float2 coneTopOrBottomToPosition = float2(
         cylindricalPosition.x - min(
             cylindricalPosition.x,
             (cylindricalPosition.y < 0.0f) ? lowerRadius : upperRadius
         ),
         fabs(cylindricalPosition.y) - halfHeight
     );
-    float2 cb = (
+    float2 coneEdgeToPosition = (
         cylindricalPosition
         - upperCorner
         + lowerToUpperCorner * saturate(
@@ -319,8 +320,18 @@ float distanceToCappedCone(
             / dot(lowerToUpperCorner, lowerToUpperCorner)
         )
     );
-    float s = (cb.x < 0.0f && ca.y < 0.0f) ? -1.0f : 1.0f;
-    return s * minLength(ca, cb);
+
+    float inside;
+    if (coneEdgeToPosition.x < 0.0f && coneTopOrBottomToPosition.y < 0.0f)
+    {
+        inside = -1.0f;
+    }
+    else
+    {
+        inside = 1.0f;
+    }
+
+    return inside * minLength(coneTopOrBottomToPosition, coneEdgeToPosition);
 }
 
 
