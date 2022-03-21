@@ -418,7 +418,10 @@ float distanceToPlane(const float3 &position, const float3 &normal)
  *
  * @returns: The minimum distance from the point to the shape
  */
-float distanceToHexagonalPrism(const float3 &position, const float height, const float depth)
+float distanceToHexagonalPrism(
+        const float3 &position,
+        const float height,
+        const float depth)
 {
     // -cos(-PI / 6.0f), -sin(-PI / 6.0f), -tan(-PI / 6.0f)
     const float2 kCosSin = float2(-0.86602540378f, 0.5f);
@@ -447,6 +450,36 @@ float distanceToHexagonalPrism(const float3 &position, const float height, const
         - negativePart(max(radialAndZDistance.x, radialAndZDistance.y))
     );
 }
+
+
+/**
+ * Compute the min distance from a point to a capsule.
+ * Oriented along the y-axis.
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg radius: The radius of the capsule
+ * @arg positiveHeight: The distance along the positive y-axis before
+ *     entering the dome
+ * @arg negativeHeight: The distance along the negative y-axis before
+ *     entering the dome
+ * 
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToCapsule(
+        const float3 &position,
+        const float radius,
+        const float positiveHeight,
+        const float negativeHeight)
+{
+    return length(float3(
+        position.x,
+        position.y - clamp(position.y, -negativeHeight, positiveHeight),
+        position.z
+    )) - radius;
+}
+
+
+
 
 
 /**
@@ -543,8 +576,33 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
     {
         return distanceToHexagonalPrism(position, dimensions.x, dimensions.y);
     }
+    if (shapeType == 14)
+    {
+        return distanceToCapsule(
+            position,
+            dimensions.x,
+            dimensions.y,
+            dimensions.z
+        );
+    }
 
     /*
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dimX);
+    }
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dimX);
+    }
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dimX);
+    }
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dimX);
+    }
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
