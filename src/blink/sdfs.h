@@ -3,9 +3,37 @@
 //
 
 
-float distanceToYAxis(const float3 &position)
+/**
+ * Compute the signed distance along a vector
+ *
+ * @arg vector: A vector from a point to the nearest surface of an
+ *     object.
+ *
+ * @returns: The signed length of the vector.
+ */
+float sdfLength(const float2 &vector)
 {
-    return length(float2(position.x, position.z));
+    return (
+        length(positivePart(vector))
+        - negativePart(maxComponent(vector))
+    );
+}
+
+
+/**
+ * Compute the signed distance along a vector
+ *
+ * @arg vector: A vector from a point to the nearest surface of an
+ *     object.
+ *
+ * @returns: The signed length of the vector.
+ */
+float sdfLength(const float3 &vector)
+{
+    return (
+        length(positivePart(vector))
+        - negativePart(maxComponent(vector))
+    );
 }
 
 
@@ -58,7 +86,7 @@ float distanceToRectangularPrism(
     const float3 prismToPosition = fabs(position) - float3(width, height, depth) / 2.0f;
     // Clamp the components that are inside the prism to the surface
     // before getting the distance
-    return length(positivePart(prismToPosition)) - negativePart(maxComponent(prismToPosition));
+    return sdfLength(prismToPosition);
 }
 
 
@@ -110,10 +138,10 @@ float distanceToCylinder(
         const float height)
 {
     // Cylindrical coordinates (r, h), ignoring the angle due to symmetry
-    float2 cylindricalPosition = float2(distanceToYAxis(position), fabs(position.y));
+    float2 cylindricalPosition = fabs(cartesianToCylindrical(position));
     float2 cylinderToPosition = cylindricalPosition - float2(radius, height / 2);
 
-    return length(positivePart(cylinderToPosition));
+    return sdfLength(cylinderToPosition);
 }
 
 
@@ -183,14 +211,9 @@ float distanceToRectangularPrismFrame(
     float3 innerReflected = fabs(prismToPosition + thickness) - thickness;
 
     return min(
-        min(
-            length(positivePart(float3(prismToPosition.x, innerReflected.y, innerReflected.z)))
-                - negativePart(max(prismToPosition.x, max(innerReflected.y, innerReflected.z))),
-            length(positivePart(float3(innerReflected.x, prismToPosition.y, innerReflected.z)))
-                - negativePart(max(innerReflected.x, max(prismToPosition.y, innerReflected.z)))
-        ),
-        length(positivePart(float3(innerReflected.x, innerReflected.y, prismToPosition.z)))
-            - negativePart(max(innerReflected.x, max(innerReflected.y, prismToPosition.z)))
+        sdfLength(float3(prismToPosition.x, innerReflected.y, innerReflected.z)),
+        sdfLength(float3(innerReflected.x, prismToPosition.y, innerReflected.z)),
+        sdfLength(float3(innerReflected.x, innerReflected.y, prismToPosition.z))
     );
 }
 
@@ -445,10 +468,7 @@ float distanceToHexagonalPrism(
     );
 
     // Return the positive distance if we are outside, negative if we are inside
-    return (
-        length(positivePart(radialAndZDistance))
-        - negativePart(max(radialAndZDistance.x, radialAndZDistance.y))
-    );
+    return sdfLength(radialAndZDistance);
 }
 
 
@@ -477,8 +497,6 @@ float distanceToCapsule(
         position.z
     )) - radius;
 }
-
-
 
 
 
@@ -585,12 +603,17 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
-
     /*
-    if (shapeType == 5)
+    if (shapeType == 15)
     {
-        return distanceToMandelbulb(position, dimX);
+        return distanceToMandelbulb(
+            position,
+            dimensions.x,
+            dimensions.y,
+            dimensions.z
+        );
     }
+
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);

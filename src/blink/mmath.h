@@ -3,49 +3,79 @@
 //
 
 
-float maxComponent(const float3 &vector)
+inline float min(const float value0, const float value1, const float value2)
+{
+    return min(value0, min(value1, value2));
+}
+
+
+inline float max(const float value0, const float value1, const float value2)
+{
+    return max(value0, max(value1, value2));
+}
+
+
+inline float maxComponent(const float3 &vector)
 {
     return max(vector.x, max(vector.y, vector.z));
 }
 
 
-float3 positivePart(const float3 &vector)
+inline float maxComponent(const float2 &vector)
+{
+    return max(vector.x, vector.y);
+}
+
+
+inline float minComponent(const float3 &vector)
+{
+    return min(vector.x, min(vector.y, vector.z));
+}
+
+
+inline float minComponent(const float2 &vector)
+{
+    return min(vector.x, vector.y);
+}
+
+
+inline float3 positivePart(const float3 &vector)
 {
     return max(vector, float3(0));
 }
 
 
-float2 positivePart(const float2 &vector)
+inline float2 positivePart(const float2 &vector)
 {
     return max(vector, float2(0));
 }
 
 
-float positivePart(const float value)
+inline float positivePart(const float value)
 {
     return max(value, 0.0f);
 }
 
 
-float3 negativePart(const float3 &vector)
+inline float3 negativePart(const float3 &vector)
 {
     return -min(vector, float3(0));
 }
 
 
-float2 negativePart(const float2 &vector)
+inline float2 negativePart(const float2 &vector)
 {
     return -min(vector, float2(0));
 }
 
 
-float negativePart(const float value)
+inline float negativePart(const float value)
 {
     return -min(value, 0.0f);
 }
 
 
-float3 offsetPoint(
+inline float3 offsetPoint(
         const float3 &point,
         const float3 &direction,
         const float offset)
@@ -54,14 +84,20 @@ float3 offsetPoint(
 }
 
 
+inline float distanceToYAxis(const float3 &position)
+{
+    return length(float2(position.x, position.z));
+}
+
+
 /**
  * Get the value of sky the ray would hit at infinite distance
  *
  * @returns: Cylindrical coordinates without angle, (r, h)
  */
-float2 cartesianToCylindrical(const float3 &coordinates)
+inline float2 cartesianToCylindrical(const float3 &coordinates)
 {
-    return float2(length(float2(coordinates.x, coordinates.z)), coordinates.y);
+    return float2(distanceToYAxis(coordinates), coordinates.y);
 }
 
 
@@ -90,7 +126,7 @@ float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float th
  *
  * @returns: The clamped value
  */
-float saturate(float value)
+inline float saturate(float value)
 {
     return clamp(value, 0.0f, 1.0f);
 }
@@ -103,7 +139,7 @@ float saturate(float value)
  *
  * @returns: The clamped value
  */
-float2 saturate(const float2 &value)
+inline float2 saturate(const float2 &value)
 {
     return clamp(value, float2(0), float2(1));
 }
@@ -116,7 +152,7 @@ float2 saturate(const float2 &value)
  *
  * @returns: The clamped value
  */
-float3 saturate(const float3 &value)
+inline float3 saturate(const float3 &value)
 {
     return clamp(value, float3(0), float3(1));
 }
@@ -129,7 +165,7 @@ float3 saturate(const float3 &value)
  *
  * @returns: The clamped value
  */
-float4 saturate(const float4 &value)
+inline float4 saturate(const float4 &value)
 {
     return clamp(value, float4(0), float4(1));
 }
@@ -141,7 +177,7 @@ float4 saturate(const float4 &value)
  * @arg worldMatrix: The world matrix
  * @arg position: The location to store the position
  */
-void positionFromWorldMatrix(const float4x4 &worldMatrix, float3 &position)
+inline void positionFromWorldMatrix(const float4x4 &worldMatrix, float3 &position)
 {
     position = float3(
         worldMatrix[0][3],
@@ -158,7 +194,7 @@ void positionFromWorldMatrix(const float4x4 &worldMatrix, float3 &position)
  * @arg v: The vector to transform
  * @arg out: The location to store the resulting vector
  */
-void matmul(const float4x4 &m, const float4 &v, float4 &out)
+inline void matmul(const float4x4 &m, const float4 &v, float4 &out)
 {
     for (int i=0; i < 4; i++)
     {
@@ -179,7 +215,7 @@ void matmul(const float4x4 &m, const float4 &v, float4 &out)
  * @arg v: The vector to transform
  * @arg out: The location to store the resulting vector
  */
-void matmul(const float3x3 &m, const float3 &v, float3 &out)
+inline void matmul(const float3x3 &m, const float3 &v, float3 &out)
 {
     out = float3(
         m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z,
@@ -189,7 +225,7 @@ void matmul(const float3x3 &m, const float3 &v, float3 &out)
 }
 
 
-float3 reflectRayOffSurface(
+inline float3 reflectRayOffSurface(
     const float3 &incidentRayDirection,
     const float3 &surfaceNormalDirection)
 {
@@ -200,7 +236,7 @@ float3 reflectRayOffSurface(
 }
 
 
-void rotationMatrix(const float3 &angles, float3x3 &out)
+inline void rotationMatrix(const float3 &angles, float3x3 &out)
 {
     // Why tf cant you init a float3x3 normally??
     out[0][0] = cos(angles.y) * cos(angles.z);
