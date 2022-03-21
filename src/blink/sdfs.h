@@ -10,7 +10,7 @@ float distanceToYAxis(const float3 &position)
 
 
 /**
- * Compute the min distance from a point to a circle
+ * Compute the min distance from a point to a circle.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg radius: The radius (xy-plane) of the ring of the torus
@@ -24,7 +24,7 @@ float distanceToCircle(const float2 &position, const float radius)
 
 
 /**
- * Compute the min distance from a point to a sphere
+ * Compute the min distance from a point to a sphere.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg radius: The radius of the sphere
@@ -38,8 +38,8 @@ float distanceToSphere(const float3 &position, const float radius)
 
 
 /**
- * Compute the min distance from a point to a rectangular prism
- * Centered at the origin
+ * Compute the min distance from a point to a rectangular prism.
+ * Centered at the origin.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg width: The width (x) of the prism
@@ -63,34 +63,40 @@ float distanceToRectangularPrism(
 
 
 /**
- * Compute the min distance from a point to a triangular prism
+ * Compute the min distance from a point to a triangular prism.
  *
  * @arg position: The point to get the distance to, from the object
- * @arg triangleEdgeLength: The triangular edge length (xy-plane)
- * @arg prismDepth: The depth (z-axis) of the prism
+ * @arg base: The equalateral triangles edge length (xy-plane)
+ * @arg depth: The depth (z-axis) of the prism
  *
  * @returns: The minimum distance from the point to the shape
  */
 float distanceToTriangularPrism(
         const float3 &position,
-        const float triangleEdgeLength,
-        const float prismDepth)
+        const float base,
+        const float depth)
 {
     const float3 absPosition = fabs(position);
 
+    // 0.28867513459f = tan(PI / 6.0f) / 2.0f, converts base length
+    // to the min distance from centroid to edge of triangle
+
+    // 0.86602540378f = cos(PI / 6.0f) = base / height
+    // 0.5f = sin(PI / 6.0f) = base / (2 * base)
+
     return max(
-        absPosition.z - prismDepth,
+        absPosition.z - depth,
         max(
-            absPosition.x * 0.866025f + position.y * 0.5f,
+            absPosition.x * 0.86602540378f + position.y * 0.5f,
             -position.y
-        ) - triangleEdgeLength * 0.5f
+        ) - 0.28867513459f * base
     );
 }
 
 
 /**
  * Compute the min distance from a point to a cylinder
- * Symmetric about the xz-plane
+ * Symmetric about the xz-plane.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg radius: The radius (xz-plane) of the cylinder
@@ -112,20 +118,23 @@ float distanceToCylinder(
 
 
 /**
- * Compute the min distance from a point to a mandelbulb
+ * Compute the min distance from a point to a mandelbulb.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg power: One greater than the axes of symmetry in the xy-plane
+ * @arg iterations: The number of iterations to compute, the higher this
+ *     is the slower it will compute, but the 'deeper' the fractal will
+ *     have detail.
  *
  * @returns: The minimum distance from the point to the shape
  */
-float distanceToMandelbulb(const float3 &position, const float power)
+float distanceToMandelbulb(const float3 &position, const float power, const int iterations)
 {
     float3 currentPosition = position;
     float dradius = 1;
     float radius = 0;
 
-    for (int i = 0; i < 13; i++) {
+    for (int i = 0; i < iterations; i++) {
         radius = length(currentPosition);
 
         if (radius > 2) {
@@ -153,7 +162,7 @@ float distanceToMandelbulb(const float3 &position, const float power)
 
 /**
  * Compute the min distance from a point to the frame of a
- * rectangular prism
+ * rectangular prism.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg width:  The width (x) of the frame
@@ -187,7 +196,7 @@ float distanceToRectangularPrismFrame(
 
 
 /**
- * Compute the min distance from a point to a torus
+ * Compute the min distance from a point to a torus.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg ringRadius: The radius (xy-plane) of the ring of the torus
@@ -212,7 +221,7 @@ float distanceToTorus(
 
 
 /**
- * Compute the min distance from a point to a capped torus
+ * Compute the min distance from a point to a capped torus.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg ringRadius: The radius (xy-plane) of the ring of the torus
@@ -252,7 +261,7 @@ float distanceToCappedTorus(
 
 
 /**
- * Compute the min distance from a point to a chain link
+ * Compute the min distance from a point to a chain link.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg width: The width (x-axis) of the link,
@@ -284,7 +293,7 @@ float distanceToLink(
 
 /**
  * Compute the min distance from a point to an infinite cylinder
- * (y-axis aligned)
+ * (y-axis aligned).
  *
  * @arg position: The point to get the distance to, from the object
  * @arg radius: The radius (xz-plane) of the cylinder
@@ -299,8 +308,8 @@ float distanceToInfiniteCylinder(const float3 &position, const float radius)
 
 /**
  * Compute the min distance from a point to a cone
- * (y-axis aligned) The tip of the cone is at the origin, and it opens
- * up the y-axis
+ * (y-axis aligned). The tip of the cone is at the origin, and it opens
+ * up the y-axis.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg angle: The angle between the tip and base of the cone [0-PI/2)
@@ -317,33 +326,39 @@ float distanceToCone(const float3 &position, const float angle, const float heig
     // The cylindrical coordinates of the edge of the cone base
     float2 cylindricalBound = float2(fabs(height * tan(angle)), height);
 
+    // Vector from the edge of the cone to the position given
     float2 coneEdgeToPosition = (
         cylindricalPosition - cylindricalBound * saturate(
             dot(cylindricalPosition, cylindricalBound)
             / dot(cylindricalBound, cylindricalBound)
         )
     );
-    float2 coneRadialToPosition = cylindricalPosition - cylindricalBound * float2(
+    // Vector from the top surface of the cone to the position given
+    float2 coneTopToPosition = cylindricalPosition - cylindricalBound * float2(
         saturate(cylindricalPosition.x / cylindricalBound.x),
         1
     );
 
     float heightSign = sign(height);
+
+    // -1 if the position is inside the cone, +1 if it is outside
     float inside = sign(max(
         heightSign * (cylindricalPosition.x * height - cylindricalPosition.y * cylindricalBound.x),
         heightSign * (cylindricalPosition.y - height)
     ));
+    // The distance is the minimum between the distance to the edge and
+    // the distance to the base
     return inside * sqrt(min(
         dot(coneEdgeToPosition, coneEdgeToPosition),
-        dot(coneRadialToPosition, coneRadialToPosition)
+        dot(coneTopToPosition, coneTopToPosition)
     ));
 }
 
 
 /**
  * Compute the min distance from a point to an infinite cone
- * (y-axis aligned) The tip of the cone is at the origin, and it opens
- * up the y-axis
+ * (y-axis aligned). The tip of the cone is at the origin, and it opens
+ * up the y-axis.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg angle: The angle between the tip and base of the cone [0-PI/2)
@@ -354,16 +369,21 @@ float distanceToCone(const float3 &position, const float angle, const float heig
 float distanceToInfiniteCone(const float3 &position, const float angle)
 {
     // The normalized cylindrical coordinates of the edge of the cone base
-    float2 cylindricalBound = float2(sin(angle), cos(angle));
+    float2 cylindricalBound = normalize(float2(sin(angle), cos(angle)));
 
     // Cylindrical coordinates (r, h), ignoring the angle due to symmetry
     float2 cylindricalPosition = cartesianToCylindrical(position);
 
+    // -1 if the position is inside the cone, +1 if it is outside
     float inside = sign(
         cylindricalPosition.x * cylindricalBound.y
         - cylindricalPosition.y * cylindricalBound.x
     );
 
+    // The shortest path is always to the cones edge, or tip if we are
+    // below it. The dot product projects the position onto the cone
+    // edge, and taking the positive part clamps the cone above the
+    // xz-plane
     return inside * length(
         cylindricalPosition
         - cylindricalBound * positivePart(dot(cylindricalPosition, cylindricalBound))
@@ -372,9 +392,9 @@ float distanceToInfiniteCone(const float3 &position, const float angle)
 
 
 /**
- * Compute the min distance from a point to a plane
+ * Compute the min distance from a point to a plane.
  * Anything underneath the plane, as defined by the normal direction
- * pointing above, will be considered inside
+ * pointing above, will be considered inside.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg normal: The normal direction of the plane
@@ -388,7 +408,49 @@ float distanceToPlane(const float3 &position, const float3 &normal)
 
 
 /**
- * Compute the min distance from a point to a capped torus
+ * Compute the min distance from a point to a hexagonal prism.
+ * The hexagonal face is parallel to the xy-plane, centered at the
+ * origin.
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg height: The height (y) of the prism
+ * @arg depth: The depth (z) of the prism
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToHexagonalPrism(const float3 &position, const float height, const float depth)
+{
+    // -cos(-PI / 6.0f), -sin(-PI / 6.0f), -tan(-PI / 6.0f)
+    const float2 kCosSin = float2(-0.86602540378f, 0.5f);
+    const float kTan = 0.57735026919f;
+    const float halfHeight = height / 2.0f;
+
+    const float3 absPosition = fabs(position);
+    float2 absPositionXY = float2(absPosition.x, absPosition.y);
+
+    absPositionXY += 2.0f * negativePart(dot(kCosSin, absPositionXY)) * kCosSin;
+
+    // Radial distance in xy-plane, and the distance along the z-axis
+    float2 radialAndZDistance = float2(
+        sign(absPositionXY.y - halfHeight) * length(
+            absPositionXY - float2(
+                clamp(absPositionXY.x, -kTan * halfHeight, kTan * halfHeight),
+                halfHeight
+            )
+        ),
+        absPosition.z - depth / 2.0f
+    );
+
+    // Return the positive distance if we are outside, negative if we are inside
+    return (
+        length(positivePart(radialAndZDistance))
+        - negativePart(max(radialAndZDistance.x, radialAndZDistance.y))
+    );
+}
+
+
+/**
+ * Compute the min distance from a point to a geometric object.
  *
  * @arg position: The point to get the distance to, from the object
  * @arg shapeType: The selection of shape to get the distance to, options:
@@ -428,7 +490,7 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
     }
     if (shapeType == 5)
     {
-        return distanceToMandelbulb(position, dimensions.x);
+        return distanceToMandelbulb(position, dimensions.x, (int) dimensions.y);
     }
     if (shapeType == 6)
     {
@@ -477,15 +539,12 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             normalize(float3(dimensions.x, dimensions.y, dimensions.z))
         );
     }
-
-
-
-    /*
-    if (shapeType == 5)
+    if (shapeType == 13)
     {
-        return distanceToMandelbulb(position, dimX);
+        return distanceToHexagonalPrism(position, dimensions.x, dimensions.y);
     }
 
+    /*
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
