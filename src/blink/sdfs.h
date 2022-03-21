@@ -32,6 +32,47 @@ inline float distanceToSphere(const float3 &position, const float radius)
 
 
 /**
+ * Compute the min distance from a point to a solid angle.
+ * The conical shape has its tip at the origin and opens up the y-axis.
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg radius: The radius of the sphere to cut the angle out of.
+ * @arg angle: The angle between the edge of the solid angle and the
+ *     y-axis on [0-PI] measured between the y-axis and wall of the
+ *     solid angle
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToSolidAngle(
+        const float3 &position,
+        const float radius,
+        const float angle)
+{
+    float2 cylindricalPosition = cartesianToCylindrical(position);
+
+    // The direction from the tip of the conical portion to where it
+    // meets the sphere
+    float2 coneEdgeDirection = float2(sin(angle), cos(angle));
+
+    // Distance to the sphere we cut the cone out of
+    float distanceToSphere = length(cylindricalPosition) - radius;
+    float distanceToCone = length(
+        cylindricalPosition - coneEdgeDirection * clamp(
+            dot(cylindricalPosition, coneEdgeDirection),
+            0.0f,
+            radius
+        )
+    );
+    float inside = sign(
+        coneEdgeDirection.y * cylindricalPosition.x
+        - coneEdgeDirection.x * cylindricalPosition.y
+    );
+
+    return max(distanceToSphere, inside * distanceToCone);
+}
+
+
+/**
  * Compute the min distance from a point to a rectangular prism.
  * Centered at the origin.
  *
@@ -258,15 +299,15 @@ float distanceToCone(const float3 &position, const float angle, const float heig
 float distanceToInfiniteCone(const float3 &position, const float angle)
 {
     // The normalized cylindrical coordinates of the edge of the cone base
-    float2 cylindricalBound = normalize(float2(sin(angle), cos(angle)));
+    float2 coneEdgeDirection = float2(sin(angle), cos(angle));
 
     // Cylindrical coordinates (r, h), ignoring the angle due to symmetry
     float2 cylindricalPosition = cartesianToCylindrical(position);
 
     // -1 if the position is inside the cone, +1 if it is outside
     float inside = sign(
-        cylindricalPosition.x * cylindricalBound.y
-        - cylindricalPosition.y * cylindricalBound.x
+        cylindricalPosition.x * coneEdgeDirection.y
+        - cylindricalPosition.y * coneEdgeDirection.x
     );
 
     // The shortest path is always to the cones edge, or tip if we are
@@ -275,7 +316,7 @@ float distanceToInfiniteCone(const float3 &position, const float angle)
     // xz-plane
     return inside * length(
         cylindricalPosition
-        - cylindricalBound * positivePart(dot(cylindricalPosition, cylindricalBound))
+        - coneEdgeDirection * positivePart(dot(cylindricalPosition, coneEdgeDirection))
     );
 }
 
@@ -490,7 +531,7 @@ float distanceToMandelbulb(const float3 &position, const float power, const int 
     float dradius = 1;
     float radius = 0;
 
-    for (int i = 0; i < iterations; i++) {
+    for (int i=0; i < iterations; i++) {
         radius = length(currentPosition);
 
         if (radius > 2) {
@@ -628,12 +669,12 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
+    if (shapeType == 16)
+    {
+        return distanceToSolidAngle(position, dimensions.x, dimensions.y);
+    }
 
     /*
-    if (shapeType == 5)
-    {
-        return distanceToMandelbulb(position, dimX);
-    }
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
