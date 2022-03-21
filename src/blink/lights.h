@@ -3,7 +3,7 @@
 //
 
 
-void directionalLightData(
+inline void directionalLightData(
         const float3 &pointOnSurface,
         const float3 &surfaceNormal,
         const float3 &light,
@@ -25,7 +25,7 @@ void directionalLightData(
 }
 
 
-void pointLightData(
+inline void pointLightData(
         const float3 &pointOnSurface,
         const float3 &surfaceNormal,
         const float3 &light,

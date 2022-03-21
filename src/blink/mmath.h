@@ -91,6 +91,71 @@ inline float distanceToYAxis(const float3 &position)
 
 
 /**
+ * Compute the signed distance along a vector
+ *
+ * @arg vector: A vector from a point to the nearest surface of an
+ *     object.
+ *
+ * @returns: The signed length of the vector.
+ */
+float sdfLength(const float2 &vector)
+{
+    return (
+        length(positivePart(vector))
+        - negativePart(maxComponent(vector))
+    );
+}
+
+
+/**
+ * Compute the signed distance along a vector
+ *
+ * @arg vector: A vector from a point to the nearest surface of an
+ *     object.
+ *
+ * @returns: The signed length of the vector.
+ */
+float sdfLength(const float3 &vector)
+{
+    return (
+        length(positivePart(vector))
+        - negativePart(maxComponent(vector))
+    );
+}
+
+/**
+ * Get the length of the shorter of two vectors.
+ *
+ * @arg vector0: The first vector to get the length of if it is the
+ *     shortest option
+ * @arg vector1: The second vector to get the length of if it is the
+ *     shortest option
+ *
+ * @returns: The shorter of the two lengths
+ */
+inline float minLength(const float2 &vector0, const float2 &vector1)
+{
+    return sqrt(min(dot(vector0, vector0), dot(vector1, vector1)));
+}
+
+
+/**
+ * Get the length of the shorter of two vectors.
+ *
+ * @arg vector0: The first vector to get the length of if it is the
+ *     shortest option
+ * @arg vector1: The second vector to get the length of if it is the
+ *     shortest option
+ *
+ * @returns: The shorter of the two lengths
+ */
+inline float minLength(const float3 &vector0, const float3 &vector1)
+{
+    return sqrt(min(dot(vector0, vector0), dot(vector1, vector1)));
+}
+
+
+/**
  * Get the value of sky the ray would hit at infinite distance
  *
  * @returns: Cylindrical coordinates without angle, (r, h)
@@ -168,6 +233,56 @@ inline float3 saturate(const float3 &value)
 inline float4 saturate(const float4 &value)
 {
     return clamp(value, float4(0), float4(1));
+}
+
+
+inline float mix(float x, float y, float a)
+{
+    return x + (y - x) * a;
+}
+
+
+inline float2 smoothMinN(float colour0, float colour1, float blendSize, float exponent)
+{
+    float m = 0.5f * pow(
+        positivePart(blendSize - fabs(colour0 - colour1)) / blendSize,
+        exponent
+    );
+
+    float s = m * blendSize / exponent;
+
+    return (colour0 < colour1) ? float2(colour0 - s, m) : float2(colour1 - s, m - 1.0f);
+}
+
+
+inline float4 blend(const float4 &colour0, const float4 &colour1, const float weight)
+{
+    return weight * colour0 + (1 - weight) * colour1;
+}
+
+
+inline float4 blend(
+    const float4 &colour0,
+    const float weight0,
+    const float4 &colour1,
+    const float weight1,
+    const float4 &colour2,
+    const float weight2,
+    const float4 &colour3)
+{
+    return blend(
+        colour0,
+        blend(
+            colour1,
+            blend(
+                colour2,
+                colour3,
+                weight2
+            ),
+            weight1
+        ),
+        weight0
+    );
 }
 
 
