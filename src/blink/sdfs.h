@@ -535,6 +535,49 @@ float distanceToCappedCone(
 
 
 /**
+ * Compute the min distance from a point to a rounded cone.
+ * Oriented along the y-axis.
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg height: The radius of the capsule
+ * @arg lowerRadius: The radius of the cone at y = 0
+ * @arg upperRadius: The radius of the cone at y = height
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToRoundedCone(
+        const float3 &position,
+        const float height,
+        const float lowerRadius,
+        const float upperRadius)
+{
+    float2 cylindricalPosition = cartesianToCylindrical(position);
+
+    // Get the unit vector that is normal to the conical surface in 2D
+    float parallelX = (upperRadius - lowerRadius) / height;
+    float parallelY = sqrt(1.0f - parallelX * parallelX);
+    float2 parallel = float2(parallelX, parallelY);
+
+    float positionProjectedOnCone = dot(cylindricalPosition, parallel);
+
+    if (positionProjectedOnCone < 0.0f)
+    {
+        // Closest point is on the lower sphere
+        return length(cylindricalPosition) - lowerRadius;
+    }
+    else if (positionProjectedOnCone > parallelY * height)
+    {
+        // Closest point is on the upper sphere
+        return length(cylindricalPosition - float2(0.0f, height)) - upperRadius;
+    }
+
+    // Closest point is on the conical surface, so project the position
+    // onto the cone's normal direction, then offset it by the lower radius
+    return dot(cylindricalPosition, float2(parallelY, -parallelX)) - lowerRadius;
+}
+
+
+/**
  * Compute the min distance from a point to a torus.
  *
  * @arg position: The point to get the distance to, from the object
@@ -862,12 +905,17 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
+    if (shapeType == 21)
+    {
+        return distanceToRoundedCone(
+            position,
+            dimensions.x,
+            dimensions.y,
+            dimensions.z
+        );
+    }
 
     /*
-    if (shapeType == 5)
-    {
-        return distanceToMandelbulb(position, dimX);
-    }
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
