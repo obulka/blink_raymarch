@@ -32,6 +32,35 @@ inline float distanceToSphere(const float3 &position, const float radius)
 
 
 /**
+ * Compute the inexact min distance from a point to an ellipsoid.
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg xRadius: The radius along the x-axis of the ellipsoid
+ * @arg yRadius: The radius along the y-axis of the ellipsoid
+ * @arg zRadius: The radius along the z-axis of the ellipsoid
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+inline float distanceToEllipsoid(
+        const float3 &position,
+        const float xRadius,
+        const float yRadius,
+        const float zRadius)
+{
+    float3 radii = float3(xRadius, yRadius, zRadius);
+
+    // Components of this vector that are < 1 are inside the ellipse
+    // when projected onto the plane the respective axis is normal to
+    float3 scaledPosition = position / radii;
+
+    // If this length is < 1 we are inside the ellipsoid
+    float scaledLength = length(scaledPosition);
+
+    return scaledLength * (scaledLength - 1.0f) / length(scaledPosition / radii);
+}
+
+
+/**
  * Compute the min distance from a point to a cut sphere.
  * The cut surface faces up the y-axis.
  *
@@ -824,12 +853,17 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
+    if (shapeType == 20)
+    {
+        return distanceToEllipsoid(
+            position,
+            dimensions.x,
+            dimensions.y,
+            dimensions.z
+        );
+    }
 
     /*
-    if (shapeType == 5)
-    {
-        return distanceToMandelbulb(position, dimX);
-    }
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
