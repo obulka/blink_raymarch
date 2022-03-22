@@ -32,6 +32,135 @@ inline float distanceToSphere(const float3 &position, const float radius)
 
 
 /**
+ * Compute the min distance from a point to a cut sphere.
+ * The cut surface faces up the y-axis.
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg radius: The radius of the sphere
+ * @arg height: The height (y-axis) below which the sphere is culled
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToCutSphere(
+        const float3 &position,
+        const float radius,
+        const float height)
+{
+    float2 cylindricalPosition = cartesianToCylindrical(position);
+
+    // The radius of the circle made by slicing the sphere
+    float cutRadiusSquared = radius * radius - height * height;
+    float cutRadius = sqrt(cutRadiusSquared);
+
+    // When the height is positive, if we are outside an infinite
+    // cone with its tip at the origin, opening through the edge of
+    // the cut surface, then the nearest point will be on the
+    // spherical surface. If the height is negative, we must be
+    // below the portion of the cone that is below the y-axis, but we
+    // must also be below a curved boundary separating the regions where
+    // the flat and spherical surfaces are closest
+    float nearestIsSpherical = max(
+        cutRadiusSquared * (radius - height + 2.0f * cylindricalPosition.y)
+            - (radius + height) * cylindricalPosition.x * cylindricalPosition.x,
+        cutRadius * cylindricalPosition.y - height * cylindricalPosition.x
+    );
+
+    if (nearestIsSpherical < 0.0f)
+    {
+        // Closest point is on the surface of the sphere
+        return length(cylindricalPosition) - radius;
+    }
+    else if (cylindricalPosition.x < cutRadius)
+    {
+        // Closest point is within the cut surface
+        return -height + cylindricalPosition.y;
+    }
+    else
+    {
+        // Closest point is on the edge of the cut surface
+        return length(cylindricalPosition - float2(cutRadius, height));
+    }
+}
+
+
+/**
+ * Compute the min distance from a point to a hollow sphere.
+ * The hollowed opening points up the y-axis.
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg radius: The radius of the sphere
+ * @arg height: The height (y-axis) at which an opening is created
+ * @arg thickness: The thickness of the walls of the hollow sphere
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToHollowSphere(
+        const float3 &position,
+        const float radius,
+        const float height,
+        const float thickness)
+{
+    float2 cylindricalPosition = cartesianToCylindrical(position);
+
+    float cutRadius = sqrt(radius * radius - height * height);
+
+    if (height * cylindricalPosition.x < cutRadius * cylindricalPosition.y)
+    {
+        // Closest point is on the rim
+        return length(cylindricalPosition - float2(cutRadius, height)) - thickness / 2.0f;
+    }
+    // Closest point is on the spherical surface
+    return fabs(length(cylindricalPosition) - radius) - thickness / 2.0f;
+}
+
+
+/**
+ * Compute the min distance from a point to a death star.
+ * The hollowed opening points up the y-axis.
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg solidRadius: The radius of the sphere that remains solid
+ * @arg hollowRadius: The radius of the sphere that is cut from the
+ *     solid
+ * @arg hollowHeight: The height (y-axis) of the center of the sphere
+ *     that is cut from the solid, above solidRadius + hollowRadius, the
+ *     result will be a standard sphere of radius solidRadius
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToDeathStar(
+        const float3 &position,
+        const float solidRadius,
+        const float hollowRadius,
+        const float hollowHeight)
+{
+    float2 cylindricalPosition = cartesianToCylindrical(position);
+
+    float solidRadiusSquared = solidRadius * solidRadius;
+
+    float cutHeight = (
+        solidRadiusSquared
+        - (hollowRadius * hollowRadius - hollowHeight * hollowHeight)
+    ) / (2.0f * hollowHeight);
+
+    float cutRadius = sqrt(solidRadiusSquared - cutHeight * cutHeight);
+
+    if (hollowHeight * positivePart(cutRadius - cylindricalPosition.x)
+            < cylindricalPosition.y * cutRadius - cylindricalPosition.x * cutHeight)
+    {
+        // Closest point is on the rim
+        return length(cylindricalPosition - float2(cutRadius, cutHeight));
+    }
+    return max(
+        // Closest point to the solid sphere
+        length(cylindricalPosition) - solidRadius,
+        // Closest point to the hollowed portion
+        hollowRadius - length(cylindricalPosition - float2(0, hollowHeight))
+    );
+}
+
+
+/**
  * Compute the min distance from a point to a solid angle.
  * The conical shape has its tip at the origin and opens up the y-axis.
  *
@@ -69,74 +198,6 @@ float distanceToSolidAngle(
     );
 
     return max(distanceToSphere, inside * distanceToCone);
-}
-
-
-/**
- * Compute the min distance from a point to a solid angle.
- * The conical shape has its tip at the origin and opens up the y-axis.
- *
- * @arg position: The point to get the distance to, from the object
- * @arg radius: The radius of the sphere
- * @arg height: The height (y-axis) below which the sphere is culled
- *
- * @returns: The minimum distance from the point to the shape
- */
-float distanceToCutSphere(
-        const float3 &position,
-        const float radius,
-        const float height)
-{
-    float w = sqrt(radius * radius - height * height);
-
-    float2 cylindricalPosition = cartesianToCylindrical(position);
-
-    float s = max(
-        (height - radius) * cylindricalPosition.x * cylindricalPosition.x
-        + w * w * (height + radius - 2.0f * cylindricalPosition.y),
-        height * cylindricalPosition.x - w * cylindricalPosition.y
-    );
-
-    if (s < 0.0f)
-    {
-        return length(cylindricalPosition) - radius;
-    }
-    else if (cylindricalPosition.x < w)
-    {
-        return height - cylindricalPosition.y;
-    }
-    else
-    {
-        return length(cylindricalPosition - float2(w, height));
-    }
-}
-
-
-/**
- * Compute the min distance from a point to a solid angle.
- * The conical shape has its tip at the origin and opens up the y-axis.
- *
- * @arg position: The point to get the distance to, from the object
- * @arg radius: The radius of the sphere
- * @arg height: The height (y-axis) below which the sphere is culled
- *
- * @returns: The minimum distance from the point to the shape
- */
-float distanceToHollowSphere(
-        const float3 &position,
-        const float radius,
-        const float height,
-        const float thickness)
-{
-    float w = sqrt(radius * radius - height * height);
-
-    float2 cylindricalPosition = cartesianToCylindrical(position);
-
-    if (height * cylindricalPosition.x < w * cylindricalPosition.y)
-    {
-        return length(cylindricalPosition - float2(w, height)) - thickness;
-    }
-    return fabs(length(cylindricalPosition) - radius) - thickness;
 }
 
 
@@ -754,8 +815,25 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
+    if (shapeType == 19)
+    {
+        return distanceToDeathStar(
+            position,
+            dimensions.x,
+            dimensions.y,
+            dimensions.z
+        );
+    }
 
     /*
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dimX);
+    }
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dimX);
+    }
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
