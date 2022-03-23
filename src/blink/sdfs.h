@@ -286,6 +286,63 @@ float distanceToRectangularPrismFrame(
 
 
 /**
+ * Compute the min distance from a point to a rhombus.
+ *
+ * @arg position: The point to get the distance to, from the object
+ * @arg width:  The width (x) of the rhombus
+ * @arg height:  The height (y) of the rhombus
+ * @arg depth:  The depth (z) of the rhombus, this the extruded
+ *     dimension, or thickness
+ * @arg cornerRadius:  The radius of the corners of the rhombus'
+ *     xy-plane parallel face
+ *
+ * @returns: The minimum distance from the point to the shape
+ */
+float distanceToRhombus(
+        const float3 &position,
+        const float width,
+        const float height,
+        const float depth,
+        const float cornerRadius)
+{
+    float3 absPosition = fabs(position);
+    float2 absPositionXY = float2(absPosition.x, absPosition.y);
+
+    float halfWidth = width / 2.0f;
+    float halfHeight = height / 2.0f;
+    float2 halfWidthHeight = float2(halfWidth, halfHeight);
+
+    float2 s = halfWidthHeight - 2.0f * absPositionXY;
+
+    float f = clamp(
+        (
+            (halfWidth * s.x - halfHeight * s.y)
+            / dot(halfWidthHeight, halfWidthHeight)
+        ),
+        -1.0f,
+        1.0f
+    );
+
+    float inside = sign(
+        absPosition.x * halfHeight + absPosition.y * halfWidth - halfWidth * halfHeight
+    );
+
+    float2 rhombusToPosition = float2(
+        (
+            inside
+            * length(absPositionXY - 0.5f * halfWidthHeight * float2(1.0f - f, 1.0f + f))
+            - cornerRadius
+        ),
+        // Closest point along z-axis only depends on the thickness of
+        // the extrusion
+        absPosition.z - depth / 2.0f
+    );
+
+    return sdfLength(rhombusToPosition);
+}
+
+
+/**
  * Compute the min distance from a point to a triangular prism.
  *
  * @arg position: The point to get the distance to, from the object
@@ -914,8 +971,34 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
+    if (shapeType == 22)
+    {
+        return distanceToRhombus(
+            position,
+            dimensions.x,
+            dimensions.y,
+            dimensions.z,
+            dimensions.w
+        );
+    }
 
     /*
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dimX);
+    }
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dimX);
+    }
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dimX);
+    }
+    if (shapeType == 5)
+    {
+        return distanceToMandelbulb(position, dimX);
+    }
     if (shapeType == 5)
     {
         return distanceToMandelbulb(position, dimX);
