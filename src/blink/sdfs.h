@@ -798,6 +798,48 @@ float distanceToOctahedron(
 
 
 /**
+ * Compute the min distance from a point to a hexagonal prism.
+ * The hexagonal face is parallel to the xy-plane, centered at the
+ * origin.
+ *
+ * @arg position: The point to get the distance to, from the object.
+ * @arg height: The height (z) of the prism.
+ *
+ * @returns: The minimum distance from the point to the shape.
+ */
+float distanceToPyramid(
+        const float3 &position,
+        const float height)
+{
+    float m2 = height * height + 0.25f;
+
+    float2 absPositionXZ = fabs(float2(position.x, position.z));
+    if (absPositionXZ.y > absPositionXZ.x)
+    {
+        absPositionXZ = float2(absPositionXZ.y, absPositionXZ.x);
+    }
+
+    absPositionXZ -= 0.5f;
+
+    float3 q = float3(
+        absPositionXZ.y,
+        height * position.y - 0.5f * absPositionXZ.x,
+        height * absPositionXZ.x + 0.5f * position.y
+    );
+
+    float s = positivePart(-q.x);
+    float t = saturate((q.y - 0.5f * absPositionXZ.y) / (m2 + 0.25f));
+
+    float a = m2 * (q.x + s) * (q.x + s) + q.y * q.y;
+    float b = m2 * (q.x + 0.5f * t) * (q.x + 0.5f * t) + (q.y - m2 * t) * (q.y - m2 * t);
+
+    float d2 = min(q.y, -q.x * m2 - q.y * 0.5f) > 0.0 ? 0.0 : min(a, b);
+
+    return sign(max(q.z, -position.y)) * sqrt((d2 + q.z * q.z) / m2);
+}
+
+
+/**
  * Compute the min distance from a point to a chain link.
  *
  * @arg position: The point to get the distance to, from the object.
@@ -1041,23 +1083,23 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
     {
         return distanceToOctahedron(position, dimensions.x);
     }
+    if (shapeType == 24)
+    {
+        return distanceToPyramid(position, dimensions.x);
+    }
 
     /*
     if (shapeType == 5)
     {
-        return distanceToMandelbulb(position, dimX);
+        return distanceToMandelbulb(position, dimensions.x);
     }
     if (shapeType == 5)
     {
-        return distanceToMandelbulb(position, dimX);
+        return distanceToMandelbulb(position, dimensions.x);
     }
     if (shapeType == 5)
     {
-        return distanceToMandelbulb(position, dimX);
-    }
-    if (shapeType == 5)
-    {
-        return distanceToMandelbulb(position, dimX);
+        return distanceToMandelbulb(position, dimensions.x);
     }
 
     */
