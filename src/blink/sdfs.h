@@ -1,6 +1,9 @@
 //
 // Signed Distance Functions
 //
+// Many of the below sdfs are based on the work of Inigo Quilez
+// https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
+//
 
 
 /**
@@ -129,6 +132,8 @@ float distanceToHollowSphere(
         const float height,
         const float thickness)
 {
+    const float halfThickness = thickness / 2.0f;
+
     const float2 cylindricalPosition = cartesianToCylindrical(position);
 
     const float cutRadius = sqrt(radius * radius - height * height);
@@ -136,10 +141,10 @@ float distanceToHollowSphere(
     if (height * cylindricalPosition.x < cutRadius * cylindricalPosition.y)
     {
         // Closest point is on the rim
-        return length(cylindricalPosition - float2(cutRadius, height)) - thickness / 2.0f;
+        return length(cylindricalPosition - float2(cutRadius, height)) - halfThickness;
     }
     // Closest point is on the spherical surface
-    return fabs(length(cylindricalPosition) - radius) - thickness / 2.0f;
+    return fabs(length(cylindricalPosition) - radius) - halfThickness;
 }
 
 
