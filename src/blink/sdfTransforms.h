@@ -65,28 +65,35 @@ void performShapeModification(
 {
     if (modifications & 1)
     {
+        position = elongate(
+            position,
+            float3(modParameters.x, modParameters.y, modParameters.z)
+        );
+    }
+    if (modifications & 2)
+    {
         position = finiteRepetition(
             position,
             float3(modParameters.x, modParameters.y, modParameters.z),
             modParameters.w
         );
     }
-    else if (modifications & 2)
+    else if (modifications & 4)
     {
         position = infiniteRepetition(
             position,
             float3(modParameters.x, modParameters.y, modParameters.z)
         );
     }
-    if (modifications & 4)
+    if (modifications & 8)
     {
         position = mirrorX(position);
     }
-    if (modifications & 8)
+    if (modifications & 16)
     {
         position = mirrorY(position);
     }
-    if (modifications & 16)
+    if (modifications & 32)
     {
         position = mirrorZ(position);
     }

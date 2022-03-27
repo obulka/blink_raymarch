@@ -15,7 +15,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessRandom, eEdgeNone> skyBox;
 
 
-    // the shape positons.xyz
+    // the shape positons.xyz, scale.w
     Image<eRead, eAccessRandom, eEdgeNone> positions;
 
     // the shape rotations.xyz
@@ -494,6 +494,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                 if (bounces >= numBounces)
                 {
+                    rayColour.w = 1.0f;
                     return rayColour;
                 }
 
@@ -514,7 +515,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             iterations++;
         }
 
-        return blend(
+        rayColour = blend(
             blend(
                 iterGlowColour,
                 blend(
@@ -527,6 +528,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             rayColour,
             rayStrength * lightIntensity
         );
+        rayColour.w = bounces > 0;
+        return rayColour;
     }
 
 
