@@ -891,7 +891,7 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
     }
     if (shapeType == 1)
     {
-        return distanceToRectangularPrism(
+        return distanceToEllipsoid(
             position,
             dimensions.x,
             dimensions.y,
@@ -900,21 +900,40 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
     }
     if (shapeType == 2)
     {
-        return distanceToCylinder(position, dimensions.x, dimensions.y);
+        return distanceToCutSphere(position, dimensions.x, dimensions.y);
     }
     if (shapeType == 3)
     {
-        return distanceToTriangularPrism(position, dimensions.x, dimensions.y);
+        return distanceToHollowSphere(
+            position,
+            dimensions.x,
+            dimensions.y,
+            dimensions.z
+        );
     }
     if (shapeType == 4)
     {
-        return distanceToTorus(position, dimensions.x, dimensions.y);
+        return distanceToDeathStar(
+            position,
+            dimensions.x,
+            dimensions.y,
+            dimensions.z
+        );
     }
     if (shapeType == 5)
     {
-        return distanceToMandelbulb(position, dimensions.x, (int) dimensions.y);
+        return distanceToSolidAngle(position, dimensions.x, dimensions.y);
     }
     if (shapeType == 6)
+    {
+        return distanceToRectangularPrism(
+            position,
+            dimensions.x,
+            dimensions.y,
+            dimensions.z
+        );
+    }
+    if (shapeType == 7)
     {
         return distanceToRectangularPrismFrame(
             position,
@@ -924,35 +943,27 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.w
         );
     }
-    if (shapeType == 7)
-    {
-        return distanceToCappedTorus(
-            position,
-            dimensions.x,
-            dimensions.y,
-            dimensions.z
-        );
-    }
     if (shapeType == 8)
     {
-        return distanceToLink(
+        return distanceToRhombus(
             position,
             dimensions.x,
             dimensions.y,
-            dimensions.z
+            dimensions.z,
+            dimensions.w
         );
     }
     if (shapeType == 9)
     {
-        return distanceToInfiniteCylinder(position, dimensions.x);
+        return distanceToTriangularPrism(position, dimensions.x, dimensions.y);
     }
     if (shapeType == 10)
     {
-        return distanceToCone(position, dimensions.x, dimensions.y);
+        return distanceToCylinder(position, dimensions.x, dimensions.y);
     }
     if (shapeType == 11)
     {
-        return distanceToInfiniteCone(position, dimensions.x);
+        return distanceToInfiniteCylinder(position, dimensions.x);
     }
     if (shapeType == 12)
     {
@@ -963,10 +974,6 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
     }
     if (shapeType == 13)
     {
-        return distanceToHexagonalPrism(position, dimensions.x, dimensions.y);
-    }
-    if (shapeType == 14)
-    {
         return distanceToCapsule(
             position,
             dimensions.x,
@@ -974,7 +981,15 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
+    if (shapeType == 14)
+    {
+        return distanceToCone(position, dimensions.x, dimensions.y);
+    }
     if (shapeType == 15)
+    {
+        return distanceToInfiniteCone(position, dimensions.x);
+    }
+    if (shapeType == 16)
     {
         return distanceToCappedCone(
             position,
@@ -983,42 +998,7 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
-    if (shapeType == 16)
-    {
-        return distanceToSolidAngle(position, dimensions.x, dimensions.y);
-    }
     if (shapeType == 17)
-    {
-        return distanceToCutSphere(position, dimensions.x, dimensions.y);
-    }
-    if (shapeType == 18)
-    {
-        return distanceToHollowSphere(
-            position,
-            dimensions.x,
-            dimensions.y,
-            dimensions.z
-        );
-    }
-    if (shapeType == 19)
-    {
-        return distanceToDeathStar(
-            position,
-            dimensions.x,
-            dimensions.y,
-            dimensions.z
-        );
-    }
-    if (shapeType == 20)
-    {
-        return distanceToEllipsoid(
-            position,
-            dimensions.x,
-            dimensions.y,
-            dimensions.z
-        );
-    }
-    if (shapeType == 21)
     {
         return distanceToRoundedCone(
             position,
@@ -1027,19 +1007,39 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.z
         );
     }
-    if (shapeType == 22)
+    if (shapeType == 18)
     {
-        return distanceToRhombus(
+        return distanceToTorus(position, dimensions.x, dimensions.y);
+    }
+    if (shapeType == 19)
+    {
+        return distanceToCappedTorus(
             position,
             dimensions.x,
             dimensions.y,
-            dimensions.z,
-            dimensions.w
+            dimensions.z
+        );
+    }
+    if (shapeType == 20)
+    {
+        return distanceToHexagonalPrism(position, dimensions.x, dimensions.y);
+    }
+    if (shapeType == 21)
+    {
+        return distanceToOctahedron(position, dimensions.x);
+    }
+    if (shapeType == 22)
+    {
+        return distanceToLink(
+            position,
+            dimensions.x,
+            dimensions.y,
+            dimensions.z
         );
     }
     if (shapeType == 23)
     {
-        return distanceToOctahedron(position, dimensions.x);
+        return distanceToMandelbulb(position, dimensions.x, (int) dimensions.y);
     }
 
     return 0;
