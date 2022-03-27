@@ -18,10 +18,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // the shape positons.xyz
     Image<eRead, eAccessRandom, eEdgeNone> positions;
 
-    // the shape rotations
+    // the shape rotations.xyz
     Image<eRead, eAccessRandom, eEdgeNone> rotations;
 
-    // the shape dimensions.xyz scale.w (some shapes may not use all channels, all use w)
+    // the shape dimensions.xyzw (some shapes may not use all channels)
     Image<eRead, eAccessRandom, eEdgeNone> dimensions;
 
     // the shape colours.xyz
@@ -29,12 +29,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     // shape type.x, operation.y, numChildren.z, blend strength.w
-    // x in [0, 1) sphere
-    // x in [1, 2) rectangular prism
-    // x in [2, 3) cylinder
-    // x in [3, 4) triangular prism
-    // x in [4, inf) torus
     Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;
+    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters;
 
     // reflection.x, transmission.y, emission.z, roughness.w (TODO)
     Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;
@@ -235,6 +231,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 SampleType(rotations) rotation = rotations(j, i);
                 SampleType(dimensions) dimension = dimensions(j, i);
                 SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);
+                SampleType(shapeModParameters) modParameters = shapeModParameters(j, i);
 
                 rotationMatrix(float3(rotation.x, rotation.y, rotation.z), rotMatrix);
                 matmul(
@@ -243,11 +240,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     transformedRay
                 );
 
+                const int modifications = (int) shapeProperty.y;
+                performShapeModification(modifications, modParameters, transformedRay);
+
                 float nextDistance = distanceToObject(
                     transformedRay / position.w,
                     (int) shapeProperty.x,
                     dimension
                 ) * position.w;
+
+                //performDistanceModification(modSelector, modParameters);
 
                 if (nextDistance < distance)
                 {
@@ -269,7 +271,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float computeShadow(
             const float3 &rayDirection,
             const float distanceToShadePoint,
-            float3 rayOrigin)
+            float3 &rayOrigin)
     {
         float distanceTravelled = 0;
         float4 colour;
@@ -460,8 +462,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         float4 rayColour = float4(0, 0, 0, 0);
 
+        float rayStrength = 1;
+
         int iterations = 1;
-        while (distanceTravelled < rayDistance)
+        while (distanceTravelled < rayDistance && rayStrength > 0)
         {
             float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);
             distanceTravelled += stepDistance;
@@ -487,7 +491,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         blend(
                             colour,
                             rayColour,
-                            (1 - surface.x) * lightIntensity
+                            rayStrength * (1 - surface.x) * lightIntensity
                         ),
                         getHazeAmount(distanceTravelled - lastHitDistance)
                     ),
@@ -498,6 +502,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 {
                     return rayColour;
                 }
+
+                rayStrength *= surface.x;
 
                 direction = reflectRayOffSurface(
                     direction,
@@ -525,7 +531,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 saturate(iterGlowAmount * iterations)
             ),
             rayColour,
-            lightIntensity
+            rayStrength * lightIntensity
         );
     }
 

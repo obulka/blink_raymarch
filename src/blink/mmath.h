@@ -15,6 +15,29 @@ inline float max(const float value0, const float value1, const float value2)
 }
 
 
+/**
+ * Why tf is this necessary? Built-in clamp fails to compile for int3s
+ */
+inline int3 clamp_(const int3 value, const int3 lower, const int3 upper)
+{
+    int3 result;
+    result.x = clamp(value.x, lower.x, upper.x);
+    result.y = clamp(value.y, lower.y, upper.y);
+    result.z = clamp(value.z, lower.y, upper.z);
+
+    return result;
+}
+
+
+/**
+ * Why tf is this necessary? Built-in round fails to compile for int3s
+ */
+inline int3 round_(const float3 value0)
+{
+    return int3(round(value0.x), round(value0.y), round(value0.z));
+}
+
+
 inline float maxComponent(const float3 &vector)
 {
     return max(vector.x, max(vector.y, vector.z));

@@ -60,15 +60,3 @@ inline float smoothIntersection(
 
     return blend(distance0, distance1, h) + amount * h * (1.0f - h);
 }
-
-
-inline float roundEdges(const float distance, float radius)
-{
-    return distance - radius;
-}
-
-
-inline float onion(const float distance, const float thickness)
-{
-    return fabs(distance) - thickness;
-}
