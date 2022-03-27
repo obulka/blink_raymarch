@@ -5,6 +5,30 @@
 //
 
 
+inline float union_(
+        const float distance0,
+        const float distance1)
+{
+    return min(distance0, distance1);
+}
+
+
+inline float subtraction(
+        const float distance0,
+        const float distance1)
+{
+    return max(-distance0, distance1);
+}
+
+
+inline float intersection(
+        const float distance0,
+        const float distance1)
+{
+    return max(distance0, distance1);
+}
+
+
 inline float smoothUnion(
         const float distance0,
         const float distance1,
@@ -12,7 +36,7 @@ inline float smoothUnion(
 {
     float h = clamp(0.5f + 0.5f * (distance1 - distance0) / amount, 0.0f, 1.0f);
 
-    return mix(distance1, distance0, h) - amount * h * (1.0f - h);
+    return blend(distance0, distance1, h) - amount * h * (1.0f - h);
 }
 
 
@@ -23,7 +47,7 @@ inline float smoothSubtraction(
 {
     float h = clamp(0.5f - 0.5f * (distance1 + distance0) / amount, 0.0f, 1.0f);
 
-    return mix(distance1, -distance0, h) + amount * h * (1.0f - h);
+    return blend(-distance0, distance1, h) + amount * h * (1.0f - h);
 }
 
 
@@ -34,5 +58,17 @@ inline float smoothIntersection(
 {
     float h = clamp(0.5f - 0.5f * (distance1 - distance0) / amount, 0.0f, 1.0f);
 
-    return mix(distance1, distance0, h) + amount * h * (1.0f - h);
+    return blend(distance0, distance1, h) + amount * h * (1.0f - h);
+}
+
+
+inline float roundEdges(const float distance, float radius)
+{
+    return distance - radius;
+}
+
+
+inline float onion(const float distance, const float thickness)
+{
+    return fabs(distance) - thickness;
 }

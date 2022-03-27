@@ -237,28 +237,28 @@ inline float4 saturate(const float4 &value)
 }
 
 
-inline float mix(float x, float y, float a)
-{
-    return x + (y - x) * a;
-}
-
-
-float2 smoothMinN(float colour0, float colour1, float blendSize, float exponent)
+float2 smoothMinN(float value0, float value1, float blendSize, float exponent)
 {
     float m = 0.5f * pow(
-        positivePart(blendSize - fabs(colour0 - colour1)) / blendSize,
+        positivePart(blendSize - fabs(value0 - value1)) / blendSize,
         exponent
     );
 
     float s = m * blendSize / exponent;
 
-    return (colour0 < colour1) ? float2(colour0 - s, m) : float2(colour1 - s, m - 1.0f);
+    return (value0 < value1) ? float2(value0 - s, m) : float2(value1 - s, m - 1.0f);
 }
 
 
-inline float4 blend(const float4 &colour0, const float4 &colour1, const float weight)
+inline float blend(const float value0, const float value1, const float weight)
 {
-    return weight * colour0 + (1 - weight) * colour1;
+    return value1 + weight * (value0 - value1);
+}
+
+
+inline float4 blend(const float4 &value0, const float4 &value1, const float weight)
+{
+    return value1 + weight * (value0 - value1);
 }
 
 
