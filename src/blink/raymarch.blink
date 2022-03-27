@@ -72,9 +72,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float hitTolerance;
         float shadowBias;
 
-        // Shader params
-        float intensityInShadow;
-
         // Scene params
         // Shape Textures
         int objectTextureHeight;
@@ -139,9 +136,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(maxBounces, "Max Bounces", 1);
         defineParam(hitTolerance, "Hit Tolerance", 0.001f);
         defineParam(shadowBias, "Shadow Bias", 1.0f);
-
-        // Shader params TODO make these surface spawn rays
-        defineParam(intensityInShadow, "Intensity in Shadows", 1.0f);
 
         // Scene params
 
@@ -282,7 +276,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             if (stepDistance < hitTolerance)
             {
-                return intensityInShadow;
+                return 0;
             }
 
             rayOrigin += rayDirection * stepDistance;

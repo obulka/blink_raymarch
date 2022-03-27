@@ -11,11 +11,11 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <split size="1841" stretch="1"/>
             <splitter orientation="2">
                 <split size="783"/>
-                <dock id="" activePageId="Viewer.1" focus="true">
+                <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
                 <split size="550"/>
-                <dock id="" activePageId="DAG.1">
+                <dock id="" activePageId="DAG.2">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
@@ -23,7 +23,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                 </dock>
             </splitter>
             <split size="615"/>
-            <dock id="" activePageId="Properties.1">
+            <dock id="" activePageId="Properties.1" focus="true">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
             </dock>
@@ -197,7 +197,6 @@ Constant {
  color {-1 0 0 1}
  format "1 1 0 0 1 1 1 empty"
  name position_scale
- selected true
  xpos 16895
  ypos 596
 }
@@ -249,6 +248,7 @@ Dot {
 Group {
  inputs 11
  name RayMarcher2
+ selected true
  xpos 17787
  ypos 1229
 }
