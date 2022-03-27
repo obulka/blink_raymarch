@@ -61,16 +61,10 @@ inline float onion(const float distance, const float thickness)
 void performShapeModification(
         const int modifications,
         const float4 &modParameters,
+        const float3 &elongation,
         float3 &position)
 {
     if (modifications & 1)
-    {
-        position = elongate(
-            position,
-            float3(modParameters.x, modParameters.y, modParameters.z)
-        );
-    }
-    if (modifications & 2)
     {
         position = finiteRepetition(
             position,
@@ -78,11 +72,18 @@ void performShapeModification(
             modParameters.w
         );
     }
-    else if (modifications & 4)
+    else if (modifications & 2)
     {
         position = infiniteRepetition(
             position,
             float3(modParameters.x, modParameters.y, modParameters.z)
+        );
+    }
+    if (modifications & 4)
+    {
+        position = elongate(
+            position,
+            float3(elongation.x, elongation.y, elongation.z)
         );
     }
     if (modifications & 8)

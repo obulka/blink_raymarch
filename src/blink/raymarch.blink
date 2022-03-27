@@ -31,6 +31,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // shape type.x, operation.y, numChildren.z, blend strength.w
     Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;
     Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters;
+    Image<eRead, eAccessRandom, eEdgeNone> elongation;
 
     // reflection.x, transmission.y, emission.z, roughness.w (TODO)
     Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;
@@ -226,6 +227,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 SampleType(dimensions) dimension = dimensions(j, i);
                 SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);
                 SampleType(shapeModParameters) modParameters = shapeModParameters(j, i);
+                SampleType(elongation) elongate = elongation(j, i);
 
                 rotationMatrix(float3(rotation.x, rotation.y, rotation.z), rotMatrix);
                 matmul(
@@ -234,8 +236,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     transformedRay
                 );
 
+                const float3 elon = float3(elongate.x, elongate.y, elongate.z);
+
                 const int modifications = (int) shapeProperty.y;
-                performShapeModification(modifications, modParameters, transformedRay);
+                performShapeModification(
+                    modifications,
+                    modParameters,
+                    elon,
+                    transformedRay
+                );
 
                 float nextDistance = distanceToObject(
                     transformedRay / position.w,

@@ -50,16 +50,16 @@ Root {
 BackdropNode {
  inputs 0
  name Light1
- xpos 16488
- ypos 560
+ xpos 16314
+ ypos 540
  bdwidth 275
  bdheight 393
 }
 BackdropNode {
  inputs 0
  name Lights1
- xpos 16438
- ypos 512
+ xpos 16264
+ ypos 492
  appearance Border
  bdwidth 369
  bdheight 506
@@ -67,162 +67,176 @@ BackdropNode {
 BackdropNode {
  inputs 0
  name Object_Properties1
- xpos 17303
- ypos 562
- bdwidth 532
- bdheight 390
+ xpos 17129
+ ypos 542
+ bdwidth 703
+ bdheight 388
 }
 BackdropNode {
  inputs 0
  name Objects1
- xpos 16868
- ypos 561
+ xpos 16694
+ ypos 541
  bdwidth 413
  bdheight 386
 }
 BackdropNode {
  inputs 0
  name Shapes1
- xpos 16840
- ypos 510
+ xpos 16666
+ ypos 490
  appearance Border
- bdwidth 1030
- bdheight 502
+ bdwidth 1233
+ bdheight 501
 }
 Constant {
  inputs 0
- color {0.2 0.2 0 1.1}
+ color {0.2 0.2 0 0}
+ format "1 1 0 0 1 1 1 empty"
+ name elongation
+ xpos 17667
+ ypos 586
+}
+Dot {
+ name Dot2
+ xpos 17701
+ ypos 892
+}
+Constant {
+ inputs 0
+ color {3 2 0 1.5}
+ format "1 1 0 0 1 1 1 empty"
  name shape_mods
- xpos 17714
- ypos 604
+ xpos 17540
+ ypos 584
 }
 Dot {
  name Dot1
- xpos 17748
- ypos 910
+ xpos 17574
+ ypos 890
 }
 Constant {
  inputs 0
  color {0 0 0 0}
  format "1 1 0 0 1 1 1 empty"
  name light_props
- xpos 16647
- ypos 591
+ xpos 16473
+ ypos 571
 }
 Dot {
  name Dot6
- xpos 16677
- ypos 921
+ xpos 16503
+ ypos 901
 }
 Constant {
  inputs 0
  color {-1 -1 -1 10}
  format "1 1 0 0 1 1 1 empty"
  name light
- xpos 16520
- ypos 591
+ xpos 16346
+ ypos 571
 }
 Dot {
  name Dot9
- xpos 16554
- ypos 918
+ xpos 16380
+ ypos 898
 }
 Constant {
  inputs 0
- color {0 3 0 0}
+ color {0 5 0 0}
  format "1 1 0 0 1 1 1 empty"
  name shape
- xpos 17464
- ypos 603
+ xpos 17290
+ ypos 583
 }
 Dot {
  name Dot10
- xpos 17498
- ypos 914
+ xpos 17324
+ ypos 894
 }
 Constant {
  inputs 0
  color 1
  format "1 1 0 0 1 1 1 empty"
  name surface
- xpos 17593
- ypos 601
+ xpos 17419
+ ypos 581
 }
 Dot {
  name Dot11
- xpos 17627
- ypos 915
+ xpos 17453
+ ypos 895
 }
 Constant {
  inputs 0
  color {0.11 0.1 0.69 0.337279}
  format "1 1 0 0 1 1 1 empty"
  name colour
- xpos 17327
- ypos 599
+ xpos 17153
+ ypos 579
 }
 Dot {
  name Dot14
- xpos 17361
- ypos 913
+ xpos 17187
+ ypos 893
 }
 Constant {
  inputs 0
  color {0.5 0.4 0.1 0.1}
  format "1 1 0 0 1 1 1 empty"
  name dimensions
- xpos 17155
- ypos 596
+ xpos 16981
+ ypos 576
 }
 Dot {
  name Dot15
- xpos 17189
- ypos 916
+ xpos 17015
+ ypos 896
 }
 Constant {
  inputs 0
  color {0 0 0 0}
  format "1 1 0 0 1 1 1 empty"
  name rotation
- xpos 17018
- ypos 598
+ xpos 16844
+ ypos 578
 }
 Dot {
  name Dot16
- xpos 17052
- ypos 917
+ xpos 16878
+ ypos 897
 }
 Constant {
  inputs 0
  color {-1 0 0 1}
  format "1 1 0 0 1 1 1 empty"
  name position_scale
- xpos 16895
- ypos 596
+ xpos 16721
+ ypos 576
 }
 Dot {
  name Dot17
- xpos 16929
- ypos 916
+ xpos 16755
+ ypos 896
 }
 Axis2 {
  inputs 0
  name Axis2
- xpos 16266
- ypos 626
+ xpos 16092
+ ypos 606
 }
 Camera2 {
  translate {0 0 20}
  focal 66
  haperture 18
  name Camera2
- xpos 16266
- ypos 780
+ xpos 16092
+ ypos 760
 }
 Dot {
  name Dot18
- xpos 16290
- ypos 1251
+ xpos 16116
+ ypos 1233
 }
 Read {
  inputs 0
@@ -247,7 +261,7 @@ Dot {
  ypos 898
 }
 Group {
- inputs 11
+ inputs 12
  name RayMarcher2
  xpos 17787
  ypos 1229
@@ -255,8 +269,8 @@ Group {
  BackdropNode {
   inputs 0
   name Light
-  xpos -767
-  ypos -377
+  xpos -979
+  ypos -365
   appearance Border
   bdwidth 544
   bdheight 336
@@ -264,8 +278,8 @@ Group {
  BackdropNode {
   inputs 0
   name Lights
-  xpos -735
-  ypos -333
+  xpos -947
+  ypos -321
   bdwidth 479
   bdheight 250
  }
@@ -273,252 +287,277 @@ Group {
   inputs 0
   name Objects
   note_font_color 0x590000ff
-  xpos -196
-  ypos -377
+  xpos -408
+  ypos -365
   appearance Border
-  bdwidth 1780
-  bdheight 335
+  bdwidth 2049
+  bdheight 328
  }
  BackdropNode {
   inputs 0
   name Surface_Characteristics
-  xpos -166
-  ypos -330
+  xpos -378
+  ypos -318
   bdwidth 953
   bdheight 249
  }
  BackdropNode {
   inputs 0
   name Transform
-  xpos 838
-  ypos -334
-  bdwidth 720
-  bdheight 251
+  xpos 626
+  ypos -322
+  bdwidth 942
+  bdheight 249
  }
  Constant {
   inputs 0
-  format "2 1 0 0 2 1 1 lights"
+  format "1 1 0 0 1 1 1 empty"
   name Constant11
-  xpos -732
-  ypos -281
+  xpos -944
+  ypos -269
  }
  Input {
   inputs 0
   name light_props
-  xpos -609
-  ypos -296
+  xpos -821
+  ypos -284
   number 9
  }
  Merge2 {
   inputs 2
   name Merge8
-  xpos -609
-  ypos -223
+  xpos -821
+  ypos -211
  }
  Dot {
   name Dot8
-  xpos -575
-  ypos -123
+  xpos -787
+  ypos -111
  }
  Constant {
   inputs 0
-  format "2 1 0 0 2 1 1 lights"
+  format "1 1 0 0 1 1 1 empty"
   name Constant10
-  xpos -499
-  ypos -286
+  xpos -711
+  ypos -274
  }
  Input {
   inputs 0
   name light
-  xpos -384
-  ypos -300
+  xpos -596
+  ypos -288
   number 8
  }
  Merge2 {
   inputs 2
   name Merge7
-  xpos -384
-  ypos -221
+  xpos -596
+  ypos -209
  }
  Dot {
   name Dot7
-  xpos -350
-  ypos -109
+  xpos -562
+  ypos -97
  }
  Constant {
   inputs 0
-  format "2 1 0 0 2 1 1 lights"
+  format "1 1 0 0 1 1 1 empty"
   name Constant8
-  xpos 100
-  ypos -276
+  xpos -112
+  ypos -264
  }
  Input {
   inputs 0
   name surface
-  xpos 213
-  ypos -288
+  xpos 1
+  ypos -276
   number 6
  }
  Merge2 {
   inputs 2
   name Merge3
-  xpos 213
-  ypos -214
+  xpos 1
+  ypos -202
  }
  Dot {
   name Dot2
-  xpos 247
-  ypos -105
+  xpos 35
+  ypos -93
  }
  Constant {
   inputs 0
-  format "2 1 0 0 2 1 1 lights"
+  format "1 1 0 0 1 1 1 empty"
+  name Constant12
+  xpos 1357
+  ypos -255
+ }
+ Input {
+  inputs 0
+  name elongation
+  xpos 1470
+  ypos -278
+  number 11
+ }
+ Merge2 {
+  inputs 2
+  name Merge11
+  xpos 1470
+  ypos -205
+ }
+ Dot {
+  name Dot12
+  xpos 1504
+  ypos -109
+ }
+ Constant {
+  inputs 0
+  format "1 1 0 0 1 1 1 empty"
   name Constant6
-  xpos 571
-  ypos -276
+  xpos 359
+  ypos -264
  }
  Input {
   inputs 0
   name shape_mods
-  xpos 693
-  ypos -289
+  xpos 481
+  ypos -277
   number 10
  }
  Merge2 {
   inputs 2
   name Merge2
-  xpos 693
-  ypos -216
+  xpos 481
+  ypos -204
  }
  Dot {
   name Dot3
-  xpos 727
-  ypos -113
+  xpos 515
+  ypos -101
  }
  Constant {
   inputs 0
-  format "2 1 0 0 2 1 1 lights"
+  format "1 1 0 0 1 1 1 empty"
   name Constant7
-  xpos 329
-  ypos -275
+  xpos 117
+  ypos -263
  }
  Input {
   inputs 0
   name shape
-  xpos 469
-  ypos -289
+  xpos 257
+  ypos -277
   number 7
  }
  Merge2 {
   inputs 2
   name Merge4
-  xpos 469
-  ypos -210
+  xpos 257
+  ypos -198
  }
  Dot {
   name Dot4
-  xpos 503
-  ypos -110
+  xpos 291
+  ypos -98
  }
  Constant {
   inputs 0
-  format "2 1 0 0 2 1 1 lights"
+  format "1 1 0 0 1 1 1 empty"
   name Constant9
-  xpos -132
-  ypos -282
+  xpos -344
+  ypos -270
  }
  Input {
   inputs 0
   name colour
-  xpos -22
-  ypos -293
+  xpos -234
+  ypos -281
   number 5
  }
  Merge2 {
   inputs 2
   name Merge5
-  xpos -22
-  ypos -215
+  xpos -234
+  ypos -203
  }
  Dot {
   name Dot5
-  xpos 12
-  ypos -119
+  xpos -200
+  ypos -107
  }
  Constant {
   inputs 0
-  format "2 1 0 0 2 1 1 lights"
+  format "1 1 0 0 1 1 1 empty"
   name Constant2
-  xpos 1345
-  ypos -268
+  xpos 1133
+  ypos -256
  }
  Input {
   inputs 0
   name dims
-  xpos 1458
-  ypos -291
+  xpos 1246
+  ypos -279
   number 4
  }
  Merge2 {
   inputs 2
   name Merge10
-  xpos 1458
-  ypos -218
+  xpos 1246
+  ypos -206
  }
  Dot {
   name Dot10
-  xpos 1492
-  ypos -122
+  xpos 1280
+  ypos -110
  }
  Constant {
   inputs 0
-  format "2 1 0 0 2 1 1 lights"
+  format "1 1 0 0 1 1 1 empty"
   name Constant4
-  xpos 1125
-  ypos -276
+  xpos 913
+  ypos -264
  }
  Input {
   inputs 0
   name rot
-  xpos 1227
-  ypos -292
+  xpos 1015
+  ypos -280
   number 3
  }
  Merge2 {
   inputs 2
   name Merge9
-  xpos 1227
-  ypos -218
+  xpos 1015
+  ypos -206
  }
  Dot {
   name Dot9
-  xpos 1261
-  ypos -120
+  xpos 1049
+  ypos -108
  }
  Constant {
   inputs 0
-  format "2 1 0 0 2 1 1 lights"
+  format "1 1 0 0 1 1 1 empty"
   name Constant5
-  xpos 863
-  ypos -280
+  xpos 651
+  ypos -268
  }
  Input {
   inputs 0
   name pos
-  xpos 990
-  ypos -292
+  xpos 778
+  ypos -280
   number 2
  }
  Merge2 {
   inputs 2
   name Merge6
-  xpos 990
-  ypos -223
+  xpos 778
+  ypos -211
  }
  Dot {
   name Dot6
-  xpos 1024
-  ypos -125
+  xpos 812
+  ypos -113
  }
  Constant {
   inputs 0
@@ -551,12 +590,12 @@ Group {
   ypos 304
  }
  BlinkScript {
-  inputs 11
+  inputs 12
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/raymarch.blink
-  recompileCount 961
+  recompileCount 977
   ProgramGroup 1
-  KernelDescription "2 \"RayMarchKernel\" iterate pixelWise 00bfe4116fece43eb0dde9febad414c5dfcf09b68feb32e356a9396cb44fd609 12 \"bg\" Read Point \"skyBox\" Read Random \"positions\" Read Random \"rotations\" Read Random \"dimensions\" Read Random \"colours\" Read Random \"shapeProperties\" Read Random \"shapeModParameters\" Read Random \"surfaceProperties\" Read Random \"lights\" Read Random \"lightProperties\" Read Random \"dst\" Write Point 25 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"SkyBox Offset Angle\" Float 1 AAAAAA== \"SkyBox Width\" Int 1 AAgAAA== \"SkyBox Height\" Int 1 AAQAAA== \"Pixel Subdivisions\" Int 1 AAAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AAB6RA== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 AACAPw== \"Object Texture Height\" Int 1 AAAAAA== \"Object Texture Width\" Int 1 AAAAAA== \"Directional Light Texture Height\" Int 1 AAAAAA== \"Directional Light Texture Width\" Int 1 AAAAAA== \"Haze Amount\" Float 1 AAAAAA== \"Haze Start\" Float 1 AAAAAA== \"Haze Distance\" Float 1 AAB6RA== \"Haze Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== \"Iter Glow Amount\" Float 1 AAAAAA== \"Iter Glow Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== 25 \"focalLength\" 1 1 \"horizontalAperture\" 1 1 \"nearPlane\" 1 1 \"farPlane\" 1 1 \"cameraWorldMatrix\" 16 1 \"formatWidth\" 1 1 \"formatHeight\" 1 1 \"skyBoxOffsetAngle\" 1 1 \"skyFormatWidth\" 1 1 \"skyFormatHeight\" 1 1 \"subdivisions\" 1 1 \"maxBounces\" 1 1 \"maxRayDistance\" 1 1 \"hitTolerance\" 1 1 \"shadowBias\" 1 1 \"objectTextureHeight\" 1 1 \"objectTextureWidth\" 1 1 \"lightTextureHeight\" 1 1 \"lightTextureWidth\" 1 1 \"hazeAmount\" 1 1 \"hazeStart\" 1 1 \"hazeDistance\" 1 1 \"hazeColour\" 4 1 \"iterGlowAmount\" 1 1 \"iterGlowColour\" 4 1 6 \"inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"bouncesPerRay\" Int 1 1 AAAAAA== \"numSubPixels\" Int 1 1 AAAAAA== \"subdividedPixelSize\" Float 1 1 AAAAAA== \"skyBoxPixelSize\" Float 2 1 AAAAAAAAAAA= \"skyBoxOffsetRadians\" Float 1 1 AAAAAA=="
-  kernelSource "#include \"camera.h\"\n#include \"lights.h\"\n#include \"mmath.h\"\n#include \"sdfs.h\"\n#include \"sdfTransforms.h\"\n#include \"sdTransforms.h\"\n\n\nkernel RayMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    // the input for format, process called once per pixel\n    Image<eRead, eAccessPoint, eEdgeNone> bg;\n\n    // the skybox in latlong format\n    Image<eRead, eAccessRandom, eEdgeNone> skyBox;\n\n\n    // the shape positons.xyz, scale.w\n    Image<eRead, eAccessRandom, eEdgeNone> positions;\n\n    // the shape rotations.xyz\n    Image<eRead, eAccessRandom, eEdgeNone> rotations;\n\n    // the shape dimensions.xyzw (some shapes may not use all channels)\n    Image<eRead, eAccessRandom, eEdgeNone> dimensions;\n\n    // the shape colours.xyz\n    Image<eRead, eAccessRandom, eEdgeNone> colours;\n\n\n    // shape type.x, operation.y, numChildren.z, blend strength.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters;\n\n    // reflection.x, transmission.y, emission.z, roughness.w (TODO)\n    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;\n\n\n    // the input directional lights direction.xyz intensity.w\n    Image<eRead, eAccessRandom, eEdgeNone> lights;\n\n    // colour.xyz, type.w\n    // w in \[0, 1) = directional, \[1, inf) = point\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties;\n\n    // the output image\n    Image<eWrite> dst;\n\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float focalLength;\n        float horizontalAperture;\n        float nearPlane;\n        float farPlane;\n        float4x4 cameraWorldMatrix;\n\n        // Image params\n        float formatWidth;\n        float formatHeight;\n\n        float skyBoxOffsetAngle;\n        int skyFormatWidth;\n        int skyFormatHeight;\n\n        // Ray params\n        int subdivisions;\n        int maxBounces;\n        float maxRayDistance;\n        float hitTolerance;\n        float shadowBias;\n\n        // Scene params\n        // Shape Textures\n        int objectTextureHeight;\n        int objectTextureWidth;\n\n        // Light textures\n        int lightTextureHeight;\n        int lightTextureWidth;\n\n        float hazeAmount;\n        float hazeStart;\n        float hazeDistance;\n        float4 hazeColour;\n\n        float iterGlowAmount;\n        float4 iterGlowColour;\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float4x4 inverseCameraProjectionMatrix;\n\n        int bouncesPerRay;\n\n        int numSubPixels;\n        float subdividedPixelSize;\n\n        float2 skyBoxPixelSize;\n        float skyBoxOffsetRadians;\n\n\n\n    // In define(), parameters can be given labels and default values.\n    void define()\n    \{\n        // Camera params\n        defineParam(focalLength, \"Focal Length\", 50.0f);\n        defineParam(horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(nearPlane, \"Near Plane\", 0.1f);\n        defineParam(farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n\n        // Image params\n        defineParam(formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(skyBoxOffsetAngle, \"SkyBox Offset Angle\", 0.0f);\n        defineParam(skyFormatHeight, \"SkyBox Height\", 1024);\n        defineParam(skyFormatWidth, \"SkyBox Width\", 2048);\n\n        // Ray params\n        defineParam(subdivisions, \"Pixel Subdivisions\", 0);\n        defineParam(maxRayDistance, \"Max Ray Distance\", 1000.0f);\n        defineParam(maxBounces, \"Max Bounces\", 1);\n        defineParam(hitTolerance, \"Hit Tolerance\", 0.001f);\n        defineParam(shadowBias, \"Shadow Bias\", 1.0f);\n\n        // Scene params\n\n        // Shape Counts\n        defineParam(objectTextureHeight, \"Object Texture Height\", 0);\n        defineParam(objectTextureWidth, \"Object Texture Width\", 0);\n\n        // Light Counts\n        defineParam(lightTextureHeight, \"Directional Light Texture Height\", 0);\n        defineParam(lightTextureWidth, \"Directional Light Texture Width\", 0);\n\n        defineParam(hazeAmount, \"Haze Amount\", 0.0f);\n        defineParam(hazeStart, \"Haze Start\", 0.0f);\n        defineParam(hazeDistance, \"Haze Distance\", 1000.0f);\n        defineParam(hazeColour, \"Haze Colour\", float4(1, 1, 1, 1));\n\n        defineParam(iterGlowAmount, \"Iter Glow Amount\", 0.0f);\n        defineParam(iterGlowColour, \"Iter Glow Colour\", float4(1, 1, 1, 1));\n    \}\n\n\n    // The init() function is run before any calls to process().\n    // Local variables can be initialized here.\n    void init()\n    \{\n        bouncesPerRay = maxBounces <= 0 ? 1 : maxBounces;\n\n        // TODO use angles to allow -ve focal length like for latlongs\n        float aspect = aspectRatio(formatHeight, formatWidth);\n        float4x4 cameraProjectionMatrix = projectionMatrix(\n            focalLength,\n            horizontalAperture,\n            aspect,\n            nearPlane,\n            farPlane\n        );\n        inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();\n\n        int subPixelDivisions = pow(2, abs(subdivisions));\n        subdividedPixelSize = 1.0f / (float) subPixelDivisions;\n        numSubPixels = pow(subPixelDivisions, 2);\n\n        skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);\n        skyBoxOffsetRadians = skyBoxOffsetAngle * PI / 180.0f;\n    \}\n\n\n    /**\n     * Get the value of sky the ray would hit at infinite distance\n     */\n    float4 readSkyValue(float3 rayDirection)\n    \{\n        float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);\n\n        SampleType(skyBox) skyBoxPixel = bilinear(\n            skyBox,\n            skyBoxPixelSize.x * angles.x,\n            skyFormatHeight - (skyBoxPixelSize.y * angles.y)\n        );\n\n        return saturate(skyBoxPixel);\n    \}\n\n\n    //\n    // Render Engine\n    //\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     */\n    float getMinDistanceToObjectInScene(\n            const float3 rayOrigin,\n            float4 &colour,\n            float4 &surface)\n    \{\n        float distance = maxRayDistance;\n\n        float3x3 rotMatrix;\n        float3 transformedRay;\n        for (int i=0; i < objectTextureHeight; i++)\n        \{\n            for (int j=0; j < objectTextureWidth; j++)\n            \{\n                SampleType(positions) position = positions(j, i);\n                SampleType(rotations) rotation = rotations(j, i);\n                SampleType(dimensions) dimension = dimensions(j, i);\n                SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);\n                SampleType(shapeModParameters) modParameters = shapeModParameters(j, i);\n\n                rotationMatrix(float3(rotation.x, rotation.y, rotation.z), rotMatrix);\n                matmul(\n                    rotMatrix.invert(),\n                    rayOrigin - float3(position.x, position.y, position.z),\n                    transformedRay\n                );\n\n                const int modifications = (int) shapeProperty.y;\n                performShapeModification(modifications, modParameters, transformedRay);\n\n                float nextDistance = distanceToObject(\n                    transformedRay / position.w,\n                    (int) shapeProperty.x,\n                    dimension\n                ) * position.w;\n\n                //performDistanceModification(modSelector, modParameters);\n\n                if (nextDistance < distance)\n                \{\n                    distance = nextDistance;\n\n                    SampleType(colours) surfaceColour = colours(j, i);\n                    SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);\n\n                    colour = float4(surfaceColour);\n                    surface = float4(surfaceProperty);\n                \}\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    float computeShadow(\n            const float3 &rayDirection,\n            const float distanceToShadePoint,\n            float3 &rayOrigin)\n    \{\n        float distanceTravelled = 0;\n        float4 colour;\n        float4 surface;\n        while (distanceTravelled < distanceToShadePoint)\n        \{\n            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);\n\n            if (stepDistance < hitTolerance)\n            \{\n                return 0;\n            \}\n\n            rayOrigin += rayDirection * stepDistance;\n            distanceTravelled += stepDistance;\n        \}\n\n        return 1;\n    \}\n\n\n    float2 lightIntensityOnSurface(\n            const float3 &pointOnSurface,\n            const float3 &surfaceNormal,\n            const float3 &light,\n            const int lightType,\n            const float intensity)\n    \{\n        float3 surfaceOffset;\n        float distanceToLight;\n        float3 lightDirection;\n        float3 shadowOffsetLightDirection;\n        float intensityAtPosition = getLightData(\n            pointOnSurface,\n            surfaceNormal,\n            light,\n            lightType,\n            intensity,\n            hitTolerance,\n            maxRayDistance,\n            shadowBias,\n            distanceToLight,\n            surfaceOffset,\n            lightDirection,\n            shadowOffsetLightDirection\n        );\n\n        float normalFactor = dot(surfaceNormal, normalize(lightDirection));\n\n        return saturate(\n            normalFactor * float2(\n                intensityAtPosition,\n                computeShadow(\n                    normalize(shadowOffsetLightDirection),\n                    distanceToLight,\n                    surfaceOffset\n                )\n            )\n        );\n    \}\n\n\n    /**\n     * Get the intensity of the light on the surface of an object\n     *\n     *\n     */\n    float computeLightIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)\n    \{\n        float2 lightIntensity = float2(0, 0);\n\n        for (int i=0; i < lightTextureHeight; i++)\n        \{\n            for (int j=0; j < lightTextureWidth; j++)\n            \{\n                SampleType(lights) light = lights(j, i);\n                SampleType(lightProperties) lightProperty = lightProperties(j, i);\n\n                lightIntensity += lightIntensityOnSurface(\n                    pointOnSurface,\n                    surfaceNormal,\n                    float3(light.x, light.y, light.z),\n                    (int) lightProperty.w,\n                    light.w\n                );\n            \}\n        \}\n\n        return saturate(lightIntensity.x * lightIntensity.y);\n    \}\n\n\n    float getHazeAmount(const float distance)\n    \{\n        return hazeAmount * saturate((distance - hazeStart) / hazeDistance);\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     *\n     * @returns: The normalized surface normal\n     */\n    float3 estimateSurfaceNormal(const float3 &point) \{\n        float4 colour;\n        float4 surface;\n        return normalize(\n            float3(\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x + hitTolerance,\n                        point.y,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x - hitTolerance,\n                        point.y,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ),\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y + hitTolerance,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y - hitTolerance,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ),\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y,\n                        point.z+hitTolerance\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y,\n                        point.z - hitTolerance\n                    ),\n                    colour,\n                    surface\n                )\n        ));\n    \}\n\n\n    /**\n     * March a ray through the scene\n     *\n     * @returns: The ray colour\n     */\n    float4 marchRay(\n            const float3 &rayOrigin,\n            const float3 &rayDirection,\n            const int numBounces,\n            const float rayDistance)\n    \{\n        float3 origin = rayOrigin;\n        float3 direction = rayDirection;\n        float4 colour;\n        float4 surface;\n\n        int bounces = 0;\n        float distanceTravelled = 0;\n        float lastHitDistance = distanceTravelled;\n\n        float lightIntensity = 1;\n\n        float4 rayColour = float4(0, 0, 0, 0);\n\n        float rayStrength = 1;\n\n        int iterations = 1;\n        while (distanceTravelled < rayDistance && rayStrength > 0)\n        \{\n            float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);\n            distanceTravelled += stepDistance;\n            origin += direction * stepDistance;\n\n            if (stepDistance < hitTolerance)\n            \{\n                bounces++;\n\n                float3 surfaceNormal = estimateSurfaceNormal(\n                    origin - direction * hitTolerance\n                );\n\n                lightIntensity = computeLightIntensityOnSurface(\n                    origin,\n                    surfaceNormal\n                );\n\n                rayColour = blend(\n                    iterGlowColour,\n                    blend(\n                        hazeColour,\n                        blend(\n                            colour,\n                            rayColour,\n                            rayStrength * (1 - surface.x) * lightIntensity\n                        ),\n                        getHazeAmount(distanceTravelled - lastHitDistance)\n                    ),\n                    iterGlowAmount * iterations\n                );\n\n                if (bounces >= numBounces)\n                \{\n                    rayColour.w = 1.0f;\n                    return rayColour;\n                \}\n\n                rayStrength *= surface.x;\n\n                direction = reflectRayOffSurface(\n                    direction,\n                    surfaceNormal\n                );\n                origin = offsetPoint(\n                    origin,\n                    direction + surfaceNormal,\n                    hitTolerance\n                );\n\n                lastHitDistance = distanceTravelled;\n            \}\n            iterations++;\n        \}\n\n        rayColour = blend(\n            blend(\n                iterGlowColour,\n                blend(\n                    hazeColour,\n                    readSkyValue(direction),\n                    getHazeAmount(distanceTravelled - lastHitDistance)\n                ),\n                saturate(iterGlowAmount * iterations)\n            ),\n            rayColour,\n            rayStrength * lightIntensity\n        );\n        rayColour.w = bounces > 0;\n        return rayColour;\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value\n     */\n    void process(int2 pos)\n    \{\n        float4 resultPixel(0, 0, 0, 0);\n\n        float2 pixelLocation = float2(pos.x, pos.y);\n\n        float2 pixelOffset;\n        for (\n            pixelOffset.x = 0.0f;\n            pixelOffset.x < 1.0f;\n            pixelOffset.x += subdividedPixelSize\n        ) \{\n            for (\n                pixelOffset.y = 0.0f;\n                pixelOffset.y < 1.0f;\n                pixelOffset.y += subdividedPixelSize\n            ) \{\n                // Generate a ray from the camera\n                float3 rayOrigin;\n                float3 rayDirection;\n                createCameraRay(\n                    cameraWorldMatrix,\n                    inverseCameraProjectionMatrix,\n                    pixelsToUV(\n                        pixelLocation + pixelOffset,\n                        float2(formatWidth, formatHeight)\n                    ),\n                    rayOrigin,\n                    rayDirection\n                );\n\n                resultPixel += marchRay(\n                    rayOrigin,\n                    rayDirection,\n                    bouncesPerRay,\n                    maxRayDistance\n                );\n            \}\n        \}\n\n        dst() = resultPixel / numSubPixels;\n    \}\n\};\n"
+  KernelDescription "2 \"RayMarchKernel\" iterate pixelWise ce08ed136ce0b5916a55da04a52b5f14de841ce54a21469bbcff34b3b24b2b50 13 \"bg\" Read Point \"skyBox\" Read Random \"positions\" Read Random \"rotations\" Read Random \"dimensions\" Read Random \"colours\" Read Random \"shapeProperties\" Read Random \"shapeModParameters\" Read Random \"elongation\" Read Random \"surfaceProperties\" Read Random \"lights\" Read Random \"lightProperties\" Read Random \"dst\" Write Point 25 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"SkyBox Offset Angle\" Float 1 AAAAAA== \"SkyBox Width\" Int 1 AAgAAA== \"SkyBox Height\" Int 1 AAQAAA== \"Pixel Subdivisions\" Int 1 AAAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AAB6RA== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 AACAPw== \"Object Texture Height\" Int 1 AAAAAA== \"Object Texture Width\" Int 1 AAAAAA== \"Directional Light Texture Height\" Int 1 AAAAAA== \"Directional Light Texture Width\" Int 1 AAAAAA== \"Haze Amount\" Float 1 AAAAAA== \"Haze Start\" Float 1 AAAAAA== \"Haze Distance\" Float 1 AAB6RA== \"Haze Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== \"Iter Glow Amount\" Float 1 AAAAAA== \"Iter Glow Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== 25 \"focalLength\" 1 1 \"horizontalAperture\" 1 1 \"nearPlane\" 1 1 \"farPlane\" 1 1 \"cameraWorldMatrix\" 16 1 \"formatWidth\" 1 1 \"formatHeight\" 1 1 \"skyBoxOffsetAngle\" 1 1 \"skyFormatWidth\" 1 1 \"skyFormatHeight\" 1 1 \"subdivisions\" 1 1 \"maxBounces\" 1 1 \"maxRayDistance\" 1 1 \"hitTolerance\" 1 1 \"shadowBias\" 1 1 \"objectTextureHeight\" 1 1 \"objectTextureWidth\" 1 1 \"lightTextureHeight\" 1 1 \"lightTextureWidth\" 1 1 \"hazeAmount\" 1 1 \"hazeStart\" 1 1 \"hazeDistance\" 1 1 \"hazeColour\" 4 1 \"iterGlowAmount\" 1 1 \"iterGlowColour\" 4 1 6 \"inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"bouncesPerRay\" Int 1 1 AAAAAA== \"numSubPixels\" Int 1 1 AAAAAA== \"subdividedPixelSize\" Float 1 1 AAAAAA== \"skyBoxPixelSize\" Float 2 1 AAAAAAAAAAA= \"skyBoxOffsetRadians\" Float 1 1 AAAAAA=="
+  kernelSource "#include \"camera.h\"\n#include \"lights.h\"\n#include \"mmath.h\"\n#include \"sdfs.h\"\n#include \"sdfTransforms.h\"\n#include \"sdTransforms.h\"\n\n\nkernel RayMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    // the input for format, process called once per pixel\n    Image<eRead, eAccessPoint, eEdgeNone> bg;\n\n    // the skybox in latlong format\n    Image<eRead, eAccessRandom, eEdgeNone> skyBox;\n\n\n    // the shape positons.xyz, scale.w\n    Image<eRead, eAccessRandom, eEdgeNone> positions;\n\n    // the shape rotations.xyz\n    Image<eRead, eAccessRandom, eEdgeNone> rotations;\n\n    // the shape dimensions.xyzw (some shapes may not use all channels)\n    Image<eRead, eAccessRandom, eEdgeNone> dimensions;\n\n    // the shape colours.xyz\n    Image<eRead, eAccessRandom, eEdgeNone> colours;\n\n\n    // shape type.x, operation.y, numChildren.z, blend strength.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters;\n    Image<eRead, eAccessRandom, eEdgeNone> elongation;\n\n    // reflection.x, transmission.y, emission.z, roughness.w (TODO)\n    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;\n\n\n    // the input directional lights direction.xyz intensity.w\n    Image<eRead, eAccessRandom, eEdgeNone> lights;\n\n    // colour.xyz, type.w\n    // w in \[0, 1) = directional, \[1, inf) = point\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties;\n\n    // the output image\n    Image<eWrite> dst;\n\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float focalLength;\n        float horizontalAperture;\n        float nearPlane;\n        float farPlane;\n        float4x4 cameraWorldMatrix;\n\n        // Image params\n        float formatWidth;\n        float formatHeight;\n\n        float skyBoxOffsetAngle;\n        int skyFormatWidth;\n        int skyFormatHeight;\n\n        // Ray params\n        int subdivisions;\n        int maxBounces;\n        float maxRayDistance;\n        float hitTolerance;\n        float shadowBias;\n\n        // Scene params\n        // Shape Textures\n        int objectTextureHeight;\n        int objectTextureWidth;\n\n        // Light textures\n        int lightTextureHeight;\n        int lightTextureWidth;\n\n        float hazeAmount;\n        float hazeStart;\n        float hazeDistance;\n        float4 hazeColour;\n\n        float iterGlowAmount;\n        float4 iterGlowColour;\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float4x4 inverseCameraProjectionMatrix;\n\n        int bouncesPerRay;\n\n        int numSubPixels;\n        float subdividedPixelSize;\n\n        float2 skyBoxPixelSize;\n        float skyBoxOffsetRadians;\n\n\n\n    // In define(), parameters can be given labels and default values.\n    void define()\n    \{\n        // Camera params\n        defineParam(focalLength, \"Focal Length\", 50.0f);\n        defineParam(horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(nearPlane, \"Near Plane\", 0.1f);\n        defineParam(farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n\n        // Image params\n        defineParam(formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(skyBoxOffsetAngle, \"SkyBox Offset Angle\", 0.0f);\n        defineParam(skyFormatHeight, \"SkyBox Height\", 1024);\n        defineParam(skyFormatWidth, \"SkyBox Width\", 2048);\n\n        // Ray params\n        defineParam(subdivisions, \"Pixel Subdivisions\", 0);\n        defineParam(maxRayDistance, \"Max Ray Distance\", 1000.0f);\n        defineParam(maxBounces, \"Max Bounces\", 1);\n        defineParam(hitTolerance, \"Hit Tolerance\", 0.001f);\n        defineParam(shadowBias, \"Shadow Bias\", 1.0f);\n\n        // Scene params\n\n        // Shape Counts\n        defineParam(objectTextureHeight, \"Object Texture Height\", 0);\n        defineParam(objectTextureWidth, \"Object Texture Width\", 0);\n\n        // Light Counts\n        defineParam(lightTextureHeight, \"Directional Light Texture Height\", 0);\n        defineParam(lightTextureWidth, \"Directional Light Texture Width\", 0);\n\n        defineParam(hazeAmount, \"Haze Amount\", 0.0f);\n        defineParam(hazeStart, \"Haze Start\", 0.0f);\n        defineParam(hazeDistance, \"Haze Distance\", 1000.0f);\n        defineParam(hazeColour, \"Haze Colour\", float4(1, 1, 1, 1));\n\n        defineParam(iterGlowAmount, \"Iter Glow Amount\", 0.0f);\n        defineParam(iterGlowColour, \"Iter Glow Colour\", float4(1, 1, 1, 1));\n    \}\n\n\n    // The init() function is run before any calls to process().\n    // Local variables can be initialized here.\n    void init()\n    \{\n        bouncesPerRay = maxBounces <= 0 ? 1 : maxBounces;\n\n        // TODO use angles to allow -ve focal length like for latlongs\n        float aspect = aspectRatio(formatHeight, formatWidth);\n        float4x4 cameraProjectionMatrix = projectionMatrix(\n            focalLength,\n            horizontalAperture,\n            aspect,\n            nearPlane,\n            farPlane\n        );\n        inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();\n\n        int subPixelDivisions = pow(2, abs(subdivisions));\n        subdividedPixelSize = 1.0f / (float) subPixelDivisions;\n        numSubPixels = pow(subPixelDivisions, 2);\n\n        skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);\n        skyBoxOffsetRadians = skyBoxOffsetAngle * PI / 180.0f;\n    \}\n\n\n    /**\n     * Get the value of sky the ray would hit at infinite distance\n     */\n    float4 readSkyValue(float3 rayDirection)\n    \{\n        float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);\n\n        SampleType(skyBox) skyBoxPixel = bilinear(\n            skyBox,\n            skyBoxPixelSize.x * angles.x,\n            skyFormatHeight - (skyBoxPixelSize.y * angles.y)\n        );\n\n        return saturate(skyBoxPixel);\n    \}\n\n\n    //\n    // Render Engine\n    //\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     */\n    float getMinDistanceToObjectInScene(\n            const float3 rayOrigin,\n            float4 &colour,\n            float4 &surface)\n    \{\n        float distance = maxRayDistance;\n\n        float3x3 rotMatrix;\n        float3 transformedRay;\n        for (int i=0; i < objectTextureHeight; i++)\n        \{\n            for (int j=0; j < objectTextureWidth; j++)\n            \{\n                SampleType(positions) position = positions(j, i);\n                SampleType(rotations) rotation = rotations(j, i);\n                SampleType(dimensions) dimension = dimensions(j, i);\n                SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);\n                SampleType(shapeModParameters) modParameters = shapeModParameters(j, i);\n                SampleType(elongation) elongate = elongation(j, i);\n\n                rotationMatrix(float3(rotation.x, rotation.y, rotation.z), rotMatrix);\n                matmul(\n                    rotMatrix.invert(),\n                    rayOrigin - float3(position.x, position.y, position.z),\n                    transformedRay\n                );\n\n                const float3 elon = float3(elongate.x, elongate.y, elongate.z);\n\n                const int modifications = (int) shapeProperty.y;\n                performShapeModification(\n                    modifications,\n                    modParameters,\n                    elon,\n                    transformedRay\n                );\n\n                float nextDistance = distanceToObject(\n                    transformedRay / position.w,\n                    (int) shapeProperty.x,\n                    dimension\n                ) * position.w;\n\n                //performDistanceModification(modSelector, modParameters);\n\n                if (nextDistance < distance)\n                \{\n                    distance = nextDistance;\n\n                    SampleType(colours) surfaceColour = colours(j, i);\n                    SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);\n\n                    colour = float4(surfaceColour);\n                    surface = float4(surfaceProperty);\n                \}\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    float computeShadow(\n            const float3 &rayDirection,\n            const float distanceToShadePoint,\n            float3 &rayOrigin)\n    \{\n        float distanceTravelled = 0;\n        float4 colour;\n        float4 surface;\n        while (distanceTravelled < distanceToShadePoint)\n        \{\n            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);\n\n            if (stepDistance < hitTolerance)\n            \{\n                return 0;\n            \}\n\n            rayOrigin += rayDirection * stepDistance;\n            distanceTravelled += stepDistance;\n        \}\n\n        return 1;\n    \}\n\n\n    float2 lightIntensityOnSurface(\n            const float3 &pointOnSurface,\n            const float3 &surfaceNormal,\n            const float3 &light,\n            const int lightType,\n            const float intensity)\n    \{\n        float3 surfaceOffset;\n        float distanceToLight;\n        float3 lightDirection;\n        float3 shadowOffsetLightDirection;\n        float intensityAtPosition = getLightData(\n            pointOnSurface,\n            surfaceNormal,\n            light,\n            lightType,\n            intensity,\n            hitTolerance,\n            maxRayDistance,\n            shadowBias,\n            distanceToLight,\n            surfaceOffset,\n            lightDirection,\n            shadowOffsetLightDirection\n        );\n\n        float normalFactor = dot(surfaceNormal, normalize(lightDirection));\n\n        return saturate(\n            normalFactor * float2(\n                intensityAtPosition,\n                computeShadow(\n                    normalize(shadowOffsetLightDirection),\n                    distanceToLight,\n                    surfaceOffset\n                )\n            )\n        );\n    \}\n\n\n    /**\n     * Get the intensity of the light on the surface of an object\n     *\n     *\n     */\n    float computeLightIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)\n    \{\n        float2 lightIntensity = float2(0, 0);\n\n        for (int i=0; i < lightTextureHeight; i++)\n        \{\n            for (int j=0; j < lightTextureWidth; j++)\n            \{\n                SampleType(lights) light = lights(j, i);\n                SampleType(lightProperties) lightProperty = lightProperties(j, i);\n\n                lightIntensity += lightIntensityOnSurface(\n                    pointOnSurface,\n                    surfaceNormal,\n                    float3(light.x, light.y, light.z),\n                    (int) lightProperty.w,\n                    light.w\n                );\n            \}\n        \}\n\n        return saturate(lightIntensity.x * lightIntensity.y);\n    \}\n\n\n    float getHazeAmount(const float distance)\n    \{\n        return hazeAmount * saturate((distance - hazeStart) / hazeDistance);\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     *\n     * @returns: The normalized surface normal\n     */\n    float3 estimateSurfaceNormal(const float3 &point) \{\n        float4 colour;\n        float4 surface;\n        return normalize(\n            float3(\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x + hitTolerance,\n                        point.y,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x - hitTolerance,\n                        point.y,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ),\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y + hitTolerance,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y - hitTolerance,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ),\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y,\n                        point.z+hitTolerance\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y,\n                        point.z - hitTolerance\n                    ),\n                    colour,\n                    surface\n                )\n        ));\n    \}\n\n\n    /**\n     * March a ray through the scene\n     *\n     * @returns: The ray colour\n     */\n    float4 marchRay(\n            const float3 &rayOrigin,\n            const float3 &rayDirection,\n            const int numBounces,\n            const float rayDistance)\n    \{\n        float3 origin = rayOrigin;\n        float3 direction = rayDirection;\n        float4 colour;\n        float4 surface;\n\n        int bounces = 0;\n        float distanceTravelled = 0;\n        float lastHitDistance = distanceTravelled;\n\n        float lightIntensity = 1;\n\n        float4 rayColour = float4(0, 0, 0, 0);\n\n        float rayStrength = 1;\n\n        int iterations = 1;\n        while (distanceTravelled < rayDistance && rayStrength > 0)\n        \{\n            float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);\n            distanceTravelled += stepDistance;\n            origin += direction * stepDistance;\n\n            if (stepDistance < hitTolerance)\n            \{\n                bounces++;\n\n                float3 surfaceNormal = estimateSurfaceNormal(\n                    origin - direction * hitTolerance\n                );\n\n                lightIntensity = computeLightIntensityOnSurface(\n                    origin,\n                    surfaceNormal\n                );\n\n                rayColour = blend(\n                    iterGlowColour,\n                    blend(\n                        hazeColour,\n                        blend(\n                            colour,\n                            rayColour,\n                            rayStrength * (1 - surface.x) * lightIntensity\n                        ),\n                        getHazeAmount(distanceTravelled - lastHitDistance)\n                    ),\n                    iterGlowAmount * iterations\n                );\n\n                if (bounces >= numBounces)\n                \{\n                    rayColour.w = 1.0f;\n                    return rayColour;\n                \}\n\n                rayStrength *= surface.x;\n\n                direction = reflectRayOffSurface(\n                    direction,\n                    surfaceNormal\n                );\n                origin = offsetPoint(\n                    origin,\n                    direction + surfaceNormal,\n                    hitTolerance\n                );\n\n                lastHitDistance = distanceTravelled;\n            \}\n            iterations++;\n        \}\n\n        rayColour = blend(\n            blend(\n                iterGlowColour,\n                blend(\n                    hazeColour,\n                    readSkyValue(direction),\n                    getHazeAmount(distanceTravelled - lastHitDistance)\n                ),\n                saturate(iterGlowAmount * iterations)\n            ),\n            rayColour,\n            rayStrength * lightIntensity\n        );\n        rayColour.w = bounces > 0;\n        return rayColour;\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value\n     */\n    void process(int2 pos)\n    \{\n        float4 resultPixel(0, 0, 0, 0);\n\n        float2 pixelLocation = float2(pos.x, pos.y);\n\n        float2 pixelOffset;\n        for (\n            pixelOffset.x = 0.0f;\n            pixelOffset.x < 1.0f;\n            pixelOffset.x += subdividedPixelSize\n        ) \{\n            for (\n                pixelOffset.y = 0.0f;\n                pixelOffset.y < 1.0f;\n                pixelOffset.y += subdividedPixelSize\n            ) \{\n                // Generate a ray from the camera\n                float3 rayOrigin;\n                float3 rayDirection;\n                createCameraRay(\n                    cameraWorldMatrix,\n                    inverseCameraProjectionMatrix,\n                    pixelsToUV(\n                        pixelLocation + pixelOffset,\n                        float2(formatWidth, formatHeight)\n                    ),\n                    rayOrigin,\n                    rayDirection\n                );\n\n                resultPixel += marchRay(\n                    rayOrigin,\n                    rayDirection,\n                    bouncesPerRay,\n                    maxRayDistance\n                );\n            \}\n        \}\n\n        dst() = resultPixel / numSubPixels;\n    \}\n\};\n"
   rebuild ""
   "RayMarchKernel_Focal Length" {{parent.DummyCam.focal}}
   "RayMarchKernel_Horizontal Aperture" {{parent.DummyCam.haperture}}
@@ -572,8 +611,7 @@ Group {
   "RayMarchKernel_Screen Height" {{input0.height}}
   "RayMarchKernel_SkyBox Width" {{input1.width}}
   "RayMarchKernel_SkyBox Height" {{input1.height}}
-  "RayMarchKernel_Pixel Subdivisions" 1
-  "RayMarchKernel_Max Bounces" 5
+  "RayMarchKernel_Max Bounces" 7
   "RayMarchKernel_Max Ray Distance" 100
   "RayMarchKernel_Hit Tolerance" 0.01
   "RayMarchKernel_Object Texture Height" {{input2.height}}
@@ -651,6 +689,6 @@ Viewer {
  frame_range 84-96
  colour_sample_bbox {0.21875 -0.0625 0.220703125 -0.060546875}
  name Viewer1
- xpos 17787
- ypos 1341
+ xpos 17822
+ ypos 1388
 }
