@@ -877,7 +877,29 @@ float distanceToMandelbulb(const float3 &position, const float power, const int 
  * @arg position: The point to get the distance to, from the object.
  * @arg shapeType: The selection of shape to get the distance to, options:
  *     0: sphere
- * 
+ *     1: ellipsoid
+ *     2: cut sphere
+ *     3: hollow sphere
+ *     4: death star
+ *     5: solid angle
+ *     6: rectangular prism
+ *     7: rectangular prism frame
+ *     8: rhombus
+ *     9: triangular prism
+ *     10: cylinder
+ *     11: infinite cylinder
+ *     12: plane
+ *     13: capsule
+ *     14: cone
+ *     15: infinite cone
+ *     16: capped cone
+ *     17: rounded cone
+ *     18: torus
+ *     19: capped torus
+ *     20: hexagonal prism
+ *     21: octahedron
+ *     22: link
+ *     23: mandelbulb
  * @arg dimensions: The radius of the 'tube' of the torus, the radius of
  *     the 'ring', and the angle to cap at in range (0-PI).
  *
