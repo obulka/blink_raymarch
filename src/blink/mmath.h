@@ -98,7 +98,7 @@ inline float distanceToYAxis(const float3 &position)
  *
  * @returns: The signed length of the vector.
  */
-float sdfLength(const float2 &vector)
+inline float sdfLength(const float2 &vector)
 {
     return (
         length(positivePart(vector))
@@ -115,13 +115,14 @@ float sdfLength(const float2 &vector)
  *
  * @returns: The signed length of the vector.
  */
-float sdfLength(const float3 &vector)
+inline float sdfLength(const float3 &vector)
 {
     return (
         length(positivePart(vector))
         - negativePart(maxComponent(vector))
     );
 }
+
 
 /**
  * Get the length of the shorter of two vectors.
@@ -242,7 +243,7 @@ inline float mix(float x, float y, float a)
 }
 
 
-inline float2 smoothMinN(float colour0, float colour1, float blendSize, float exponent)
+float2 smoothMinN(float colour0, float colour1, float blendSize, float exponent)
 {
     float m = 0.5f * pow(
         positivePart(blendSize - fabs(colour0 - colour1)) / blendSize,
@@ -258,31 +259,6 @@ inline float2 smoothMinN(float colour0, float colour1, float blendSize, float ex
 inline float4 blend(const float4 &colour0, const float4 &colour1, const float weight)
 {
     return weight * colour0 + (1 - weight) * colour1;
-}
-
-
-inline float4 blend(
-    const float4 &colour0,
-    const float weight0,
-    const float4 &colour1,
-    const float weight1,
-    const float4 &colour2,
-    const float weight2,
-    const float4 &colour3)
-{
-    return blend(
-        colour0,
-        blend(
-            colour1,
-            blend(
-                colour2,
-                colour3,
-                weight2
-            ),
-            weight1
-        ),
-        weight0
-    );
 }
 
 
@@ -353,7 +329,7 @@ inline float3 reflectRayOffSurface(
 
 inline void rotationMatrix(const float3 &angles, float3x3 &out)
 {
-    // Why tf cant you init a float3x3 normally??
+    // Why tf can I not init a float3x3 normally??
     out[0][0] = cos(angles.y) * cos(angles.z);
     out[0][1] = sin(angles.x) * sin(angles.y) * cos(angles.z) - cos(angles.x) * sin(angles.z);
     out[0][2] = cos(angles.x) * sin(angles.y) * cos(angles.z) + sin(angles.x) * sin(angles.z);
