@@ -52,7 +52,7 @@ inline float roundEdges(const float distance, float radius)
 }
 
 
-inline float onion(const float distance, const float thickness)
+inline float hollow(const float distance, const float thickness)
 {
     return fabs(distance) - thickness;
 }
@@ -60,30 +60,30 @@ inline float onion(const float distance, const float thickness)
 
 void performShapeModification(
         const int modifications,
-        const float4 &modParameters,
-        const float3 &elongation,
+        const float4 &modParameters0,
+        const float4 &modParameters1,
         float3 &position)
 {
     if (modifications & 1)
     {
         position = finiteRepetition(
             position,
-            float3(modParameters.x, modParameters.y, modParameters.z),
-            modParameters.w
+            float3(modParameters0.x, modParameters0.y, modParameters0.z),
+            modParameters0.w
         );
     }
     else if (modifications & 2)
     {
         position = infiniteRepetition(
             position,
-            float3(modParameters.x, modParameters.y, modParameters.z)
+            float3(modParameters0.x, modParameters0.y, modParameters0.z)
         );
     }
     if (modifications & 4)
     {
         position = elongate(
             position,
-            float3(elongation.x, elongation.y, elongation.z)
+            float3(modParameters1.x, modParameters1.y, modParameters1.z)
         );
     }
     if (modifications & 8)
@@ -98,4 +98,23 @@ void performShapeModification(
     {
         position = mirrorZ(position);
     }
+}
+
+
+float performDistanceModification(
+        const int modifications,
+        const float edgeRadius,
+        const float wallThickness,
+        const float distance)
+{
+    float result = distance;
+    if (modifications & 64)
+    {
+        result = roundEdges(result, edgeRadius);
+    }
+    if (modifications & 128)
+    {
+        result = hollow(result, wallThickness);
+    }
+    return result;
 }
