@@ -21,6 +21,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                     <page id="DopeSheet.1"/>
                     <page id="DAG.2"/>
                     <page id="DAG.3"/>
+                    <page id="DAG.4"/>
                 </dock>
             </splitter>
             <split size="615"/>
@@ -56,14 +57,14 @@ Read {
  origset true
  name Read14
  xpos 17973
- ypos 743
+ ypos 763
 }
 Reformat {
  type scale
  scale 0.25
  name Reformat1
  xpos 17973
- ypos 885
+ ypos 915
 }
 Dot {
  name Dot19
@@ -74,7 +75,7 @@ Axis2 {
  inputs 0
  name Axis2
  xpos 17795
- ypos 753
+ ypos 770
 }
 Camera2 {
  translate {0 0 2}
@@ -94,12 +95,20 @@ Group {
  name sdf_light
  xpos 18137
  ypos 776
+ addUserKnob {20 User}
+ addUserKnob {4 type l Type M {Directional Point}}
+ addUserKnob {13 dir_pos l Direction/Position}
+ dir_pos {-1 -1 -1}
+ addUserKnob {7 intensity l Intensity}
+ intensity 1
+ addUserKnob {18 colour l Colour}
+ colour {1 1 1}
 }
 add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
  Constant {
   inputs 0
   channels sdf_light
-  color {-1 -1 -1 10}
+  color {{parent.dir_pos.x} {parent.dir_pos.y} {parent.dir_pos.z} {parent.intensity}}
   format "1 1 0 0 1 1 1 1x1"
   name light
   xpos 434
@@ -114,7 +123,7 @@ add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properti
  Constant {
   inputs 0
   channels sdf_light_properties
-  color {0 0 0 0}
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.type}}
   format "1 1 0 0 1 1 1 1x1"
   name light_props
   xpos 561
@@ -134,7 +143,6 @@ add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properti
  }
  Output {
   name Output1
-  selected true
   xpos 501
   ypos 491
  }
@@ -149,86 +157,92 @@ Group {
  name sdf_primitive
  xpos 18314
  ypos 778
+ addUserKnob {20 User}
+ addUserKnob {4 shape l Shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
+ addUserKnob {19 dimensions l Dimensions t "The dimensions of the object, the values change meaning depending on the shape, and for some, not all values are used.\n\nSphere:\n    r = radius\n\nEllipsoid:\n    r = The radius along the x-axis of the ellipsoid.\n    g = The radius along the y-axis of the ellipsoid.\n    b = The radius along the z-axis of the ellipsoid.\n\n"}
+ dimensions {0.25 0.3 0.3 0.01}
+ addUserKnob {18 colour l Colour}
+ colour {0.11 0.1 0.69}
+ addUserKnob {19 surface l Surface t "r = reflectivity\ng = transmissivity (TODO)\nb = emissivity (TODO)\na = roughness (TODO)"}
+ surface {1 0 0 0}
+ addUserKnob {7 wall_thickness l "Wall Thickness"}
+ wall_thickness 0.01
+ addUserKnob {6 hollow l Hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
+ addUserKnob {13 elongation l Elongation}
+ elongation {0.1 0 0}
+ addUserKnob {6 elongate l Elongate -STARTLINE}
+ addUserKnob {7 edge_radius l "Edge Radius"}
+ addUserKnob {6 mirror_x l "Mirror X" +STARTLINE}
+ addUserKnob {6 mirror_y l "Mirror Y" -STARTLINE}
+ addUserKnob {6 mirror_z l "Mirror Z" -STARTLINE}
+ addUserKnob {26 div0 l "" +STARTLINE}
+ addUserKnob {13 position l Position}
+ addUserKnob {13 rotation l Rotation}
+ addUserKnob {7 uniform_scale l "Uniform Scale" R 0 10}
+ uniform_scale 1
+ addUserKnob {26 div1 l "" +STARTLINE}
+ addUserKnob {19 repetition_params l Repetition}
+ repetition_params {1 1 1 1.5}
+ addUserKnob {4 repetition_type l Type -STARTLINE M {None Finite Infinite "" "" ""}}
 }
- BackdropNode {
-  inputs 0
-  name Object_Properties1
-  xpos 645
-  ypos 421
-  bdwidth 703
-  bdheight 388
- }
- BackdropNode {
-  inputs 0
-  name Objects1
-  xpos 210
-  ypos 420
-  bdwidth 413
-  bdheight 386
- }
 add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.position_y sdf_position_scale.position_z sdf_position_scale.uniform_scale}
  Constant {
   inputs 0
   channels sdf_position_scale
-  color {0 0 0 1}
+  color {{parent.position.x} {parent.position.y} {parent.position.z} {parent.uniform_scale}}
   format "1 1 0 0 1 1 1 1x1"
   name position_scale
-  xpos 237
+  xpos 280
   ypos 455
  }
  Dot {
   name Dot17
-  xpos 271
+  xpos 314
   ypos 647
  }
 add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sdf_rotation_wall_thickness.rotation_y sdf_rotation_wall_thickness.rotation_z sdf_rotation_wall_thickness.wall_thickness}
  Constant {
   inputs 0
   channels sdf_rotation_wall_thickness
-  color {0.7853981634 0.7853981634 0 0.03}
+  color {{parent.rotation.x} {parent.rotation.y} {parent.rotation.z} {parent.wall_thickness}}
   format "1 1 0 0 1 1 1 1x1"
   name rotation
-  xpos 360
+  xpos 403
   ypos 457
- }
- Dot {
-  name Dot16
-  xpos 394
-  ypos 648
  }
  Copy {
   inputs 2
   channels all
   name Copy1
-  xpos 303
+  xpos 403
   ypos 726
  }
 add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y sdf_dimensions.dimension_z sdf_dimensions.dimension_w}
  Constant {
   inputs 0
   channels sdf_dimensions
-  color {0.1 0.05 0.05 0.01}
+  color {{parent.dimensions.r} {parent.dimensions.g} {parent.dimensions.b} {parent.dimensions.a}}
   format "1 1 0 0 1 1 1 1x1"
   name dimensions
-  xpos 497
+  xpos 540
   ypos 460
  }
  Copy {
   inputs 2
   channels all
   name Copy2
-  xpos 497
+  xpos 540
   ypos 726
  }
 add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_b sdf_colour.colour_a}
  Constant {
   inputs 0
   channels sdf_colour
-  color {0.11 0.1 0.69 0.337279}
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
   format "1 1 0 0 1 1 1 1x1"
   name colour
   xpos 669
-  ypos 463
+  ypos 459
  }
  Copy {
   inputs 2
@@ -241,11 +255,11 @@ add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.n
  Constant {
   inputs 0
   channels sdf_shape
-  color {2 64 0 0}
+  color {{parent.shape} {"parent.repetition_type | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0)"} 0 0}
   format "1 1 0 0 1 1 1 1x1"
   name shape
   xpos 806
-  ypos 462
+  ypos 458
  }
  Copy {
   inputs 2
@@ -258,7 +272,7 @@ add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surfa
  Constant {
   inputs 0
   channels sdf_surface
-  color {1 0 0 0}
+  color {{parent.surface.r} {parent.surface.g} {parent.surface.b} {parent.surface.a}}
   format "1 1 0 0 1 1 1 1x1"
   name surface
   xpos 935
@@ -275,7 +289,7 @@ add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetio
  Constant {
   inputs 0
   channels sdf_shape_mods_0
-  color {1 1 1 1.5}
+  color {{parent.repetition_params.r} {parent.repetition_params.g} {parent.repetition_params.b} {parent.repetition_params.a}}
   format "1 1 0 0 1 1 1 1x1"
   name shape_mods
   xpos 1056
@@ -292,7 +306,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
  Constant {
   inputs 0
   channels sdf_shape_mods_1
-  color {0 0 0 0}
+  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
   format "1 1 0 0 1 1 1 1x1"
   name shape_mods1
   xpos 1183
@@ -308,14 +322,9 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
  Output {
   name Output1
   xpos 1183
-  ypos 987
+  ypos 898
  }
 end_group
-Dot {
- name Dot2
- xpos 18348
- ypos 1036
-}
 Group {
  inputs 4
  name ray_marcher

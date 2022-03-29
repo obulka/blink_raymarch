@@ -41,7 +41,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;
 
 
-    // the input directional lights direction.xyz intensity.w
+    // the input lights direction/position.xyz intensity.w
     Image<eRead, eAccessRandom, eEdgeNone> lights;
 
     // colour.xyz, type.w
