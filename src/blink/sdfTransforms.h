@@ -110,11 +110,7 @@ float performDistanceModification(
     float result = distance;
     if (modifications & 64)
     {
-        result = roundEdges(result, edgeRadius);
-    }
-    if (modifications & 128)
-    {
         result = hollow(result, wallThickness);
     }
-    return result;
+    return roundEdges(result, edgeRadius);
 }
