@@ -360,11 +360,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 SampleType(lights) light = lights(j, i);
                 SampleType(lightProperties) lightProperty = lightProperties(j, i);
 
+                int lightType = (int) lightProperty.w;
+                if (lightType < 0)
+                {
+                    continue;
+                }
                 lightIntensity += lightIntensityOnSurface(
                     pointOnSurface,
                     surfaceNormal,
                     float3(light.x, light.y, light.z),
-                    (int) lightProperty.w,
+                    lightType,
                     light.w
                 );
             }
