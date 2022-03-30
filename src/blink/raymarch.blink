@@ -505,7 +505,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         ),
                         getHazeAmount(distanceTravelled - lastHitDistance)
                     ),
-                    iterGlowAmount * iterations
+                    saturate(iterGlowAmount * iterations)
                 );
 
                 if (bounces >= numBounces)

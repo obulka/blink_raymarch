@@ -846,34 +846,68 @@ float distanceToLink(
  */
 float distanceToMandelbulb(const float3 &position, const float power, const int iterations)
 {
+    // float3 currentPosition = position;
+    // float dradius = 1;
+    // float radius = 0;
+
+    // for (int i=0; i < iterations; i++) {
+    //     radius = length(currentPosition);
+
+    //     if (radius > 2) {
+    //         break;
+    //     }
+
+    //     float theta = acos(currentPosition.z / radius);
+    //     float phi = atan2(currentPosition.y, currentPosition.x);
+    //     dradius = pow(radius, power - 1.0f) * power * dradius + 1.0f;
+
+    //     theta = theta * power;
+    //     phi = phi * power;
+
+    //     currentPosition = pow(radius, power) * float3(
+    //         sin(theta) * cos(phi),
+    //         sin(phi) * sin(theta),
+    //         cos(theta)
+    //     );
+    //     currentPosition += position;
+    // }
+    // return 0.5f * log(radius) * radius / dradius;
+
+
     float3 currentPosition = position;
-    float dradius = 1;
-    float radius = 0;
+    float m = dot(currentPosition, currentPosition);
 
-    for (int i=0; i < iterations; i++) {
-        radius = length(currentPosition);
+    float4 trap = float4(fabs(currentPosition), m);
+    float dradius = 1.0f;
 
-        if (radius > 2) {
+    for (int i=0; i < iterations; i++)
+    {
+        dradius = power * pow(m, (power - 1) / 2) * dradius + 1.0f;
+
+        float r = length(currentPosition);
+        float b = power * acos(currentPosition.y / r);
+        float a = power * atan2(currentPosition.x, currentPosition.z);
+
+        currentPosition = position + pow(r, power) * float3(
+            sin(b) * sin(a),
+            cos(b),
+            sin(b) * cos(a)
+        );
+
+        trap = min(trap, float4(fabs(currentPosition), m));
+
+        m = dot(currentPosition, currentPosition);
+        if(m > 4.0f)
+        {
             break;
         }
-
-        float theta = acos(currentPosition.z / radius);
-        float phi = atan2(currentPosition.y, currentPosition.x);
-        dradius = pow(radius, power - 1.0f) * power * dradius + 1.0f;
-
-        theta = theta * power;
-        phi = phi * power;
-
-        currentPosition = pow(radius, power) * float3(
-            sin(theta) * cos(phi),
-            sin(phi) * sin(theta),
-            cos(theta)
-        );
-        currentPosition += position;
     }
 
-    return 0.5f * log(radius) * radius / dradius;
+    float4 resColor = float4(m, trap.y, trap.z, trap.w);
+
+    return 0.25f * log(m) * sqrt(m) / dradius;
 }
+
 
 
 /**
