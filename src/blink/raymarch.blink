@@ -74,6 +74,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int subdivisions;
         int maxBounces;
         float maxRayDistance;
+        int maxRaySteps;
         float hitTolerance;
         float shadowBias;
 
@@ -138,6 +139,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         // Ray params
         defineParam(subdivisions, "Pixel Subdivisions", 0);
         defineParam(maxRayDistance, "Max Ray Distance", 1000.0f);
+        defineParam(maxRaySteps, "Max Ray Steps", 128);
         defineParam(maxBounces, "Max Bounces", 1);
         defineParam(hitTolerance, "Hit Tolerance", 0.001f);
         defineParam(shadowBias, "Shadow Bias", 1.0f);
@@ -286,7 +288,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float distanceTravelled = 0;
         float4 colour;
         float4 surface;
-        while (distanceTravelled < distanceToShadePoint)
+        int iterations = 0;
+        while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
         {
             float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
 
@@ -297,6 +300,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             rayOrigin += rayDirection * stepDistance;
             distanceTravelled += stepDistance;
+            iterations++;
         }
 
         return 1;
@@ -363,15 +367,18 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 int lightType = (int) lightProperty.w;
                 if (lightType < 0)
                 {
-                    continue;
+                    lightIntensity += float2(light.w, 1);
                 }
-                lightIntensity += lightIntensityOnSurface(
-                    pointOnSurface,
-                    surfaceNormal,
-                    float3(light.x, light.y, light.z),
-                    lightType,
-                    light.w
-                );
+                else
+                {
+                    lightIntensity += lightIntensityOnSurface(
+                        pointOnSurface,
+                        surfaceNormal,
+                        float3(light.x, light.y, light.z),
+                        lightType,
+                        light.w
+                    );
+                }
             }
         }
 
@@ -480,7 +487,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float rayStrength = 1;
 
         int iterations = 1;
-        while (distanceTravelled < rayDistance && rayStrength > 0)
+        while (distanceTravelled < rayDistance && rayStrength > 0 && iterations <= maxRaySteps)
         {
             float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);
             distanceTravelled += stepDistance;

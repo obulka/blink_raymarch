@@ -846,66 +846,38 @@ float distanceToLink(
  */
 float distanceToMandelbulb(const float3 &position, const float power, const int iterations)
 {
-    // float3 currentPosition = position;
-    // float dradius = 1;
-    // float radius = 0;
-
-    // for (int i=0; i < iterations; i++) {
-    //     radius = length(currentPosition);
-
-    //     if (radius > 2) {
-    //         break;
-    //     }
-
-    //     float theta = acos(currentPosition.z / radius);
-    //     float phi = atan2(currentPosition.y, currentPosition.x);
-    //     dradius = pow(radius, power - 1.0f) * power * dradius + 1.0f;
-
-    //     theta = theta * power;
-    //     phi = phi * power;
-
-    //     currentPosition = pow(radius, power) * float3(
-    //         sin(theta) * cos(phi),
-    //         sin(phi) * sin(theta),
-    //         cos(theta)
-    //     );
-    //     currentPosition += position;
-    // }
-    // return 0.5f * log(radius) * radius / dradius;
-
-
     float3 currentPosition = position;
-    float m = dot(currentPosition, currentPosition);
+    float radiusSquared = dot(currentPosition, currentPosition);
 
-    float4 trap = float4(fabs(currentPosition), m);
+    // float4 trap = float4(fabs(currentPosition), radiusSquared);
     float dradius = 1.0f;
 
     for (int i=0; i < iterations; i++)
     {
-        dradius = power * pow(m, (power - 1) / 2) * dradius + 1.0f;
+        dradius = power * pow(radiusSquared, (power - 1) / 2) * dradius + 1.0f;
 
-        float r = length(currentPosition);
-        float b = power * acos(currentPosition.y / r);
-        float a = power * atan2(currentPosition.x, currentPosition.z);
+        float currentRadius = length(currentPosition);
+        float theta = power * acos(currentPosition.z / currentRadius);
+        float phi = power * atan2(currentPosition.y, currentPosition.x);
 
-        currentPosition = position + pow(r, power) * float3(
-            sin(b) * sin(a),
-            cos(b),
-            sin(b) * cos(a)
+        currentPosition = position + pow(currentRadius, power) * float3(
+            sin(theta) * cos(phi),
+            sin(theta) * sin(phi),
+            cos(theta)
         );
 
-        trap = min(trap, float4(fabs(currentPosition), m));
+        // trap = min(trap, float4(fabs(currentPosition), radiusSquared));
 
-        m = dot(currentPosition, currentPosition);
-        if(m > 4.0f)
+        radiusSquared = dot(currentPosition, currentPosition);
+        if(radiusSquared > 4.0f)
         {
             break;
         }
     }
 
-    float4 resColor = float4(m, trap.y, trap.z, trap.w);
+    // float4 resColor = float4(radiusSquared, trap.y, trap.z, trap.w);
 
-    return 0.25f * log(m) * sqrt(m) / dradius;
+    return 0.25f * log(radiusSquared) * sqrt(radiusSquared) / dradius;
 }
 
 
@@ -946,6 +918,10 @@ float distanceToMandelbulb(const float3 &position, const float power, const int 
  */
 float distanceToObject(const float3 &position, const int shapeType, const float4 &dimensions)
 {
+    if (shapeType == 23)
+    {
+        return distanceToMandelbulb(position, dimensions.x, (int) dimensions.y);
+    }
     if (shapeType == 0)
     {
         return distanceToSphere(position, dimensions.x);
@@ -1097,10 +1073,6 @@ float distanceToObject(const float3 &position, const int shapeType, const float4
             dimensions.y,
             dimensions.z
         );
-    }
-    if (shapeType == 23)
-    {
-        return distanceToMandelbulb(position, dimensions.x, (int) dimensions.y);
     }
 
     return 0;
