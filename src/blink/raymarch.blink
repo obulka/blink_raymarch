@@ -151,8 +151,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(objectTextureWidth, "Object Texture Width", 0);
 
         // Light Counts
-        defineParam(lightTextureHeight, "Directional Light Texture Height", 0);
-        defineParam(lightTextureWidth, "Directional Light Texture Width", 0);
+        defineParam(lightTextureHeight, "Light Texture Height", 0);
+        defineParam(lightTextureWidth, "Light Texture Width", 0);
 
         defineParam(hazeAmount, "Haze Amount", 0.0f);
         defineParam(hazeStart, "Haze Start", 0.0f);
@@ -212,18 +212,67 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     //
 
 
+    float3 transformRay(
+        const float3 &rayOrigin,
+        const float3 &position,
+        const float3 &rotation,
+        const int modifications,
+        const float4 &modParameters0,
+        const float4 &modParameters1)
+    {
+        float3x3 rotMatrix;
+        float3 transformedRay;
+        rotationMatrix(rotation, rotMatrix);
+        matmul(
+            rotMatrix.invert(),
+            rayOrigin - position,
+            transformedRay
+        );
+        performShapeModification(
+            modifications,
+            modParameters0,
+            modParameters1,
+            transformedRay
+        );
+
+        return transformedRay;
+    }
+
+
+    float getNextDistance(
+        const float3 &rayOrigin,
+        const int shape,
+        const float4 &dimension,
+        const float uniformScale,
+        const int modifications,
+        const float edgeRadius,
+        const float wallThickness)
+    {
+        float nextDistance = distanceToObject(
+            rayOrigin / uniformScale,
+            shape,
+            dimension
+        ) * uniformScale;
+
+        return performDistanceModification(
+            modifications,
+            edgeRadius,
+            wallThickness,
+            nextDistance
+        );
+    }
+
+
     /**
      * Compute the minimum distance to an object in the scene
      */
     float getMinDistanceToObjectInScene(
-            const float3 rayOrigin,
+            const float3 &rayOrigin,
             float4 &colour,
             float4 &surface)
     {
         float distance = maxRayDistance;
 
-        float3x3 rotMatrix;
-        float3 transformedRay;
         for (int i=0; i < objectTextureHeight; i++)
         {
             for (int j=0; j < objectTextureWidth; j++)
@@ -235,33 +284,73 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, i);
                 SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, i);
 
-                rotationMatrix(float3(rotation.x, rotation.y, rotation.z), rotMatrix);
-                matmul(
-                    rotMatrix.invert(),
-                    rayOrigin - float3(position.x, position.y, position.z),
-                    transformedRay
-                );
-
                 const int modifications = (int) shapeProperty.y;
-                performShapeModification(
+                const float scale = position.w;
+
+                const float3 transformedRay = transformRay(
+                    rayOrigin,
+                    float3(position.x, position.y, position.z),
+                    float3(rotation.x, rotation.y, rotation.z),
                     modifications,
                     modParameters0,
-                    modParameters1,
-                    transformedRay
+                    modParameters1
                 );
 
-                float nextDistance = distanceToObject(
-                    transformedRay / position.w,
+                float nextDistance = getNextDistance(
+                    transformedRay,
                     (int) shapeProperty.x,
-                    dimension
-                ) * position.w;
-
-                nextDistance = performDistanceModification(
+                    dimension,
+                    scale,
                     modifications,
                     modParameters1.w,
-                    rotation.w,
-                    nextDistance
+                    rotation.w
                 );
+
+                const int numChildren = (int) shapeProperty.z;
+                const float blendStrength = shapeProperty.w;
+
+                // TODO should be able to get rid of this duplication in a clever way
+                // maybe cahce the parent values as you compute the child then pop back
+                // and allow infinite child depth
+                for (int child=j + 1; child < j + 1 + numChildren; child++)
+                {
+                    SampleType(positions) childPosition = positions(child, i);
+                    SampleType(rotations) childRotation = rotations(child, i);
+                    SampleType(dimensions) childDimension = dimensions(child, i);
+                    SampleType(shapeProperties) childShapeProperty = shapeProperties(child, i);
+                    SampleType(shapeModParameters0) childModParameters0 = shapeModParameters0(child, i);
+                    SampleType(shapeModParameters1) childModParameters1 = shapeModParameters1(child, i);
+
+                    const int childModifications = (int) childShapeProperty.y;
+                    const float childScale = childPosition.w * scale;
+
+                    const float3 childTransformedRay = transformRay(
+                        transformedRay,
+                        float3(childPosition.x, childPosition.y, childPosition.z),
+                        float3(childRotation.x, childRotation.y, childRotation.z),
+                        childModifications,
+                        childModParameters0,
+                        childModParameters1
+                    );
+
+                    const float childNextDistance = getNextDistance(
+                        childTransformedRay,
+                        (int) childShapeProperty.x,
+                        childDimension,
+                        childScale,
+                        childModifications,
+                        childModParameters1.w,
+                        childRotation.w
+                    );
+
+                    nextDistance = performChildInteraction(
+                        modifications,
+                        nextDistance,
+                        childNextDistance,
+                        blendStrength
+                    );
+                }
+                j += numChildren;
 
                 if (nextDistance < distance)
                 {

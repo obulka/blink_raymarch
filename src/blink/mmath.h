@@ -279,11 +279,16 @@ inline float blend(const float value0, const float value1, const float weight)
 }
 
 
-inline float4 blend(const float4 &value0, const float4 &value1, const float weight)
+inline float3 blend(const float3 &value0, const float3 &value1, const float weight)
 {
     return value1 + weight * (value0 - value1);
 }
 
+
+inline float4 blend(const float4 &value0, const float4 &value1, const float weight)
+{
+    return value1 + weight * (value0 - value1);
+}
 
 /**
  * Get the position component of a world matrix.

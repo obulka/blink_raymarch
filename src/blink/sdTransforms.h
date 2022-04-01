@@ -32,31 +32,65 @@ inline float intersection(
 inline float smoothUnion(
         const float distance0,
         const float distance1,
-        const float amount)
+        const float blendSize)
 {
-    float h = clamp(0.5f + 0.5f * (distance1 - distance0) / amount, 0.0f, 1.0f);
+    float amount = clamp(0.5f + 0.5f * (distance1 - distance0) / blendSize, 0.0f, 1.0f);
 
-    return blend(distance0, distance1, h) - amount * h * (1.0f - h);
+    return blend(distance0, distance1, amount) - blendSize * amount * (1.0f - amount);
 }
 
 
 inline float smoothSubtraction(
         const float distance0,
         const float distance1,
-        const float amount)
+        const float blendSize)
 {
-    float h = clamp(0.5f - 0.5f * (distance1 + distance0) / amount, 0.0f, 1.0f);
+    float amount = clamp(0.5f - 0.5f * (distance1 + distance0) / blendSize, 0.0f, 1.0f);
 
-    return blend(-distance0, distance1, h) + amount * h * (1.0f - h);
+    return blend(-distance0, distance1, amount) + blendSize * amount * (1.0f - amount);
 }
 
 
 inline float smoothIntersection(
         const float distance0,
         const float distance1,
-        const float amount)
+        const float blendSize)
 {
-    float h = clamp(0.5f - 0.5f * (distance1 - distance0) / amount, 0.0f, 1.0f);
+    float amount = clamp(0.5f - 0.5f * (distance1 - distance0) / blendSize, 0.0f, 1.0f);
 
-    return blend(distance0, distance1, h) + amount * h * (1.0f - h);
+    return blend(distance0, distance1, amount) + blendSize * amount * (1.0f - amount);
+}
+
+
+float performChildInteraction(
+        const int modifications,
+        const float distance0,
+        const float distance1,
+        const float blendSize)
+{
+    if (modifications & 128)
+    {
+        return union_(distance0, distance1);
+    }
+    if (modifications & 256)
+    {
+        return subtraction(distance0, distance1);
+    }
+    if (modifications & 512)
+    {
+        return intersection(distance0, distance1);
+    }
+    if (modifications & 1024)
+    {
+        return smoothUnion(distance0, distance1, blendSize);
+    }
+    if (modifications & 2048)
+    {
+        return smoothSubtraction(distance0, distance1, blendSize);
+    }
+    if (modifications & 4096)
+    {
+        return smoothIntersection(distance0, distance1, blendSize);
+    }
+    return min(distance0, distance1);
 }

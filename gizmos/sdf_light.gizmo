@@ -1,0 +1,58 @@
+#! /usr/local/Nuke13.0v2/libnuke-13.0.2.so -nx
+version 13.0 v2
+Gizmo {
+ inputs 0
+ addUserKnob {20 User}
+ addUserKnob {4 type l Type M {None Directional Point Dome ""}}
+ type Point
+ addUserKnob {13 dir_pos l Direction/Position}
+ dir_pos {0 1 1}
+ addUserKnob {7 intensity l Intensity}
+ intensity 1
+ addUserKnob {18 colour l Colour}
+ colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+}
+add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
+ Constant {
+  inputs 0
+  channels sdf_light
+  color {{parent.dir_pos.x} {parent.dir_pos.y} {parent.dir_pos.z} {parent.intensity}}
+  format "1 1 0 0 1 1 1 1x1"
+  name light
+  xpos 434
+  ypos 12
+ }
+ Dot {
+  name Dot9
+  xpos 468
+  ypos 279
+ }
+add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
+ Constant {
+  inputs 0
+  channels sdf_light_properties
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.type - 1"}}
+  format "1 1 0 0 1 1 1 1x1"
+  name light_props
+  xpos 561
+  ypos 12
+ }
+ Dot {
+  name Dot6
+  xpos 591
+  ypos 282
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 501
+  ypos 380
+ }
+ Output {
+  name Output1
+  xpos 501
+  ypos 516
+ }
+end_group

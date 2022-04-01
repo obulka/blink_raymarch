@@ -1,0 +1,151 @@
+#! /usr/local/Nuke13.0v2/libnuke-13.0.2.so -nx
+version 13.0 v2
+Gizmo {
+ inputs 2
+}
+ Reformat {
+  inputs 0
+  type "to box"
+  box_width 1
+  box_height 1
+  box_fixed true
+  name Reformat1
+  xpos -119
+  ypos 440
+ }
+ Input {
+  inputs 0
+  name Input2
+  xpos 158
+  ypos -28
+  number 1
+ }
+ Dot {
+  name Dot2
+  xpos 192
+  ypos -2
+ }
+set N4dbdf200 [stack 0]
+ Dot {
+  name Dot3
+  xpos 329
+  ypos -2
+ }
+ Dot {
+  name Dot4
+  xpos 329
+  ypos 391
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+  ypos -32
+ }
+ Dot {
+  name Dot1
+  xpos 34
+  ypos -6
+ }
+set N4dbdd600 [stack 0]
+ Dot {
+  name Dot6
+  xpos -98
+  ypos -6
+ }
+ Dot {
+  name Dot5
+  xpos -98
+  ypos 336
+ }
+push $N4dbdf200
+ Crop {
+  box {0 0 {Dot1.width+Dot2.width} 1}
+  reformat true
+  crop false
+  name Crop3
+  xpos 158
+  ypos 69
+ }
+ Crop {
+  box {0 0 {parent.Dot2.width} 1}
+  name Crop4
+  xpos 158
+  ypos 95
+ }
+ Transform {
+  translate {{parent.Dot1.width} 0}
+  center {1 0.5}
+  name Transform2
+  xpos 158
+  ypos 121
+ }
+ Crop {
+  box {0 0 {width} {height}}
+  crop false
+  name Crop5
+  xpos 158
+  ypos 167
+ }
+push $N4dbdd600
+ Crop {
+  box {0 0 {Dot1.width+Dot2.width} 1}
+  reformat true
+  crop false
+  name Crop6
+  xpos 0
+  ypos 66
+ }
+ Crop {
+  box {0 0 {parent.Dot1.width} 1}
+  name Crop7
+  xpos 0
+  ypos 92
+ }
+ Crop {
+  box {0 0 {width} {height}}
+  crop false
+  name Crop8
+  xpos 0
+  ypos 164
+ }
+ Merge2 {
+  inputs 2
+  also_merge all
+  name Merge1
+  xpos 0
+  ypos 262
+  disable {{"\[exists parent.input1] ? 0:1"}}
+ }
+ Switch {
+  inputs 2
+  which {{"\[exists parent.input1] ? 0:1"}}
+  name Switch2
+  xpos 0
+  ypos 332
+ }
+ Switch {
+  inputs 2
+  which {{"\[exists parent.input0] ? 0:1"}}
+  name Switch1
+  xpos 0
+  ypos 387
+ }
+ Switch {
+  inputs 2
+  which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+  name Switch3
+  xpos 0
+  ypos 456
+ }
+ Dot {
+  name out_dot
+  xpos 36
+  ypos 518
+ }
+ Output {
+  name Output1
+  xpos 2
+  ypos 661
+ }
+end_group
