@@ -70,27 +70,23 @@ float performChildInteraction(
 {
     if (modifications & 128)
     {
-        return union_(distance0, distance1);
+        return subtraction(distance0, distance1);
     }
     if (modifications & 256)
     {
-        return subtraction(distance0, distance1);
+        return intersection(distance0, distance1);
     }
     if (modifications & 512)
     {
-        return intersection(distance0, distance1);
+        return smoothUnion(distance0, distance1, blendSize);
     }
     if (modifications & 1024)
     {
-        return smoothUnion(distance0, distance1, blendSize);
+        return smoothSubtraction(distance0, distance1, blendSize);
     }
     if (modifications & 2048)
     {
-        return smoothSubtraction(distance0, distance1, blendSize);
-    }
-    if (modifications & 4096)
-    {
         return smoothIntersection(distance0, distance1, blendSize);
     }
-    return min(distance0, distance1);
+    return union_(distance0, distance1);
 }

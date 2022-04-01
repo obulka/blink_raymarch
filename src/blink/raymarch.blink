@@ -345,8 +345,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     nextDistance = performChildInteraction(
                         modifications,
-                        nextDistance,
                         childNextDistance,
+                        nextDistance,
                         blendStrength
                     );
                 }
@@ -382,7 +382,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         {
             float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
 
-            if (stepDistance < hitTolerance)
+            if (fabs(stepDistance) < hitTolerance)
             {
                 return 0;
             }
@@ -582,7 +582,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             distanceTravelled += stepDistance;
             origin += direction * stepDistance;
 
-            if (stepDistance < hitTolerance)
+            if (fabs(stepDistance) < hitTolerance)
             {
                 bounces++;
 
