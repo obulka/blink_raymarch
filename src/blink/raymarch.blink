@@ -283,6 +283,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);
                 SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, i);
                 SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, i);
+                SampleType(colours) surfaceColour = colours(j, i);
+                SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);
 
                 const int modifications = (int) shapeProperty.y;
                 const float scale = position.w;
@@ -309,6 +311,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 const int numChildren = (int) shapeProperty.z;
                 const float blendStrength = shapeProperty.w;
 
+
+                float4 parentColour = surfaceColour;
+                float4 parentSurface = surfaceProperty;
+
                 // TODO should be able to get rid of this duplication in a clever way
                 // maybe cahce the parent values as you compute the child then pop back
                 // and allow infinite child depth
@@ -320,6 +326,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     SampleType(shapeProperties) childShapeProperty = shapeProperties(child, i);
                     SampleType(shapeModParameters0) childModParameters0 = shapeModParameters0(child, i);
                     SampleType(shapeModParameters1) childModParameters1 = shapeModParameters1(child, i);
+                    SampleType(colours) childColour = colours(child, i);
+                    SampleType(surfaceProperties) childSurface = surfaceProperties(child, i);
 
                     const int childModifications = (int) childShapeProperty.y;
                     const float childScale = childPosition.w * scale;
@@ -347,6 +355,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         modifications,
                         childNextDistance,
                         nextDistance,
+                        childColour,
+                        parentColour,
+                        childSurface,
+                        parentSurface,
                         blendStrength
                     );
                 }
@@ -356,11 +368,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 {
                     distance = nextDistance;
 
-                    SampleType(colours) surfaceColour = colours(j, i);
-                    SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);
-
-                    colour = float4(surfaceColour);
-                    surface = float4(surfaceProperty);
+                    colour = float4(parentColour);
+                    surface = float4(parentSurface);
                 }
             }
         }
@@ -368,6 +377,30 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         return distance;
     }
 
+float calcSoftshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax)
+{
+
+    for (int i=0; i < 31; i++)
+    {
+        float h = map(ro + rd * t);
+
+        // use this if you are getting artifact on the first iteration, or unroll the
+        // first iteration out of the loop
+        //float y = (i==0) ? 0.0 : h*h/(2.0*ph); 
+
+        float y = h*h/(2.0*ph);
+        float d = sqrt(h*h-y*y);
+        res = min( res, 10.0*d/max(0.0,t-y) );
+        ph = h;
+
+        t += h;
+        
+        if( res<0.0001 || t>tmax ) break;
+        
+    }
+    res = clamp( res, 0.0, 1.0 );
+    return res*res*(3.0-2.0*res);
+}
 
     float computeShadow(
             const float3 &rayDirection,
@@ -375,8 +408,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float3 &rayOrigin)
     {
         float distanceTravelled = 0;
+        float shadowIntensity = 1.0f;
+        float lastStepDistance = 1000000000000000000000000.0f;
         float4 colour;
         float4 surface;
+
         int iterations = 0;
         while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
         {
@@ -384,15 +420,23 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             if (fabs(stepDistance) < hitTolerance)
             {
-                return 0;
+                float y = stepDistance * stepDistance / (2.0f * lastStepDistance);
+                shadowIntensity = min(
+                    shadowIntensity,
+                    10.0f * sqrt(stepDistance * stepDistance - y * y)
+                    / max(0.0f, distanceTravelled - y)
+                );
+                break;
             }
 
+            lastStepDistance = stepDistance;
             rayOrigin += rayDirection * stepDistance;
             distanceTravelled += stepDistance;
             iterations++;
         }
 
-        return 1;
+        shadowIntensity = saturate(shadowIntensity);
+        return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
     }
 
 
