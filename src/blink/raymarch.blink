@@ -377,34 +377,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         return distance;
     }
 
-float calcSoftshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax)
-{
-
-    for (int i=0; i < 31; i++)
-    {
-        float h = map(ro + rd * t);
-
-        // use this if you are getting artifact on the first iteration, or unroll the
-        // first iteration out of the loop
-        //float y = (i==0) ? 0.0 : h*h/(2.0*ph); 
-
-        float y = h*h/(2.0*ph);
-        float d = sqrt(h*h-y*y);
-        res = min( res, 10.0*d/max(0.0,t-y) );
-        ph = h;
-
-        t += h;
-        
-        if( res<0.0001 || t>tmax ) break;
-        
-    }
-    res = clamp( res, 0.0, 1.0 );
-    return res*res*(3.0-2.0*res);
-}
 
     float computeShadow(
             const float3 &rayDirection,
             const float distanceToShadePoint,
+            const float softness,
             float3 &rayOrigin)
     {
         float distanceTravelled = 0;
@@ -418,14 +395,15 @@ float calcSoftshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax)
         {
             float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
 
+            float softOffset = stepDistance * stepDistance / (2.0f * lastStepDistance);
+            shadowIntensity = min(
+                shadowIntensity,
+                softness * sqrt(stepDistance * stepDistance - softOffset * softOffset)
+                / max(0.00000001f, distanceTravelled - softOffset)
+            );
+
             if (fabs(stepDistance) < hitTolerance)
             {
-                float y = stepDistance * stepDistance / (2.0f * lastStepDistance);
-                shadowIntensity = min(
-                    shadowIntensity,
-                    10.0f * sqrt(stepDistance * stepDistance - y * y)
-                    / max(0.0f, distanceTravelled - y)
-                );
                 break;
             }
 
@@ -437,6 +415,33 @@ float calcSoftshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax)
 
         shadowIntensity = saturate(shadowIntensity);
         return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
+    }
+
+
+    float computeHardShadow(
+            const float3 &rayDirection,
+            const float distanceToShadePoint,
+            float3 &rayOrigin)
+    {
+        float distanceTravelled = 0;
+        float4 colour;
+        float4 surface;
+        int iterations = 0;
+        while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
+        {
+            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
+
+            if (fabs(stepDistance) < hitTolerance)
+            {
+                return 0;
+            }
+
+            rayOrigin += rayDirection * stepDistance;
+            distanceTravelled += stepDistance;
+            iterations++;
+        }
+
+        return 1;
     }
 
 
@@ -474,6 +479,7 @@ float calcSoftshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax)
                 computeShadow(
                     normalize(shadowOffsetLightDirection),
                     distanceToLight,
+                    3.0f,
                     surfaceOffset
                 )
             )
@@ -486,7 +492,10 @@ float calcSoftshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax)
      *
      *
      */
-    float computeLightIntensityOnSurface(const float3 &pointOnSurface, const float3 &surfaceNormal)
+    float computeLightIntensityOnSurface(
+            const float3 &pointOnSurface,
+            const float3 &surfaceNormal,
+            float4 &lightColour)
     {
         float2 lightIntensity = float2(0, 0);
 
@@ -498,13 +507,14 @@ float calcSoftshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax)
                 SampleType(lightProperties) lightProperty = lightProperties(j, i);
 
                 int lightType = (int) lightProperty.w;
-                if (lightType < 0)
+                float2 currentLightIntensity;
+                if (lightType <= 0)
                 {
-                    lightIntensity += float2(light.w, 1);
+                    currentLightIntensity = float2(light.w, 1);
                 }
                 else
                 {
-                    lightIntensity += lightIntensityOnSurface(
+                    currentLightIntensity = lightIntensityOnSurface(
                         pointOnSurface,
                         surfaceNormal,
                         float3(light.x, light.y, light.z),
@@ -512,8 +522,16 @@ float calcSoftshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax)
                         light.w
                     );
                 }
+                lightColour += currentLightIntensity.y * float4(
+                    lightProperty.x,
+                    lightProperty.y,
+                    lightProperty.z,
+                    0.0f
+                );
+                lightIntensity += currentLightIntensity;
             }
         }
+        lightColour /= lightTextureWidth * lightTextureHeight;
 
         return saturate(lightIntensity.x * lightIntensity.y);
     }
@@ -634,9 +652,11 @@ float calcSoftshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax)
                     origin - direction * hitTolerance
                 );
 
+                float4 lightColour = float4(0);
                 lightIntensity = computeLightIntensityOnSurface(
                     origin,
-                    surfaceNormal
+                    surfaceNormal,
+                    lightColour
                 );
 
                 rayColour = blend(
@@ -644,7 +664,7 @@ float calcSoftshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax)
                     blend(
                         hazeColour,
                         blend(
-                            colour,
+                            lightColour * colour,
                             rayColour,
                             rayStrength * (1 - surface.x) * lightIntensity
                         ),

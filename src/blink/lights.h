@@ -60,7 +60,7 @@ float getLightData(
         float3 &lightDirection,
         float3 &shadowOffsetLightDirection)
 {
-    if (lightType == 0)
+    if (lightType == 1)
     {
         // directional
         directionalLightData(
