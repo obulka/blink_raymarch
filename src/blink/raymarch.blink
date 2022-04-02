@@ -48,6 +48,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // w in [0, 1) = directional, [1, inf) = point
     Image<eRead, eAccessRandom, eEdgeNone> lightProperties;
 
+    // shadow hardness.x
+    Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;
+
     // the output image
     Image<eWrite> dst;
 
@@ -378,7 +381,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    float computeShadow(
+    float computeSoftShadow(
             const float3 &rayDirection,
             const float distanceToShadePoint,
             const float softness,
@@ -395,11 +398,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         {
             float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
 
-            float softOffset = stepDistance * stepDistance / (2.0f * lastStepDistance);
+            float softOffset = (iterations == 0) ? 0.0f : stepDistance * stepDistance / (2.0f * lastStepDistance);
             shadowIntensity = min(
                 shadowIntensity,
                 softness * sqrt(stepDistance * stepDistance - softOffset * softOffset)
-                / max(0.00000001f, distanceTravelled - softOffset)
+                / max(0.0000000000000000000000001f, distanceTravelled - softOffset)
             );
 
             if (fabs(stepDistance) < hitTolerance)
@@ -418,7 +421,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    float computeHardShadow(
+    float computeShadow(
             const float3 &rayDirection,
             const float distanceToShadePoint,
             float3 &rayOrigin)
@@ -450,7 +453,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &surfaceNormal,
             const float3 &light,
             const int lightType,
-            const float intensity)
+            const float intensity,
+            const float shadow_hardness)
     {
         float3 surfaceOffset;
         float distanceToLight;
@@ -460,7 +464,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             pointOnSurface,
             surfaceNormal,
             light,
-            lightType,
+            abs(lightType),
             intensity,
             hitTolerance,
             maxRayDistance,
@@ -473,16 +477,27 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         float normalFactor = dot(surfaceNormal, normalize(lightDirection));
 
+        float shadowIntensityAtPosition;
+        if (lightType < 0)
+        {
+            shadowIntensityAtPosition = computeSoftShadow(
+                normalize(shadowOffsetLightDirection),
+                distanceToLight,
+                shadow_hardness,
+                surfaceOffset
+            );
+        }
+        else
+        {
+            shadowIntensityAtPosition = computeShadow(
+                normalize(shadowOffsetLightDirection),
+                distanceToLight,
+                surfaceOffset
+            );
+        }
+
         return saturate(
-            normalFactor * float2(
-                intensityAtPosition,
-                computeShadow(
-                    normalize(shadowOffsetLightDirection),
-                    distanceToLight,
-                    3.0f,
-                    surfaceOffset
-                )
-            )
+            normalFactor * float2(intensityAtPosition, shadowIntensityAtPosition)
         );
     }
 
@@ -505,10 +520,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             {
                 SampleType(lights) light = lights(j, i);
                 SampleType(lightProperties) lightProperty = lightProperties(j, i);
+                SampleType(lightProperties1) lightProperty1 = lightProperties1(j, i);
 
                 int lightType = (int) lightProperty.w;
                 float2 currentLightIntensity;
-                if (lightType <= 0)
+                if (lightType == 0)
                 {
                     currentLightIntensity = float2(light.w, 1);
                 }
@@ -519,7 +535,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         surfaceNormal,
                         float3(light.x, light.y, light.z),
                         lightType,
-                        light.w
+                        light.w,
+                        lightProperty1.x
                     );
                 }
                 lightColour += currentLightIntensity.y * float4(
