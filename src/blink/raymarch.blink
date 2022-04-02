@@ -319,7 +319,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 float4 parentSurface = surfaceProperty;
 
                 // TODO should be able to get rid of this duplication in a clever way
-                // maybe cahce the parent values as you compute the child then pop back
+                // maybe cache the parent values as you compute the child then pop back
                 // and allow infinite child depth
                 for (int child=j + 1; child < j + 1 + numChildren; child++)
                 {
@@ -402,7 +402,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             shadowIntensity = min(
                 shadowIntensity,
                 softness * sqrt(stepDistance * stepDistance - softOffset * softOffset)
-                / max(0.0000000000000000000000001f, distanceTravelled - softOffset)
+                / max(0.0f, distanceTravelled - softOffset)
             );
 
             if (fabs(stepDistance) < hitTolerance)
