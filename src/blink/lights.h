@@ -75,9 +75,8 @@ float getLightData(
             shadowOffsetLightDirection,
             distanceToLight
         );
-        return intensity;
     }
-    else
+    else if (lightType == 2)
     {
         // point
         pointLightData(
@@ -93,4 +92,6 @@ float getLightData(
         );
         return intensity / pow(distanceToLight, 4);
     }
+
+    return intensity;
 }

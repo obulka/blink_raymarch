@@ -398,7 +398,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         {
             float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
 
-            float softOffset = (iterations == 0) ? 0.0f : stepDistance * stepDistance / (2.0f * lastStepDistance);
+            float softOffset = stepDistance * stepDistance / (2.0f * lastStepDistance);
             shadowIntensity = min(
                 shadowIntensity,
                 softness * sqrt(stepDistance * stepDistance - softOffset * softOffset)
@@ -448,6 +448,36 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    float computeAmbientOcclusion(
+            const float3 &rayDirection,
+            const float3 &rayOrigin,
+            const float amount,
+            const int iterations)
+    {
+        float occlusion = 0.0f;
+        float occlusionScaleFactor = 1.0f;
+        float4 colour;
+        float4 surface;
+        for(int iteration=0; iteration < iterations; iteration++)
+        {
+            float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;
+            float distanceToClosestObject = getMinDistanceToObjectInScene(
+                rayOrigin + stepDistance * rayDirection,
+                colour,
+                surface
+            );
+            occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;
+            occlusionScaleFactor *= 0.95;
+        }
+
+        return (
+            amount
+            * saturate(0.5f + 0.5f * rayDirection.y)  // ambient
+            * saturate(1.0f - 1.5f * occlusion)       // occlusion
+        );
+    }
+
+
     float2 lightIntensityOnSurface(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
@@ -456,6 +486,20 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const float intensity,
             const float shadow_hardness)
     {
+        int absLightType = abs(lightType);
+        if (absLightType == 3)
+        {
+            return float2(
+                1.0f,
+                computeAmbientOcclusion(
+                    surfaceNormal,
+                    pointOnSurface,
+                    light.x,
+                    (int) light.y
+                )
+            );
+        }
+
         float3 surfaceOffset;
         float distanceToLight;
         float3 lightDirection;
@@ -464,7 +508,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             pointOnSurface,
             surfaceNormal,
             light,
-            abs(lightType),
+            absLightType,
             intensity,
             hitTolerance,
             maxRayDistance,
@@ -513,6 +557,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float4 &lightColour)
     {
         float2 lightIntensity = float2(0, 0);
+        lightColour = float4(0);
 
         for (int i=0; i < lightTextureHeight; i++)
         {
@@ -669,7 +714,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     origin - direction * hitTolerance
                 );
 
-                float4 lightColour = float4(0);
+                float4 lightColour;
                 lightIntensity = computeLightIntensityOnSurface(
                     origin,
                     surfaceNormal,
