@@ -737,7 +737,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
 
 
-                float radialOffset = (1 - surface.x) * random(
+                float radialOffset = surface.w * random(
                     (iterations * distanceTravelled + stepDistance)
                     * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z)
                 );
