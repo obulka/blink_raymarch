@@ -481,6 +481,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float2 lightIntensityOnSurface(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
+            const float4 &surface,
+            const float3 &reflectedDirection,
             const float3 &light,
             const int lightType,
             const float intensity,
@@ -518,8 +520,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             lightDirection,
             shadowOffsetLightDirection
         );
-
-        float normalFactor = dot(surfaceNormal, normalize(lightDirection));
+        lightDirection = normalize(lightDirection);
+        // float normalFactor = blend(
+        //     saturate(dot(reflectedDirection, lightDirection)),
+        //     saturate(dot(surfaceNormal, lightDirection)),
+        //     surface.x
+        // );
+        float normalFactor = dot(surfaceNormal, lightDirection);
 
         float shadowIntensityAtPosition;
         if (lightType < 0)
@@ -554,6 +561,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float computeLightIntensityOnSurface(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
+            const float4 &surface,
+            const float3 &reflectedDirection,
             float4 &lightColour)
     {
         float2 lightIntensity = float2(0, 0);
@@ -578,6 +587,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     currentLightIntensity = lightIntensityOnSurface(
                         pointOnSurface,
                         surfaceNormal,
+                        surface,
+                        reflectedDirection,
                         float3(light.x, light.y, light.z),
                         lightType,
                         light.w,
@@ -695,7 +706,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         float lightIntensity = 1;
 
-        float4 rayColour = float4(0, 0, 0, 0);
+        float4 rayColour = float4(0);
+        float4 lightColour = float4(1);
 
         float rayStrength = 1;
 
@@ -714,12 +726,24 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     origin - direction * hitTolerance
                 );
 
-                float4 lightColour;
+                direction = reflectRayOffSurface(
+                    direction,
+                    surfaceNormal
+                );
+
                 lightIntensity = computeLightIntensityOnSurface(
                     origin,
                     surfaceNormal,
+                    surface,
+                    direction,
                     lightColour
                 );
+
+                // rayColour += (
+                //     lightColour * colour * rayStrength * lightIntensity
+                //     // + iterGlowColour * saturate(iterGlowAmount * iterations)
+                //     // + hazeColour * getHazeAmount(distanceTravelled - lastHitDistance)
+                // );
 
                 rayColour = blend(
                     iterGlowColour,
@@ -738,15 +762,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 if (bounces >= numBounces)
                 {
                     rayColour.w = 1.0f;
-                    return rayColour;
+                    return rayColour / (float) bounces;
                 }
 
                 rayStrength *= surface.x;
-
-                direction = reflectRayOffSurface(
-                    direction,
-                    surfaceNormal
-                );
                 origin = offsetPoint(
                     origin,
                     direction + surfaceNormal,
@@ -758,12 +777,17 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             iterations++;
         }
 
+        // rayColour += (
+        //     readSkyValue(direction)
+        //     // + hazeColour * getHazeAmount(distanceTravelled - lastHitDistance)
+        //     // + iterGlowColour * saturate(iterGlowAmount * iterations)
+        // );
         rayColour = blend(
             blend(
                 iterGlowColour,
                 blend(
                     hazeColour,
-                    readSkyValue(direction),
+                    lightColour * readSkyValue(direction),
                     getHazeAmount(distanceTravelled - lastHitDistance)
                 ),
                 saturate(iterGlowAmount * iterations)
@@ -772,7 +796,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             rayStrength * lightIntensity
         );
         rayColour.w = bounces > 0;
-        return rayColour;
+        return rayColour / (float) (bounces + 1);
     }
 
 
