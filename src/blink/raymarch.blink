@@ -762,7 +762,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 if (bounces >= numBounces)
                 {
                     rayColour.w = 1.0f;
-                    return rayColour / (float) bounces;
+                    return rayColour;
                 }
 
                 rayStrength *= surface.x;
@@ -796,7 +796,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             rayStrength * lightIntensity
         );
         rayColour.w = bounces > 0;
-        return rayColour / (float) (bounces + 1);
+        return rayColour;
     }
 
 
