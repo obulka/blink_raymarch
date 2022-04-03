@@ -486,6 +486,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &light,
             const int lightType,
             const float intensity,
+            const float falloff,
             const float shadow_hardness)
     {
         int absLightType = abs(lightType);
@@ -512,6 +513,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             light,
             absLightType,
             intensity,
+            falloff,
             hitTolerance,
             maxRayDistance,
             shadowBias,
@@ -592,10 +594,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         float3(light.x, light.y, light.z),
                         lightType,
                         light.w,
+                        lightProperty1.y,
                         lightProperty1.x
                     );
                 }
-                lightColour += currentLightIntensity.y * float4(
+                lightColour += currentLightIntensity.x * currentLightIntensity.y * float4(
                     lightProperty.x,
                     lightProperty.y,
                     lightProperty.z,
@@ -604,7 +607,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 lightIntensity += currentLightIntensity;
             }
         }
-        lightColour /= lightTextureWidth * lightTextureHeight;
+        // lightColour /= lightTextureWidth * lightTextureHeight;
 
         return saturate(lightIntensity.x * lightIntensity.y);
     }
@@ -731,6 +734,38 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     surfaceNormal
                 );
 
+
+
+
+                float radialOffset = (1 - surface.x) * random(
+                    (iterations * distanceTravelled + stepDistance)
+                    * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z)
+                );
+                float angularOffset = 2.0f * PI * random(radialOffset * distanceTravelled);
+
+                // Update the ray direction to send a scattered cluster of rays
+                float3 orthogonal = cross(direction, float3(1, 0, 0));
+                float3 rayNormal;
+                if (length(orthogonal) == 0.0f)
+                {
+                    rayNormal = normalize(cross(direction, float3(0, 1, 0)));
+                }
+                else
+                {
+                    rayNormal = normalize(orthogonal);
+                }
+                rayNormal = (
+                    cos(angularOffset)
+                    * rayNormal
+                    + sin(angularOffset)
+                    * cross(direction, rayNormal)
+                );
+
+                direction = normalize(radialOffset * rayNormal + direction);
+
+
+
+
                 lightIntensity = computeLightIntensityOnSurface(
                     origin,
                     surfaceNormal,
@@ -738,12 +773,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     direction,
                     lightColour
                 );
-
-                // rayColour += (
-                //     lightColour * colour * rayStrength * lightIntensity
-                //     // + iterGlowColour * saturate(iterGlowAmount * iterations)
-                //     // + hazeColour * getHazeAmount(distanceTravelled - lastHitDistance)
-                // );
 
                 rayColour = blend(
                     iterGlowColour,
@@ -777,11 +806,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             iterations++;
         }
 
-        // rayColour += (
-        //     readSkyValue(direction)
-        //     // + hazeColour * getHazeAmount(distanceTravelled - lastHitDistance)
-        //     // + iterGlowColour * saturate(iterGlowAmount * iterations)
-        // );
         rayColour = blend(
             blend(
                 iterGlowColour,

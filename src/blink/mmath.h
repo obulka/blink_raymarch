@@ -3,6 +3,18 @@
 //
 
 
+inline float fract(float value)
+{
+    return value - floor(value);
+}
+
+
+inline float random(float seed)
+{
+    return fract(sin(seed * 91.3458f) * 47453.5453f);
+}
+
+
 inline float min(const float value0, const float value1, const float value2)
 {
     return min(value0, min(value1, value2));

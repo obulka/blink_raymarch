@@ -52,6 +52,7 @@ float getLightData(
         const float3 &light,
         const int lightType,
         const float intensity,
+        const float falloff,
         const float hitTolerance,
         const float maxRayDistance,
         const float shadowBias,
@@ -90,8 +91,7 @@ float getLightData(
             shadowOffsetLightDirection,
             distanceToLight
         );
-        return intensity / pow(distanceToLight, 4);
     }
 
-    return intensity;
+    return intensity / pow(distanceToLight, falloff);
 }
