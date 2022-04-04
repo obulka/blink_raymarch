@@ -51,9 +51,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // shadow hardness.x
     Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;
 
-    // the skybox in latlong format
-    Image<eRead, eAccessRandom, eEdgeNone> skyBoxLight;
-
     // the output image
     Image<eWrite> dst;
 
@@ -75,7 +72,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float skyBoxOffsetAngle;
         int skyFormatWidth;
         int skyFormatHeight;
-        float skyBoxLightScale;
 
         // Ray params
         int subdivisions;
@@ -142,7 +138,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(skyBoxOffsetAngle, "SkyBox Offset Angle", 0.0f);
         defineParam(skyFormatHeight, "SkyBox Height", 1024);
         defineParam(skyFormatWidth, "SkyBox Width", 2048);
-        defineParam(skyBoxLightScale, "SkyBox Light Scale", 0.25f);
 
         // Ray params
         defineParam(subdivisions, "Pixel Subdivisions", 0);
@@ -209,23 +204,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             skyBox,
             skyBoxPixelSize.x * angles.x,
             skyFormatHeight - (skyBoxPixelSize.y * angles.y)
-        );
-
-        return saturate(skyBoxPixel);
-    }
-
-
-    /**
-     * Get the value of sky the ray would hit at infinite distance
-     */
-    float4 readSkyLightValue(float3 rayDirection)
-    {
-        float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);
-
-        SampleType(skyBoxLight) skyBoxPixel = bilinear(
-            skyBoxLight,
-            skyBoxPixelSize.x * angles.x * skyBoxLightScale,
-            skyFormatHeight - (skyBoxPixelSize.y * angles.y * skyBoxLightScale)
         );
 
         return saturate(skyBoxPixel);
@@ -822,22 +800,20 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             iterations++;
         }
 
+        // float4 skyColour = readSkyValue(direction);
+
         rayColour = blend(
+            readSkyValue(direction),
             blend(
-                readSkyValue(direction),
+                iterGlowColour,
                 blend(
-                    iterGlowColour,
-                    blend(
-                        hazeColour,
-                        rayColour,
-                        getHazeAmount(distanceTravelled - lastHitDistance)
-                    ),
-                    saturate(iterGlowAmount * iterations)
+                    hazeColour,
+                    rayColour,
+                    getHazeAmount(distanceTravelled - lastHitDistance)
                 ),
-                rayStrength
+                saturate(iterGlowAmount * iterations)
             ),
-            readSkyLightValue(direction),
-            lightIntensity
+            rayStrength
         );
         rayColour.w = bounces > 0;
         return rayColour;
