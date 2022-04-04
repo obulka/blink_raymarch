@@ -98,6 +98,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float iterGlowAmount;
         float4 iterGlowColour;
 
+        int outputType;
+
     local:
         // These local variables are not exposed to the user.
 
@@ -164,6 +166,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         defineParam(iterGlowAmount, "Iter Glow Amount", 0.0f);
         defineParam(iterGlowColour, "Iter Glow Colour", float4(1, 1, 1, 1));
+
+        defineParam(outputType, "Output Type", 0);
     }
 
 
@@ -723,11 +727,41 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             if (fabs(stepDistance) < hitTolerance)
             {
-                bounces++;
-
                 float3 surfaceNormal = estimateSurfaceNormal(
                     origin - direction * hitTolerance
                 );
+                if (outputType > 0)
+                {
+                    if (outputType == 1)
+                    {
+                        return float4(
+                            origin.x,
+                            origin.y,
+                            origin.z,
+                            1
+                        );
+                    }
+                    if (outputType == 2)
+                    {
+                        return float4(
+                            surfaceNormal.x,
+                            surfaceNormal.y,
+                            surfaceNormal.z,
+                            1
+                        );
+                    }
+                    if (outputType == 3)
+                    {
+                        return float4(
+                            distanceTravelled,
+                            0,
+                            0,
+                            1
+                        );
+                    }
+                }
+                bounces++;
+
 
                 direction = reflectRayOffSurface(
                     direction,
@@ -800,7 +834,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             iterations++;
         }
 
-        // float4 skyColour = readSkyValue(direction);
+        if (outputType > 0)
+        {
+            return float4(0);
+        }
 
         rayColour = blend(
             readSkyValue(direction),
