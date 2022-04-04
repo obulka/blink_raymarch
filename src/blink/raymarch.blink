@@ -6,6 +6,9 @@
 #include "sdTransforms.h"
 
 
+#define MAX_CHILD_DEPTH 100
+
+
 kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 {
     // the input for format, process called once per pixel
@@ -279,6 +282,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float4 &surface)
     {
         float distance = maxRayDistance;
+
+        float parentData[MAX_CHILD_DEPTH];
 
         for (int i=0; i < objectTextureHeight; i++)
         {
