@@ -501,8 +501,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 computeAmbientOcclusion(
                     surfaceNormal,
                     pointOnSurface,
-                    light.x,
-                    (int) light.y
+                    intensity,
+                    (int) light.x
                 )
             );
         }
