@@ -51,6 +51,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // shadow hardness.x
     Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;
 
+    // the skybox in latlong format
+    Image<eRead, eAccessRandom, eEdgeNone> skyBoxLight;
+
     // the output image
     Image<eWrite> dst;
 
@@ -72,6 +75,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float skyBoxOffsetAngle;
         int skyFormatWidth;
         int skyFormatHeight;
+        float skyBoxLightScale;
 
         // Ray params
         int subdivisions;
@@ -138,6 +142,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(skyBoxOffsetAngle, "SkyBox Offset Angle", 0.0f);
         defineParam(skyFormatHeight, "SkyBox Height", 1024);
         defineParam(skyFormatWidth, "SkyBox Width", 2048);
+        defineParam(skyBoxLightScale, "SkyBox Light Scale", 0.25f);
 
         // Ray params
         defineParam(subdivisions, "Pixel Subdivisions", 0);
@@ -204,6 +209,23 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             skyBox,
             skyBoxPixelSize.x * angles.x,
             skyFormatHeight - (skyBoxPixelSize.y * angles.y)
+        );
+
+        return saturate(skyBoxPixel);
+    }
+
+
+    /**
+     * Get the value of sky the ray would hit at infinite distance
+     */
+    float4 readSkyLightValue(float3 rayDirection)
+    {
+        float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);
+
+        SampleType(skyBoxLight) skyBoxPixel = bilinear(
+            skyBoxLight,
+            skyBoxPixelSize.x * angles.x * skyBoxLightScale,
+            skyFormatHeight - (skyBoxPixelSize.y * angles.y * skyBoxLightScale)
         );
 
         return saturate(skyBoxPixel);
@@ -710,7 +732,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float lightIntensity = 1;
 
         float4 rayColour = float4(0);
-        float4 lightColour = float4(1);
+        float4 lightColour = float4(0);
 
         float rayStrength = 1;
 
@@ -733,9 +755,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     direction,
                     surfaceNormal
                 );
-
-
-
 
                 float radialOffset = surface.w * random(
                     (iterations * distanceTravelled + stepDistance)
@@ -762,9 +781,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 direction = normalize(radialOffset * rayNormal + direction);
-
-
-
 
                 lightIntensity = computeLightIntensityOnSurface(
                     origin,
@@ -808,16 +824,20 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         rayColour = blend(
             blend(
-                iterGlowColour,
+                readSkyValue(direction),
                 blend(
-                    hazeColour,
-                    lightColour * readSkyValue(direction),
-                    getHazeAmount(distanceTravelled - lastHitDistance)
+                    iterGlowColour,
+                    blend(
+                        hazeColour,
+                        rayColour,
+                        getHazeAmount(distanceTravelled - lastHitDistance)
+                    ),
+                    saturate(iterGlowAmount * iterations)
                 ),
-                saturate(iterGlowAmount * iterations)
+                rayStrength
             ),
-            rayColour,
-            rayStrength * lightIntensity
+            readSkyLightValue(direction),
+            lightIntensity
         );
         rayColour.w = bounces > 0;
         return rayColour;
