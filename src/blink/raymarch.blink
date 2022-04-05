@@ -276,7 +276,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     /**
      * Compute the minimum distance to an object in the scene
      */
-    float getMinDistanceToObjectInScene(
+    float getMinDistanceToObjectInSceneV1(
             const float3 &rayOrigin,
             float4 &colour,
             float4 &surface)
@@ -382,6 +382,259 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     colour = float4(parentColour);
                     surface = float4(parentSurface);
+                }
+            }
+        }
+
+        return distance;
+    }
+
+
+    /**
+     * Compute the minimum distance to an object in the scene
+     */
+    float getMinDistanceToObjectInScene(
+            const float3 &rayOrigin,
+            float4 &colour,
+            float4 &surface)
+    {
+        float distance = maxRayDistance;
+
+        // numChildren, transformedRay, nextDistance, colour, surface, blendStrength, mods
+        float parentStack[MAX_CHILD_DEPTH][1 + 3 + 1 + 3 +  4 + 1 + 1];
+        int parentStackLength = 0;
+
+        for (int i=0; i < objectTextureHeight; i++)
+        {
+            for (int j=0; j < objectTextureWidth; j++)
+            {
+                SampleType(positions) position = positions(j, i);
+                SampleType(rotations) rotation = rotations(j, i);
+                SampleType(dimensions) dimension = dimensions(j, i);
+                SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);
+                SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, i);
+                SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, i);
+                SampleType(colours) surfaceColour = colours(j, i);
+                SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);
+
+                const int modifications = (int) shapeProperty.y;
+                const float scale = position.w;
+
+                const float blendStrength = shapeProperty.w;
+                int numChildren = (int) shapeProperty.z;
+
+                float nextDistance = maxRayDistance;
+
+                if (numChildren <= 0)
+                {
+                    // No Children left, compute interactions with parent
+
+                    if (parentStackLength > 0)
+                    {
+                        float4 blendedColour = surfaceColour;
+                        float4 blendedSurface = surfaceProperty;
+
+                        // Read top of parentStack
+
+                        int stackLastIndex = parentStackLength - 1;
+
+                        const float parentNumChildren = parentStack[stackLastIndex][0];
+
+                        float3 parentTransformedRay;
+                        parentTransformedRay.x = parentStack[stackLastIndex][1];
+                        parentTransformedRay.y = parentStack[stackLastIndex][2];
+                        parentTransformedRay.z = parentStack[stackLastIndex][3];
+
+                        float parentNextDistance = parentStack[stackLastIndex][3];
+
+                        float4 parentSurfaceColour;
+                        parentSurfaceColour.x = parentStack[stackLastIndex][4];
+                        parentSurfaceColour.y = parentStack[stackLastIndex][5];
+                        parentSurfaceColour.z = parentStack[stackLastIndex][6];
+                        parentSurfaceColour.w = 0.0f; // TODO get rid of this
+
+                        float4 parentSurfaceProperty;
+                        parentSurfaceProperty.x = parentStack[stackLastIndex][7];
+                        parentSurfaceProperty.y = parentStack[stackLastIndex][8];
+                        parentSurfaceProperty.z = parentStack[stackLastIndex][9];
+                        parentSurfaceProperty.w = parentStack[stackLastIndex][10];
+
+                        float parentBlendStrength = parentStack[stackLastIndex][11];
+
+                        int parentModifications = (int) parentStack[stackLastIndex][12];
+
+                        // Use parent transform to position child
+                        const float3 transformedRay = transformRay(
+                            parentTransformedRay,
+                            float3(position.x, position.y, position.z),
+                            float3(rotation.x, rotation.y, rotation.z),
+                            modifications,
+                            modParameters0,
+                            modParameters1
+                        );
+
+                        // Get distance to this child
+                        nextDistance = getNextDistance(
+                            transformedRay,
+                            (int) shapeProperty.x,
+                            dimension,
+                            scale,
+                            modifications,
+                            modParameters1.w,
+                            rotation.w
+                        );
+
+                        // Compute interaction between parent and this child
+                        nextDistance = performChildInteraction(
+                            parentModifications,
+                            parentNextDistance,
+                            nextDistance,
+                            parentSurfaceColour,
+                            blendedColour,
+                            parentSurfaceProperty,
+                            blendedSurface,
+                            parentBlendStrength
+                        );
+
+                        // Update the global min distance
+                        if (nextDistance < distance)
+                        {
+                            distance = nextDistance;
+
+                            colour = float4(blendedColour);
+                            surface = float4(blendedSurface);
+                        }
+
+                        // This child is done so cut it from the graph
+                        for (int parentIndex=stackLastIndex - 1; parentIndex >= 0; parentIndex--)
+                        {
+                            parentStack[parentIndex][0]--;
+                        }
+                        numChildren = parentStack[stackLastIndex][0];
+
+                        while (numChildren <= 0 && parentStackLength > 0)
+                        {
+                            nextDistance = parentNextDistance;
+                            blendedColour = parentSurfaceColour;
+                            blendedSurface = parentSurfaceProperty;
+
+                            stackLastIndex--;
+
+                            parentNextDistance = parentStack[stackLastIndex][3];
+
+                            parentSurfaceColour.x = parentStack[stackLastIndex][4];
+                            parentSurfaceColour.y = parentStack[stackLastIndex][5];
+                            parentSurfaceColour.z = parentStack[stackLastIndex][6];
+                            parentSurfaceColour.w = 0.0f; // TODO get rid of this
+
+                            parentSurfaceProperty.x = parentStack[stackLastIndex][7];
+                            parentSurfaceProperty.y = parentStack[stackLastIndex][8];
+                            parentSurfaceProperty.z = parentStack[stackLastIndex][9];
+                            parentSurfaceProperty.w = parentStack[stackLastIndex][10];
+
+                            parentBlendStrength = parentStack[stackLastIndex][11];
+
+                            parentModifications = (int) parentStack[stackLastIndex][12];
+
+                            // Compute interaction between parent and this child
+                            nextDistance = performChildInteraction(
+                                parentModifications,
+                                parentNextDistance,
+                                nextDistance,
+                                parentSurfaceColour,
+                                blendedColour,
+                                parentSurfaceProperty,
+                                blendedSurface,
+                                parentBlendStrength
+                            );
+                            // Update the global min distance
+                            if (nextDistance < distance)
+                            {
+                                distance = nextDistance;
+
+                                colour = float4(blendedColour);
+                                surface = float4(blendedSurface);
+                            }
+
+                            numChildren = parentStack[stackLastIndex][0];
+                            parentStackLength--;
+                        }
+                    }
+                    else
+                    {
+                        const float3 transformedRay = transformRay(
+                            rayOrigin,
+                            float3(position.x, position.y, position.z),
+                            float3(rotation.x, rotation.y, rotation.z),
+                            modifications,
+                            modParameters0,
+                            modParameters1
+                        );
+
+                        nextDistance = getNextDistance(
+                            transformedRay,
+                            (int) shapeProperty.x,
+                            dimension,
+                            scale,
+                            modifications,
+                            modParameters1.w,
+                            rotation.w
+                        );
+
+                        if (nextDistance < distance)
+                        {
+                            distance = nextDistance;
+
+                            colour = float4(surfaceColour);
+                            surface = float4(surfaceProperty);
+                        }
+                    }
+                }
+                else
+                {
+                    // Node has Children
+                    float3 parentTransformedRay = rayOrigin;
+                    if (parentStackLength > 0)
+                    {
+                        parentTransformedRay.x = parentStack[parentStackLength][1];
+                        parentTransformedRay.y = parentStack[parentStackLength][2];
+                        parentTransformedRay.z = parentStack[parentStackLength][3];
+                    }
+                    const float3 transformedRay = transformRay(
+                        parentTransformedRay,
+                        float3(position.x, position.y, position.z),
+                        float3(rotation.x, rotation.y, rotation.z),
+                        modifications,
+                        modParameters0,
+                        modParameters1
+                    );
+
+                    nextDistance = getNextDistance(
+                        transformedRay,
+                        (int) shapeProperty.x,
+                        dimension,
+                        scale,
+                        modifications,
+                        modParameters1.w,
+                        rotation.w
+                    );
+
+                    // parentStack.push()
+                    parentStack[parentStackLength][0] = numChildren;
+                    parentStack[parentStackLength][1] = transformedRay.x;
+                    parentStack[parentStackLength][2] = transformedRay.y;
+                    parentStack[parentStackLength][3] = transformedRay.z;
+                    parentStack[parentStackLength][4] = nextDistance;
+                    parentStack[parentStackLength][5] = surfaceColour.x;
+                    parentStack[parentStackLength][6] = surfaceColour.y;
+                    parentStack[parentStackLength][7] = surfaceColour.z;
+                    parentStack[parentStackLength][8] = surfaceProperty.x;
+                    parentStack[parentStackLength][9] = surfaceProperty.y;
+                    parentStack[parentStackLength][10] = surfaceProperty.z;
+                    parentStack[parentStackLength][11] = surfaceProperty.w;
+                    parentStack[parentStackLength][12] = blendStrength;
+                    parentStack[parentStackLength][13] = (float) modifications;
+                    parentStackLength++;
                 }
             }
         }
