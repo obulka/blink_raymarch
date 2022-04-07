@@ -770,8 +770,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
     /**
      * Get the intensity of the light on the surface of an object
-     *
-     *
      */
     float computeLightIntensityOnSurface(
             const float3 &pointOnSurface,
@@ -939,6 +937,34 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 float3 surfaceNormal = estimateSurfaceNormal(
                     origin - direction * hitTolerance
                 );
+
+                // Use roughness to modify surface normal
+                float radialOffset = surface.w * random(
+                    (iterations * distanceTravelled + stepDistance)
+                    * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z)
+                );
+                float angularOffset = 2.0f * PI * random(radialOffset * distanceTravelled);
+
+                // Update the ray direction to send a scattered cluster of rays
+                float3 orthogonal = cross(surfaceNormal, float3(1, 0, 0));
+                float3 rayNormal;
+                if (length(orthogonal) == 0.0f)
+                {
+                    rayNormal = normalize(cross(surfaceNormal, float3(0, 1, 0)));
+                }
+                else
+                {
+                    rayNormal = normalize(orthogonal);
+                }
+                rayNormal = (
+                    cos(angularOffset)
+                    * rayNormal
+                    + sin(angularOffset)
+                    * cross(surfaceNormal, rayNormal)
+                );
+
+                surfaceNormal = normalize(radialOffset * rayNormal + surfaceNormal);
+
                 if (outputType > 0)
                 {
                     if (outputType == 1)
@@ -971,37 +997,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 }
                 bounces++;
 
-
                 direction = reflectRayOffSurface(
                     direction,
                     surfaceNormal
                 );
-
-                float radialOffset = surface.w * random(
-                    (iterations * distanceTravelled + stepDistance)
-                    * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z)
-                );
-                float angularOffset = 2.0f * PI * random(radialOffset * distanceTravelled);
-
-                // Update the ray direction to send a scattered cluster of rays
-                float3 orthogonal = cross(direction, float3(1, 0, 0));
-                float3 rayNormal;
-                if (length(orthogonal) == 0.0f)
-                {
-                    rayNormal = normalize(cross(direction, float3(0, 1, 0)));
-                }
-                else
-                {
-                    rayNormal = normalize(orthogonal);
-                }
-                rayNormal = (
-                    cos(angularOffset)
-                    * rayNormal
-                    + sin(angularOffset)
-                    * cross(direction, rayNormal)
-                );
-
-                direction = normalize(radialOffset * rayNormal + direction);
 
                 lightIntensity = computeLightIntensityOnSurface(
                     origin,
