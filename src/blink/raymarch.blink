@@ -6,6 +6,7 @@
 #include "sdTransforms.h"
 
 
+#define MAX_RAYS_PER_SUBPIXEL 50
 #define MAX_CHILD_DEPTH 100
 
 
@@ -27,7 +28,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // the shape dimensions.xyzw (some shapes may not use all channels)
     Image<eRead, eAccessRandom, eEdgeNone> dimensions;
 
-    // the shape colours.xyz
+    // the shape colours.xyz, refractive index.w
     Image<eRead, eAccessRandom, eEdgeNone> colours;
 
 
@@ -78,6 +79,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Ray params
         int subdivisions;
+        int maxRaysPerSubPixel;
         int maxBounces;
         float maxRayDistance;
         int maxRaySteps;
@@ -85,6 +87,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float shadowBias;
 
         // Scene params
+        float refractiveIndex;
+
         // Shape Textures
         int objectTextureHeight;
         int objectTextureWidth;
@@ -146,6 +150,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Ray params
         defineParam(subdivisions, "Pixel Subdivisions", 0);
+        defineParam(maxRaysPerSubPixel, "Max Rays Per Subpixel", 1);
         defineParam(maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(maxRaySteps, "Max Ray Steps", 128);
         defineParam(maxBounces, "Max Bounces", 1);
@@ -153,6 +158,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(shadowBias, "Shadow Bias", 1.0f);
 
         // Scene params
+        defineParam(refractiveIndex, "Index of Refraction", 1.0f);
 
         // Shape Counts
         defineParam(objectTextureHeight, "Object Texture Height", 0);
@@ -270,123 +276,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             wallThickness,
             nextDistance
         );
-    }
-
-
-    /**
-     * Compute the minimum distance to an object in the scene
-     */
-    float getMinDistanceToObjectInSceneV1(
-            const float3 &rayOrigin,
-            float4 &colour,
-            float4 &surface)
-    {
-        float distance = maxRayDistance;
-
-        float parentData[MAX_CHILD_DEPTH];
-
-        for (int i=0; i < objectTextureHeight; i++)
-        {
-            for (int j=0; j < objectTextureWidth; j++)
-            {
-                SampleType(positions) position = positions(j, i);
-                SampleType(rotations) rotation = rotations(j, i);
-                SampleType(dimensions) dimension = dimensions(j, i);
-                SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);
-                SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, i);
-                SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, i);
-                SampleType(colours) surfaceColour = colours(j, i);
-                SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);
-
-                const int modifications = (int) shapeProperty.y;
-                const float scale = position.w;
-
-                const float3 transformedRay = transformRay(
-                    rayOrigin,
-                    float3(position.x, position.y, position.z),
-                    float3(rotation.x, rotation.y, rotation.z),
-                    modifications,
-                    modParameters0,
-                    modParameters1
-                );
-
-                float nextDistance = getNextDistance(
-                    transformedRay,
-                    (int) shapeProperty.x,
-                    dimension,
-                    scale,
-                    modifications,
-                    modParameters1.w,
-                    rotation.w
-                );
-
-                const int numChildren = (int) shapeProperty.z;
-                const float blendStrength = shapeProperty.w;
-
-
-                float4 parentColour = surfaceColour;
-                float4 parentSurface = surfaceProperty;
-
-                // TODO should be able to get rid of this duplication in a clever way
-                // maybe cache the parent values as you compute the child then pop back
-                // and allow infinite child depth
-                for (int child=j + 1; child < j + 1 + numChildren; child++)
-                {
-                    SampleType(positions) childPosition = positions(child, i);
-                    SampleType(rotations) childRotation = rotations(child, i);
-                    SampleType(dimensions) childDimension = dimensions(child, i);
-                    SampleType(shapeProperties) childShapeProperty = shapeProperties(child, i);
-                    SampleType(shapeModParameters0) childModParameters0 = shapeModParameters0(child, i);
-                    SampleType(shapeModParameters1) childModParameters1 = shapeModParameters1(child, i);
-                    SampleType(colours) childColour = colours(child, i);
-                    SampleType(surfaceProperties) childSurface = surfaceProperties(child, i);
-
-                    const int childModifications = (int) childShapeProperty.y;
-                    const float childScale = childPosition.w * scale;
-
-                    const float3 childTransformedRay = transformRay(
-                        transformedRay,
-                        float3(childPosition.x, childPosition.y, childPosition.z),
-                        float3(childRotation.x, childRotation.y, childRotation.z),
-                        childModifications,
-                        childModParameters0,
-                        childModParameters1
-                    );
-
-                    const float childNextDistance = getNextDistance(
-                        childTransformedRay,
-                        (int) childShapeProperty.x,
-                        childDimension,
-                        childScale,
-                        childModifications,
-                        childModParameters1.w,
-                        childRotation.w
-                    );
-
-                    nextDistance = performChildInteraction(
-                        modifications,
-                        childNextDistance,
-                        nextDistance,
-                        childColour,
-                        parentColour,
-                        childSurface,
-                        parentSurface,
-                        blendStrength
-                    );
-                }
-                j += numChildren;
-
-                if (nextDistance < distance)
-                {
-                    distance = nextDistance;
-
-                    colour = float4(parentColour);
-                    surface = float4(parentSurface);
-                }
-            }
-        }
-
-        return distance;
     }
 
 
@@ -694,8 +583,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float2 lightIntensityOnSurface(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
-            const float4 &surface,
-            const float3 &reflectedDirection,
             const float3 &light,
             const int lightType,
             const float intensity,
@@ -736,11 +623,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             shadowOffsetLightDirection
         );
         lightDirection = normalize(lightDirection);
-        // float normalFactor = blend(
-        //     saturate(dot(reflectedDirection, lightDirection)),
-        //     saturate(dot(surfaceNormal, lightDirection)),
-        //     surface.x
-        // );
+
         float normalFactor = dot(surfaceNormal, lightDirection);
 
         float shadowIntensityAtPosition;
@@ -774,8 +657,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float computeLightIntensityOnSurface(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
-            const float4 &surface,
-            const float3 &reflectedDirection,
             float4 &lightColour)
     {
         float2 lightIntensity = float2(0, 0);
@@ -800,8 +681,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     currentLightIntensity = lightIntensityOnSurface(
                         pointOnSurface,
                         surfaceNormal,
-                        surface,
-                        reflectedDirection,
                         float3(light.x, light.y, light.z),
                         lightType,
                         light.w,
@@ -818,7 +697,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 lightIntensity += currentLightIntensity;
             }
         }
-        // lightColour /= lightTextureWidth * lightTextureHeight;
 
         return saturate(lightIntensity.x * lightIntensity.y);
     }
@@ -881,7 +759,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     float3(
                         point.x,
                         point.y,
-                        point.z+hitTolerance
+                        point.z + hitTolerance
                     ),
                     colour,
                     surface
@@ -909,157 +787,259 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const int numBounces,
             const float rayDistance)
     {
-        float3 origin = rayOrigin;
-        float3 direction = rayDirection;
+        const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, maxRaysPerSubPixel) - 1;
+
+        // rayOrigin, rayDirection, rayIntensity, index of refraction, internal
+        float rays[MAX_RAYS_PER_SUBPIXEL][3 + 3 + 1 + 1 + 1];
+        rays[0][0] = rayOrigin.x;
+        rays[0][1] = rayOrigin.y;
+        rays[0][2] = rayOrigin.z;
+
+        rays[0][3] = rayDirection.x;
+        rays[0][4] = rayDirection.y;
+        rays[0][5] = rayDirection.z;
+
+        rays[0][6] = 1.0f;
+
+        rays[0][7] = refractiveIndex;
+
+        rays[0][8] = false;
+
+        int numRays = 1;
+        int currentRayIndex = 0;
+
         float4 colour;
         float4 surface;
-
-        int bounces = 0;
-        float distanceTravelled = 0;
-        float lastHitDistance = distanceTravelled;
-
-        float lightIntensity = 1;
 
         float4 rayColour = float4(0);
         float4 lightColour = float4(0);
 
-        float rayStrength = 1;
-
+        int bounces = 0;
         int iterations = 1;
-        while (distanceTravelled < rayDistance && rayStrength > 0 && iterations <= maxRaySteps)
+        while (currentRayIndex < numRays)
         {
-            float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);
-            distanceTravelled += stepDistance;
-            origin += direction * stepDistance;
+            float lightIntensity = 1;
 
-            if (fabs(stepDistance) < hitTolerance)
+            float distanceTravelled = 0;
+
+            float3 origin = float3(
+                rays[currentRayIndex][0],
+                rays[currentRayIndex][1],
+                rays[currentRayIndex][2]
+            );
+            float3 direction = float3(
+                rays[currentRayIndex][3],
+                rays[currentRayIndex][4],
+                rays[currentRayIndex][5]
+            );
+            float rayIntensity = rays[currentRayIndex][6];
+
+            bool madeContact = false;
+
+            while (distanceTravelled < rayDistance && rayIntensity > 0 && iterations <= maxRaySteps)
             {
-                float3 surfaceNormal = estimateSurfaceNormal(
-                    origin - direction * hitTolerance
-                );
+                float stepDistance = fabs(getMinDistanceToObjectInScene(origin, colour, surface));
 
-                // Use roughness to modify surface normal
-                float radialOffset = surface.w * random(
-                    (iterations * distanceTravelled + stepDistance)
-                    * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z)
-                );
-                float angularOffset = 2.0f * PI * random(radialOffset * distanceTravelled);
+                distanceTravelled += stepDistance;
+                origin += direction * stepDistance;
 
-                // Update the ray direction to send a scattered cluster of rays
-                float3 orthogonal = cross(surfaceNormal, float3(1, 0, 0));
-                float3 rayNormal;
-                if (length(orthogonal) == 0.0f)
+                if (stepDistance < hitTolerance)
                 {
-                    rayNormal = normalize(cross(surfaceNormal, float3(0, 1, 0)));
-                }
-                else
-                {
-                    rayNormal = normalize(orthogonal);
-                }
-                rayNormal = (
-                    cos(angularOffset)
-                    * rayNormal
-                    + sin(angularOffset)
-                    * cross(surfaceNormal, rayNormal)
-                );
+                    float3 surfaceNormal = estimateSurfaceNormal(
+                        origin - direction * hitTolerance
+                    );
 
-                surfaceNormal = normalize(radialOffset * rayNormal + surfaceNormal);
+                    // Use roughness to modify surface normal
+                    float radialOffset = surface.w * random(
+                        (iterations * distanceTravelled + stepDistance)
+                        * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z)
+                    );
+                    float angularOffset = 2.0f * PI * random(radialOffset * distanceTravelled);
 
-                if (outputType > 0)
-                {
-                    if (outputType == 1)
+                    // Update the ray direction to send a scattered cluster of rays
+                    float3 orthogonal = cross(surfaceNormal, float3(1, 0, 0));
+                    float3 rayNormal;
+                    if (length(orthogonal) == 0.0f)
                     {
-                        return float4(
-                            origin.x,
-                            origin.y,
-                            origin.z,
-                            1
+                        rayNormal = normalize(cross(surfaceNormal, float3(0, 1, 0)));
+                    }
+                    else
+                    {
+                        rayNormal = normalize(orthogonal);
+                    }
+                    rayNormal = (
+                        cos(angularOffset)
+                        * rayNormal
+                        + sin(angularOffset)
+                        * cross(surfaceNormal, rayNormal)
+                    );
+
+                    surfaceNormal = normalize(radialOffset * rayNormal + surfaceNormal);
+
+                    if (outputType > 0)
+                    {
+                        if (outputType == 1)
+                        {
+                            return float4(
+                                origin.x,
+                                origin.y,
+                                origin.z,
+                                1
+                            );
+                        }
+                        if (outputType == 2)
+                        {
+                            return float4(
+                                surfaceNormal.x,
+                                surfaceNormal.y,
+                                surfaceNormal.z,
+                                1
+                            );
+                        }
+                        if (outputType == 3)
+                        {
+                            return float4(
+                                distanceTravelled,
+                                0,
+                                0,
+                                1
+                            );
+                        }
+                    }
+                    bounces++;
+
+                    if (!rays[currentRayIndex][8])
+                    {
+                        lightIntensity = computeLightIntensityOnSurface(
+                            origin,
+                            surfaceNormal,
+                            lightColour
                         );
                     }
-                    if (outputType == 2)
-                    {
-                        return float4(
-                            surfaceNormal.x,
-                            surfaceNormal.y,
-                            surfaceNormal.z,
-                            1
-                        );
-                    }
-                    if (outputType == 3)
-                    {
-                        return float4(
-                            distanceTravelled,
-                            0,
-                            0,
-                            1
-                        );
-                    }
-                }
-                bounces++;
 
-                direction = reflectRayOffSurface(
-                    direction,
-                    surfaceNormal
-                );
-
-                lightIntensity = computeLightIntensityOnSurface(
-                    origin,
-                    surfaceNormal,
-                    surface,
-                    direction,
-                    lightColour
-                );
-
-                rayColour = blend(
-                    iterGlowColour,
-                    blend(
-                        hazeColour,
+                    rayColour = blend(
+                        iterGlowColour,
                         blend(
-                            lightColour * colour,
-                            rayColour,
-                            rayStrength * (1 - surface.x) * lightIntensity
+                            hazeColour,
+                            blend(
+                                lightColour * colour,
+                                rayColour,
+                                rayIntensity * (1 - surface.x - surface.y) * lightIntensity
+                            ),
+                            getHazeAmount(distanceTravelled)
                         ),
-                        getHazeAmount(distanceTravelled - lastHitDistance)
-                    ),
-                    saturate(iterGlowAmount * iterations)
-                );
+                        saturate(iterGlowAmount * iterations)
+                    );
 
-                if (bounces >= numBounces)
-                {
-                    rayColour.w = 1.0f;
-                    return rayColour;
+                    if (bounces >= numBounces)
+                    {
+                        rayColour.w = 1.0f;
+                        return rayColour;
+                    }
+
+                    const float incidentRefractiveIndex = rays[currentRayIndex][7];
+                    const float refractedRefractiveIndex = colour.w;
+                    const float reflectivity = 1.0f;//schlickReflectionCoefficient(
+                    //     direction,
+                    //     surfaceNormal,
+                    //     incidentRefractiveIndex,
+                    //     refractedRefractiveIndex
+                    // );
+                    const float reflection = reflectivity * surface.x;
+                    const float refraction = (1.0f - reflectivity) * surface.y;
+
+                    if (reflection > 0.0f && numRays < lastRay)
+                    {
+                        float3 reflectedDirection = reflectRayOffSurface(
+                            direction,
+                            surfaceNormal
+                        );
+                        float3 reflectedOrigin = offsetPoint(
+                            origin,
+                            reflectedDirection + surfaceNormal,
+                            hitTolerance
+                        );
+
+                        rays[numRays][0] = reflectedOrigin.x;
+                        rays[numRays][1] = reflectedOrigin.y;
+                        rays[numRays][2] = reflectedOrigin.z;
+
+                        rays[numRays][3] = reflectedDirection.x;
+                        rays[numRays][4] = reflectedDirection.y;
+                        rays[numRays][5] = reflectedDirection.z;
+
+                        rays[numRays][6] = rayIntensity * reflection;
+
+                        rays[numRays][7] = incidentRefractiveIndex;
+
+                        rays[numRays][8] = rays[currentRayIndex][8];
+
+                        numRays++;
+                    }
+
+                    if (refraction > 0.0f && numRays < lastRay)
+                    {
+                        float3 refractedDirection = refractRayThroughSurface(
+                            direction,
+                            surfaceNormal,
+                            incidentRefractiveIndex,
+                            refractedRefractiveIndex
+                        );
+                        float3 refractedOrigin = offsetPoint(
+                            origin,
+                            -surfaceNormal,
+                            2.0f * hitTolerance
+                        );
+
+                        rays[numRays][0] = refractedOrigin.x;
+                        rays[numRays][1] = refractedOrigin.y;
+                        rays[numRays][2] = refractedOrigin.z;
+
+                        rays[numRays][3] = refractedDirection.x;
+                        rays[numRays][4] = refractedDirection.y;
+                        rays[numRays][5] = refractedDirection.z;
+
+                        rays[numRays][6] = rayIntensity * refraction;
+
+                        rays[numRays][7] = refractedRefractiveIndex;
+
+                        rays[numRays][8] = !rays[currentRayIndex][8];
+
+                        numRays++;
+                    }
+
+                    madeContact = true;
+                    break;
                 }
 
-                rayStrength *= surface.x;
-                origin = offsetPoint(
-                    origin,
-                    direction + surfaceNormal,
-                    hitTolerance
-                );
-
-                lastHitDistance = distanceTravelled;
+                iterations++;
             }
-            iterations++;
+
+            if (outputType > 0)
+            {
+                return float4(0);
+            }
+
+            if (!madeContact)
+            {
+                rayColour = blend(
+                    readSkyValue(direction),
+                    blend(
+                        iterGlowColour,
+                        blend(
+                            hazeColour,
+                            rayColour,
+                            getHazeAmount(distanceTravelled)
+                        ),
+                        saturate(iterGlowAmount * iterations)
+                    ),
+                    rayIntensity
+                );
+            }
+
+            currentRayIndex++;
         }
 
-        if (outputType > 0)
-        {
-            return float4(0);
-        }
-
-        rayColour = blend(
-            readSkyValue(direction),
-            blend(
-                iterGlowColour,
-                blend(
-                    hazeColour,
-                    rayColour,
-                    getHazeAmount(distanceTravelled - lastHitDistance)
-                ),
-                saturate(iterGlowAmount * iterations)
-            ),
-            rayStrength
-        );
         rayColour.w = bounces > 0;
         return rayColour;
     }
