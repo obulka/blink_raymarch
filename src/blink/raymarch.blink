@@ -430,18 +430,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 if (numChildren <= 0)
                 {
                     // No Children left, compute interactions with parent
-
                     if (parentStackLength > 0)
                     {
-                        float4 blendedColour = surfaceColour;
-                        float4 blendedSurface = surfaceProperty;
-
-                        // Read top of parentStack
-
-                        float3 parentTransformedRay;
-                        parentTransformedRay.x = parentStack[stackLastIndex][1];
-                        parentTransformedRay.y = parentStack[stackLastIndex][2];
-                        parentTransformedRay.z = parentStack[stackLastIndex][3];
+                        const float3 parentTransformedRay = float3(
+                            parentStack[stackLastIndex][1],
+                            parentStack[stackLastIndex][2],
+                            parentStack[stackLastIndex][3]
+                        );
 
                         // Use parent transform to position child
                         const float3 transformedRay = transformRay(
@@ -464,26 +459,26 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             rotation.w
                         );
 
-                        stackLastIndex++;
-                        while (numChildren <= 0 && --stackLastIndex >= 0)
+                        float4 blendedColour = surfaceColour;
+                        float4 blendedSurface = surfaceProperty;
+
+                        do
                         {
-                            float parentNextDistance = parentStack[stackLastIndex][4];
-
-                            float4 parentSurfaceColour;
-                            parentSurfaceColour.x = parentStack[stackLastIndex][5];
-                            parentSurfaceColour.y = parentStack[stackLastIndex][6];
-                            parentSurfaceColour.z = parentStack[stackLastIndex][7];
-                            parentSurfaceColour.w = 0.0f; // TODO get rid of this
-
-                            float4 parentSurfaceProperty;
-                            parentSurfaceProperty.x = parentStack[stackLastIndex][8];
-                            parentSurfaceProperty.y = parentStack[stackLastIndex][9];
-                            parentSurfaceProperty.z = parentStack[stackLastIndex][10];
-                            parentSurfaceProperty.w = parentStack[stackLastIndex][11];
-
-                            float parentBlendStrength = parentStack[stackLastIndex][12];
-
-                            int parentModifications = (int) parentStack[stackLastIndex][13];
+                            const float parentNextDistance = parentStack[stackLastIndex][4];
+                            const float4 parentSurfaceColour = float4(
+                                parentStack[stackLastIndex][5],
+                                parentStack[stackLastIndex][6],
+                                parentStack[stackLastIndex][7],
+                                0.0f // TODO get rid of this, make it float3
+                            );
+                            const float4 parentSurfaceProperty = float4(
+                                parentStack[stackLastIndex][8],
+                                parentStack[stackLastIndex][9],
+                                parentStack[stackLastIndex][10],
+                                parentStack[stackLastIndex][11]
+                            );
+                            const float parentBlendStrength = parentStack[stackLastIndex][12];
+                            const int parentModifications = (int) parentStack[stackLastIndex][13];
 
                             // Compute interaction between parent and this child
                             nextDistance = performChildInteraction(
@@ -496,7 +491,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 blendedSurface,
                                 parentBlendStrength
                             );
-                            // Update the global min distance
+                            // Update the global min distance (and surface/colour)
                             if (nextDistance < distance)
                             {
                                 distance = nextDistance;
@@ -511,6 +506,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                             numChildren = parentStack[stackLastIndex][0];
                         }
+                        while (numChildren <= 0 && --stackLastIndex >= 0);
+
                         parentStackLength = stackLastIndex + 1;
                     }
                     else
@@ -545,7 +542,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 }
                 else
                 {
-                    // Node has Children
+                    // Node has Children, push it to the stack for later
+                    // processing when we have its children
                     float3 parentTransformedRay = rayOrigin;
                     if (parentStackLength > 0)
                     {
