@@ -445,23 +445,23 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         parentTransformedRay.y = parentStack[stackLastIndex][2];
                         parentTransformedRay.z = parentStack[stackLastIndex][3];
 
-                        float parentNextDistance = parentStack[stackLastIndex][3];
+                        float parentNextDistance = parentStack[stackLastIndex][4];
 
                         float4 parentSurfaceColour;
-                        parentSurfaceColour.x = parentStack[stackLastIndex][4];
-                        parentSurfaceColour.y = parentStack[stackLastIndex][5];
-                        parentSurfaceColour.z = parentStack[stackLastIndex][6];
+                        parentSurfaceColour.x = parentStack[stackLastIndex][5];
+                        parentSurfaceColour.y = parentStack[stackLastIndex][6];
+                        parentSurfaceColour.z = parentStack[stackLastIndex][7];
                         parentSurfaceColour.w = 0.0f; // TODO get rid of this
 
                         float4 parentSurfaceProperty;
-                        parentSurfaceProperty.x = parentStack[stackLastIndex][7];
-                        parentSurfaceProperty.y = parentStack[stackLastIndex][8];
-                        parentSurfaceProperty.z = parentStack[stackLastIndex][9];
-                        parentSurfaceProperty.w = parentStack[stackLastIndex][10];
+                        parentSurfaceProperty.x = parentStack[stackLastIndex][8];
+                        parentSurfaceProperty.y = parentStack[stackLastIndex][9];
+                        parentSurfaceProperty.z = parentStack[stackLastIndex][10];
+                        parentSurfaceProperty.w = parentStack[stackLastIndex][11];
 
-                        float parentBlendStrength = parentStack[stackLastIndex][11];
+                        float parentBlendStrength = parentStack[stackLastIndex][12];
 
-                        int parentModifications = (int) parentStack[stackLastIndex][12];
+                        int parentModifications = (int) parentStack[stackLastIndex][13];
 
                         // Use parent transform to position child
                         const float3 transformedRay = transformRay(
@@ -484,58 +484,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             rotation.w
                         );
 
-                        // Compute interaction between parent and this child
-                        nextDistance = performChildInteraction(
-                            parentModifications,
-                            parentNextDistance,
-                            nextDistance,
-                            parentSurfaceColour,
-                            blendedColour,
-                            parentSurfaceProperty,
-                            blendedSurface,
-                            parentBlendStrength
-                        );
-
-                        // Update the global min distance
-                        if (nextDistance < distance)
+                        while (numChildren <= 0)
                         {
-                            distance = nextDistance;
-
-                            colour = float4(blendedColour);
-                            surface = float4(blendedSurface);
-                        }
-
-                        // This child is done so cut it from the graph
-                        for (int parentIndex=stackLastIndex - 1; parentIndex >= 0; parentIndex--)
-                        {
-                            parentStack[parentIndex][0]--;
-                        }
-                        numChildren = parentStack[stackLastIndex][0];
-
-                        while (numChildren <= 0 && parentStackLength > 0)
-                        {
-                            nextDistance = parentNextDistance;
-                            blendedColour = parentSurfaceColour;
-                            blendedSurface = parentSurfaceProperty;
-
-                            stackLastIndex--;
-
-                            parentNextDistance = parentStack[stackLastIndex][3];
-
-                            parentSurfaceColour.x = parentStack[stackLastIndex][4];
-                            parentSurfaceColour.y = parentStack[stackLastIndex][5];
-                            parentSurfaceColour.z = parentStack[stackLastIndex][6];
-                            parentSurfaceColour.w = 0.0f; // TODO get rid of this
-
-                            parentSurfaceProperty.x = parentStack[stackLastIndex][7];
-                            parentSurfaceProperty.y = parentStack[stackLastIndex][8];
-                            parentSurfaceProperty.z = parentStack[stackLastIndex][9];
-                            parentSurfaceProperty.w = parentStack[stackLastIndex][10];
-
-                            parentBlendStrength = parentStack[stackLastIndex][11];
-
-                            parentModifications = (int) parentStack[stackLastIndex][12];
-
                             // Compute interaction between parent and this child
                             nextDistance = performChildInteraction(
                                 parentModifications,
@@ -555,10 +505,39 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 colour = float4(blendedColour);
                                 surface = float4(blendedSurface);
                             }
+                            for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
+                            {
+                                parentStack[parentIndex][0]--;
+                            }
+
+                            stackLastIndex--;
+                            if (stackLastIndex <= 0)
+                            {
+                                break;
+                            }
+
+                            nextDistance = parentNextDistance;
+                            blendedColour = parentSurfaceColour;
+                            blendedSurface = parentSurfaceProperty;
 
                             numChildren = parentStack[stackLastIndex][0];
-                            parentStackLength--;
+
+                            parentNextDistance = parentStack[stackLastIndex][4];
+
+                            parentSurfaceColour.x = parentStack[stackLastIndex][5];
+                            parentSurfaceColour.y = parentStack[stackLastIndex][6];
+                            parentSurfaceColour.z = parentStack[stackLastIndex][7];
+
+                            parentSurfaceProperty.x = parentStack[stackLastIndex][8];
+                            parentSurfaceProperty.y = parentStack[stackLastIndex][9];
+                            parentSurfaceProperty.z = parentStack[stackLastIndex][10];
+                            parentSurfaceProperty.w = parentStack[stackLastIndex][11];
+
+                            parentBlendStrength = parentStack[stackLastIndex][12];
+
+                            parentModifications = (int) parentStack[stackLastIndex][13];
                         }
+                        parentStackLength = stackLastIndex + 1;
                     }
                     else
                     {
@@ -596,9 +575,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     float3 parentTransformedRay = rayOrigin;
                     if (parentStackLength > 0)
                     {
-                        parentTransformedRay.x = parentStack[parentStackLength][1];
-                        parentTransformedRay.y = parentStack[parentStackLength][2];
-                        parentTransformedRay.z = parentStack[parentStackLength][3];
+                        parentTransformedRay.x = parentStack[parentStackLength - 1][1];
+                        parentTransformedRay.y = parentStack[parentStackLength - 1][2];
+                        parentTransformedRay.z = parentStack[parentStackLength - 1][3];
                     }
                     const float3 transformedRay = transformRay(
                         parentTransformedRay,
