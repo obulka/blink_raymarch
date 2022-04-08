@@ -789,7 +789,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const int numBounces,
             const float rayDistance)
     {
-        const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, maxRaysPerSubPixel) - 1;
+        const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, maxRaysPerSubPixel);
 
         // rayOrigin, rayDirection, rayIntensity, index of refraction
         float rays[MAX_RAYS_PER_SUBPIXEL][3 + 3 + 1 + 1];
@@ -827,12 +827,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 rays[currentRayIndex][1],
                 rays[currentRayIndex][2]
             );
-            float3 direction = float3(
+            const float3 direction = float3(
                 rays[currentRayIndex][3],
                 rays[currentRayIndex][4],
                 rays[currentRayIndex][5]
             );
-            float rayIntensity = rays[currentRayIndex][6];
+            const float rayIntensity = rays[currentRayIndex][6];
 
             bool madeContact = false;
 
@@ -949,13 +949,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     {
                         reflection += reflectivity;
 
-                        float3 refractedDirection = refractRayThroughSurface(
+                        const float3 refractedDirection = refractRayThroughSurface(
                             direction,
                             surfaceNormal,
                             incidentRefractiveIndex,
                             refractedRefractiveIndex
                         );
-                        float3 refractedOrigin = offsetPoint(
+                        const float3 refractedOrigin = offsetPoint(
                             origin,
                             -surfaceNormal,
                             2.0f * hitTolerance
@@ -978,11 +978,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     if (reflection > 0.0f && numRays < lastRay)
                     {
-                        float3 reflectedDirection = reflectRayOffSurface(
+                        const float3 reflectedDirection = reflectRayOffSurface(
                             direction,
                             surfaceNormal
                         );
-                        float3 reflectedOrigin = offsetPoint(
+                        const float3 reflectedOrigin = offsetPoint(
                             origin,
                             reflectedDirection + surfaceNormal,
                             hitTolerance
