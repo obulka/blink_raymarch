@@ -374,18 +374,15 @@ inline float3 refractRayThroughSurface(
     const float refractedRefractiveIndex)
 {
     const float refractiveRatio = incidentRefractiveIndex / refractedRefractiveIndex;
-    const float3 normalCrossDir = cross(surfaceNormalDirection, incidentRayDirection);
+    const float cosIncident = -dot(surfaceNormalDirection, incidentRayDirection);
+    const float sinTransmittedSquared = refractiveRatio * refractiveRatio * (
+        1.0f - cosIncident * cosIncident
+    );
+    if (sinTransmittedSquared > 1.0f) return float3(0.5f);
+    const float cosTransmitted = sqrt(1.0f - sinTransmittedSquared);
     return (
-        refractiveRatio
-        * (cross(surfaceNormalDirection, cross(-surfaceNormalDirection, incidentRayDirection)))
-        - (
-            surfaceNormalDirection
-            * sqrt(
-                1.0f - (
-                    refractiveRatio * refractiveRatio * dot(normalCrossDir, normalCrossDir)
-                )
-            )
-        )
+        refractiveRatio * incidentRayDirection
+        + (refractiveRatio * cosIncident - cosTransmitted) * surfaceNormalDirection
     );
 }
 
@@ -401,11 +398,20 @@ inline float schlickReflectionCoefficient(
         / (incidentRefractiveIndex + refractedRefractiveIndex),
         2
     );
-    return (
-        parallelCoefficient
-        + (1 - parallelCoefficient)
-        * (1 - dot(incidentRayDirection, surfaceNormalDirection))
-    );
+    float cosX = dot(surfaceNormalDirection, incidentRayDirection);
+    if (incidentRefractiveIndex > refractedRefractiveIndex)
+    {
+        const float refractiveRatio = incidentRefractiveIndex / refractedRefractiveIndex;
+        const float sinTransmittedSquared = refractiveRatio * refractiveRatio * (
+            1.0f - cosX * cosX
+        );
+        if (sinTransmittedSquared > 1.0f)
+        {
+            return 1.0f;
+        }
+        cosX = sqrt(1.0f - sinTransmittedSquared);
+    }
+    return parallelCoefficient + (1 - parallelCoefficient) * pow(cosX, 5);
 }
 
 

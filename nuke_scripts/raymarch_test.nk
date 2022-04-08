@@ -10,17 +10,16 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             </dock>
             <split size="1841" stretch="1"/>
             <splitter orientation="2">
-                <split size="783"/>
-                <dock id="" activePageId="Viewer.1" focus="true">
+                <split size="673"/>
+                <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="550"/>
-                <dock id="" activePageId="DAG.1">
+                <split size="660"/>
+                <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
                     <page id="DAG.2"/>
-                    <page id="DAG.3"/>
                 </dock>
             </splitter>
             <split size="615"/>
@@ -35,6 +34,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/nuke_scripts/raymarch_test.nk
+ frame 39
  last_frame 360
  format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
  proxy_type scale
@@ -47,14 +47,6 @@ Root {
  int16Lut sRGB
  logLut Cineon
  floatLut linear
-}
-BackdropNode {
- inputs 0
- name inner_tori
- xpos 18002
- ypos 971
- bdwidth 261
- bdheight 101
 }
 BackdropNode {
  inputs 0
@@ -89,1560 +81,6 @@ Reformat {
  xpos 18932
  ypos 945
 }
-Group {
- inputs 0
- name orbit_spheres
- xpos 18012
- ypos 912
- addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
- addUserKnob {7 dimension_x l radius R 0 10}
- dimension_x 0.166665
- addUserKnob {7 dimension_y}
- addUserKnob {7 dimension_z}
- addUserKnob {7 dimension_w}
- addUserKnob {7 wall_thickness l "wall thickness"}
- wall_thickness 0.01
- addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
- addUserKnob {7 edge_radius l "edge radius"}
- addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
- addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
- addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
- addUserKnob {26 ""}
- addUserKnob {18 colour}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 reflection}
- reflection {{".5*sin(8*(((frame - 45)*pi/180) - pi/16)) +.5"}}
- addUserKnob {7 transmission}
- addUserKnob {7 emission}
- addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- roughness {{".5*cos(8*(((frame - 45)*pi/180) - pi/16)) +.5"}}
- addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {13 translate}
- translate {-0.70710678 -0.70710678 0}
- addUserKnob {13 rotate}
- addUserKnob {13 elongation}
- addUserKnob {6 elongate -STARTLINE}
- addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
- uniform_scale 1
- addUserKnob {26 div1 l "" +STARTLINE}
- addUserKnob {19 repetition_params l repetition}
- repetition_params {1 1 0 1.414213562}
- addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
- repetition_type Finite
- addUserKnob {26 ""}
- addUserKnob {7 blend_strength l "blend strength"}
- blend_strength 0.14
- addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
- blend_type "Smooth Union"
-}
- Input {
-  inputs 0
-  name merge
-  xpos 1484
-  ypos 476
- }
- Dot {
-  name Dot2
-  xpos 1518
-  ypos 904
- }
- Input {
-  inputs 0
-  name children
-  xpos 1357
-  ypos 475
-  number 1
- }
- Dot {
-  name Dot1
-  xpos 1391
-  ypos 826
- }
-add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.position_y sdf_position_scale.position_z sdf_position_scale.uniform_scale}
- Constant {
-  inputs 0
-  channels sdf_position_scale
-  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
-  format "1 1 0 0 1 1 1 1x1"
-  name position_scale
-  xpos 280
-  ypos 455
- }
- Dot {
-  name Dot17
-  xpos 314
-  ypos 647
- }
-add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sdf_rotation_wall_thickness.rotation_y sdf_rotation_wall_thickness.rotation_z sdf_rotation_wall_thickness.wall_thickness}
- Constant {
-  inputs 0
-  channels sdf_rotation_wall_thickness
-  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name rotation
-  xpos 403
-  ypos 457
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 403
-  ypos 726
- }
-add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y sdf_dimensions.dimension_z sdf_dimensions.dimension_w}
- Constant {
-  inputs 0
-  channels sdf_dimensions
-  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
-  format "1 1 0 0 1 1 1 1x1"
-  name dimensions
-  xpos 540
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 540
-  ypos 726
- }
-add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_b sdf_colour.colour_a}
- Constant {
-  inputs 0
-  channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name colour
-  xpos 669
-  ypos 459
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy3
-  xpos 669
-  ypos 726
- }
-add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.num_children sdf_shape.blend_strength}
- Constant {
-  inputs 0
-  channels sdf_shape
-  color {{parent.shape} {"parent.repetition_type | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape
-  xpos 806
-  ypos 462
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy4
-  xpos 806
-  ypos 726
- }
-add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surface.emission sdf_surface.roughness}
- Constant {
-  inputs 0
-  channels sdf_surface
-  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name surface
-  xpos 935
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy5
-  xpos 936
-  ypos 726
- }
-add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetion_y sdf_shape_mods_0.repetion_z sdf_shape_mods_0.repetion_w}
- Constant {
-  inputs 0
-  channels sdf_shape_mods_0
-  color {{parent.repetition_params.r} {parent.repetition_params.g} {parent.repetition_params.b} {parent.repetition_params.a}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods
-  xpos 1056
-  ypos 463
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy6
-  xpos 1056
-  ypos 726
- }
-add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elongation_y sdf_shape_mods_1.elongation_z sdf_shape_mods_1.edge_radius}
- Constant {
-  inputs 0
-  channels sdf_shape_mods_1
-  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods1
-  xpos 1183
-  ypos 465
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy7
-  xpos 1183
-  ypos 726
- }
- Group {
-  inputs 2
-  name sdf_merge
-  xpos 1183
-  ypos 822
-  disable {{"\[exists parent.input1] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N2a557200 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N2a555600 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N2a557200
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N2a555600
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Group {
-  inputs 2
-  name sdf_merge1
-  xpos 1183
-  ypos 900
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N2a504f00 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N2a4eb200 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N2a504f00
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N2a4eb200
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 1183
-  ypos 1002
- }
-end_group
-push 0
-Group {
- inputs 2
- name inner_torus1
- xpos 18012
- ypos 1029
- addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
- shape torus
- addUserKnob {7 dimension_x l radius R 0 10}
- dimension_x 1
- addUserKnob {7 dimension_y}
- dimension_y 0.01
- addUserKnob {7 dimension_z}
- addUserKnob {7 dimension_w}
- addUserKnob {7 wall_thickness l "wall thickness"}
- wall_thickness 0.01
- addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
- addUserKnob {7 edge_radius l "edge radius"}
- addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
- addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
- addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
- addUserKnob {26 ""}
- addUserKnob {18 colour}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 reflection}
- reflection 1
- addUserKnob {7 transmission}
- addUserKnob {7 emission}
- addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {13 translate}
- addUserKnob {13 rotate}
- rotate {{"frame * 4"} 59 0}
- addUserKnob {13 elongation}
- elongation {0 0.1 0}
- addUserKnob {6 elongate -STARTLINE}
- addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
- uniform_scale 1
- addUserKnob {26 div1 l "" +STARTLINE}
- addUserKnob {19 repetition_params l repetition}
- repetition_params {2 2 1 1.3}
- addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
- addUserKnob {26 ""}
- addUserKnob {7 blend_strength l "blend strength"}
- blend_strength 0.14
- addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
- blend_type "Smooth Union"
-}
- Input {
-  inputs 0
-  name merge
-  xpos 1484
-  ypos 476
- }
- Dot {
-  name Dot2
-  xpos 1518
-  ypos 904
- }
- Input {
-  inputs 0
-  name children
-  xpos 1357
-  ypos 475
-  number 1
- }
- Dot {
-  name Dot1
-  xpos 1391
-  ypos 826
- }
- Constant {
-  inputs 0
-  channels sdf_position_scale
-  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
-  format "1 1 0 0 1 1 1 1x1"
-  name position_scale
-  xpos 280
-  ypos 455
- }
- Dot {
-  name Dot17
-  xpos 314
-  ypos 647
- }
- Constant {
-  inputs 0
-  channels sdf_rotation_wall_thickness
-  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name rotation
-  xpos 403
-  ypos 457
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 403
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_dimensions
-  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
-  format "1 1 0 0 1 1 1 1x1"
-  name dimensions
-  xpos 540
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 540
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name colour
-  xpos 669
-  ypos 459
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy3
-  xpos 669
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape
-  color {{parent.shape} {"parent.repetition_type | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape
-  xpos 806
-  ypos 462
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy4
-  xpos 806
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_surface
-  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name surface
-  xpos 935
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy5
-  xpos 936
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape_mods_0
-  color {{parent.repetition_params.r} {parent.repetition_params.g} {parent.repetition_params.b} {parent.repetition_params.a}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods
-  xpos 1056
-  ypos 463
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy6
-  xpos 1056
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape_mods_1
-  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods1
-  xpos 1183
-  ypos 465
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy7
-  xpos 1183
-  ypos 726
- }
- Group {
-  inputs 2
-  name sdf_merge
-  xpos 1183
-  ypos 822
-  disable {{"\[exists parent.input1] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N294ddd00 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N294dc100 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N294ddd00
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N294dc100
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Group {
-  inputs 2
-  name sdf_merge1
-  xpos 1183
-  ypos 900
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N2945f900 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N2945dd00 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N2945f900
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N2945dd00
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 1183
-  ypos 1002
- }
-end_group
-push 0
-Group {
- inputs 2
- name inner_torus2
- xpos 18134
- ypos 1029
- addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
- shape torus
- addUserKnob {7 dimension_x l radius R 0 10}
- dimension_x 1
- addUserKnob {7 dimension_y}
- dimension_y 0.01
- addUserKnob {7 dimension_z}
- addUserKnob {7 dimension_w}
- addUserKnob {7 wall_thickness l "wall thickness"}
- wall_thickness 0.01
- addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
- addUserKnob {7 edge_radius l "edge radius"}
- addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
- addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
- addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
- addUserKnob {26 ""}
- addUserKnob {18 colour}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 reflection}
- reflection 1
- addUserKnob {7 transmission}
- addUserKnob {7 emission}
- addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {13 translate}
- addUserKnob {13 rotate}
- rotate {90 0 0}
- addUserKnob {13 elongation}
- elongation {0 0.1 0}
- addUserKnob {6 elongate -STARTLINE}
- addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
- uniform_scale 1
- addUserKnob {26 div1 l "" +STARTLINE}
- addUserKnob {19 repetition_params l repetition}
- repetition_params {2 2 1 1.3}
- addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
- addUserKnob {26 ""}
- addUserKnob {7 blend_strength l "blend strength"}
- blend_strength 0.37
- addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
- blend_type "Smooth Union"
-}
- Input {
-  inputs 0
-  name merge
-  xpos 1484
-  ypos 476
- }
- Dot {
-  name Dot2
-  xpos 1518
-  ypos 904
- }
- Input {
-  inputs 0
-  name children
-  xpos 1357
-  ypos 475
-  number 1
- }
- Dot {
-  name Dot1
-  xpos 1391
-  ypos 826
- }
- Constant {
-  inputs 0
-  channels sdf_position_scale
-  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
-  format "1 1 0 0 1 1 1 1x1"
-  name position_scale
-  xpos 280
-  ypos 455
- }
- Dot {
-  name Dot17
-  xpos 314
-  ypos 647
- }
- Constant {
-  inputs 0
-  channels sdf_rotation_wall_thickness
-  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name rotation
-  xpos 403
-  ypos 457
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 403
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_dimensions
-  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
-  format "1 1 0 0 1 1 1 1x1"
-  name dimensions
-  xpos 540
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 540
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name colour
-  xpos 669
-  ypos 459
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy3
-  xpos 669
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape
-  color {{parent.shape} {"parent.repetition_type | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape
-  xpos 806
-  ypos 462
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy4
-  xpos 806
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_surface
-  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name surface
-  xpos 935
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy5
-  xpos 936
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape_mods_0
-  color {{parent.repetition_params.r} {parent.repetition_params.g} {parent.repetition_params.b} {parent.repetition_params.a}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods
-  xpos 1056
-  ypos 463
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy6
-  xpos 1056
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape_mods_1
-  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods1
-  xpos 1183
-  ypos 465
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy7
-  xpos 1183
-  ypos 726
- }
- Group {
-  inputs 2
-  name sdf_merge
-  xpos 1183
-  ypos 822
-  disable {{"\[exists parent.input1] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N29b6b200 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N29b69600 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N29b6b200
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N29b69600
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Group {
-  inputs 2
-  name sdf_merge1
-  xpos 1183
-  ypos 900
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N29b24f00 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N29aff200 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N29b24f00
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N29aff200
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 1183
-  ypos 1002
- }
-end_group
 Dot {
  inputs 0
  name Dot19
@@ -1651,6 +89,7 @@ Dot {
 }
 Axis2 {
  inputs 0
+ rotate {-45 0 0}
  name Axis2
  xpos 18843
  ypos 828
@@ -1790,7 +229,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set N29a59600 [stack 0]
+set N1c1be400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1812,7 +251,7 @@ set N29a59600 [stack 0]
    xpos 34
    ypos -6
   }
-set N29a3b900 [stack 0]
+set N1c1bc800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1823,7 +262,7 @@ set N29a3b900 [stack 0]
    xpos -98
    ypos 336
   }
-push $N29a59600
+push $N1c1be400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1852,7 +291,7 @@ push $N29a59600
    xpos 158
    ypos 167
   }
-push $N29a3b900
+push $N1c1bc800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2038,7 +477,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N299cc100 [stack 0]
+set N1c12cf00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2060,7 +499,7 @@ set N299cc100 [stack 0]
    xpos 34
    ypos -6
   }
-set N299a2400 [stack 0]
+set N1c107200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2071,7 +510,7 @@ set N299a2400 [stack 0]
    xpos -98
    ypos 336
   }
-push $N299cc100
+push $N1c12cf00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2100,7 +539,7 @@ push $N299cc100
    xpos 158
    ypos 167
   }
-push $N299a2400
+push $N1c107200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2286,7 +725,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N29912b00 [stack 0]
+set Nf1f63900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2308,7 +747,7 @@ set N29912b00 [stack 0]
    xpos 34
    ypos -6
   }
-set N29910f00 [stack 0]
+set Nf1f61d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2319,7 +758,7 @@ set N29910f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N29912b00
+push $Nf1f63900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2348,7 +787,7 @@ push $N29912b00
    xpos 158
    ypos 167
   }
-push $N29910f00
+push $Nf1f61d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2534,7 +973,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N29881600 [stack 0]
+set Nf1cbe400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2556,7 +995,7 @@ set N29881600 [stack 0]
    xpos 34
    ypos -6
   }
-set N29867900 [stack 0]
+set Nf1cbc800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2567,7 +1006,7 @@ set N29867900 [stack 0]
    xpos -98
    ypos 336
   }
-push $N29881600
+push $Nf1cbe400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2596,7 +1035,7 @@ push $N29881600
    xpos 158
    ypos 167
   }
-push $N29867900
+push $Nf1cbc800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2782,7 +1221,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N297f4100 [stack 0]
+set Nf1c2cf00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2804,7 +1243,7 @@ set N297f4100 [stack 0]
    xpos 34
    ypos -6
   }
-set N297ca400 [stack 0]
+set Nf1c07200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2815,7 +1254,7 @@ set N297ca400 [stack 0]
    xpos -98
    ypos 336
   }
-push $N297f4100
+push $Nf1c2cf00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2844,7 +1283,7 @@ push $N297f4100
    xpos 158
    ypos 167
   }
-push $N297ca400
+push $Nf1c07200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3030,7 +1469,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N131b2b00 [stack 0]
+set Nf1d67900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3052,7 +1491,7 @@ set N131b2b00 [stack 0]
    xpos 34
    ypos -6
   }
-set N131b0f00 [stack 0]
+set Nf1d65d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3063,7 +1502,7 @@ set N131b0f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N131b2b00
+push $Nf1d67900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3092,7 +1531,7 @@ push $N131b2b00
    xpos 158
    ypos 167
   }
-push $N131b0f00
+push $Nf1d65d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3162,9 +1601,1043 @@ push $N131b0f00
 end_group
 Group {
  inputs 0
- name b_wall
- xpos 18168
- ypos 581
+ name base_sphere2
+ xpos 18178
+ ypos 1029
+ addUserKnob {20 User l "SDF Primitive"}
+ addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
+ addUserKnob {7 dimension_x l radius R 0 10}
+ dimension_x 0.1
+ addUserKnob {7 dimension_y}
+ addUserKnob {7 dimension_z}
+ addUserKnob {7 dimension_w}
+ addUserKnob {7 wall_thickness l "wall thickness"}
+ wall_thickness 0.01
+ addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
+ addUserKnob {7 edge_radius l "edge radius"}
+ addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
+ addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
+ addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {18 colour}
+ colour {1 0 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 reflection}
+ addUserKnob {7 transmission}
+ addUserKnob {7 refractive_index l "refractive index" R 1 4}
+ refractive_index 1.3
+ addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
+ addUserKnob {7 emission}
+ addUserKnob {26 div0 l "" +STARTLINE}
+ addUserKnob {13 translate}
+ translate {0 0 -2}
+ addUserKnob {13 rotate}
+ rotate {{frame*4} {frame*4} 0}
+ addUserKnob {13 elongation}
+ elongation {0.1 0 0}
+ addUserKnob {6 elongate -STARTLINE}
+ addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
+ uniform_scale 1
+ addUserKnob {26 div1 l "" +STARTLINE}
+ addUserKnob {19 repetition_params l repetition}
+ repetition_params {2 2 1 1.3}
+ addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
+ addUserKnob {26 ""}
+ addUserKnob {7 blend_strength l "blend strength"}
+ blend_strength 0.1
+ addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
+}
+ Input {
+  inputs 0
+  name siblings
+  xpos 1484
+  ypos 476
+ }
+ Dot {
+  name Dot2
+  xpos 1518
+  ypos 904
+ }
+ Input {
+  inputs 0
+  name children
+  xpos 1357
+  ypos 475
+  number 1
+ }
+ Dot {
+  name Dot1
+  xpos 1391
+  ypos 826
+ }
+add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.position_y sdf_position_scale.position_z sdf_position_scale.uniform_scale}
+ Constant {
+  inputs 0
+  channels sdf_position_scale
+  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
+  format "1 1 0 0 1 1 1 1x1"
+  name position_scale
+  xpos 280
+  ypos 455
+ }
+ Dot {
+  name Dot17
+  xpos 314
+  ypos 647
+ }
+add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sdf_rotation_wall_thickness.rotation_y sdf_rotation_wall_thickness.rotation_z sdf_rotation_wall_thickness.wall_thickness}
+ Constant {
+  inputs 0
+  channels sdf_rotation_wall_thickness
+  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name rotation
+  xpos 403
+  ypos 457
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 403
+  ypos 726
+ }
+add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y sdf_dimensions.dimension_z sdf_dimensions.dimension_w}
+ Constant {
+  inputs 0
+  channels sdf_dimensions
+  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
+  format "1 1 0 0 1 1 1 1x1"
+  name dimensions
+  xpos 540
+  ypos 460
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy2
+  xpos 540
+  ypos 726
+ }
+add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_b sdf_colour.colour_a}
+ Constant {
+  inputs 0
+  channels sdf_colour
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.refractive_index}}
+  format "1 1 0 0 1 1 1 1x1"
+  name colour
+  xpos 669
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy3
+  xpos 669
+  ypos 726
+ }
+add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.num_children sdf_shape.blend_strength}
+ Constant {
+  inputs 0
+  channels sdf_shape
+  color {{parent.shape} {"parent.repetition_type | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape
+  xpos 806
+  ypos 462
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy4
+  xpos 806
+  ypos 726
+ }
+add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surface.emission sdf_surface.roughness}
+ Constant {
+  inputs 0
+  channels sdf_surface
+  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name surface
+  xpos 935
+  ypos 460
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy5
+  xpos 936
+  ypos 726
+ }
+add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetion_y sdf_shape_mods_0.repetion_z sdf_shape_mods_0.repetion_w}
+ Constant {
+  inputs 0
+  channels sdf_shape_mods_0
+  color {{parent.repetition_params.r} {parent.repetition_params.g} {parent.repetition_params.b} {parent.repetition_params.a}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape_mods
+  xpos 1056
+  ypos 463
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy6
+  xpos 1056
+  ypos 726
+ }
+add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elongation_y sdf_shape_mods_1.elongation_z sdf_shape_mods_1.edge_radius}
+ Constant {
+  inputs 0
+  channels sdf_shape_mods_1
+  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape_mods1
+  xpos 1183
+  ypos 465
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy7
+  xpos 1183
+  ypos 726
+ }
+ Group {
+  inputs 2
+  name sdf_merge
+  xpos 1183
+  ypos 822
+  disable {{"\[exists parent.input1] ? 0 : 1"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N8c71e400 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N8c71c800 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N8c71e400
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N8c71c800
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Group {
+  inputs 2
+  name sdf_merge1
+  xpos 1183
+  ypos 900
+  disable {{"\[exists parent.input0] ? 0 : 1"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N8c6d8100 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N8c6b2400 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N8c6d8100
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N8c6b2400
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Output {
+  name Output1
+  xpos 1183
+  ypos 1002
+ }
+end_group
+Group {
+ inputs 0
+ name sdf_primitive4
+ xpos 18175
+ ypos 572
+ addUserKnob {20 User l "SDF Primitive"}
+ addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
+ shape plane
+ addUserKnob {7 dimension_x l radius R 0 10}
+ addUserKnob {7 dimension_y}
+ addUserKnob {7 dimension_z}
+ dimension_z -1
+ addUserKnob {7 dimension_w}
+ addUserKnob {7 wall_thickness l "wall thickness"}
+ wall_thickness 0.01
+ addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
+ addUserKnob {7 edge_radius l "edge radius"}
+ addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
+ addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
+ addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {18 colour}
+ colour {0 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 reflection}
+ addUserKnob {7 transmission}
+ addUserKnob {7 refractive_index l "refractive index" R 1 4}
+ refractive_index 1
+ addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
+ addUserKnob {7 emission}
+ addUserKnob {26 div0 l "" +STARTLINE}
+ addUserKnob {13 translate}
+ translate {0 4 2}
+ addUserKnob {13 rotate}
+ addUserKnob {13 elongation}
+ addUserKnob {6 elongate -STARTLINE}
+ addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
+ uniform_scale 1
+ addUserKnob {26 div1 l "" +STARTLINE}
+ addUserKnob {19 repetition_params l repetition}
+ repetition_params {2 2 1 1.3}
+ addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
+ addUserKnob {26 ""}
+ addUserKnob {7 blend_strength l "blend strength"}
+ blend_strength 0.1
+ addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
+}
+ Input {
+  inputs 0
+  name siblings
+  xpos 1484
+  ypos 476
+ }
+ Dot {
+  name Dot2
+  xpos 1518
+  ypos 904
+ }
+ Input {
+  inputs 0
+  name children
+  xpos 1357
+  ypos 475
+  number 1
+ }
+ Dot {
+  name Dot1
+  xpos 1391
+  ypos 826
+ }
+ Constant {
+  inputs 0
+  channels sdf_position_scale
+  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
+  format "1 1 0 0 1 1 1 1x1"
+  name position_scale
+  xpos 280
+  ypos 455
+ }
+ Dot {
+  name Dot17
+  xpos 314
+  ypos 647
+ }
+ Constant {
+  inputs 0
+  channels sdf_rotation_wall_thickness
+  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name rotation
+  xpos 403
+  ypos 457
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 403
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_dimensions
+  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
+  format "1 1 0 0 1 1 1 1x1"
+  name dimensions
+  xpos 540
+  ypos 460
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy2
+  xpos 540
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_colour
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.refractive_index}}
+  format "1 1 0 0 1 1 1 1x1"
+  name colour
+  xpos 669
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy3
+  xpos 669
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape
+  color {{parent.shape} {"parent.repetition_type | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape
+  xpos 806
+  ypos 462
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy4
+  xpos 806
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_surface
+  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name surface
+  xpos 935
+  ypos 460
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy5
+  xpos 936
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape_mods_0
+  color {{parent.repetition_params.r} {parent.repetition_params.g} {parent.repetition_params.b} {parent.repetition_params.a}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape_mods
+  xpos 1056
+  ypos 463
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy6
+  xpos 1056
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape_mods_1
+  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape_mods1
+  xpos 1183
+  ypos 465
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy7
+  xpos 1183
+  ypos 726
+ }
+ Group {
+  inputs 2
+  name sdf_merge
+  xpos 1183
+  ypos 822
+  disable {{"\[exists parent.input1] ? 0 : 1"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N30e64800 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N30e46b00 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N30e64800
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N30e46b00
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Group {
+  inputs 2
+  name sdf_merge1
+  xpos 1183
+  ypos 900
+  disable {{"\[exists parent.input0] ? 0 : 1"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N30dee400 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N30dec800 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N30dee400
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N30dec800
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Output {
+  name Output1
+  xpos 1183
+  ypos 1002
+ }
+end_group
+Group {
+ name sdf_primitive3
+ xpos 18177
+ ypos 639
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
  shape plane
@@ -3185,17 +2658,16 @@ Group {
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection}
- reflection 0.1
  addUserKnob {7 transmission}
- addUserKnob {7 emission}
+ addUserKnob {7 refractive_index l "refractive index" R 1 4}
+ refractive_index 1
  addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- roughness 0.05
+ addUserKnob {7 emission}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate}
  translate {0 0 -2}
  addUserKnob {13 rotate}
  addUserKnob {13 elongation}
- elongation {0 0.1 0}
  addUserKnob {6 elongate -STARTLINE}
  addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
  uniform_scale 1
@@ -3206,13 +2678,12 @@ Group {
  addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
  addUserKnob {26 ""}
  addUserKnob {7 blend_strength l "blend strength"}
- blend_strength 0.14
+ blend_strength 0.1
  addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
- blend_type "Smooth Union"
 }
  Input {
   inputs 0
-  name merge
+  name siblings
   xpos 1484
   ypos 476
  }
@@ -3282,7 +2753,7 @@ Group {
  Constant {
   inputs 0
   channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.refractive_index}}
   format "1 1 0 0 1 1 1 1x1"
   name colour
   xpos 669
@@ -3390,7 +2861,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N2913f200 [stack 0]
+set N30f9b200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3412,7 +2883,7 @@ set N2913f200 [stack 0]
    xpos 34
    ypos -6
   }
-set N2913d600 [stack 0]
+set N30f99600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3423,7 +2894,7 @@ set N2913d600 [stack 0]
    xpos -98
    ypos 336
   }
-push $N2913f200
+push $N30f9b200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3452,7 +2923,7 @@ push $N2913f200
    xpos 158
    ypos 167
   }
-push $N2913d600
+push $N30f99600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3545,7 +3016,7 @@ push $N2913d600
    xpos 192
    ypos -2
   }
-set N290f0f00 [stack 0]
+set N30f44f00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3567,7 +3038,7 @@ set N290f0f00 [stack 0]
    xpos 34
    ypos -6
   }
-set N290d3200 [stack 0]
+set N30f23200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3578,7 +3049,7 @@ set N290d3200 [stack 0]
    xpos -98
    ypos 336
   }
-push $N290f0f00
+push $N30f44f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3607,7 +3078,7 @@ push $N290f0f00
    xpos 158
    ypos 167
   }
-push $N290d3200
+push $N30f23200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3676,16 +3147,16 @@ push $N290d3200
  }
 end_group
 Group {
- name f_wall
- xpos 18168
- ypos 649
+ name sdf_primitive2
+ xpos 18177
+ ypos 701
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
  shape plane
  addUserKnob {7 dimension_x l radius R 0 10}
+ dimension_x 1
  addUserKnob {7 dimension_y}
  addUserKnob {7 dimension_z}
- dimension_z -1
  addUserKnob {7 dimension_w}
  addUserKnob {7 wall_thickness l "wall thickness"}
  wall_thickness 0.01
@@ -3699,17 +3170,16 @@ Group {
  colour {0 0 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection}
- reflection 0.1
  addUserKnob {7 transmission}
- addUserKnob {7 emission}
+ addUserKnob {7 refractive_index l "refractive index" R 1 4}
+ refractive_index 1
  addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- roughness 0.05
+ addUserKnob {7 emission}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate}
- translate {2 0 2}
+ translate {-2 0 0}
  addUserKnob {13 rotate}
  addUserKnob {13 elongation}
- elongation {0 0.1 0}
  addUserKnob {6 elongate -STARTLINE}
  addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
  uniform_scale 1
@@ -3720,13 +3190,12 @@ Group {
  addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
  addUserKnob {26 ""}
  addUserKnob {7 blend_strength l "blend strength"}
- blend_strength 0.14
+ blend_strength 0.1
  addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
- blend_type "Smooth Union"
 }
  Input {
   inputs 0
-  name merge
+  name siblings
   xpos 1484
   ypos 476
  }
@@ -3796,7 +3265,7 @@ Group {
  Constant {
   inputs 0
   channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.refractive_index}}
   format "1 1 0 0 1 1 1 1x1"
   name colour
   xpos 669
@@ -3904,7 +3373,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N29020800 [stack 0]
+set N20cfdd00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3926,7 +3395,7 @@ set N29020800 [stack 0]
    xpos 34
    ypos -6
   }
-set N28fe6b00 [stack 0]
+set N20cfc100 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3937,7 +3406,7 @@ set N28fe6b00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N29020800
+push $N20cfdd00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3966,7 +3435,7 @@ push $N29020800
    xpos 158
    ypos 167
   }
-push $N28fe6b00
+push $N20cfc100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4059,7 +3528,7 @@ push $N28fe6b00
    xpos 192
    ypos -2
   }
-set N28f96400 [stack 0]
+set N20c8b900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4081,7 +3550,7 @@ set N28f96400 [stack 0]
    xpos 34
    ypos -6
   }
-set N28f94800 [stack 0]
+set N20c89d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4092,7 +3561,7 @@ set N28f94800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N28f96400
+push $N20c8b900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4121,7 +3590,7 @@ push $N28f96400
    xpos 158
    ypos 167
   }
-push $N28f94800
+push $N20c89d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4190,9 +3659,9 @@ push $N28f94800
  }
 end_group
 Group {
- name r_wall
- xpos 18168
- ypos 717
+ name sdf_primitive1
+ xpos 18177
+ ypos 768
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
  shape plane
@@ -4214,15 +3683,15 @@ Group {
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection}
  addUserKnob {7 transmission}
- addUserKnob {7 emission}
+ addUserKnob {7 refractive_index l "refractive index" R 1 4}
+ refractive_index 1
  addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- roughness 0.05
+ addUserKnob {7 emission}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate}
  translate {2 0 0}
  addUserKnob {13 rotate}
  addUserKnob {13 elongation}
- elongation {0 0.1 0}
  addUserKnob {6 elongate -STARTLINE}
  addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
  uniform_scale 1
@@ -4233,13 +3702,12 @@ Group {
  addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
  addUserKnob {26 ""}
  addUserKnob {7 blend_strength l "blend strength"}
- blend_strength 0.14
+ blend_strength 0.1
  addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
- blend_type "Smooth Union"
 }
  Input {
   inputs 0
-  name merge
+  name siblings
   xpos 1484
   ypos 476
  }
@@ -4309,7 +3777,7 @@ Group {
  Constant {
   inputs 0
   channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.refractive_index}}
   format "1 1 0 0 1 1 1 1x1"
   name colour
   xpos 669
@@ -4417,7 +3885,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N28ebdd00 [stack 0]
+set N20e54800 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4439,7 +3907,7 @@ set N28ebdd00 [stack 0]
    xpos 34
    ypos -6
   }
-set N28ebc100 [stack 0]
+set N20e2eb00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4450,7 +3918,7 @@ set N28ebc100 [stack 0]
    xpos -98
    ypos 336
   }
-push $N28ebdd00
+push $N20e54800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4479,7 +3947,7 @@ push $N28ebdd00
    xpos 158
    ypos 167
   }
-push $N28ebc100
+push $N20e2eb00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4572,7 +4040,7 @@ push $N28ebc100
    xpos 192
    ypos -2
   }
-set N28e3f900 [stack 0]
+set N20dd6400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4594,7 +4062,7 @@ set N28e3f900 [stack 0]
    xpos 34
    ypos -6
   }
-set N28e3dd00 [stack 0]
+set N20dd4800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4605,7 +4073,7 @@ set N28e3dd00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N28e3f900
+push $N20dd6400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4634,7 +4102,7 @@ push $N28e3f900
    xpos 158
    ypos 167
   }
-push $N28e3dd00
+push $N20dd4800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4703,522 +4171,9 @@ push $N28e3dd00
  }
 end_group
 Group {
- name l_wall
- xpos 18168
- ypos 778
- addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
- shape plane
- addUserKnob {7 dimension_x l radius R 0 10}
- dimension_x 1
- addUserKnob {7 dimension_y}
- addUserKnob {7 dimension_z}
- addUserKnob {7 dimension_w}
- addUserKnob {7 wall_thickness l "wall thickness"}
- wall_thickness 0.01
- addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
- addUserKnob {7 edge_radius l "edge radius"}
- addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
- addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
- addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
- addUserKnob {26 ""}
- addUserKnob {18 colour}
- colour {1 0 0}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 reflection}
- addUserKnob {7 transmission}
- addUserKnob {7 emission}
- addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- roughness 0.05
- addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {13 translate}
- translate {-2 0 0}
- addUserKnob {13 rotate}
- addUserKnob {13 elongation}
- elongation {0 0.1 0}
- addUserKnob {6 elongate -STARTLINE}
- addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
- uniform_scale 1
- addUserKnob {26 div1 l "" +STARTLINE}
- addUserKnob {19 repetition_params l repetition}
- repetition_params {2 2 1 1.3}
- addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
- addUserKnob {26 ""}
- addUserKnob {7 blend_strength l "blend strength"}
- blend_strength 0.14
- addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
- blend_type "Smooth Union"
-}
- Input {
-  inputs 0
-  name merge
-  xpos 1484
-  ypos 476
- }
- Dot {
-  name Dot2
-  xpos 1518
-  ypos 904
- }
- Input {
-  inputs 0
-  name children
-  xpos 1357
-  ypos 475
-  number 1
- }
- Dot {
-  name Dot1
-  xpos 1391
-  ypos 826
- }
- Constant {
-  inputs 0
-  channels sdf_position_scale
-  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
-  format "1 1 0 0 1 1 1 1x1"
-  name position_scale
-  xpos 280
-  ypos 455
- }
- Dot {
-  name Dot17
-  xpos 314
-  ypos 647
- }
- Constant {
-  inputs 0
-  channels sdf_rotation_wall_thickness
-  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name rotation
-  xpos 403
-  ypos 457
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 403
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_dimensions
-  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
-  format "1 1 0 0 1 1 1 1x1"
-  name dimensions
-  xpos 540
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 540
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name colour
-  xpos 669
-  ypos 459
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy3
-  xpos 669
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape
-  color {{parent.shape} {"parent.repetition_type | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape
-  xpos 806
-  ypos 462
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy4
-  xpos 806
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_surface
-  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name surface
-  xpos 935
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy5
-  xpos 936
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape_mods_0
-  color {{parent.repetition_params.r} {parent.repetition_params.g} {parent.repetition_params.b} {parent.repetition_params.a}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods
-  xpos 1056
-  ypos 463
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy6
-  xpos 1056
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape_mods_1
-  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods1
-  xpos 1183
-  ypos 465
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy7
-  xpos 1183
-  ypos 726
- }
- Group {
-  inputs 2
-  name sdf_merge
-  xpos 1183
-  ypos 822
-  disable {{"\[exists parent.input1] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N29757200 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N29755600 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N29757200
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N29755600
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Group {
-  inputs 2
-  name sdf_merge1
-  xpos 1183
-  ypos 900
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N29708f00 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N296eb200 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N29708f00
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N296eb200
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 1183
-  ypos 1002
- }
-end_group
-Group {
- name ceiling
- xpos 18168
- ypos 838
+ name sdf_primitive
+ xpos 18177
+ ypos 833
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
  shape plane
@@ -5236,19 +4191,19 @@ Group {
  addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {18 colour}
- colour {{".5*sin(8*(((frame - 45)*pi/180) - pi/16)) +.5"} {".5*sin(8*(((frame - 45)*pi/180))) +.5"} {".5*sin(8*(((frame - 45)*pi/180) - 3 * pi/16)) +.5"}}
+ colour {1 0 0}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection}
  addUserKnob {7 transmission}
- addUserKnob {7 emission}
+ addUserKnob {7 refractive_index l "refractive index" R 1 4}
+ refractive_index 1
  addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- roughness 0.05
+ addUserKnob {7 emission}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate}
  translate {0 4 0}
  addUserKnob {13 rotate}
  addUserKnob {13 elongation}
- elongation {0 0.1 0}
  addUserKnob {6 elongate -STARTLINE}
  addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
  uniform_scale 1
@@ -5259,13 +4214,12 @@ Group {
  addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
  addUserKnob {26 ""}
  addUserKnob {7 blend_strength l "blend strength"}
- blend_strength 0.14
+ blend_strength 0.1
  addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
- blend_type "Smooth Union"
 }
  Input {
   inputs 0
-  name merge
+  name siblings
   xpos 1484
   ypos 476
  }
@@ -5335,7 +4289,7 @@ Group {
  Constant {
   inputs 0
   channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.refractive_index}}
   format "1 1 0 0 1 1 1 1x1"
   name colour
   xpos 669
@@ -5443,7 +4397,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N29628800 [stack 0]
+set N20f8b200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5465,7 +4419,7 @@ set N29628800 [stack 0]
    xpos 34
    ypos -6
   }
-set N29602b00 [stack 0]
+set N20f89600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5476,7 +4430,7 @@ set N29602b00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N29628800
+push $N20f8b200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5505,7 +4459,7 @@ push $N29628800
    xpos 158
    ypos 167
   }
-push $N29602b00
+push $N20f89600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5598,7 +4552,7 @@ push $N29602b00
    xpos 192
    ypos -2
   }
-set N295b6400 [stack 0]
+set N20f2cf00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5620,7 +4574,7 @@ set N295b6400 [stack 0]
    xpos 34
    ypos -6
   }
-set N295b4800 [stack 0]
+set N20f0f200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5631,7 +4585,7 @@ set N295b4800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N295b6400
+push $N20f2cf00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5660,7 +4614,7 @@ push $N295b6400
    xpos 158
    ypos 167
   }
-push $N295b4800
+push $N20f0f200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5732,8 +4686,8 @@ push 0
 Group {
  inputs 2
  name floor
- xpos 18315
- ypos 838
+ xpos 18314
+ ypos 833
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
  shape plane
@@ -5755,1039 +4709,527 @@ Group {
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection}
  addUserKnob {7 transmission}
- addUserKnob {7 emission}
- addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {13 translate}
- translate {0 -2 0}
- addUserKnob {13 rotate}
- addUserKnob {13 elongation}
- elongation {0 0.1 0}
- addUserKnob {6 elongate -STARTLINE}
- addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
- uniform_scale 1
- addUserKnob {26 div1 l "" +STARTLINE}
- addUserKnob {19 repetition_params l repetition}
- repetition_params {2 2 1 1.3}
- addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
- addUserKnob {26 ""}
- addUserKnob {7 blend_strength l "blend strength"}
- blend_strength 0.14
- addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
-}
- Input {
-  inputs 0
-  name merge
-  xpos 1484
-  ypos 476
- }
- Dot {
-  name Dot2
-  xpos 1518
-  ypos 904
- }
- Input {
-  inputs 0
-  name children
-  xpos 1357
-  ypos 475
-  number 1
- }
- Dot {
-  name Dot1
-  xpos 1391
-  ypos 826
- }
- Constant {
-  inputs 0
-  channels sdf_position_scale
-  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
-  format "1 1 0 0 1 1 1 1x1"
-  name position_scale
-  xpos 280
-  ypos 455
- }
- Dot {
-  name Dot17
-  xpos 314
-  ypos 647
- }
- Constant {
-  inputs 0
-  channels sdf_rotation_wall_thickness
-  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name rotation
-  xpos 403
-  ypos 457
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 403
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_dimensions
-  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
-  format "1 1 0 0 1 1 1 1x1"
-  name dimensions
-  xpos 540
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 540
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name colour
-  xpos 669
-  ypos 459
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy3
-  xpos 669
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape
-  color {{parent.shape} {"parent.repetition_type | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape
-  xpos 806
-  ypos 462
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy4
-  xpos 806
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_surface
-  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name surface
-  xpos 935
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy5
-  xpos 936
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape_mods_0
-  color {{parent.repetition_params.r} {parent.repetition_params.g} {parent.repetition_params.b} {parent.repetition_params.a}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods
-  xpos 1056
-  ypos 463
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy6
-  xpos 1056
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape_mods_1
-  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods1
-  xpos 1183
-  ypos 465
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy7
-  xpos 1183
-  ypos 726
- }
- Group {
-  inputs 2
-  name sdf_merge
-  xpos 1183
-  ypos 822
-  disable {{"\[exists parent.input1] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N2a42c800 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N2a406b00 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N2a42c800
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N2a406b00
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Group {
-  inputs 2
-  name sdf_merge1
-  xpos 1183
-  ypos 900
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N2a3ba400 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N2a3b8800 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N2a3ba400
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N2a3b8800
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 1183
-  ypos 1002
- }
-end_group
-Group {
- name outer_torus
- xpos 18315
- ypos 928
- disable true
- addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
- shape torus
- addUserKnob {7 dimension_x l radius R 0 10}
- dimension_x 2
- addUserKnob {7 dimension_y}
- dimension_y 0.15
- addUserKnob {7 dimension_z}
- addUserKnob {7 dimension_w}
- addUserKnob {7 wall_thickness l "wall thickness"}
- wall_thickness 0.01
- addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
- addUserKnob {7 edge_radius l "edge radius"}
- addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
- addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
- addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
- addUserKnob {26 ""}
- addUserKnob {18 colour}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 reflection}
- reflection 1
- addUserKnob {7 transmission}
- addUserKnob {7 emission}
- addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {13 translate}
- addUserKnob {13 rotate}
- addUserKnob {13 elongation}
- elongation {0 0.1 0}
- addUserKnob {6 elongate -STARTLINE}
- addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
- uniform_scale 1
- addUserKnob {26 div1 l "" +STARTLINE}
- addUserKnob {19 repetition_params l repetition}
- repetition_params {2 2 1 1.3}
- addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
- addUserKnob {26 ""}
- addUserKnob {7 blend_strength l "blend strength"}
- blend_strength 0.14
- addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
- blend_type "Smooth Union"
-}
- Input {
-  inputs 0
-  name merge
-  xpos 1484
-  ypos 476
- }
- Dot {
-  name Dot2
-  xpos 1518
-  ypos 904
- }
- Input {
-  inputs 0
-  name children
-  xpos 1357
-  ypos 475
-  number 1
- }
- Dot {
-  name Dot1
-  xpos 1391
-  ypos 826
- }
- Constant {
-  inputs 0
-  channels sdf_position_scale
-  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
-  format "1 1 0 0 1 1 1 1x1"
-  name position_scale
-  xpos 280
-  ypos 455
- }
- Dot {
-  name Dot17
-  xpos 314
-  ypos 647
- }
- Constant {
-  inputs 0
-  channels sdf_rotation_wall_thickness
-  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name rotation
-  xpos 403
-  ypos 457
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 403
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_dimensions
-  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
-  format "1 1 0 0 1 1 1 1x1"
-  name dimensions
-  xpos 540
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 540
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name colour
-  xpos 669
-  ypos 459
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy3
-  xpos 669
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape
-  color {{parent.shape} {"parent.repetition_type | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape
-  xpos 806
-  ypos 462
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy4
-  xpos 806
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_surface
-  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name surface
-  xpos 935
-  ypos 460
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy5
-  xpos 936
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape_mods_0
-  color {{parent.repetition_params.r} {parent.repetition_params.g} {parent.repetition_params.b} {parent.repetition_params.a}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods
-  xpos 1056
-  ypos 463
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy6
-  xpos 1056
-  ypos 726
- }
- Constant {
-  inputs 0
-  channels sdf_shape_mods_1
-  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
-  format "1 1 0 0 1 1 1 1x1"
-  name shape_mods1
-  xpos 1183
-  ypos 465
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy7
-  xpos 1183
-  ypos 726
- }
- Group {
-  inputs 2
-  name sdf_merge
-  xpos 1183
-  ypos 822
-  disable {{"\[exists parent.input1] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N2a2e1d00 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N2a2e0100 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N2a2e1d00
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N2a2e0100
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Group {
-  inputs 2
-  name sdf_merge1
-  xpos 1183
-  ypos 900
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N2a25f900 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N2a25dd00 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N2a25f900
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N2a25dd00
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 1183
-  ypos 1002
- }
-end_group
-Group {
- name base_sphere
- xpos 18315
- ypos 1029
- addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
- addUserKnob {7 dimension_x l radius R 0 10}
- dimension_x 0.33333
- addUserKnob {7 dimension_y}
- addUserKnob {7 dimension_z}
- addUserKnob {7 dimension_w}
- addUserKnob {7 wall_thickness l "wall thickness"}
- wall_thickness 0.01
- addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
- addUserKnob {7 edge_radius l "edge radius"}
- addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
- addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
- addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
- addUserKnob {26 ""}
- addUserKnob {18 colour}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 reflection}
- addUserKnob {7 transmission}
- transmission 0.9
  addUserKnob {7 refractive_index l "refractive index" R 1 4}
  refractive_index 1
  addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
  addUserKnob {7 emission}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate}
+ translate {0 -2 0}
  addUserKnob {13 rotate}
- rotate {{frame*4} {frame*4} 0}
+ addUserKnob {13 elongation}
+ addUserKnob {6 elongate -STARTLINE}
+ addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
+ uniform_scale 1
+ addUserKnob {26 div1 l "" +STARTLINE}
+ addUserKnob {19 repetition_params l repetition}
+ repetition_params {2 2 1 1.3}
+ addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
+ addUserKnob {26 ""}
+ addUserKnob {7 blend_strength l "blend strength"}
+ blend_strength 0.1
+ addUserKnob {4 blend_type l "blend type" -STARTLINE M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
+}
+ Input {
+  inputs 0
+  name siblings
+  xpos 1484
+  ypos 476
+ }
+ Dot {
+  name Dot2
+  xpos 1518
+  ypos 904
+ }
+ Input {
+  inputs 0
+  name children
+  xpos 1357
+  ypos 475
+  number 1
+ }
+ Dot {
+  name Dot1
+  xpos 1391
+  ypos 826
+ }
+ Constant {
+  inputs 0
+  channels sdf_position_scale
+  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
+  format "1 1 0 0 1 1 1 1x1"
+  name position_scale
+  xpos 280
+  ypos 455
+ }
+ Dot {
+  name Dot17
+  xpos 314
+  ypos 647
+ }
+ Constant {
+  inputs 0
+  channels sdf_rotation_wall_thickness
+  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name rotation
+  xpos 403
+  ypos 457
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 403
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_dimensions
+  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
+  format "1 1 0 0 1 1 1 1x1"
+  name dimensions
+  xpos 540
+  ypos 460
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy2
+  xpos 540
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_colour
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.refractive_index}}
+  format "1 1 0 0 1 1 1 1x1"
+  name colour
+  xpos 669
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy3
+  xpos 669
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape
+  color {{parent.shape} {"parent.repetition_type | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape
+  xpos 806
+  ypos 462
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy4
+  xpos 806
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_surface
+  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name surface
+  xpos 935
+  ypos 460
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy5
+  xpos 936
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape_mods_0
+  color {{parent.repetition_params.r} {parent.repetition_params.g} {parent.repetition_params.b} {parent.repetition_params.a}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape_mods
+  xpos 1056
+  ypos 463
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy6
+  xpos 1056
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape_mods_1
+  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape_mods1
+  xpos 1183
+  ypos 465
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy7
+  xpos 1183
+  ypos 726
+ }
+ Group {
+  inputs 2
+  name sdf_merge
+  xpos 1183
+  ypos 822
+  disable {{"\[exists parent.input1] ? 0 : 1"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N407f1d00 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N407f0100 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N407f1d00
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N407f0100
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Group {
+  inputs 2
+  name sdf_merge1
+  xpos 1183
+  ypos 900
+  disable {{"\[exists parent.input0] ? 0 : 1"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N309f3900 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N309f1d00 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N309f3900
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N309f1d00
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Output {
+  name Output1
+  xpos 1183
+  ypos 1002
+ }
+end_group
+Group {
+ inputs 2
+ name base_sphere
+ xpos 18315
+ ypos 1029
+ addUserKnob {20 User l "SDF Primitive"}
+ addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" "hexagonal prism" octahedron link mandelbulb}}
+ addUserKnob {7 dimension_x l radius R 0 10}
+ dimension_x 0.5
+ addUserKnob {7 dimension_y}
+ addUserKnob {7 dimension_z}
+ addUserKnob {7 dimension_w}
+ addUserKnob {7 wall_thickness l "wall thickness"}
+ wall_thickness 0.01
+ addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
+ addUserKnob {7 edge_radius l "edge radius"}
+ addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
+ addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
+ addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {18 colour}
+ colour {0 0 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 reflection}
+ reflection 1
+ addUserKnob {7 transmission}
+ addUserKnob {7 refractive_index l "refractive index" R 1 4}
+ refractive_index 1.5
+ addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
+ addUserKnob {7 emission}
+ addUserKnob {26 div0 l "" +STARTLINE}
+ addUserKnob {13 translate}
+ addUserKnob {13 rotate}
+ rotate {{-frame} 0 0}
  addUserKnob {13 elongation}
  elongation {0.1 0 0}
  addUserKnob {6 elongate -STARTLINE}
@@ -6983,7 +5425,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N130ce400 [stack 0]
+set Nf1344800 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7005,7 +5447,7 @@ set N130ce400 [stack 0]
    xpos 34
    ypos -6
   }
-set N130cc800 [stack 0]
+set Nf131eb00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7016,7 +5458,7 @@ set N130cc800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N130ce400
+push $Nf1344800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7045,7 +5487,7 @@ push $N130ce400
    xpos 158
    ypos 167
   }
-push $N130cc800
+push $Nf131eb00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7138,7 +5580,7 @@ push $N130cc800
    xpos 192
    ypos -2
   }
-set N13078100 [stack 0]
+set Nf12da400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7160,7 +5602,7 @@ set N13078100 [stack 0]
    xpos 34
    ypos -6
   }
-set N1305a400 [stack 0]
+set Nf12d8800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7171,7 +5613,7 @@ set N1305a400 [stack 0]
    xpos -98
    ypos 336
   }
-push $N13078100
+push $Nf12da400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7200,7 +5642,7 @@ push $N13078100
    xpos 158
    ypos 167
   }
-push $N1305a400
+push $Nf12d8800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7281,18 +5723,18 @@ Group {
  addUserKnob {20 User l "Ray March"}
  addUserKnob {3 pixel_subdivisions l "pixel subdivisions" t "Subdivide the pixel and cast a ray for each subdivision, resulting in 2^subdivisions rays"}
  addUserKnob {3 max_rays_per_subpixel l "max rays per subpixel"}
- max_rays_per_subpixel 10
+ max_rays_per_subpixel 3
  addUserKnob {3 max_bounces l "max bounces" t "Rays will reflect this many times before they are stopped"}
- max_bounces 10
+ max_bounces 5
  addUserKnob {7 ray_distance l "max ray distance" R 10 10000}
  ray_distance 100
  addUserKnob {3 max_ray_steps l "max ray steps"}
- max_ray_steps 500
+ max_ray_steps 1000
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
- hit_tolerance 0.001
+ hit_tolerance 0.0001
  addUserKnob {7 shadow_bias l "shadow bias" t "The surface will be offset by an additional factor of this amount before determining if it is in shadow" R 1 2}
  shadow_bias 1
- addUserKnob {26 "" +STARTLINE}
+ addUserKnob {26 ""}
  addUserKnob {7 refractive_index l "refractive index" R 1 4}
  refractive_index 1
  addUserKnob {26 ""}
@@ -7405,7 +5847,7 @@ Group {
   xpos -48
   ypos -1309
  }
-set N12fe9600 [stack 0]
+set Nf102b900 [stack 0]
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_light_properties1
@@ -7420,7 +5862,7 @@ set N12fe9600 [stack 0]
   xpos -232
   ypos -866
  }
-push $N12fe9600
+push $Nf102b900
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_light_properties
@@ -7435,7 +5877,7 @@ push $N12fe9600
   xpos -113
   ypos -864
  }
-push $N12fe9600
+push $Nf102b900
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_light
@@ -7475,7 +5917,7 @@ push $N12fe9600
   xpos 641
   ypos -1318
  }
-set N12fb8800 [stack 0]
+set Nf1006b00 [stack 0]
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_surface
@@ -7490,7 +5932,7 @@ set N12fb8800 [stack 0]
   xpos 322
   ypos -863
  }
-push $N12fb8800
+push $Nf1006b00
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_shape_mods_1
@@ -7505,7 +5947,7 @@ push $N12fb8800
   xpos 780
   ypos -865
  }
-push $N12fb8800
+push $Nf1006b00
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_shape_mods_0
@@ -7520,7 +5962,7 @@ push $N12fb8800
   xpos 641
   ypos -864
  }
-push $N12fb8800
+push $Nf1006b00
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_shape
@@ -7535,7 +5977,7 @@ push $N12fb8800
   xpos 473
   ypos -863
  }
-push $N12fb8800
+push $Nf1006b00
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_colour
@@ -7550,7 +5992,7 @@ push $N12fb8800
   xpos 165
   ypos -864
  }
-push $N12fb8800
+push $Nf1006b00
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_dimensions
@@ -7565,7 +6007,7 @@ push $N12fb8800
   xpos 1227
   ypos -857
  }
-push $N12fb8800
+push $Nf1006b00
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_rotation_wall_thickness
@@ -7580,7 +6022,7 @@ push $N12fb8800
   xpos 1076
   ypos -854
  }
-push $N12fb8800
+push $Nf1006b00
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_position_scale
@@ -7634,10 +6076,10 @@ push $N12fb8800
  BlinkScript {
   inputs 13
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/raymarch.blink
-  recompileCount 1356
+  recompileCount 1386
   ProgramGroup 1
-  KernelDescription "2 \"RayMarchKernel\" iterate pixelWise 59a6459d4ac3ca067db18bf19377e16c5dbf1b90bfc5ce35a9b7693dab5dd591 14 \"bg\" Read Point \"skyBox\" Read Random \"positions\" Read Random \"rotations\" Read Random \"dimensions\" Read Random \"colours\" Read Random \"shapeProperties\" Read Random \"shapeModParameters0\" Read Random \"shapeModParameters1\" Read Random \"surfaceProperties\" Read Random \"lights\" Read Random \"lightProperties\" Read Random \"lightProperties1\" Read Random \"dst\" Write Point 29 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"SkyBox Offset Angle\" Float 1 AAAAAA== \"SkyBox Width\" Int 1 AAgAAA== \"SkyBox Height\" Int 1 AAQAAA== \"Pixel Subdivisions\" Int 1 AAAAAA== \"Max Rays Per Subpixel\" Int 1 AQAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AAB6RA== \"Max Ray Steps\" Int 1 gAAAAA== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 AACAPw== \"Index of Refraction\" Float 1 AACAPw== \"Object Texture Height\" Int 1 AAAAAA== \"Object Texture Width\" Int 1 AAAAAA== \"Light Texture Height\" Int 1 AAAAAA== \"Light Texture Width\" Int 1 AAAAAA== \"Haze Amount\" Float 1 AAAAAA== \"Haze Start\" Float 1 AAAAAA== \"Haze Distance\" Float 1 AAB6RA== \"Haze Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== \"Iter Glow Amount\" Float 1 AAAAAA== \"Iter Glow Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== \"Output Type\" Int 1 AAAAAA== 29 \"focalLength\" 1 1 \"horizontalAperture\" 1 1 \"nearPlane\" 1 1 \"farPlane\" 1 1 \"cameraWorldMatrix\" 16 1 \"formatWidth\" 1 1 \"formatHeight\" 1 1 \"skyBoxOffsetAngle\" 1 1 \"skyFormatWidth\" 1 1 \"skyFormatHeight\" 1 1 \"subdivisions\" 1 1 \"maxRaysPerSubPixel\" 1 1 \"maxBounces\" 1 1 \"maxRayDistance\" 1 1 \"maxRaySteps\" 1 1 \"hitTolerance\" 1 1 \"shadowBias\" 1 1 \"refractiveIndex\" 1 1 \"objectTextureHeight\" 1 1 \"objectTextureWidth\" 1 1 \"lightTextureHeight\" 1 1 \"lightTextureWidth\" 1 1 \"hazeAmount\" 1 1 \"hazeStart\" 1 1 \"hazeDistance\" 1 1 \"hazeColour\" 4 1 \"iterGlowAmount\" 1 1 \"iterGlowColour\" 4 1 \"outputType\" 1 1 6 \"inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"bouncesPerRay\" Int 1 1 AAAAAA== \"numSubPixels\" Int 1 1 AAAAAA== \"subdividedPixelSize\" Float 1 1 AAAAAA== \"skyBoxPixelSize\" Float 2 1 AAAAAAAAAAA= \"skyBoxOffsetRadians\" Float 1 1 AAAAAA=="
-  kernelSource "#include \"camera.h\"\n#include \"lights.h\"\n#include \"mmath.h\"\n#include \"sdfs.h\"\n#include \"sdfTransforms.h\"\n#include \"sdTransforms.h\"\n\n\n#define MAX_RAYS_PER_SUBPIXEL 50\n#define MAX_CHILD_DEPTH 100\n\n\nkernel RayMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    // the input for format, process called once per pixel\n    Image<eRead, eAccessPoint, eEdgeNone> bg;\n\n    // the skybox in latlong format\n    Image<eRead, eAccessRandom, eEdgeNone> skyBox;\n\n\n    // the shape positons.xyz, scale.w\n    Image<eRead, eAccessRandom, eEdgeNone> positions;\n\n    // the shape rotations.xyz, wall thickness.w\n    Image<eRead, eAccessRandom, eEdgeNone> rotations;\n\n    // the shape dimensions.xyzw (some shapes may not use all channels)\n    Image<eRead, eAccessRandom, eEdgeNone> dimensions;\n\n    // the shape colours.xyz, refractive index.w\n    Image<eRead, eAccessRandom, eEdgeNone> colours;\n\n\n    // shape type.x, operation.y, numChildren.z, blend strength.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;\n\n    // repetition params.xyzw\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters0;\n\n    // elongation.xyz edgeRadius.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters1;\n\n    // reflection.x, transmission.y, emission.z, roughness.w (TODO)\n    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;\n\n\n    // the input lights direction/position.xyz intensity.w\n    Image<eRead, eAccessRandom, eEdgeNone> lights;\n\n    // colour.xyz, type.w\n    // w in \[0, 1) = directional, \[1, inf) = point\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties;\n\n    // shadow hardness.x\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;\n\n    // the output image\n    Image<eWrite> dst;\n\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float focalLength;\n        float horizontalAperture;\n        float nearPlane;\n        float farPlane;\n        float4x4 cameraWorldMatrix;\n\n        // Image params\n        float formatWidth;\n        float formatHeight;\n\n        float skyBoxOffsetAngle;\n        int skyFormatWidth;\n        int skyFormatHeight;\n\n        // Ray params\n        int subdivisions;\n        int maxRaysPerSubPixel;\n        int maxBounces;\n        float maxRayDistance;\n        int maxRaySteps;\n        float hitTolerance;\n        float shadowBias;\n\n        // Scene params\n        float refractiveIndex;\n\n        // Shape Textures\n        int objectTextureHeight;\n        int objectTextureWidth;\n\n        // Light textures\n        int lightTextureHeight;\n        int lightTextureWidth;\n\n        float hazeAmount;\n        float hazeStart;\n        float hazeDistance;\n        float4 hazeColour;\n\n        float iterGlowAmount;\n        float4 iterGlowColour;\n\n        int outputType;\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float4x4 inverseCameraProjectionMatrix;\n\n        int bouncesPerRay;\n\n        int numSubPixels;\n        float subdividedPixelSize;\n\n        float2 skyBoxPixelSize;\n        float skyBoxOffsetRadians;\n\n\n\n    // In define(), parameters can be given labels and default values.\n    void define()\n    \{\n        // Camera params\n        defineParam(focalLength, \"Focal Length\", 50.0f);\n        defineParam(horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(nearPlane, \"Near Plane\", 0.1f);\n        defineParam(farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n\n        // Image params\n        defineParam(formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(skyBoxOffsetAngle, \"SkyBox Offset Angle\", 0.0f);\n        defineParam(skyFormatHeight, \"SkyBox Height\", 1024);\n        defineParam(skyFormatWidth, \"SkyBox Width\", 2048);\n\n        // Ray params\n        defineParam(subdivisions, \"Pixel Subdivisions\", 0);\n        defineParam(maxRaysPerSubPixel, \"Max Rays Per Subpixel\", 1);\n        defineParam(maxRayDistance, \"Max Ray Distance\", 1000.0f);\n        defineParam(maxRaySteps, \"Max Ray Steps\", 128);\n        defineParam(maxBounces, \"Max Bounces\", 1);\n        defineParam(hitTolerance, \"Hit Tolerance\", 0.001f);\n        defineParam(shadowBias, \"Shadow Bias\", 1.0f);\n\n        // Scene params\n        defineParam(refractiveIndex, \"Index of Refraction\", 1.0f);\n\n        // Shape Counts\n        defineParam(objectTextureHeight, \"Object Texture Height\", 0);\n        defineParam(objectTextureWidth, \"Object Texture Width\", 0);\n\n        // Light Counts\n        defineParam(lightTextureHeight, \"Light Texture Height\", 0);\n        defineParam(lightTextureWidth, \"Light Texture Width\", 0);\n\n        defineParam(hazeAmount, \"Haze Amount\", 0.0f);\n        defineParam(hazeStart, \"Haze Start\", 0.0f);\n        defineParam(hazeDistance, \"Haze Distance\", 1000.0f);\n        defineParam(hazeColour, \"Haze Colour\", float4(1, 1, 1, 1));\n\n        defineParam(iterGlowAmount, \"Iter Glow Amount\", 0.0f);\n        defineParam(iterGlowColour, \"Iter Glow Colour\", float4(1, 1, 1, 1));\n\n        defineParam(outputType, \"Output Type\", 0);\n    \}\n\n\n    // The init() function is run before any calls to process().\n    // Local variables can be initialized here.\n    void init()\n    \{\n        bouncesPerRay = maxBounces <= 0 ? 1 : maxBounces;\n\n        // TODO use angles to allow -ve focal length like for latlongs\n        float aspect = aspectRatio(formatHeight, formatWidth);\n        float4x4 cameraProjectionMatrix = projectionMatrix(\n            focalLength,\n            horizontalAperture,\n            aspect,\n            nearPlane,\n            farPlane\n        );\n        inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();\n\n        int subPixelDivisions = pow(2, abs(subdivisions));\n        subdividedPixelSize = 1.0f / (float) subPixelDivisions;\n        numSubPixels = pow(subPixelDivisions, 2);\n\n        skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);\n        skyBoxOffsetRadians = skyBoxOffsetAngle * PI / 180.0f;\n    \}\n\n\n    /**\n     * Get the value of sky the ray would hit at infinite distance\n     */\n    float4 readSkyValue(float3 rayDirection)\n    \{\n        float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);\n\n        SampleType(skyBox) skyBoxPixel = bilinear(\n            skyBox,\n            skyBoxPixelSize.x * angles.x,\n            skyFormatHeight - (skyBoxPixelSize.y * angles.y)\n        );\n\n        return saturate(skyBoxPixel);\n    \}\n\n\n    //\n    // Render Engine\n    //\n\n\n    float3 transformRay(\n        const float3 &rayOrigin,\n        const float3 &position,\n        const float3 &rotation,\n        const int modifications,\n        const float4 &modParameters0,\n        const float4 &modParameters1)\n    \{\n        float3x3 rotMatrix;\n        float3 transformedRay;\n        rotationMatrix(rotation, rotMatrix);\n        matmul(\n            rotMatrix.invert(),\n            rayOrigin - position,\n            transformedRay\n        );\n        performShapeModification(\n            modifications,\n            modParameters0,\n            modParameters1,\n            transformedRay\n        );\n\n        return transformedRay;\n    \}\n\n\n    float getNextDistance(\n        const float3 &rayOrigin,\n        const int shape,\n        const float4 &dimension,\n        const float uniformScale,\n        const int modifications,\n        const float edgeRadius,\n        const float wallThickness)\n    \{\n        float nextDistance = distanceToObject(\n            rayOrigin / uniformScale,\n            shape,\n            dimension\n        ) * uniformScale;\n\n        return performDistanceModification(\n            modifications,\n            edgeRadius,\n            wallThickness,\n            nextDistance\n        );\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     */\n    float getMinDistanceToObjectInScene(\n            const float3 &rayOrigin,\n            float4 &colour,\n            float4 &surface)\n    \{\n        float distance = maxRayDistance;\n\n        // numChildren, transformedRay, nextDistance, colour, surface, blendStrength, mods\n        float parentStack\[MAX_CHILD_DEPTH]\[1 + 3 + 1 + 3 +  4 + 1 + 1];\n        int parentStackLength = 0;\n\n        for (int i=0; i < objectTextureHeight; i++)\n        \{\n            for (int j=0; j < objectTextureWidth; j++)\n            \{\n                SampleType(positions) position = positions(j, i);\n                SampleType(rotations) rotation = rotations(j, i);\n                SampleType(dimensions) dimension = dimensions(j, i);\n                SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);\n                SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, i);\n                SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, i);\n                SampleType(colours) surfaceColour = colours(j, i);\n                SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);\n\n                const int modifications = (int) shapeProperty.y;\n                const float scale = position.w;\n\n                const float blendStrength = shapeProperty.w;\n                int numChildren = (int) shapeProperty.z;\n\n                float nextDistance = maxRayDistance;\n\n                int stackLastIndex = parentStackLength - 1;\n\n                if (numChildren <= 0)\n                \{\n                    // No Children left, compute interactions with parent\n                    if (parentStackLength > 0)\n                    \{\n                        const float3 parentTransformedRay = float3(\n                            parentStack\[stackLastIndex]\[1],\n                            parentStack\[stackLastIndex]\[2],\n                            parentStack\[stackLastIndex]\[3]\n                        );\n\n                        // Use parent transform to position child\n                        const float3 transformedRay = transformRay(\n                            parentTransformedRay,\n                            float3(position.x, position.y, position.z),\n                            float3(rotation.x, rotation.y, rotation.z),\n                            modifications,\n                            modParameters0,\n                            modParameters1\n                        );\n\n                        // Get distance to this child\n                        nextDistance = getNextDistance(\n                            transformedRay,\n                            (int) shapeProperty.x,\n                            dimension,\n                            scale,\n                            modifications,\n                            modParameters1.w,\n                            rotation.w\n                        );\n\n                        float4 blendedColour = surfaceColour;\n                        float4 blendedSurface = surfaceProperty;\n\n                        do\n                        \{\n                            const float parentNextDistance = parentStack\[stackLastIndex]\[4];\n                            const float4 parentSurfaceColour = float4(\n                                parentStack\[stackLastIndex]\[5],\n                                parentStack\[stackLastIndex]\[6],\n                                parentStack\[stackLastIndex]\[7],\n                                0.0f // TODO get rid of this, make it float3\n                            );\n                            const float4 parentSurfaceProperty = float4(\n                                parentStack\[stackLastIndex]\[8],\n                                parentStack\[stackLastIndex]\[9],\n                                parentStack\[stackLastIndex]\[10],\n                                parentStack\[stackLastIndex]\[11]\n                            );\n                            const float parentBlendStrength = parentStack\[stackLastIndex]\[12];\n                            const int parentModifications = (int) parentStack\[stackLastIndex]\[13];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentSurfaceColour,\n                                blendedColour,\n                                parentSurfaceProperty,\n                                blendedSurface,\n                                parentBlendStrength\n                            );\n                            // Update the global min distance (and surface/colour)\n                            if (nextDistance < distance)\n                            \{\n                                distance = nextDistance;\n\n                                colour = float4(blendedColour);\n                                surface = float4(blendedSurface);\n                            \}\n                            for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                            \{\n                                parentStack\[parentIndex]\[0]--;\n                            \}\n\n                            numChildren = parentStack\[stackLastIndex]\[0];\n                        \}\n                        while (numChildren <= 0 && --stackLastIndex >= 0);\n\n                        parentStackLength = stackLastIndex + 1;\n                    \}\n                    else\n                    \{\n                        const float3 transformedRay = transformRay(\n                            rayOrigin,\n                            float3(position.x, position.y, position.z),\n                            float3(rotation.x, rotation.y, rotation.z),\n                            modifications,\n                            modParameters0,\n                            modParameters1\n                        );\n\n                        nextDistance = getNextDistance(\n                            transformedRay,\n                            (int) shapeProperty.x,\n                            dimension,\n                            scale,\n                            modifications,\n                            modParameters1.w,\n                            rotation.w\n                        );\n\n                        if (nextDistance < distance)\n                        \{\n                            distance = nextDistance;\n\n                            colour = float4(surfaceColour);\n                            surface = float4(surfaceProperty);\n                        \}\n                    \}\n                \}\n                else\n                \{\n                    // Node has Children, push it to the stack for later\n                    // processing when we have its children\n                    float3 parentTransformedRay = rayOrigin;\n                    if (parentStackLength > 0)\n                    \{\n                        parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                        parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                        parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                    \}\n                    const float3 transformedRay = transformRay(\n                        parentTransformedRay,\n                        float3(position.x, position.y, position.z),\n                        float3(rotation.x, rotation.y, rotation.z),\n                        modifications,\n                        modParameters0,\n                        modParameters1\n                    );\n\n                    nextDistance = getNextDistance(\n                        transformedRay,\n                        (int) shapeProperty.x,\n                        dimension,\n                        scale,\n                        modifications,\n                        modParameters1.w,\n                        rotation.w\n                    );\n\n                    // parentStack.push()\n                    parentStack\[parentStackLength]\[0] = numChildren;\n                    parentStack\[parentStackLength]\[1] = transformedRay.x;\n                    parentStack\[parentStackLength]\[2] = transformedRay.y;\n                    parentStack\[parentStackLength]\[3] = transformedRay.z;\n                    parentStack\[parentStackLength]\[4] = nextDistance;\n                    parentStack\[parentStackLength]\[5] = surfaceColour.x;\n                    parentStack\[parentStackLength]\[6] = surfaceColour.y;\n                    parentStack\[parentStackLength]\[7] = surfaceColour.z;\n                    parentStack\[parentStackLength]\[8] = surfaceProperty.x;\n                    parentStack\[parentStackLength]\[9] = surfaceProperty.y;\n                    parentStack\[parentStackLength]\[10] = surfaceProperty.z;\n                    parentStack\[parentStackLength]\[11] = surfaceProperty.w;\n                    parentStack\[parentStackLength]\[12] = blendStrength;\n                    parentStack\[parentStackLength]\[13] = (float) modifications;\n                    parentStackLength++;\n                \}\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    float computeSoftShadow(\n            const float3 &rayDirection,\n            const float distanceToShadePoint,\n            const float softness,\n            float3 &rayOrigin)\n    \{\n        float distanceTravelled = 0;\n        float shadowIntensity = 1.0f;\n        float lastStepDistance = 1000000000000000000000000.0f;\n        float4 colour;\n        float4 surface;\n\n        int iterations = 0;\n        while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)\n        \{\n            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);\n\n            float softOffset = stepDistance * stepDistance / (2.0f * lastStepDistance);\n            shadowIntensity = min(\n                shadowIntensity,\n                softness * sqrt(stepDistance * stepDistance - softOffset * softOffset)\n                / max(0.0f, distanceTravelled - softOffset)\n            );\n\n            if (fabs(stepDistance) < hitTolerance)\n            \{\n                break;\n            \}\n\n            lastStepDistance = stepDistance;\n            rayOrigin += rayDirection * stepDistance;\n            distanceTravelled += stepDistance;\n            iterations++;\n        \}\n\n        shadowIntensity = saturate(shadowIntensity);\n        return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);\n    \}\n\n\n    float computeShadow(\n            const float3 &rayDirection,\n            const float distanceToShadePoint,\n            float3 &rayOrigin)\n    \{\n        float distanceTravelled = 0;\n        float4 colour;\n        float4 surface;\n        int iterations = 0;\n        while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)\n        \{\n            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);\n\n            if (fabs(stepDistance) < hitTolerance)\n            \{\n                return 0;\n            \}\n\n            rayOrigin += rayDirection * stepDistance;\n            distanceTravelled += stepDistance;\n            iterations++;\n        \}\n\n        return 1;\n    \}\n\n\n    float computeAmbientOcclusion(\n            const float3 &rayDirection,\n            const float3 &rayOrigin,\n            const float amount,\n            const int iterations)\n    \{\n        float occlusion = 0.0f;\n        float occlusionScaleFactor = 1.0f;\n        float4 colour;\n        float4 surface;\n        for(int iteration=0; iteration < iterations; iteration++)\n        \{\n            float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;\n            float distanceToClosestObject = getMinDistanceToObjectInScene(\n                rayOrigin + stepDistance * rayDirection,\n                colour,\n                surface\n            );\n            occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;\n            occlusionScaleFactor *= 0.95;\n        \}\n\n        return (\n            amount\n            * saturate(0.5f + 0.5f * rayDirection.y)  // ambient\n            * saturate(1.0f - 1.5f * occlusion)       // occlusion\n        );\n    \}\n\n\n    float2 lightIntensityOnSurface(\n            const float3 &pointOnSurface,\n            const float3 &surfaceNormal,\n            const float3 &light,\n            const int lightType,\n            const float intensity,\n            const float falloff,\n            const float shadow_hardness)\n    \{\n        int absLightType = abs(lightType);\n        if (absLightType == 3)\n        \{\n            return float2(\n                1.0f,\n                computeAmbientOcclusion(\n                    surfaceNormal,\n                    pointOnSurface,\n                    intensity,\n                    (int) light.x\n                )\n            );\n        \}\n\n        float3 surfaceOffset;\n        float distanceToLight;\n        float3 lightDirection;\n        float3 shadowOffsetLightDirection;\n        float intensityAtPosition = getLightData(\n            pointOnSurface,\n            surfaceNormal,\n            light,\n            absLightType,\n            intensity,\n            falloff,\n            hitTolerance,\n            maxRayDistance,\n            shadowBias,\n            distanceToLight,\n            surfaceOffset,\n            lightDirection,\n            shadowOffsetLightDirection\n        );\n        lightDirection = normalize(lightDirection);\n\n        float normalFactor = dot(surfaceNormal, lightDirection);\n\n        float shadowIntensityAtPosition;\n        if (lightType < 0)\n        \{\n            shadowIntensityAtPosition = computeSoftShadow(\n                normalize(shadowOffsetLightDirection),\n                distanceToLight,\n                shadow_hardness,\n                surfaceOffset\n            );\n        \}\n        else\n        \{\n            shadowIntensityAtPosition = computeShadow(\n                normalize(shadowOffsetLightDirection),\n                distanceToLight,\n                surfaceOffset\n            );\n        \}\n\n        return saturate(\n            normalFactor * float2(intensityAtPosition, shadowIntensityAtPosition)\n        );\n    \}\n\n\n    /**\n     * Get the intensity of the light on the surface of an object\n     */\n    float computeLightIntensityOnSurface(\n            const float3 &pointOnSurface,\n            const float3 &surfaceNormal,\n            float4 &lightColour)\n    \{\n        float2 lightIntensity = float2(0, 0);\n        lightColour = float4(0);\n\n        for (int i=0; i < lightTextureHeight; i++)\n        \{\n            for (int j=0; j < lightTextureWidth; j++)\n            \{\n                SampleType(lights) light = lights(j, i);\n                SampleType(lightProperties) lightProperty = lightProperties(j, i);\n                SampleType(lightProperties1) lightProperty1 = lightProperties1(j, i);\n\n                int lightType = (int) lightProperty.w;\n                float2 currentLightIntensity;\n                if (lightType == 0)\n                \{\n                    currentLightIntensity = float2(light.w, 1);\n                \}\n                else\n                \{\n                    currentLightIntensity = lightIntensityOnSurface(\n                        pointOnSurface,\n                        surfaceNormal,\n                        float3(light.x, light.y, light.z),\n                        lightType,\n                        light.w,\n                        lightProperty1.y,\n                        lightProperty1.x\n                    );\n                \}\n                lightColour += currentLightIntensity.x * currentLightIntensity.y * float4(\n                    lightProperty.x,\n                    lightProperty.y,\n                    lightProperty.z,\n                    0.0f\n                );\n                lightIntensity += currentLightIntensity;\n            \}\n        \}\n\n        return saturate(lightIntensity.x * lightIntensity.y);\n    \}\n\n\n    float getHazeAmount(const float distance)\n    \{\n        return hazeAmount * saturate((distance - hazeStart) / hazeDistance);\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     *\n     * @returns: The normalized surface normal\n     */\n    float3 estimateSurfaceNormal(const float3 &point) \{\n        float4 colour;\n        float4 surface;\n        return normalize(\n            float3(\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x + hitTolerance,\n                        point.y,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x - hitTolerance,\n                        point.y,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ),\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y + hitTolerance,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y - hitTolerance,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ),\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y,\n                        point.z + hitTolerance\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y,\n                        point.z - hitTolerance\n                    ),\n                    colour,\n                    surface\n                )\n        ));\n    \}\n\n\n    /**\n     * March a ray through the scene\n     *\n     * @returns: The ray colour\n     */\n    float4 marchRay(\n            const float3 &rayOrigin,\n            const float3 &rayDirection,\n            const int numBounces,\n            const float rayDistance)\n    \{\n        const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, maxRaysPerSubPixel) - 1;\n\n        // rayOrigin, rayDirection, rayIntensity, index of refraction, internal\n        float rays\[MAX_RAYS_PER_SUBPIXEL]\[3 + 3 + 1 + 1 + 1];\n        rays\[0]\[0] = rayOrigin.x;\n        rays\[0]\[1] = rayOrigin.y;\n        rays\[0]\[2] = rayOrigin.z;\n\n        rays\[0]\[3] = rayDirection.x;\n        rays\[0]\[4] = rayDirection.y;\n        rays\[0]\[5] = rayDirection.z;\n\n        rays\[0]\[6] = 1.0f;\n\n        rays\[0]\[7] = refractiveIndex;\n\n        rays\[0]\[8] = false;\n\n        int numRays = 1;\n        int currentRayIndex = 0;\n\n        float4 colour;\n        float4 surface;\n\n        float4 rayColour = float4(0);\n        float4 lightColour = float4(0);\n\n        int bounces = 0;\n        int iterations = 1;\n        while (currentRayIndex < numRays)\n        \{\n            float lightIntensity = 1;\n\n            float distanceTravelled = 0;\n\n            float3 origin = float3(\n                rays\[currentRayIndex]\[0],\n                rays\[currentRayIndex]\[1],\n                rays\[currentRayIndex]\[2]\n            );\n            float3 direction = float3(\n                rays\[currentRayIndex]\[3],\n                rays\[currentRayIndex]\[4],\n                rays\[currentRayIndex]\[5]\n            );\n            float rayIntensity = rays\[currentRayIndex]\[6];\n\n            bool madeContact = false;\n\n            while (distanceTravelled < rayDistance && rayIntensity > 0 && iterations <= maxRaySteps)\n            \{\n                float stepDistance = fabs(getMinDistanceToObjectInScene(origin, colour, surface));\n\n                distanceTravelled += stepDistance;\n                origin += direction * stepDistance;\n\n                if (stepDistance < hitTolerance)\n                \{\n                    float3 surfaceNormal = estimateSurfaceNormal(\n                        origin - direction * hitTolerance\n                    );\n\n                    // Use roughness to modify surface normal\n                    float radialOffset = surface.w * random(\n                        (iterations * distanceTravelled + stepDistance)\n                        * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z)\n                    );\n                    float angularOffset = 2.0f * PI * random(radialOffset * distanceTravelled);\n\n                    // Update the ray direction to send a scattered cluster of rays\n                    float3 orthogonal = cross(surfaceNormal, float3(1, 0, 0));\n                    float3 rayNormal;\n                    if (length(orthogonal) == 0.0f)\n                    \{\n                        rayNormal = normalize(cross(surfaceNormal, float3(0, 1, 0)));\n                    \}\n                    else\n                    \{\n                        rayNormal = normalize(orthogonal);\n                    \}\n                    rayNormal = (\n                        cos(angularOffset)\n                        * rayNormal\n                        + sin(angularOffset)\n                        * cross(surfaceNormal, rayNormal)\n                    );\n\n                    surfaceNormal = normalize(radialOffset * rayNormal + surfaceNormal);\n\n                    if (outputType > 0)\n                    \{\n                        if (outputType == 1)\n                        \{\n                            return float4(\n                                origin.x,\n                                origin.y,\n                                origin.z,\n                                1\n                            );\n                        \}\n                        if (outputType == 2)\n                        \{\n                            return float4(\n                                surfaceNormal.x,\n                                surfaceNormal.y,\n                                surfaceNormal.z,\n                                1\n                            );\n                        \}\n                        if (outputType == 3)\n                        \{\n                            return float4(\n                                distanceTravelled,\n                                0,\n                                0,\n                                1\n                            );\n                        \}\n                    \}\n                    bounces++;\n\n                    if (!rays\[currentRayIndex]\[8])\n                    \{\n                        lightIntensity = computeLightIntensityOnSurface(\n                            origin,\n                            surfaceNormal,\n                            lightColour\n                        );\n                    \}\n\n                    rayColour = blend(\n                        iterGlowColour,\n                        blend(\n                            hazeColour,\n                            blend(\n                                lightColour * colour,\n                                rayColour,\n                                rayIntensity * (1 - surface.x - surface.y) * lightIntensity\n                            ),\n                            getHazeAmount(distanceTravelled)\n                        ),\n                        saturate(iterGlowAmount * iterations)\n                    );\n\n                    if (bounces >= numBounces)\n                    \{\n                        rayColour.w = 1.0f;\n                        return rayColour;\n                    \}\n\n                    const float incidentRefractiveIndex = rays\[currentRayIndex]\[7];\n                    const float refractedRefractiveIndex = colour.w;\n                    const float reflectivity = 1.0f;//schlickReflectionCoefficient(\n                    //     direction,\n                    //     surfaceNormal,\n                    //     incidentRefractiveIndex,\n                    //     refractedRefractiveIndex\n                    // );\n                    const float reflection = reflectivity * surface.x;\n                    const float refraction = (1.0f - reflectivity) * surface.y;\n\n                    if (reflection > 0.0f && numRays < lastRay)\n                    \{\n                        float3 reflectedDirection = reflectRayOffSurface(\n                            direction,\n                            surfaceNormal\n                        );\n                        float3 reflectedOrigin = offsetPoint(\n                            origin,\n                            reflectedDirection + surfaceNormal,\n                            hitTolerance\n                        );\n\n                        rays\[numRays]\[0] = reflectedOrigin.x;\n                        rays\[numRays]\[1] = reflectedOrigin.y;\n                        rays\[numRays]\[2] = reflectedOrigin.z;\n\n                        rays\[numRays]\[3] = reflectedDirection.x;\n                        rays\[numRays]\[4] = reflectedDirection.y;\n                        rays\[numRays]\[5] = reflectedDirection.z;\n\n                        rays\[numRays]\[6] = rayIntensity * reflection;\n\n                        rays\[numRays]\[7] = incidentRefractiveIndex;\n\n                        rays\[numRays]\[8] = rays\[currentRayIndex]\[8];\n\n                        numRays++;\n                    \}\n\n                    if (refraction > 0.0f && numRays < lastRay)\n                    \{\n                        float3 refractedDirection = refractRayThroughSurface(\n                            direction,\n                            surfaceNormal,\n                            incidentRefractiveIndex,\n                            refractedRefractiveIndex\n                        );\n                        float3 refractedOrigin = offsetPoint(\n                            origin,\n                            -surfaceNormal,\n                            2.0f * hitTolerance\n                        );\n\n                        rays\[numRays]\[0] = refractedOrigin.x;\n                        rays\[numRays]\[1] = refractedOrigin.y;\n                        rays\[numRays]\[2] = refractedOrigin.z;\n\n                        rays\[numRays]\[3] = refractedDirection.x;\n                        rays\[numRays]\[4] = refractedDirection.y;\n                        rays\[numRays]\[5] = refractedDirection.z;\n\n                        rays\[numRays]\[6] = rayIntensity * refraction;\n\n                        rays\[numRays]\[7] = refractedRefractiveIndex;\n\n                        rays\[numRays]\[8] = !rays\[currentRayIndex]\[8];\n\n                        numRays++;\n                    \}\n\n                    madeContact = true;\n                    break;\n                \}\n\n                iterations++;\n            \}\n\n            if (outputType > 0)\n            \{\n                return float4(0);\n            \}\n\n            if (!madeContact)\n            \{\n                rayColour = blend(\n                    readSkyValue(direction),\n                    blend(\n                        iterGlowColour,\n                        blend(\n                            hazeColour,\n                            rayColour,\n                            getHazeAmount(distanceTravelled)\n                        ),\n                        saturate(iterGlowAmount * iterations)\n                    ),\n                    rayIntensity\n                );\n            \}\n\n            currentRayIndex++;\n        \}\n\n        rayColour.w = bounces > 0;\n        return rayColour;\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value\n     */\n    void process(int2 pos)\n    \{\n        float4 resultPixel(0, 0, 0, 0);\n\n        float2 pixelLocation = float2(pos.x, pos.y);\n\n        float2 pixelOffset;\n        for (\n            pixelOffset.x = 0.0f;\n            pixelOffset.x < 1.0f;\n            pixelOffset.x += subdividedPixelSize\n        ) \{\n            for (\n                pixelOffset.y = 0.0f;\n                pixelOffset.y < 1.0f;\n                pixelOffset.y += subdividedPixelSize\n            ) \{\n                // Generate a ray from the camera\n                float3 rayOrigin;\n                float3 rayDirection;\n                createCameraRay(\n                    cameraWorldMatrix,\n                    inverseCameraProjectionMatrix,\n                    pixelsToUV(\n                        pixelLocation + pixelOffset,\n                        float2(formatWidth, formatHeight)\n                    ),\n                    rayOrigin,\n                    rayDirection\n                );\n\n                resultPixel += marchRay(\n                    rayOrigin,\n                    rayDirection,\n                    bouncesPerRay,\n                    maxRayDistance\n                );\n            \}\n        \}\n\n        dst() = resultPixel / numSubPixels;\n    \}\n\};\n"
+  KernelDescription "2 \"RayMarchKernel\" iterate pixelWise e7c711ac07e013d0477939c42ff81fe3b60f41e6b7db37d281f55fd273fb1bbe 14 \"bg\" Read Point \"skyBox\" Read Random \"positions\" Read Random \"rotations\" Read Random \"dimensions\" Read Random \"colours\" Read Random \"shapeProperties\" Read Random \"shapeModParameters0\" Read Random \"shapeModParameters1\" Read Random \"surfaceProperties\" Read Random \"lights\" Read Random \"lightProperties\" Read Random \"lightProperties1\" Read Random \"dst\" Write Point 29 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"SkyBox Offset Angle\" Float 1 AAAAAA== \"SkyBox Width\" Int 1 AAgAAA== \"SkyBox Height\" Int 1 AAQAAA== \"Pixel Subdivisions\" Int 1 AAAAAA== \"Max Rays Per Subpixel\" Int 1 AQAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AAB6RA== \"Max Ray Steps\" Int 1 gAAAAA== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 AACAPw== \"Index of Refraction\" Float 1 AACAPw== \"Object Texture Height\" Int 1 AAAAAA== \"Object Texture Width\" Int 1 AAAAAA== \"Light Texture Height\" Int 1 AAAAAA== \"Light Texture Width\" Int 1 AAAAAA== \"Haze Amount\" Float 1 AAAAAA== \"Haze Start\" Float 1 AAAAAA== \"Haze Distance\" Float 1 AAB6RA== \"Haze Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== \"Iter Glow Amount\" Float 1 AAAAAA== \"Iter Glow Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== \"Output Type\" Int 1 AAAAAA== 29 \"focalLength\" 1 1 \"horizontalAperture\" 1 1 \"nearPlane\" 1 1 \"farPlane\" 1 1 \"cameraWorldMatrix\" 16 1 \"formatWidth\" 1 1 \"formatHeight\" 1 1 \"skyBoxOffsetAngle\" 1 1 \"skyFormatWidth\" 1 1 \"skyFormatHeight\" 1 1 \"subdivisions\" 1 1 \"maxRaysPerSubPixel\" 1 1 \"maxBounces\" 1 1 \"maxRayDistance\" 1 1 \"maxRaySteps\" 1 1 \"hitTolerance\" 1 1 \"shadowBias\" 1 1 \"refractiveIndex\" 1 1 \"objectTextureHeight\" 1 1 \"objectTextureWidth\" 1 1 \"lightTextureHeight\" 1 1 \"lightTextureWidth\" 1 1 \"hazeAmount\" 1 1 \"hazeStart\" 1 1 \"hazeDistance\" 1 1 \"hazeColour\" 4 1 \"iterGlowAmount\" 1 1 \"iterGlowColour\" 4 1 \"outputType\" 1 1 6 \"inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"bouncesPerRay\" Int 1 1 AAAAAA== \"numSubPixels\" Int 1 1 AAAAAA== \"subdividedPixelSize\" Float 1 1 AAAAAA== \"skyBoxPixelSize\" Float 2 1 AAAAAAAAAAA= \"skyBoxOffsetRadians\" Float 1 1 AAAAAA=="
+  kernelSource "#include \"camera.h\"\n#include \"lights.h\"\n#include \"mmath.h\"\n#include \"sdfs.h\"\n#include \"sdfTransforms.h\"\n#include \"sdTransforms.h\"\n\n\n#define MAX_RAYS_PER_SUBPIXEL 50\n#define MAX_CHILD_DEPTH 100\n\n\nkernel RayMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    // the input for format, process called once per pixel\n    Image<eRead, eAccessPoint, eEdgeNone> bg;\n\n    // the skybox in latlong format\n    Image<eRead, eAccessRandom, eEdgeNone> skyBox;\n\n\n    // the shape positons.xyz, scale.w\n    Image<eRead, eAccessRandom, eEdgeNone> positions;\n\n    // the shape rotations.xyz, wall thickness.w\n    Image<eRead, eAccessRandom, eEdgeNone> rotations;\n\n    // the shape dimensions.xyzw (some shapes may not use all channels)\n    Image<eRead, eAccessRandom, eEdgeNone> dimensions;\n\n    // the shape colours.xyz, refractive index.w\n    Image<eRead, eAccessRandom, eEdgeNone> colours;\n\n\n    // shape type.x, operation.y, numChildren.z, blend strength.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;\n\n    // repetition params.xyzw\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters0;\n\n    // elongation.xyz edgeRadius.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters1;\n\n    // reflection.x, transmission.y, emission.z, roughness.w (TODO)\n    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;\n\n\n    // the input lights direction/position.xyz intensity.w\n    Image<eRead, eAccessRandom, eEdgeNone> lights;\n\n    // colour.xyz, type.w\n    // w in \[0, 1) = directional, \[1, inf) = point\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties;\n\n    // shadow hardness.x\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;\n\n    // the output image\n    Image<eWrite> dst;\n\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float focalLength;\n        float horizontalAperture;\n        float nearPlane;\n        float farPlane;\n        float4x4 cameraWorldMatrix;\n\n        // Image params\n        float formatWidth;\n        float formatHeight;\n\n        float skyBoxOffsetAngle;\n        int skyFormatWidth;\n        int skyFormatHeight;\n\n        // Ray params\n        int subdivisions;\n        int maxRaysPerSubPixel;\n        int maxBounces;\n        float maxRayDistance;\n        int maxRaySteps;\n        float hitTolerance;\n        float shadowBias;\n\n        // Scene params\n        float refractiveIndex;\n\n        // Shape Textures\n        int objectTextureHeight;\n        int objectTextureWidth;\n\n        // Light textures\n        int lightTextureHeight;\n        int lightTextureWidth;\n\n        float hazeAmount;\n        float hazeStart;\n        float hazeDistance;\n        float4 hazeColour;\n\n        float iterGlowAmount;\n        float4 iterGlowColour;\n\n        int outputType;\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float4x4 inverseCameraProjectionMatrix;\n\n        int bouncesPerRay;\n\n        int numSubPixels;\n        float subdividedPixelSize;\n\n        float2 skyBoxPixelSize;\n        float skyBoxOffsetRadians;\n\n\n\n    // In define(), parameters can be given labels and default values.\n    void define()\n    \{\n        // Camera params\n        defineParam(focalLength, \"Focal Length\", 50.0f);\n        defineParam(horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(nearPlane, \"Near Plane\", 0.1f);\n        defineParam(farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n\n        // Image params\n        defineParam(formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(skyBoxOffsetAngle, \"SkyBox Offset Angle\", 0.0f);\n        defineParam(skyFormatHeight, \"SkyBox Height\", 1024);\n        defineParam(skyFormatWidth, \"SkyBox Width\", 2048);\n\n        // Ray params\n        defineParam(subdivisions, \"Pixel Subdivisions\", 0);\n        defineParam(maxRaysPerSubPixel, \"Max Rays Per Subpixel\", 1);\n        defineParam(maxRayDistance, \"Max Ray Distance\", 1000.0f);\n        defineParam(maxRaySteps, \"Max Ray Steps\", 128);\n        defineParam(maxBounces, \"Max Bounces\", 1);\n        defineParam(hitTolerance, \"Hit Tolerance\", 0.001f);\n        defineParam(shadowBias, \"Shadow Bias\", 1.0f);\n\n        // Scene params\n        defineParam(refractiveIndex, \"Index of Refraction\", 1.0f);\n\n        // Shape Counts\n        defineParam(objectTextureHeight, \"Object Texture Height\", 0);\n        defineParam(objectTextureWidth, \"Object Texture Width\", 0);\n\n        // Light Counts\n        defineParam(lightTextureHeight, \"Light Texture Height\", 0);\n        defineParam(lightTextureWidth, \"Light Texture Width\", 0);\n\n        defineParam(hazeAmount, \"Haze Amount\", 0.0f);\n        defineParam(hazeStart, \"Haze Start\", 0.0f);\n        defineParam(hazeDistance, \"Haze Distance\", 1000.0f);\n        defineParam(hazeColour, \"Haze Colour\", float4(1, 1, 1, 1));\n\n        defineParam(iterGlowAmount, \"Iter Glow Amount\", 0.0f);\n        defineParam(iterGlowColour, \"Iter Glow Colour\", float4(1, 1, 1, 1));\n\n        defineParam(outputType, \"Output Type\", 0);\n    \}\n\n\n    // The init() function is run before any calls to process().\n    // Local variables can be initialized here.\n    void init()\n    \{\n        bouncesPerRay = maxBounces <= 0 ? 1 : maxBounces;\n\n        // TODO use angles to allow -ve focal length like for latlongs\n        float aspect = aspectRatio(formatHeight, formatWidth);\n        float4x4 cameraProjectionMatrix = projectionMatrix(\n            focalLength,\n            horizontalAperture,\n            aspect,\n            nearPlane,\n            farPlane\n        );\n        inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();\n\n        int subPixelDivisions = pow(2, abs(subdivisions));\n        subdividedPixelSize = 1.0f / (float) subPixelDivisions;\n        numSubPixels = pow(subPixelDivisions, 2);\n\n        skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);\n        skyBoxOffsetRadians = skyBoxOffsetAngle * PI / 180.0f;\n    \}\n\n\n    /**\n     * Get the value of sky the ray would hit at infinite distance\n     */\n    float4 readSkyValue(float3 rayDirection)\n    \{\n        float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);\n\n        SampleType(skyBox) skyBoxPixel = bilinear(\n            skyBox,\n            skyBoxPixelSize.x * angles.x,\n            skyFormatHeight - (skyBoxPixelSize.y * angles.y)\n        );\n\n        return saturate(skyBoxPixel);\n    \}\n\n\n    //\n    // Render Engine\n    //\n\n\n    float3 transformRay(\n        const float3 &rayOrigin,\n        const float3 &position,\n        const float3 &rotation,\n        const int modifications,\n        const float4 &modParameters0,\n        const float4 &modParameters1)\n    \{\n        float3x3 rotMatrix;\n        float3 transformedRay;\n        rotationMatrix(rotation, rotMatrix);\n        matmul(\n            rotMatrix.invert(),\n            rayOrigin - position,\n            transformedRay\n        );\n        performShapeModification(\n            modifications,\n            modParameters0,\n            modParameters1,\n            transformedRay\n        );\n\n        return transformedRay;\n    \}\n\n\n    float getNextDistance(\n        const float3 &rayOrigin,\n        const int shape,\n        const float4 &dimension,\n        const float uniformScale,\n        const int modifications,\n        const float edgeRadius,\n        const float wallThickness)\n    \{\n        float nextDistance = distanceToObject(\n            rayOrigin / uniformScale,\n            shape,\n            dimension\n        ) * uniformScale;\n\n        return fabs(performDistanceModification(\n            modifications,\n            edgeRadius,\n            wallThickness,\n            nextDistance\n        ));\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     */\n    float getMinDistanceToObjectInScene(\n            const float3 &rayOrigin,\n            float4 &colour,\n            float4 &surface)\n    \{\n        float distance = maxRayDistance;\n\n        // numChildren, transformedRay, nextDistance, colour, refractive\n        // index, surface, blendStrength, mods\n        float parentStack\[MAX_CHILD_DEPTH]\[1 + 3 + 1 + 3 + 1 +  4 + 1 + 1];\n        int parentStackLength = 0;\n\n        for (int i=0; i < objectTextureHeight; i++)\n        \{\n            for (int j=0; j < objectTextureWidth; j++)\n            \{\n                SampleType(positions) position = positions(j, i);\n                SampleType(rotations) rotation = rotations(j, i);\n                SampleType(dimensions) dimension = dimensions(j, i);\n                SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);\n                SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, i);\n                SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, i);\n                SampleType(colours) surfaceColour = colours(j, i);\n                SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);\n\n                const int modifications = (int) shapeProperty.y;\n                const float scale = position.w;\n\n                const float blendStrength = shapeProperty.w;\n                int numChildren = (int) shapeProperty.z;\n\n                float nextDistance = maxRayDistance;\n\n                int stackLastIndex = parentStackLength - 1;\n\n                if (numChildren <= 0)\n                \{\n                    // No Children left, compute interactions with parent\n                    if (parentStackLength > 0)\n                    \{\n                        const float3 parentTransformedRay = float3(\n                            parentStack\[stackLastIndex]\[1],\n                            parentStack\[stackLastIndex]\[2],\n                            parentStack\[stackLastIndex]\[3]\n                        );\n\n                        // Use parent transform to position child\n                        const float3 transformedRay = transformRay(\n                            parentTransformedRay,\n                            float3(position.x, position.y, position.z),\n                            float3(rotation.x, rotation.y, rotation.z),\n                            modifications,\n                            modParameters0,\n                            modParameters1\n                        );\n\n                        // Get distance to this child\n                        nextDistance = getNextDistance(\n                            transformedRay,\n                            (int) shapeProperty.x,\n                            dimension,\n                            scale,\n                            modifications,\n                            modParameters1.w,\n                            rotation.w\n                        );\n\n                        float4 blendedColour = surfaceColour;\n                        float4 blendedSurface = surfaceProperty;\n\n                        do\n                        \{\n                            const float parentNextDistance = parentStack\[stackLastIndex]\[4];\n                            const float4 parentSurfaceColour = float4(\n                                parentStack\[stackLastIndex]\[5],\n                                parentStack\[stackLastIndex]\[6],\n                                parentStack\[stackLastIndex]\[7],\n                                parentStack\[stackLastIndex]\[8]\n                            );\n                            const float4 parentSurfaceProperty = float4(\n                                parentStack\[stackLastIndex]\[9],\n                                parentStack\[stackLastIndex]\[10],\n                                parentStack\[stackLastIndex]\[11],\n                                parentStack\[stackLastIndex]\[12]\n                            );\n                            const float parentBlendStrength = parentStack\[stackLastIndex]\[13];\n                            const int parentModifications = (int) parentStack\[stackLastIndex]\[14];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentSurfaceColour,\n                                blendedColour,\n                                parentSurfaceProperty,\n                                blendedSurface,\n                                parentBlendStrength\n                            );\n                            // Update the global min distance (and surface/colour)\n                            if (nextDistance < distance)\n                            \{\n                                distance = nextDistance;\n\n                                colour = blendedColour;\n                                surface = blendedSurface;\n                            \}\n                            for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                            \{\n                                parentStack\[parentIndex]\[0]--;\n                            \}\n\n                            numChildren = parentStack\[stackLastIndex]\[0];\n                        \}\n                        while (numChildren <= 0 && --stackLastIndex >= 0);\n\n                        parentStackLength = stackLastIndex + 1;\n                    \}\n                    else\n                    \{\n                        const float3 transformedRay = transformRay(\n                            rayOrigin,\n                            float3(position.x, position.y, position.z),\n                            float3(rotation.x, rotation.y, rotation.z),\n                            modifications,\n                            modParameters0,\n                            modParameters1\n                        );\n\n                        nextDistance = getNextDistance(\n                            transformedRay,\n                            (int) shapeProperty.x,\n                            dimension,\n                            scale,\n                            modifications,\n                            modParameters1.w,\n                            rotation.w\n                        );\n\n                        if (nextDistance < distance)\n                        \{\n                            distance = nextDistance;\n\n                            colour = float4(surfaceColour);\n                            surface = float4(surfaceProperty);\n                        \}\n                    \}\n                \}\n                else\n                \{\n                    // Node has Children, push it to the stack for later\n                    // processing when we have its children\n                    float3 parentTransformedRay = rayOrigin;\n                    if (parentStackLength > 0)\n                    \{\n                        parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                        parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                        parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                    \}\n                    const float3 transformedRay = transformRay(\n                        parentTransformedRay,\n                        float3(position.x, position.y, position.z),\n                        float3(rotation.x, rotation.y, rotation.z),\n                        modifications,\n                        modParameters0,\n                        modParameters1\n                    );\n\n                    nextDistance = getNextDistance(\n                        transformedRay,\n                        (int) shapeProperty.x,\n                        dimension,\n                        scale,\n                        modifications,\n                        modParameters1.w,\n                        rotation.w\n                    );\n\n                    // parentStack.push()\n                    parentStack\[parentStackLength]\[0] = numChildren;\n                    parentStack\[parentStackLength]\[1] = transformedRay.x;\n                    parentStack\[parentStackLength]\[2] = transformedRay.y;\n                    parentStack\[parentStackLength]\[3] = transformedRay.z;\n                    parentStack\[parentStackLength]\[4] = nextDistance;\n                    parentStack\[parentStackLength]\[5] = surfaceColour.x;\n                    parentStack\[parentStackLength]\[6] = surfaceColour.y;\n                    parentStack\[parentStackLength]\[7] = surfaceColour.z;\n                    parentStack\[parentStackLength]\[8] = surfaceColour.w;\n                    parentStack\[parentStackLength]\[9] = surfaceProperty.x;\n                    parentStack\[parentStackLength]\[10] = surfaceProperty.y;\n                    parentStack\[parentStackLength]\[11] = surfaceProperty.z;\n                    parentStack\[parentStackLength]\[12] = surfaceProperty.w;\n                    parentStack\[parentStackLength]\[13] = blendStrength;\n                    parentStack\[parentStackLength]\[14] = (float) modifications;\n                    parentStackLength++;\n                \}\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    float computeSoftShadow(\n            const float3 &rayDirection,\n            const float distanceToShadePoint,\n            const float softness,\n            float3 &rayOrigin)\n    \{\n        float distanceTravelled = 0;\n        float shadowIntensity = 1.0f;\n        float lastStepDistance = 1000000000000000000000000.0f;\n        float4 colour;\n        float4 surface;\n\n        int iterations = 0;\n        while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)\n        \{\n            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);\n\n            float softOffset = stepDistance * stepDistance / (2.0f * lastStepDistance);\n            shadowIntensity = min(\n                shadowIntensity,\n                softness * sqrt(stepDistance * stepDistance - softOffset * softOffset)\n                / max(0.0f, distanceTravelled - softOffset)\n            );\n\n            if (fabs(stepDistance) < hitTolerance)\n            \{\n                break;\n            \}\n\n            lastStepDistance = stepDistance;\n            rayOrigin += rayDirection * stepDistance;\n            distanceTravelled += stepDistance;\n            iterations++;\n        \}\n\n        shadowIntensity = saturate(shadowIntensity);\n        return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);\n    \}\n\n\n    float computeShadow(\n            const float3 &rayDirection,\n            const float distanceToShadePoint,\n            float3 &rayOrigin)\n    \{\n        float distanceTravelled = 0;\n        float4 colour;\n        float4 surface;\n        int iterations = 0;\n        while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)\n        \{\n            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);\n\n            if (fabs(stepDistance) < hitTolerance)\n            \{\n                return 0;\n            \}\n\n            rayOrigin += rayDirection * stepDistance;\n            distanceTravelled += stepDistance;\n            iterations++;\n        \}\n\n        return 1;\n    \}\n\n\n    float computeAmbientOcclusion(\n            const float3 &rayDirection,\n            const float3 &rayOrigin,\n            const float amount,\n            const int iterations)\n    \{\n        float occlusion = 0.0f;\n        float occlusionScaleFactor = 1.0f;\n        float4 colour;\n        float4 surface;\n        for(int iteration=0; iteration < iterations; iteration++)\n        \{\n            float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;\n            float distanceToClosestObject = getMinDistanceToObjectInScene(\n                rayOrigin + stepDistance * rayDirection,\n                colour,\n                surface\n            );\n            occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;\n            occlusionScaleFactor *= 0.95;\n        \}\n\n        return (\n            amount\n            * saturate(0.5f + 0.5f * rayDirection.y)  // ambient\n            * saturate(1.0f - 1.5f * occlusion)       // occlusion\n        );\n    \}\n\n\n    float2 lightIntensityOnSurface(\n            const float3 &pointOnSurface,\n            const float3 &surfaceNormal,\n            const float3 &light,\n            const int lightType,\n            const float intensity,\n            const float falloff,\n            const float shadow_hardness)\n    \{\n        int absLightType = abs(lightType);\n        if (absLightType == 3)\n        \{\n            return float2(\n                1.0f,\n                computeAmbientOcclusion(\n                    surfaceNormal,\n                    pointOnSurface,\n                    intensity,\n                    (int) light.x\n                )\n            );\n        \}\n\n        float3 surfaceOffset;\n        float distanceToLight;\n        float3 lightDirection;\n        float3 shadowOffsetLightDirection;\n        float intensityAtPosition = getLightData(\n            pointOnSurface,\n            surfaceNormal,\n            light,\n            absLightType,\n            intensity,\n            falloff,\n            hitTolerance,\n            maxRayDistance,\n            shadowBias,\n            distanceToLight,\n            surfaceOffset,\n            lightDirection,\n            shadowOffsetLightDirection\n        );\n        lightDirection = normalize(lightDirection);\n\n        float normalFactor = dot(surfaceNormal, lightDirection);\n\n        float shadowIntensityAtPosition;\n        if (lightType < 0)\n        \{\n            shadowIntensityAtPosition = computeSoftShadow(\n                normalize(shadowOffsetLightDirection),\n                distanceToLight,\n                shadow_hardness,\n                surfaceOffset\n            );\n        \}\n        else\n        \{\n            shadowIntensityAtPosition = computeShadow(\n                normalize(shadowOffsetLightDirection),\n                distanceToLight,\n                surfaceOffset\n            );\n        \}\n\n        return saturate(\n            normalFactor * float2(intensityAtPosition, shadowIntensityAtPosition)\n        );\n    \}\n\n\n    /**\n     * Get the intensity of the light on the surface of an object\n     */\n    float computeLightIntensityOnSurface(\n            const float3 &pointOnSurface,\n            const float3 &surfaceNormal,\n            float4 &lightColour)\n    \{\n        float2 lightIntensity = float2(0, 0);\n        lightColour = float4(0);\n\n        for (int i=0; i < lightTextureHeight; i++)\n        \{\n            for (int j=0; j < lightTextureWidth; j++)\n            \{\n                SampleType(lights) light = lights(j, i);\n                SampleType(lightProperties) lightProperty = lightProperties(j, i);\n                SampleType(lightProperties1) lightProperty1 = lightProperties1(j, i);\n\n                int lightType = (int) lightProperty.w;\n                float2 currentLightIntensity;\n                if (lightType == 0)\n                \{\n                    currentLightIntensity = float2(light.w, 1);\n                \}\n                else\n                \{\n                    currentLightIntensity = lightIntensityOnSurface(\n                        pointOnSurface,\n                        surfaceNormal,\n                        float3(light.x, light.y, light.z),\n                        lightType,\n                        light.w,\n                        lightProperty1.y,\n                        lightProperty1.x\n                    );\n                \}\n                lightColour += currentLightIntensity.x * currentLightIntensity.y * float4(\n                    lightProperty.x,\n                    lightProperty.y,\n                    lightProperty.z,\n                    0.0f\n                );\n                lightIntensity += currentLightIntensity;\n            \}\n        \}\n\n        return saturate(lightIntensity.x * lightIntensity.y);\n    \}\n\n\n    float getHazeAmount(const float distance)\n    \{\n        return hazeAmount * saturate((distance - hazeStart) / hazeDistance);\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     *\n     * @returns: The normalized surface normal\n     */\n    float3 estimateSurfaceNormal(const float3 &point) \{\n        float4 colour;\n        float4 surface;\n        return normalize(\n            float3(\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x + hitTolerance,\n                        point.y,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x - hitTolerance,\n                        point.y,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ),\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y + hitTolerance,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y - hitTolerance,\n                        point.z\n                    ),\n                    colour,\n                    surface\n                ),\n                getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y,\n                        point.z + hitTolerance\n                    ),\n                    colour,\n                    surface\n                ) - getMinDistanceToObjectInScene(\n                    float3(\n                        point.x,\n                        point.y,\n                        point.z - hitTolerance\n                    ),\n                    colour,\n                    surface\n                )\n        ));\n    \}\n\n\n    /**\n     * March a ray through the scene\n     *\n     * @returns: The ray colour\n     */\n    float4 marchRay(\n            const float3 &rayOrigin,\n            const float3 &rayDirection,\n            const int numBounces,\n            const float rayDistance)\n    \{\n        const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, maxRaysPerSubPixel) - 1;\n\n        // rayOrigin, rayDirection, rayIntensity, index of refraction\n        float rays\[MAX_RAYS_PER_SUBPIXEL]\[3 + 3 + 1 + 1];\n        rays\[0]\[0] = rayOrigin.x;\n        rays\[0]\[1] = rayOrigin.y;\n        rays\[0]\[2] = rayOrigin.z;\n\n        rays\[0]\[3] = rayDirection.x;\n        rays\[0]\[4] = rayDirection.y;\n        rays\[0]\[5] = rayDirection.z;\n\n        rays\[0]\[6] = 1.0f;\n\n        rays\[0]\[7] = refractiveIndex;\n\n        int numRays = 1;\n        int currentRayIndex = 0;\n\n        float4 colour;\n        float4 surface;\n\n        float4 rayColour = float4(0);\n        float4 lightColour = float4(0);\n\n        int bounces = 0;\n        int iterations = 1;\n        while (currentRayIndex < numRays)\n        \{\n            float lightIntensity = 1;\n\n            float distanceTravelled = 0;\n\n            float3 origin = float3(\n                rays\[currentRayIndex]\[0],\n                rays\[currentRayIndex]\[1],\n                rays\[currentRayIndex]\[2]\n            );\n            float3 direction = float3(\n                rays\[currentRayIndex]\[3],\n                rays\[currentRayIndex]\[4],\n                rays\[currentRayIndex]\[5]\n            );\n            float rayIntensity = rays\[currentRayIndex]\[6];\n\n            bool madeContact = false;\n\n            while (distanceTravelled < rayDistance && iterations <= maxRaySteps)\n            \{\n                float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);\n\n                distanceTravelled += stepDistance;\n                origin += direction * stepDistance;\n\n                if (stepDistance < hitTolerance)\n                \{\n                    float3 surfaceNormal = estimateSurfaceNormal(\n                        origin - direction * hitTolerance\n                    );\n\n                    // Use roughness to modify surface normal\n                    float radialOffset = surface.w * random(\n                        (iterations * distanceTravelled + stepDistance)\n                        * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z)\n                    );\n                    float angularOffset = 2.0f * PI * random(radialOffset * distanceTravelled);\n\n                    // Update the ray direction to send a scattered cluster of rays\n                    float3 orthogonal = cross(surfaceNormal, float3(1, 0, 0));\n                    float3 rayNormal;\n                    if (length(orthogonal) == 0.0f)\n                    \{\n                        rayNormal = normalize(cross(surfaceNormal, float3(0, 1, 0)));\n                    \}\n                    else\n                    \{\n                        rayNormal = normalize(orthogonal);\n                    \}\n                    rayNormal = (\n                        cos(angularOffset)\n                        * rayNormal\n                        + sin(angularOffset)\n                        * cross(surfaceNormal, rayNormal)\n                    );\n\n                    surfaceNormal = normalize(radialOffset * rayNormal + surfaceNormal);\n\n                    if (outputType > 0)\n                    \{\n                        if (outputType == 1)\n                        \{\n                            return float4(\n                                origin.x,\n                                origin.y,\n                                origin.z,\n                                1\n                            );\n                        \}\n                        if (outputType == 2)\n                        \{\n                            return float4(\n                                surfaceNormal.x,\n                                surfaceNormal.y,\n                                surfaceNormal.z,\n                                1\n                            );\n                        \}\n                        if (outputType == 3)\n                        \{\n                            return float4(\n                                distanceTravelled,\n                                0,\n                                0,\n                                1\n                            );\n                        \}\n                    \}\n                    bounces++;\n\n                    lightIntensity = computeLightIntensityOnSurface(\n                        origin,\n                        surfaceNormal,\n                        lightColour\n                    );\n\n                    rayColour = blend(\n                        iterGlowColour,\n                        blend(\n                            hazeColour,\n                            blend(\n                                lightColour * colour,\n                                rayColour,\n                                rayIntensity * (1 - surface.x - surface.y) * lightIntensity\n                            ),\n                            getHazeAmount(distanceTravelled)\n                        ),\n                        saturate(iterGlowAmount * iterations)\n                    );\n\n                    if (bounces >= numBounces)\n                    \{\n                        rayColour.w = 1.0f;\n                        return rayColour;\n                    \}\n\n                    const float incidentRefractiveIndex = rays\[currentRayIndex]\[7];\n                    const float refractedRefractiveIndex = colour.w;\n                    const float reflectivity = schlickReflectionCoefficient(\n                        direction,\n                        surfaceNormal,\n                        incidentRefractiveIndex,\n                        refractedRefractiveIndex\n                    );\n                    const float refraction = surface.y * (1 - reflectivity);\n                    float reflection = surface.x;\n\n                    if (refraction > 0.0f && numRays < lastRay)\n                    \{\n                        reflection += reflectivity;\n\n                        float3 refractedDirection = refractRayThroughSurface(\n                            direction,\n                            surfaceNormal,\n                            incidentRefractiveIndex,\n                            refractedRefractiveIndex\n                        );\n                        float3 refractedOrigin = offsetPoint(\n                            origin,\n                            -surfaceNormal,\n                            2.0f * hitTolerance\n                        );\n\n                        rays\[numRays]\[0] = refractedOrigin.x;\n                        rays\[numRays]\[1] = refractedOrigin.y;\n                        rays\[numRays]\[2] = refractedOrigin.z;\n\n                        rays\[numRays]\[3] = refractedDirection.x;\n                        rays\[numRays]\[4] = refractedDirection.y;\n                        rays\[numRays]\[5] = refractedDirection.z;\n\n                        rays\[numRays]\[6] = rayIntensity * refraction;\n\n                        rays\[numRays]\[7] = refractedRefractiveIndex;\n\n                        numRays++;\n                    \}\n\n                    if (reflection > 0.0f && numRays < lastRay)\n                    \{\n                        float3 reflectedDirection = reflectRayOffSurface(\n                            direction,\n                            surfaceNormal\n                        );\n                        float3 reflectedOrigin = offsetPoint(\n                            origin,\n                            reflectedDirection + surfaceNormal,\n                            hitTolerance\n                        );\n\n                        rays\[numRays]\[0] = reflectedOrigin.x;\n                        rays\[numRays]\[1] = reflectedOrigin.y;\n                        rays\[numRays]\[2] = reflectedOrigin.z;\n\n                        rays\[numRays]\[3] = reflectedDirection.x;\n                        rays\[numRays]\[4] = reflectedDirection.y;\n                        rays\[numRays]\[5] = reflectedDirection.z;\n\n                        rays\[numRays]\[6] = rayIntensity * reflection;\n\n                        rays\[numRays]\[7] = incidentRefractiveIndex;\n\n                        numRays++;\n                    \}\n\n                    madeContact = true;\n                    break;\n                \}\n\n                iterations++;\n            \}\n\n            if (outputType > 0)\n            \{\n                return float4(0);\n            \}\n\n            if (!madeContact)\n            \{\n                rayColour = blend(\n                    readSkyValue(direction),\n                    blend(\n                        iterGlowColour,\n                        blend(\n                            hazeColour,\n                            rayColour,\n                            getHazeAmount(distanceTravelled)\n                        ),\n                        saturate(iterGlowAmount * iterations)\n                    ),\n                    rayIntensity\n                );\n            \}\n\n            currentRayIndex++;\n        \}\n\n        rayColour.w = bounces > 0;\n        return rayColour;\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value\n     */\n    void process(int2 pos)\n    \{\n        float4 resultPixel(0, 0, 0, 0);\n\n        float2 pixelLocation = float2(pos.x, pos.y);\n\n        float2 pixelOffset;\n        for (\n            pixelOffset.x = 0.0f;\n            pixelOffset.x < 1.0f;\n            pixelOffset.x += subdividedPixelSize\n        ) \{\n            for (\n                pixelOffset.y = 0.0f;\n                pixelOffset.y < 1.0f;\n                pixelOffset.y += subdividedPixelSize\n            ) \{\n                // Generate a ray from the camera\n                float3 rayOrigin;\n                float3 rayDirection;\n                createCameraRay(\n                    cameraWorldMatrix,\n                    inverseCameraProjectionMatrix,\n                    pixelsToUV(\n                        pixelLocation + pixelOffset,\n                        float2(formatWidth, formatHeight)\n                    ),\n                    rayOrigin,\n                    rayDirection\n                );\n\n                resultPixel += marchRay(\n                    rayOrigin,\n                    rayDirection,\n                    bouncesPerRay,\n                    maxRayDistance\n                );\n            \}\n        \}\n\n        dst() = resultPixel / numSubPixels;\n    \}\n\};\n"
   rebuild ""
   "RayMarchKernel_Focal Length" {{parent.DummyCam.focal}}
   "RayMarchKernel_Horizontal Aperture" {{parent.DummyCam.haperture}}
@@ -7686,7 +6128,7 @@ push $N12fb8800
  }
 end_group
 Viewer {
- frame 1
+ frame 39
  frame_range 1-360
  channels rgb
  colour_sample_bbox {0.2001953125 0.1083984375 0.2006835938 0.1088867188}
