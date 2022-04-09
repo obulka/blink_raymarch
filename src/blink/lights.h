@@ -4,23 +4,15 @@
 
 
 inline void directionalLightData(
-        const float3 &pointOnSurface,
         const float3 &surfaceNormal,
         const float3 &light,
-        const float hitTolerance,
         const float maxRayDistance,
-        const float shadowBias,
         float3 &lightDirection,
-        float3 &surfaceOffset,
         float3 &shadowOffsetLightDirection,
         float &distanceToLight)
 {
     lightDirection = -light;
-    surfaceOffset = (
-        hitTolerance * shadowBias * (lightDirection + surfaceNormal) + pointOnSurface
-    );
     shadowOffsetLightDirection = lightDirection;
-
     distanceToLight = maxRayDistance;
 }
 
@@ -29,20 +21,27 @@ inline void pointLightData(
         const float3 &pointOnSurface,
         const float3 &surfaceNormal,
         const float3 &light,
-        const float hitTolerance,
-        const float shadowBias,
         float3 &lightDirection,
-        float3 &surfaceOffset,
         float3 &shadowOffsetLightDirection,
         float &distanceToLight)
 {
     lightDirection = light - pointOnSurface;
-    surfaceOffset = (
-        hitTolerance * shadowBias * (lightDirection + surfaceNormal) + pointOnSurface
-    );
-    shadowOffsetLightDirection = light - surfaceOffset;
-
+    shadowOffsetLightDirection = lightDirection;
     distanceToLight = length(shadowOffsetLightDirection);
+}
+
+
+inline void domeLightData(
+        const float3 &surfaceNormal,
+        const float maxRayDistance,
+        const float3 &light,
+        float3 &lightDirection,
+        float3 &shadowOffsetLightDirection,
+        float &distanceToLight)
+{
+    lightDirection = surfaceNormal;
+    shadowOffsetLightDirection = lightDirection;
+    distanceToLight = maxRayDistance;
 }
 
 
@@ -53,11 +52,8 @@ float getLightData(
         const int lightType,
         const float intensity,
         const float falloff,
-        const float hitTolerance,
         const float maxRayDistance,
-        const float shadowBias,
         float &distanceToLight,
-        float3 &surfaceOffset,
         float3 &lightDirection,
         float3 &shadowOffsetLightDirection)
 {
@@ -65,14 +61,10 @@ float getLightData(
     {
         // directional
         directionalLightData(
-            pointOnSurface,
             surfaceNormal,
             light,
-            hitTolerance,
             maxRayDistance,
-            shadowBias,
             lightDirection,
-            surfaceOffset,
             shadowOffsetLightDirection,
             distanceToLight
         );
@@ -84,10 +76,18 @@ float getLightData(
             pointOnSurface,
             surfaceNormal,
             light,
-            hitTolerance,
-            shadowBias,
             lightDirection,
-            surfaceOffset,
+            shadowOffsetLightDirection,
+            distanceToLight
+        );
+    }
+    else if (lightType == 100)
+    {
+        // dome
+        domeLightData(
+            surfaceNormal,
+            maxRayDistance,
+            lightDirection,
             shadowOffsetLightDirection,
             distanceToLight
         );

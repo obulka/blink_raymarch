@@ -119,6 +119,48 @@ inline float3 offsetPoint(
 }
 
 
+inline float3 surfaceOffsetPoint(
+        const float3 &surfacePoint,
+        const float3 &direction,
+        const float3 &normal,
+        const float bias,
+        const float tolerance)
+{
+    return tolerance * bias * (direction + normal) + surfacePoint;
+}
+
+
+float3 roughen(
+    const float normal,
+    const float roughness,
+    const float seed)
+{
+    // Use roughness to modify surface normal
+    const float radialOffset = roughness * random(seed);
+    const float angularOffset = 2.0f * PI * random(radialOffset * seed);
+
+    // Update the ray direction to send a scattered cluster of rays
+    float3 orthogonal = cross(normal, float3(1, 0, 0));
+    float3 rayNormal;
+    if (length(orthogonal) == 0.0f)
+    {
+        rayNormal = cross(normal, float3(0, 1, 0));
+    }
+    else
+    {
+        rayNormal = orthogonal;
+    }
+    rayNormal = (
+        cos(angularOffset)
+        * rayNormal
+        + sin(angularOffset)
+        * cross(normal, rayNormal)
+    );
+
+    return normalize(radialOffset * rayNormal + normal);
+}
+
+
 inline float distanceToYAxis(const float3 &position)
 {
     return length(float2(position.x, position.z));
