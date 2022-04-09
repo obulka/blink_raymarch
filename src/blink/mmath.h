@@ -418,6 +418,44 @@ inline float schlickReflectionCoefficient(
 }
 
 
+inline float reflectionCoefficient(
+    const float3 &incidentRayDirection,
+    const float3 &surfaceNormalDirection,
+    const float incidentRefractiveIndex,
+    const float refractedRefractiveIndex)
+{
+    const float refractiveRatio = incidentRefractiveIndex / refractedRefractiveIndex;
+
+    const float cosIncident = -dot(incidentRayDirection, surfaceNormalDirection);
+
+    const float sinTransmittedSquared = refractiveRatio * refractiveRatio * (
+        1.0f - cosIncident * cosIncident
+    );
+
+    if (sinTransmittedSquared > 1.0f)
+    {
+        return 1.0f;
+    }
+
+    const float cosTransmitted = sqrt(1.0f - sinTransmittedSquared);
+
+    const float orthogonalReflectance = (
+        (incidentRefractiveIndex * cosIncident - refractedRefractiveIndex * cosTransmitted)
+        / (incidentRefractiveIndex * cosIncident + refractedRefractiveIndex * cosTransmitted)
+    );
+
+    const float parallelReflectance = (
+        (refractedRefractiveIndex * cosIncident - incidentRefractiveIndex * cosTransmitted)
+        / (refractedRefractiveIndex * cosIncident + incidentRefractiveIndex * cosTransmitted)
+    );
+
+    return (
+        orthogonalReflectance * orthogonalReflectance
+        + parallelReflectance * parallelReflectance
+    ) / 2.0f;
+}
+
+
 inline void rotationMatrix(const float3 &angles, float3x3 &out)
 {
     // Why tf can I not init a float3x3 normally??

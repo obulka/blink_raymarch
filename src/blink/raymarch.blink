@@ -270,12 +270,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             dimension
         ) * uniformScale;
 
-        return fabs(performDistanceModification(
+        return performDistanceModification(
             modifications,
             edgeRadius,
             wallThickness,
             nextDistance
-        ));
+        );
     }
 
 
@@ -382,7 +382,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 parentBlendStrength
                             );
                             // Update the global min distance (and surface/colour)
-                            if (nextDistance < distance)
+                            if (fabs(nextDistance) < fabs(distance))
                             {
                                 distance = nextDistance;
 
@@ -421,7 +421,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             rotation.w
                         );
 
-                        if (nextDistance < distance)
+                        if (fabs(nextDistance) < fabs(distance))
                         {
                             distance = nextDistance;
 
@@ -500,16 +500,20 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int iterations = 0;
         while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
         {
-            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
-
-            float softOffset = stepDistance * stepDistance / (2.0f * lastStepDistance);
+            const float stepDistance = fabs(getMinDistanceToObjectInScene(
+                rayOrigin,
+                colour,
+                surface
+            ));
+            const float stepDistanceSquared = stepDistance * stepDistance;
+            float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);
             shadowIntensity = min(
                 shadowIntensity,
-                softness * sqrt(stepDistance * stepDistance - softOffset * softOffset)
+                softness * sqrt(stepDistanceSquared - softOffset * softOffset)
                 / max(0.0f, distanceTravelled - softOffset)
             );
 
-            if (fabs(stepDistance) < hitTolerance)
+            if (stepDistance < hitTolerance)
             {
                 break;
             }
@@ -536,9 +540,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int iterations = 0;
         while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
         {
-            float stepDistance = getMinDistanceToObjectInScene(rayOrigin, colour, surface);
+            float stepDistance = fabs(getMinDistanceToObjectInScene(rayOrigin, colour, surface));
 
-            if (fabs(stepDistance) < hitTolerance)
+            if (stepDistance < hitTolerance)
             {
                 return 0;
             }
@@ -565,11 +569,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         for(int iteration=0; iteration < iterations; iteration++)
         {
             float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;
-            float distanceToClosestObject = getMinDistanceToObjectInScene(
+            float distanceToClosestObject = fabs(getMinDistanceToObjectInScene(
                 rayOrigin + stepDistance * rayDirection,
                 colour,
                 surface
-            );
+            ));
             occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;
             occlusionScaleFactor *= 0.95;
         }
@@ -718,63 +722,43 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The normalized surface normal
      */
-    float3 estimateSurfaceNormal(const float3 &point) {
+    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint) {
         float4 colour;
         float4 surface;
+
+        const float epsilon = hitTolerance;// * pixelFootprint;
+
+        const float3 offset0 = 0.5773f * float3(1, -1, -1);
+        const float3 offset1 = 0.5773f * float3(-1, -1, 1);
+        const float3 offset2 = 0.5773f * float3(-1, 1, -1);
+        const float3 offset3 = 0.5773f * float3(1, 1, 1);
+
         return normalize(
-            float3(
-                getMinDistanceToObjectInScene(
-                    float3(
-                        point.x + hitTolerance,
-                        point.y,
-                        point.z
-                    ),
-                    colour,
-                    surface
-                ) - getMinDistanceToObjectInScene(
-                    float3(
-                        point.x - hitTolerance,
-                        point.y,
-                        point.z
-                    ),
-                    colour,
-                    surface
-                ),
-                getMinDistanceToObjectInScene(
-                    float3(
-                        point.x,
-                        point.y + hitTolerance,
-                        point.z
-                    ),
-                    colour,
-                    surface
-                ) - getMinDistanceToObjectInScene(
-                    float3(
-                        point.x,
-                        point.y - hitTolerance,
-                        point.z
-                    ),
-                    colour,
-                    surface
-                ),
-                getMinDistanceToObjectInScene(
-                    float3(
-                        point.x,
-                        point.y,
-                        point.z + hitTolerance
-                    ),
-                    colour,
-                    surface
-                ) - getMinDistanceToObjectInScene(
-                    float3(
-                        point.x,
-                        point.y,
-                        point.z - hitTolerance
-                    ),
-                    colour,
-                    surface
-                )
-        ));
+            offset0
+            * getMinDistanceToObjectInScene(
+                point + offset0 * epsilon,
+                colour,
+                surface
+            )
+            + offset1
+            * getMinDistanceToObjectInScene(
+                point + offset1 * epsilon,
+                colour,
+                surface
+            )
+            + offset2
+            * getMinDistanceToObjectInScene(
+                point + offset2 * epsilon,
+                colour,
+                surface
+            )
+            + offset3
+            * getMinDistanceToObjectInScene(
+                point + offset3 * epsilon,
+                colour,
+                surface
+            )
+        );
     }
 
 
@@ -838,52 +822,62 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             while (distanceTravelled < rayDistance && iterations <= maxRaySteps)
             {
-                float stepDistance = getMinDistanceToObjectInScene(origin, colour, surface);
+                const float signedStepDistance = getMinDistanceToObjectInScene(
+                    origin,
+                    colour,
+                    surface
+                );
+                const float stepDistance = fabs(signedStepDistance);
 
                 distanceTravelled += stepDistance;
                 origin += direction * stepDistance;
 
                 if (stepDistance < hitTolerance)
                 {
-                    float3 surfaceNormal = estimateSurfaceNormal(
-                        origin - direction * hitTolerance
+                    const float3 surfacePosition = origin - direction * hitTolerance;
+                    float3 surfaceNormal = sign(signedStepDistance) * estimateSurfaceNormal(
+                        surfacePosition,
+                        distanceTravelled
                     );
 
-                    // Use roughness to modify surface normal
-                    float radialOffset = surface.w * random(
-                        (iterations * distanceTravelled + stepDistance)
-                        * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z)
-                    );
-                    float angularOffset = 2.0f * PI * random(radialOffset * distanceTravelled);
-
-                    // Update the ray direction to send a scattered cluster of rays
-                    float3 orthogonal = cross(surfaceNormal, float3(1, 0, 0));
-                    float3 rayNormal;
-                    if (length(orthogonal) == 0.0f)
+                    if (surface.w > 0.0f)
                     {
-                        rayNormal = normalize(cross(surfaceNormal, float3(0, 1, 0)));
-                    }
-                    else
-                    {
-                        rayNormal = normalize(orthogonal);
-                    }
-                    rayNormal = (
-                        cos(angularOffset)
-                        * rayNormal
-                        + sin(angularOffset)
-                        * cross(surfaceNormal, rayNormal)
-                    );
+                        // Use roughness to modify surface normal
+                        float radialOffset = surface.w * random(
+                            (iterations * distanceTravelled + stepDistance)
+                            * (surfaceNormal.x + surfaceNormal.y + surfaceNormal.z)
+                        );
+                        float angularOffset = 2.0f * PI * random(radialOffset * distanceTravelled);
 
-                    surfaceNormal = normalize(radialOffset * rayNormal + surfaceNormal);
+                        // Update the ray direction to send a scattered cluster of rays
+                        float3 orthogonal = cross(surfaceNormal, float3(1, 0, 0));
+                        float3 rayNormal;
+                        if (length(orthogonal) == 0.0f)
+                        {
+                            rayNormal = cross(surfaceNormal, float3(0, 1, 0));
+                        }
+                        else
+                        {
+                            rayNormal = orthogonal;
+                        }
+                        rayNormal = (
+                            cos(angularOffset)
+                            * rayNormal
+                            + sin(angularOffset)
+                            * cross(surfaceNormal, rayNormal)
+                        );
+
+                        surfaceNormal = normalize(radialOffset * rayNormal + surfaceNormal);
+                    }
 
                     if (outputType > 0)
                     {
                         if (outputType == 1)
                         {
                             return float4(
-                                origin.x,
-                                origin.y,
-                                origin.z,
+                                surfacePosition.x,
+                                surfacePosition.y,
+                                surfacePosition.z,
                                 1
                             );
                         }
@@ -936,7 +930,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     const float incidentRefractiveIndex = rays[currentRayIndex][7];
                     const float refractedRefractiveIndex = colour.w;
-                    const float reflectivity = schlickReflectionCoefficient(
+                    const float reflectivity = reflectionCoefficient(
                         direction,
                         surfaceNormal,
                         incidentRefractiveIndex,
@@ -945,9 +939,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     const float refraction = surface.y * (1 - reflectivity);
                     float reflection = surface.x;
 
-                    if (refraction > 0.0f && numRays < lastRay)
+                    if (surface.y > 0.0f && numRays < lastRay)
                     {
-                        reflection += reflectivity;
+                        reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
 
                         const float3 refractedDirection = refractRayThroughSurface(
                             direction,
@@ -956,9 +950,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             refractedRefractiveIndex
                         );
                         const float3 refractedOrigin = offsetPoint(
-                            origin,
+                            surfacePosition,
                             -surfaceNormal,
-                            2.0f * hitTolerance
+                            2.0f * hitTolerance + stepDistance
                         );
 
                         rays[numRays][0] = refractedOrigin.x;
