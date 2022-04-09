@@ -6,7 +6,7 @@
 #include "sdTransforms.h"
 
 
-#define MAX_RAYS_PER_SUBPIXEL 50
+#define MAX_RAYS_PER_SUBPIXEL 100
 #define MAX_CHILD_DEPTH 100
 
 
@@ -722,11 +722,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The normalized surface normal
      */
-    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint) {
+    float3 estimateSurfaceNormal(const float3 &point) {
         float4 colour;
         float4 surface;
 
-        const float epsilon = hitTolerance;// * pixelFootprint;
+        const float epsilon = hitTolerance;
 
         const float3 offset0 = 0.5773f * float3(1, -1, -1);
         const float3 offset1 = 0.5773f * float3(-1, -1, 1);
@@ -798,6 +798,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float4 rayColour = float4(0);
         float4 lightColour = float4(0);
 
+        float lastStepDistance = 1.0f;
+
         int bounces = 0;
         int iterations = 1;
         while (currentRayIndex < numRays)
@@ -832,12 +834,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 distanceTravelled += stepDistance;
                 origin += direction * stepDistance;
 
-                if (stepDistance < hitTolerance)
+                if (stepDistance < hitTolerance * distanceTravelled)
                 {
                     const float3 surfacePosition = origin - direction * hitTolerance;
-                    float3 surfaceNormal = sign(signedStepDistance) * estimateSurfaceNormal(
-                        surfacePosition,
-                        distanceTravelled
+                    float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
+                        surfacePosition
                     );
 
                     if (surface.w > 0.0f)
@@ -930,13 +931,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     const float incidentRefractiveIndex = rays[currentRayIndex][7];
                     const float refractedRefractiveIndex = colour.w;
-                    const float reflectivity = reflectionCoefficient(
+                    const float reflectivity = schlickReflectionCoefficient(
                         direction,
                         surfaceNormal,
                         incidentRefractiveIndex,
                         refractedRefractiveIndex
                     );
-                    const float refraction = surface.y * (1 - reflectivity);
+                    const float refraction = saturate(surface.y * (1 - reflectivity));
                     float reflection = surface.x;
 
                     if (surface.y > 0.0f && numRays < lastRay)
@@ -951,7 +952,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         );
                         const float3 refractedOrigin = offsetPoint(
                             surfacePosition,
-                            -surfaceNormal,
+                            refractedDirection - surfaceNormal,
                             2.0f * hitTolerance + stepDistance
                         );
 
@@ -1001,6 +1002,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     break;
                 }
 
+                lastStepDistance = signedStepDistance;
                 iterations++;
             }
 
