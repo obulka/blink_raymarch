@@ -749,7 +749,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             rayDirection = roughen(
                 surfaceNormal,
                 saturate(1.0f - surface.x - surface.y),
-                iteration * seed
+                iteration * seed / skyLightSamples
             );
             currentLightIntensity = lightIntensityOnSurface(
                 pointOnSurface,
@@ -760,10 +760,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 0.0f,
                 skyLightShadowHardness
             );
+            const float4 skyLightColour = saturate(readSkyLightValue(rayDirection));
             lightColour = blend(
-                saturate(readSkyLightValue(rayDirection)),
+                skyLightColour,
                 lightColour,
-                currentLightIntensity.x * currentLightIntensity.y
+                length(skyLightColour) * currentLightIntensity.x * currentLightIntensity.y
             );
             lightIntensity += currentLightIntensity / (float) skyLightSamples;
             seed += fabs(
