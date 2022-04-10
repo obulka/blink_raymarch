@@ -131,7 +131,7 @@ inline float3 surfaceOffsetPoint(
 
 
 float3 roughen(
-    const float normal,
+    const float3 &normal,
     const float roughness,
     const float seed)
 {
@@ -140,15 +140,10 @@ float3 roughen(
     const float angularOffset = 2.0f * PI * random(radialOffset * seed);
 
     // Update the ray direction to send a scattered cluster of rays
-    float3 orthogonal = cross(normal, float3(1, 0, 0));
-    float3 rayNormal;
-    if (length(orthogonal) == 0.0f)
+    float3 rayNormal = normalize(cross(normal, float3(1, 0, 0)));
+    if (length(rayNormal) == 0.0f)
     {
         rayNormal = cross(normal, float3(0, 1, 0));
-    }
-    else
-    {
-        rayNormal = orthogonal;
     }
     rayNormal = (
         cos(angularOffset)

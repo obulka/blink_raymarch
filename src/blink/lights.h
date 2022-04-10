@@ -19,7 +19,6 @@ inline void directionalLightData(
 
 inline void pointLightData(
         const float3 &pointOnSurface,
-        const float3 &surfaceNormal,
         const float3 &light,
         float3 &lightDirection,
         float3 &shadowOffsetLightDirection,
@@ -32,14 +31,13 @@ inline void pointLightData(
 
 
 inline void domeLightData(
-        const float3 &surfaceNormal,
         const float maxRayDistance,
         const float3 &light,
         float3 &lightDirection,
         float3 &shadowOffsetLightDirection,
         float &distanceToLight)
 {
-    lightDirection = surfaceNormal;
+    lightDirection = light;
     shadowOffsetLightDirection = lightDirection;
     distanceToLight = maxRayDistance;
 }
@@ -74,7 +72,6 @@ float getLightData(
         // point
         pointLightData(
             pointOnSurface,
-            surfaceNormal,
             light,
             lightDirection,
             shadowOffsetLightDirection,
@@ -85,8 +82,8 @@ float getLightData(
     {
         // dome
         domeLightData(
-            surfaceNormal,
             maxRayDistance,
+            light,
             lightDirection,
             shadowOffsetLightDirection,
             distanceToLight

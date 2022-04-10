@@ -699,6 +699,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float computeLightIntensityOnSurface(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
+            const float4 &surface,
             float4 &lightColour)
     {
         float2 lightIntensity = float2(0, 0);
@@ -741,23 +742,33 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         // Add HDRI lighting
-        for (int iteration=0; iteration < skyLightSamples; iteration++)
+        float3 rayDirection = surfaceNormal;
+        float seed = fabs(pointOnSurface.x + pointOnSurface.y + pointOnSurface.z) + 0.5773f;
+        for (int iteration=1; iteration <= skyLightSamples; iteration++)
         {
+            rayDirection = roughen(
+                surfaceNormal,
+                saturate(1.0f - surface.x - surface.y),
+                iteration * seed
+            );
             currentLightIntensity = lightIntensityOnSurface(
                 pointOnSurface,
                 surfaceNormal,
-                float3(0),
+                rayDirection,
                 softenSkyLightShadows * 100,
                 skyLightGain,
                 0.0f,
                 skyLightShadowHardness
             );
-            lightColour += saturate(
-                currentLightIntensity.x
-                * currentLightIntensity.y
-                * readSkyLightValue(surfaceNormal)
+            lightColour = blend(
+                saturate(readSkyLightValue(rayDirection)),
+                lightColour,
+                currentLightIntensity.x * currentLightIntensity.y
             );
-            lightIntensity += currentLightIntensity;
+            lightIntensity += currentLightIntensity / (float) skyLightSamples;
+            seed += fabs(
+                rayDirection.x + rayDirection.y + rayDirection.z
+            ) + 0.5773f / (float) iteration;
         }
 
         return saturate(lightIntensity.x * lightIntensity.y);
@@ -942,6 +953,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     lightIntensity = computeLightIntensityOnSurface(
                         origin,
                         surfaceNormal,
+                        surface,
                         lightColour
                     );
 
