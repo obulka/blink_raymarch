@@ -74,6 +74,12 @@ inline float minComponent(const float2 &vector)
 }
 
 
+inline float4 positivePart(const float4 &vector)
+{
+    return max(vector, float4(0));
+}
+
+
 inline float3 positivePart(const float3 &vector)
 {
     return max(vector, float3(0));
@@ -239,21 +245,56 @@ inline float2 cartesianToCylindrical(const float3 &coordinates)
 }
 
 
-/**
- * Get the value of sky the ray would hit at infinite distance
- */
+inline float3 sphericalUnitVectorToCartesion(const float2 &angles)
+{
+    const float sinPhi = sin(angles.y);
+    return float3(
+        cos(angles.x) * sinPhi,
+        sin(angles.x) * sinPhi,
+        cos(angles.y)
+    );
+}
+
+
+inline float2 normalizeAngles(const float2 &angles)
+{
+    float2 normalizedAngles = float2(
+        fmod(angles.x, 2.0f * PI),
+        fmod(angles.y, PI)
+    );
+    normalizedAngles.x += 2 * PI * (normalizedAngles.x < 0);
+    normalizedAngles.y += PI * (normalizedAngles.y < 0);
+
+    return normalizedAngles;
+}
+
+
 float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float thetaOffset)
 {
-    float rayAnglePhi = fmod(acos(rayDirection.y), PI);
-    rayAnglePhi += PI * (rayAnglePhi < 0);
+    const float rayAnglePhi = acos(rayDirection.y);
+    const float rayAngleTheta = atan2(rayDirection.z, rayDirection.x) + thetaOffset;
 
-    float rayAngleTheta = fmod(
-        atan2(rayDirection.z, rayDirection.x) + thetaOffset,
-        2 * PI
+    return normalizeAngles(float2(rayAngleTheta, rayAnglePhi));
+}
+
+
+float sphericalUnitDot(const float2 &vector0, const float2 &vector1)
+{
+    return (
+        cos(vector0.x) * cos(vector1.x)
+        + cos(vector0.y - vector1.y) * sin(vector0.x) * sin(vector1.x)
     );
-    rayAngleTheta += 2 * PI * (rayAngleTheta < 0);
+}
 
-    return float2(rayAngleTheta, rayAnglePhi);
+
+inline float2 uvPositionToAngles(const float2 &uvPosition)
+{
+    return normalizeAngles(
+        float2(
+            uvPosition.x * 2.0f * PI,
+            uvPosition.y * PI
+        )
+    );
 }
 
 
@@ -493,21 +534,6 @@ inline float reflectionCoefficient(
 }
 
 
-inline void rotationMatrix(const float3 &angles, float3x3 &out)
-{
-    // Why tf can I not init a float3x3 normally??
-    out[0][0] = cos(angles.y) * cos(angles.z);
-    out[0][1] = sin(angles.x) * sin(angles.y) * cos(angles.z) - cos(angles.x) * sin(angles.z);
-    out[0][2] = cos(angles.x) * sin(angles.y) * cos(angles.z) + sin(angles.x) * sin(angles.z);
-    out[1][0] = cos(angles.y) * sin(angles.z);
-    out[1][1] = sin(angles.x) * sin(angles.y) * sin(angles.z) + cos(angles.x) * cos(angles.z);
-    out[1][2] = cos(angles.x) * sin(angles.y) * sin(angles.z) - sin(angles.x) * cos(angles.z);
-    out[2][0] = -sin(angles.y);
-    out[2][1] = sin(angles.x) * cos(angles.y);
-    out[2][2] = cos(angles.x) * cos(angles.y);
-}
-
-
 /**
  * Generate a ray out of the camera
  */
@@ -531,6 +557,21 @@ void createCameraRay(
         direction
     );
     rayDirection = normalize(float3(direction.x, direction.y, direction.z));
+}
+
+
+inline void rotationMatrix(const float3 &angles, float3x3 &out)
+{
+    // Why tf can I not init a float3x3 normally??
+    out[0][0] = cos(angles.y) * cos(angles.z);
+    out[0][1] = sin(angles.x) * sin(angles.y) * cos(angles.z) - cos(angles.x) * sin(angles.z);
+    out[0][2] = cos(angles.x) * sin(angles.y) * cos(angles.z) + sin(angles.x) * sin(angles.z);
+    out[1][0] = cos(angles.y) * sin(angles.z);
+    out[1][1] = sin(angles.x) * sin(angles.y) * sin(angles.z) + cos(angles.x) * cos(angles.z);
+    out[1][2] = cos(angles.x) * sin(angles.y) * sin(angles.z) - sin(angles.x) * cos(angles.z);
+    out[2][0] = -sin(angles.y);
+    out[2][1] = sin(angles.x) * cos(angles.y);
+    out[2][2] = cos(angles.x) * cos(angles.y);
 }
 
 
