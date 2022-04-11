@@ -116,6 +116,59 @@ inline float negativePart(const float value)
 }
 
 
+inline void rotationMatrix(const float3 &angles, float3x3 &out)
+{
+    // Why tf can I not init a float3x3 normally??
+    out[0][0] = cos(angles.y) * cos(angles.z);
+    out[0][1] = sin(angles.x) * sin(angles.y) * cos(angles.z) - cos(angles.x) * sin(angles.z);
+    out[0][2] = cos(angles.x) * sin(angles.y) * cos(angles.z) + sin(angles.x) * sin(angles.z);
+    out[1][0] = cos(angles.y) * sin(angles.z);
+    out[1][1] = sin(angles.x) * sin(angles.y) * sin(angles.z) + cos(angles.x) * cos(angles.z);
+    out[1][2] = cos(angles.x) * sin(angles.y) * sin(angles.z) - sin(angles.x) * cos(angles.z);
+    out[2][0] = -sin(angles.y);
+    out[2][1] = sin(angles.x) * cos(angles.y);
+    out[2][2] = cos(angles.x) * cos(angles.y);
+}
+
+
+/**
+ * Multiply a 4d vector by a 4x4 matrix.
+ *
+ * @arg m: The matrix that will transform the vector
+ * @arg v: The vector to transform
+ * @arg out: The location to store the resulting vector
+ */
+inline void matmul(const float4x4 &m, const float4 &v, float4 &out)
+{
+    for (int i=0; i < 4; i++)
+    {
+        out[i] = 0;
+
+        for (int j=0; j < 4; j++)
+        {
+            out[i] += m[i][j] * v[j];
+        }
+    }
+}
+
+
+/**
+ * Multiply a 3d vector by a 3x3 matrix.
+ *
+ * @arg m: The matrix that will transform the vector
+ * @arg v: The vector to transform
+ * @arg out: The location to store the resulting vector
+ */
+inline void matmul(const float3x3 &m, const float3 &v, float3 &out)
+{
+    out = float3(
+        m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z,
+        m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z,
+        m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z
+    );
+}
+
+
 inline float3 offsetPoint(
         const float3 &point,
         const float3 &direction,
@@ -137,6 +190,28 @@ inline float3 surfaceOffsetPoint(
 
 
 float3 roughen(
+    const float3 &normal,
+    const float roughness,
+    const float seed)
+{
+    const float xAngle = random(seed);
+    const float yAngle = random(xAngle * seed + fabs(normal.x + normal.y + normal.z));
+    const float zAngle = random(yAngle * xAngle * seed + fabs(normal.x + normal.y * normal.z));
+
+    float3x3 rotation;
+    rotationMatrix(
+        PI * roughness * (float3(xAngle, yAngle, zAngle) - 0.5f) / 2.0f,
+        rotation
+    );
+
+    float3 roughened;
+    matmul(rotation, normal, roughened);
+
+    return normalize(roughened);
+}
+
+
+float3 roughen1(
     const float3 &normal,
     const float roughness,
     const float seed)
@@ -396,44 +471,6 @@ inline void positionFromWorldMatrix(const float4x4 &worldMatrix, float3 &positio
 }
 
 
-/**
- * Multiply a 4d vector by a 4x4 matrix.
- *
- * @arg m: The matrix that will transform the vector
- * @arg v: The vector to transform
- * @arg out: The location to store the resulting vector
- */
-inline void matmul(const float4x4 &m, const float4 &v, float4 &out)
-{
-    for (int i=0; i < 4; i++)
-    {
-        out[i] = 0;
-
-        for (int j=0; j < 4; j++)
-        {
-            out[i] += m[i][j] * v[j];
-        }
-    }
-}
-
-
-/**
- * Multiply a 3d vector by a 3x3 matrix.
- *
- * @arg m: The matrix that will transform the vector
- * @arg v: The vector to transform
- * @arg out: The location to store the resulting vector
- */
-inline void matmul(const float3x3 &m, const float3 &v, float3 &out)
-{
-    out = float3(
-        m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z,
-        m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z,
-        m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z
-    );
-}
-
-
 inline float3 reflectRayOffSurface(
     const float3 &incidentRayDirection,
     const float3 &surfaceNormalDirection)
@@ -557,21 +594,6 @@ void createCameraRay(
         direction
     );
     rayDirection = normalize(float3(direction.x, direction.y, direction.z));
-}
-
-
-inline void rotationMatrix(const float3 &angles, float3x3 &out)
-{
-    // Why tf can I not init a float3x3 normally??
-    out[0][0] = cos(angles.y) * cos(angles.z);
-    out[0][1] = sin(angles.x) * sin(angles.y) * cos(angles.z) - cos(angles.x) * sin(angles.z);
-    out[0][2] = cos(angles.x) * sin(angles.y) * cos(angles.z) + sin(angles.x) * sin(angles.z);
-    out[1][0] = cos(angles.y) * sin(angles.z);
-    out[1][1] = sin(angles.x) * sin(angles.y) * sin(angles.z) + cos(angles.x) * cos(angles.z);
-    out[1][2] = cos(angles.x) * sin(angles.y) * sin(angles.z) - sin(angles.x) * cos(angles.z);
-    out[2][0] = -sin(angles.y);
-    out[2][1] = sin(angles.x) * cos(angles.y);
-    out[2][2] = cos(angles.x) * cos(angles.y);
 }
 
 
