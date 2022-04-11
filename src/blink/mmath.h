@@ -331,7 +331,7 @@ inline float3 sphericalUnitVectorToCartesion(const float2 &angles)
 }
 
 
-inline float2 normalizeAngles(const float2 &angles)
+inline float2 normalizeAngles1(const float2 &angles)
 {
     float2 normalizedAngles = float2(
         fmod(angles.x, 2.0f * PI),
@@ -344,12 +344,33 @@ inline float2 normalizeAngles(const float2 &angles)
 }
 
 
+float2 normalizeAngles(const float2 &angles)
+{
+    float normalizedTheta = angles.x;
+    float normalizedPhi = angles.y;
+    if (normalizedPhi <= 0.0f)
+    {
+        normalizedPhi = -normalizedPhi;
+        normalizedTheta += PI;
+    }
+    else if (normalizedPhi > PI)
+    {
+        normalizedPhi = 2.0f * PI - normalizedPhi;
+        normalizedTheta += PI;
+    }
+    normalizedTheta = fmod(normalizedTheta, 2.0f * PI),
+    normalizedTheta += 2.0f * PI * (normalizedTheta < 0.0f);
+
+    return float2(normalizedTheta, normalizedPhi);
+}
+
+
 float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float thetaOffset)
 {
-    const float rayAnglePhi = acos(rayDirection.y);
-    const float rayAngleTheta = atan2(rayDirection.z, rayDirection.x) + thetaOffset;
-
-    return normalizeAngles(float2(rayAngleTheta, rayAnglePhi));
+    return normalizeAngles(float2(
+        atan2(rayDirection.z, rayDirection.x) + thetaOffset,
+        acos(rayDirection.y)
+    ));
 }
 
 
@@ -454,6 +475,7 @@ inline float4 blend(const float4 &value0, const float4 &value1, const float weig
 {
     return value1 + weight * (value0 - value1);
 }
+
 
 /**
  * Get the position component of a world matrix.

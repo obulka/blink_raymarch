@@ -1,0 +1,132 @@
+kernel HDRIBlur : ImageComputationKernel<ePixelWise>
+{
+    Image<eRead, eAccessRandom, eEdgeClamped> src; // the input image
+    Image<eWrite> dst; // the output image
+
+    param:
+        int formatWidth;
+        int formatHeight;
+        float2 blurAngles;
+        float samplesPerDegree;
+
+    local:
+        float2 pixelSize;
+        float2 blurRadians;
+
+
+    // In define(), parameters can be given labels and default values.
+    void define()
+    {
+        defineParam(formatHeight, "HDRI Lighting Height", 512);
+        defineParam(formatWidth, "HDRI Lighting Width", 1024);
+        defineParam(blurAngles, "Blur Angles", float2(180, 180));
+        defineParam(samplesPerDegree, "Samples per Degree", 1.0f);
+    }
+
+
+    void init()
+    {
+        pixelSize = float2(formatWidth / (2.0f * PI), formatHeight / PI);
+        blurRadians = PI * blurAngles / 180.0f;
+    }
+
+
+    /**
+     * Get the value of hdri the ray would hit at infinite distance
+     */
+    inline float4 readHDRIValue(const float2 &angles)
+    {
+        return bilinear(
+            src,
+            pixelSize.x * angles.x,
+            formatHeight - (pixelSize.y * angles.y)
+        );
+    }
+
+
+    inline float2 pixelsToUV(const float2 &pixelLocation, const float2 &format)
+    {
+        return float2(
+            2.0f * pixelLocation.x / format.x - 1.0f,
+            2.0f * pixelLocation.y / format.y - 1.0f
+        );
+    }
+
+
+    inline float2 uvPositionToAngles(const float2 &uvPosition)
+    {
+        return float2(
+            (uvPosition.x + 1.0f) * PI,
+            (1.0f - uvPosition.y) * PI / 2.0f
+        );
+    }
+
+
+    float normalizeAngles(float2 &angles)
+    {
+        float flipDirection = 1.0f;
+        float normalizedPhi = angles.y;
+        if (angles.y < 0.0f)
+        {
+            angles.y = -angles.y;
+            angles.x += PI;
+            flipDirection = -1.0f;
+        }
+        else if (angles.y > PI)
+        {
+            angles.y = 2.0f * PI - angles.y;
+            angles.x += PI;
+            flipDirection = -1.0f;
+        }
+        angles.x = fmod(angles.x, 2.0f * PI),
+        angles.x += 2.0f * PI * (angles.x < 0.0f);
+
+        return flipDirection;
+    }
+
+
+    inline float positivePart(const float value)
+    {
+        return max(value, 0.0f);
+    }
+
+
+    float sphericalUnitDot(const float2 &vector0, const float2 &vector1)
+    {
+        return (
+            cos(vector0.y) * cos(vector1.y)
+            + cos(vector0.x - vector1.x) * sin(vector0.y) * sin(vector1.y)
+        );
+    }
+
+
+    void process(int2 pos)
+    {
+        const float2 uvPosition = pixelsToUV(pos, float2(formatWidth, formatHeight));
+        const float2 centralDirection = uvPositionToAngles(uvPosition);
+        const float2 blurStart = centralDirection - blurRadians / 2.0f;
+
+        float2 blurIncrement = blurRadians / blurAngles / samplesPerDegree;
+        float2 currentAngle = blurStart;
+        float4 sum = float4(0);
+
+        for (int i=0; i < blurAngles.y * samplesPerDegree; i++)
+        {
+            blurIncrement.y *= normalizeAngles(currentAngle);
+
+            for (int j=0; j < blurAngles.x * samplesPerDegree; j++)
+            {
+                sum += (
+                    positivePart(sphericalUnitDot(centralDirection, currentAngle))
+                    * readHDRIValue(currentAngle)
+                );
+                currentAngle.x += blurIncrement.x;
+                normalizeAngles(currentAngle);
+            }
+            currentAngle.x = blurStart.x;
+            currentAngle.y += blurIncrement.y;
+        }
+
+        dst() = sum / floor(blurAngles.x * blurAngles.y) / samplesPerDegree / samplesPerDegree;
+    }
+};

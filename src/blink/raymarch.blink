@@ -16,7 +16,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessPoint, eEdgeNone> bg;
 
     // the skybox in latlong format
-    Image<eRead, eAccessRandom, eEdgeNone> skyBox;
+    Image<eRead, eAccessRandom, eEdgeConstant> skyBox;
 
 
     // the shape positons.xyz, scale.w
@@ -228,31 +228,38 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float4 readSkyValue(float3 rayDirection)
     {
-        float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);
+        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);
 
-        SampleType(skyBox) skyBoxPixel = bilinear(
-            skyBox,
-            skyBoxPixelSize.x * angles.x,
-            skyFormatHeight - (skyBoxPixelSize.y * angles.y)
+        const float2 indices = clamp(
+            float2(
+                skyBoxPixelSize.x * angles.x,
+                skyFormatHeight - (skyBoxPixelSize.y * angles.y)
+            ),
+            float2(0),
+            float2(skyFormatWidth, skyFormatHeight) - 1.0f
         );
 
-        return skyBoxPixel;
+        return bilinear(skyBox, indices.x, indices.y);
     }
+
 
     /**
      * Get the value of sky the ray would hit at infinite distance
      */
     float4 readSkyLightValue(float3 rayDirection)
     {
-        float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);
+        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);
 
-        SampleType(skyBoxLight) skyLightPixel = bilinear(
-            skyBoxLight,
-            skyLightPixelSize.x * angles.x,
-            skyLightFormatHeight - (skyLightPixelSize.y * angles.y)
+        const float2 indices = clamp(
+            float2(
+                skyLightPixelSize.x * angles.x,
+                skyLightFormatHeight - (skyLightPixelSize.y * angles.y)
+            ),
+            float2(0),
+            float2(skyLightFormatWidth, skyLightFormatHeight) - 1.0f
         );
 
-        return skyLightPixel;
+        return bilinear(skyBoxLight, indices.x, indices.y);
     }
 
 
@@ -295,12 +302,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         const float uniformScale,
         const int modifications,
         const float edgeRadius,
-        const float wallThickness)
+        const float wallThickness,
+        float4 &colour)
     {
         float nextDistance = distanceToObject(
             rayOrigin / uniformScale,
             shape,
-            dimension
+            dimension,
+            colour
         ) * uniformScale;
 
         return performDistanceModification(
@@ -350,6 +359,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                 int stackLastIndex = parentStackLength - 1;
 
+                float4 blendedColour = surfaceColour;
+                float4 blendedSurface = surfaceProperty;
                 if (numChildren <= 0)
                 {
                     // No Children left, compute interactions with parent
@@ -379,11 +390,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             scale,
                             modifications,
                             modParameters1.w,
-                            rotation.w
+                            rotation.w,
+                            blendedColour
                         );
-
-                        float4 blendedColour = surfaceColour;
-                        float4 blendedSurface = surfaceProperty;
 
                         do
                         {
@@ -451,15 +460,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             scale,
                             modifications,
                             modParameters1.w,
-                            rotation.w
+                            rotation.w,
+                            blendedColour
                         );
 
                         if (fabs(nextDistance) < fabs(distance))
                         {
                             distance = nextDistance;
 
-                            colour = float4(surfaceColour);
-                            surface = float4(surfaceProperty);
+                            colour = blendedColour;
+                            surface = blendedSurface;
                         }
                     }
                 }
@@ -490,7 +500,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         scale,
                         modifications,
                         modParameters1.w,
-                        rotation.w
+                        rotation.w,
+                        blendedColour
                     );
 
                     // parentStack.push()
@@ -499,14 +510,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     parentStack[parentStackLength][2] = transformedRay.y;
                     parentStack[parentStackLength][3] = transformedRay.z;
                     parentStack[parentStackLength][4] = nextDistance;
-                    parentStack[parentStackLength][5] = surfaceColour.x;
-                    parentStack[parentStackLength][6] = surfaceColour.y;
-                    parentStack[parentStackLength][7] = surfaceColour.z;
-                    parentStack[parentStackLength][8] = surfaceColour.w;
-                    parentStack[parentStackLength][9] = surfaceProperty.x;
-                    parentStack[parentStackLength][10] = surfaceProperty.y;
-                    parentStack[parentStackLength][11] = surfaceProperty.z;
-                    parentStack[parentStackLength][12] = surfaceProperty.w;
+                    parentStack[parentStackLength][5] = blendedColour.x;
+                    parentStack[parentStackLength][6] = blendedColour.y;
+                    parentStack[parentStackLength][7] = blendedColour.z;
+                    parentStack[parentStackLength][8] = blendedColour.w;
+                    parentStack[parentStackLength][9] = blendedSurface.x;
+                    parentStack[parentStackLength][10] = blendedSurface.y;
+                    parentStack[parentStackLength][11] = blendedSurface.z;
+                    parentStack[parentStackLength][12] = blendedSurface.w;
                     parentStack[parentStackLength][13] = blendStrength;
                     parentStack[parentStackLength][14] = (float) modifications;
                     parentStackLength++;
@@ -987,9 +998,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         refractedRefractiveIndex
                     );
                     const float refraction = saturate(surface.y * (1 - reflectivity));
+                    float intensity = rayIntensity * refraction;
                     float reflection = surface.x;
 
-                    if (surface.y > 0.0f && numRays < lastRay)
+                    if (surface.y > 0.0f && numRays < lastRay && intensity > hitTolerance)
                     {
                         reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
 
@@ -1013,14 +1025,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         rays[numRays][4] = refractedDirection.y;
                         rays[numRays][5] = refractedDirection.z;
 
-                        rays[numRays][6] = rayIntensity * refraction;
+                        rays[numRays][6] = intensity;
 
                         rays[numRays][7] = refractedRefractiveIndex;
 
                         numRays++;
                     }
 
-                    if (reflection > 0.0f && numRays < lastRay)
+                    intensity = rayIntensity * reflection;
+                    if (reflection > 0.0f && numRays < lastRay && intensity > hitTolerance)
                     {
                         const float3 reflectedDirection = reflectRayOffSurface(
                             direction,
@@ -1040,7 +1053,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         rays[numRays][4] = reflectedDirection.y;
                         rays[numRays][5] = reflectedDirection.z;
 
-                        rays[numRays][6] = rayIntensity * reflection;
+                        rays[numRays][6] = intensity;
 
                         rays[numRays][7] = incidentRefractiveIndex;
 

@@ -844,14 +844,20 @@ float distanceToLink(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToMandelbulb(const float3 &position, const float power, const int iterations)
+float distanceToMandelbulb(
+        const float3 &position,
+        const float power,
+        const int iterations,
+        const float maxSquareRadius,
+        float4 &trapColour)
 {
     float3 currentPosition = position;
     float radiusSquared = dot(currentPosition, currentPosition);
 
-    // float4 trap = float4(fabs(currentPosition), radiusSquared);
-    float dradius = 1.0f;
+    float3 absPosition = fabs(currentPosition);
+    trapColour = float4(absPosition.x, absPosition.y, absPosition.z, radiusSquared);
 
+    float dradius = 1.0f;
     for (int i=0; i < iterations; i++)
     {
         dradius = power * pow(radiusSquared, (power - 1) / 2) * dradius + 1.0f;
@@ -866,20 +872,28 @@ float distanceToMandelbulb(const float3 &position, const float power, const int 
             cos(theta)
         );
 
-        // trap = min(trap, float4(fabs(currentPosition), radiusSquared));
+        absPosition = fabs(currentPosition);
+        trapColour = min(
+            trapColour,
+            float4(absPosition.x, absPosition.y, absPosition.z, radiusSquared)
+        );
 
         radiusSquared = dot(currentPosition, currentPosition);
-        if(radiusSquared > 4.0f)
+        if(radiusSquared > maxSquareRadius)
         {
             break;
         }
     }
 
-    // float4 resColor = float4(radiusSquared, trap.y, trap.z, trap.w);
+    trapColour = saturate(float4(
+        trapColour.x,
+        trapColour.y,
+        trapColour.z,
+        trapColour.w
+    ));
 
     return 0.25f * log(radiusSquared) * sqrt(radiusSquared) / dradius;
 }
-
 
 
 /**
@@ -916,11 +930,21 @@ float distanceToMandelbulb(const float3 &position, const float power, const int 
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToObject(const float3 &position, const int shapeType, const float4 &dimensions)
+float distanceToObject(
+        const float3 &position,
+        const int shapeType,
+        const float4 &dimensions,
+        float4 &trapColour)
 {
     if (shapeType == 23)
     {
-        return distanceToMandelbulb(position, dimensions.x, (int) dimensions.y);
+        return distanceToMandelbulb(
+            position,
+            dimensions.x,
+            (int) dimensions.y,
+            dimensions.z,
+            trapColour
+        );
     }
     if (shapeType == 0)
     {
