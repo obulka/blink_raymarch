@@ -938,13 +938,20 @@ float distanceToObject(
 {
     if (shapeType == 23)
     {
-        return distanceToMandelbulb(
+        float4 colour;
+        const float distance = distanceToMandelbulb(
             position,
             dimensions.x,
             (int) dimensions.y,
             dimensions.z,
-            trapColour
+            colour
         );
+        trapColour = blend(
+            colour,
+            trapColour,
+            saturate(dimensions.w)
+        );
+        return distance;
     }
     if (shapeType == 0)
     {
