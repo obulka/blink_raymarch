@@ -105,6 +105,7 @@ kernel HDRIBlur : ImageComputationKernel<ePixelWise>
         const float2 uvPosition = pixelsToUV(pos, float2(formatWidth, formatHeight));
         const float2 centralDirection = uvPositionToAngles(uvPosition);
         const float2 blurStart = centralDirection - blurRadians / 2.0f;
+        normalizeAngles(blurStart);
 
         float2 blurIncrement = blurRadians / blurAngles / samplesPerDegree;
         float2 currentAngle = blurStart;
@@ -112,8 +113,6 @@ kernel HDRIBlur : ImageComputationKernel<ePixelWise>
 
         for (int i=0; i < blurAngles.y * samplesPerDegree; i++)
         {
-            blurIncrement.y *= normalizeAngles(currentAngle);
-
             for (int j=0; j < blurAngles.x * samplesPerDegree; j++)
             {
                 sum += (
@@ -125,6 +124,7 @@ kernel HDRIBlur : ImageComputationKernel<ePixelWise>
             }
             currentAngle.x = blurStart.x;
             currentAngle.y += blurIncrement.y;
+            blurIncrement.y *= normalizeAngles(currentAngle);
         }
 
         dst() = sum / floor(blurAngles.x * blurAngles.y) / samplesPerDegree / samplesPerDegree;

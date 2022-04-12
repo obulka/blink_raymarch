@@ -771,11 +771,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 0.0f,
                 skyLightShadowHardness
             );
-            const float4 skyLightColour = saturate(readSkyLightValue(rayDirection));
+            const float4 skyLightColour = readSkyLightValue(rayDirection);
             lightColour = blend(
                 skyLightColour,
                 lightColour,
-                length(skyLightColour) * currentLightIntensity.x * currentLightIntensity.y
+                saturate(length(skyLightColour) * currentLightIntensity.x * currentLightIntensity.y)
             );
             lightIntensity += currentLightIntensity / (float) skyLightSamples;
             seed += fabs(
@@ -783,6 +783,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             ) + 0.5773f / (float) iteration;
         }
 
+        lightColour = saturate(lightColour);
         return saturate(lightIntensity.x * lightIntensity.y);
     }
 
@@ -1076,16 +1077,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             if (!madeContact)
             {
                 rayColour = blend(
-                    saturate(readSkyValue(direction)),
                     blend(
                         iterGlowColour,
                         blend(
                             hazeColour,
-                            rayColour,
+                            saturate(readSkyValue(direction)),
                             getHazeAmount(distanceTravelled)
                         ),
                         saturate(iterGlowAmount * iterations)
                     ),
+                    rayColour,
                     rayIntensity
                 );
             }
