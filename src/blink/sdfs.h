@@ -7,6 +7,19 @@
 
 
 /**
+ * Compute the min distance from a point to a point.
+ *
+ * @arg position: The point to get the distance to, from the object.
+ *
+ * @returns: The minimum distance from the point to the shape.
+ */
+inline float distanceToPoint(const float3 &position)
+{
+    return length(position);
+}
+
+
+/**
  * Compute the min distance from a point to a circle.
  *
  * @arg position: The point to get the distance to, from the object.

@@ -192,11 +192,11 @@ inline float3 surfaceOffsetPoint(
 float3 roughen(
     const float3 &normal,
     const float roughness,
-    const float seed)
+    const float3 &seed)
 {
-    const float xAngle = random(seed);
-    const float yAngle = random(xAngle * seed + fabs(normal.x + normal.y + normal.z));
-    const float zAngle = random(yAngle * xAngle * seed + fabs(normal.x + normal.y * normal.z));
+    const float xAngle = random(seed.x);
+    const float yAngle = random(seed.y);
+    const float zAngle = random(seed.z);
 
     float3x3 rotation;
     rotationMatrix(
