@@ -1,21 +1,20 @@
 #! /usr/local/Nuke13.0v2/libnuke-13.0.2.so -nx
-#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/trap_fractal/no_lights/no_lights.%04d.exr" format:"1024 778 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 240" fps:"0" colorspace:"default (linear)" datatype:"16 bit half" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 13.0 v2
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="1976" y="188" w="2504" h="1376" maximized="1" screen="0">
+    <window x="0" y="161" w="1920" h="1043" maximized="1" screen="1">
         <splitter orientation="1">
             <split size="40"/>
             <dock id="" hideTitles="1" activePageId="Toolbar.1">
                 <page id="Toolbar.1"/>
             </dock>
-            <split size="1841" stretch="1"/>
+            <split size="1257" stretch="1"/>
             <splitter orientation="2">
-                <split size="938"/>
+                <split size="874"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="395"/>
+                <split size="126"/>
                 <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
@@ -34,7 +33,8 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/nuke_scripts/raymarch_test.nk
- last_frame 240
+ frame 442
+ last_frame 479
  format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
  proxy_type scale
  proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
@@ -299,7 +299,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N8a8f3200 [stack 0]
+set Na94b8f00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -321,7 +321,7 @@ set N8a8f3200 [stack 0]
    xpos 34
    ypos -6
   }
-set N8a8f1600 [stack 0]
+set Nec0cb200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -332,7 +332,7 @@ set N8a8f1600 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8a8f3200
+push $Na94b8f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -361,7 +361,7 @@ push $N8a8f3200
    xpos 158
    ypos 167
   }
-push $N8a8f1600
+push $Nec0cb200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -454,7 +454,7 @@ push $N8a8f1600
    xpos 192
    ypos -2
   }
-set N8a8acf00 [stack 0]
+set Nec086b00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -476,7 +476,7 @@ set N8a8acf00 [stack 0]
    xpos 34
    ypos -6
   }
-set N8a883200 [stack 0]
+set Nec084f00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -487,7 +487,7 @@ set N8a883200 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8a8acf00
+push $Nec086b00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -516,7 +516,7 @@ push $N8a8acf00
    xpos 158
    ypos 167
   }
-push $N8a883200
+push $Nec084f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -811,7 +811,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N14190800 [stack 0]
+set Nd017e400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -833,7 +833,7 @@ set N14190800 [stack 0]
    xpos 34
    ypos -6
   }
-set N1416eb00 [stack 0]
+set Nd017c800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -844,7 +844,7 @@ set N1416eb00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N14190800
+push $Nd017e400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -873,7 +873,7 @@ push $N14190800
    xpos 158
    ypos 167
   }
-push $N1416eb00
+push $Nd017c800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -966,7 +966,7 @@ push $N1416eb00
    xpos 192
    ypos -2
   }
-set N1411e400 [stack 0]
+set Nd0120100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -988,7 +988,7 @@ set N1411e400 [stack 0]
    xpos 34
    ypos -6
   }
-set N1411c800 [stack 0]
+set Nd00fe400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -999,7 +999,7 @@ set N1411c800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N1411e400
+push $Nd0120100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1028,7 +1028,7 @@ push $N1411e400
    xpos 158
    ypos 167
   }
-push $N1411c800
+push $Nd00fe400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1323,7 +1323,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nd0151d00 [stack 0]
+set N18117900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1345,7 +1345,7 @@ set Nd0151d00 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd0150100 [stack 0]
+set N18115d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1356,7 +1356,7 @@ set Nd0150100 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nd0151d00
+push $N18117900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1385,7 +1385,7 @@ push $Nd0151d00
    xpos 158
    ypos 167
   }
-push $Nd0150100
+push $N18115d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1478,7 +1478,7 @@ push $Nd0150100
    xpos 192
    ypos -2
   }
-set Nd02d3900 [stack 0]
+set Na88b9600 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1500,7 +1500,7 @@ set Nd02d3900 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd02d1d00 [stack 0]
+set Na88a7900 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1511,7 +1511,7 @@ set Nd02d1d00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nd02d3900
+push $Na88b9600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1540,7 +1540,7 @@ push $Nd02d3900
    xpos 158
    ypos 167
   }
-push $Nd02d1d00
+push $Na88a7900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1835,7 +1835,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nf01af200 [stack 0]
+set Na89d4f00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1857,7 +1857,7 @@ set Nf01af200 [stack 0]
    xpos 34
    ypos -6
   }
-set Nf01ad600 [stack 0]
+set Na89b7200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1868,7 +1868,7 @@ set Nf01ad600 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nf01af200
+push $Na89d4f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1897,7 +1897,7 @@ push $Nf01af200
    xpos 158
    ypos 167
   }
-push $Nf01ad600
+push $Na89b7200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1990,7 +1990,7 @@ push $Nf01ad600
    xpos 192
    ypos -2
   }
-set Nf014cf00 [stack 0]
+set Na895ab00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2012,7 +2012,7 @@ set Nf014cf00 [stack 0]
    xpos 34
    ypos -6
   }
-set Nf012f200 [stack 0]
+set Na8958f00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2023,7 +2023,7 @@ set Nf012f200 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nf014cf00
+push $Na895ab00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2052,7 +2052,7 @@ push $Nf014cf00
    xpos 158
    ypos 167
   }
-push $Nf012f200
+push $Na8958f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2347,7 +2347,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nd00b8800 [stack 0]
+set Na8f72400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2369,7 +2369,7 @@ set Nd00b8800 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd0096b00 [stack 0]
+set Na8f70800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2380,7 +2380,7 @@ set Nd0096b00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nd00b8800
+push $Na8f72400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2409,7 +2409,7 @@ push $Nd00b8800
    xpos 158
    ypos 167
   }
-push $Nd0096b00
+push $Na8f70800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2502,7 +2502,7 @@ push $Nd0096b00
    xpos 192
    ypos -2
   }
-set Nd003a400 [stack 0]
+set Na8f24100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2524,7 +2524,7 @@ set Nd003a400 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd0038800 [stack 0]
+set Na8efe400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2535,7 +2535,7 @@ set Nd0038800 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nd003a400
+push $Na8f24100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2564,7 +2564,7 @@ push $Nd003a400
    xpos 158
    ypos 167
   }
-push $Nd0038800
+push $Na8efe400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2861,7 +2861,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nc0535d00 [stack 0]
+set Na8a13900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2883,7 +2883,7 @@ set Nc0535d00 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc0534100 [stack 0]
+set Na8a11d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2894,7 +2894,7 @@ set Nc0534100 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc0535d00
+push $Na8a13900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2923,7 +2923,7 @@ push $Nc0535d00
    xpos 158
    ypos 167
   }
-push $Nc0534100
+push $Na8a11d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3016,7 +3016,7 @@ push $Nc0534100
    xpos 192
    ypos -2
   }
-set Nc06ab900 [stack 0]
+set Na8bb9600 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3038,7 +3038,7 @@ set Nc06ab900 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc06a9d00 [stack 0]
+set Na8b9f900 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3049,7 +3049,7 @@ set Nc06a9d00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc06ab900
+push $Na8bb9600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3078,7 +3078,7 @@ push $Nc06ab900
    xpos 158
    ypos 167
   }
-push $Nc06a9d00
+push $Na8b9f900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3279,7 +3279,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set Na899dd00 [stack 0]
+set Na8cef200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3301,7 +3301,7 @@ set Na899dd00 [stack 0]
    xpos 34
    ypos -6
   }
-set Na899c100 [stack 0]
+set Na8ced600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3312,7 +3312,7 @@ set Na899c100 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na899dd00
+push $Na8cef200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3341,7 +3341,7 @@ push $Na899dd00
    xpos 158
    ypos 167
   }
-push $Na899c100
+push $Na8ced600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3527,7 +3527,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na8900800 [stack 0]
+set Na8c65d00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3549,7 +3549,7 @@ set Na8900800 [stack 0]
    xpos 34
    ypos -6
   }
-set Na86deb00 [stack 0]
+set Na8c64100 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3560,7 +3560,7 @@ set Na86deb00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na8900800
+push $Na8c65d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3589,7 +3589,7 @@ push $Na8900800
    xpos 158
    ypos 167
   }
-push $Na86deb00
+push $Na8c64100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3676,7 +3676,19 @@ Reformat {
  xpos 18921
  ypos 934
 }
+Read {
+ inputs 0
+ file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/kloppenheim_02_4k.exr
+ format "4096 2048 0 0 4096 2048 1 4K_LatLong"
+ origset true
+ auto_alpha true
+ name Read1
+ xpos 18921
+ ypos 794
+}
 Dot {
+ inputs 0
  name Dot19
  xpos 18955
  ypos 998
@@ -3822,7 +3834,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na860ab00 [stack 0]
+set Na8d94100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3844,7 +3856,7 @@ set Na860ab00 [stack 0]
    xpos 34
    ypos -6
   }
-set Na8608f00 [stack 0]
+set Na8d62400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3855,7 +3867,7 @@ set Na8608f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na860ab00
+push $Na8d94100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3884,7 +3896,7 @@ push $Na860ab00
    xpos 158
    ypos 167
   }
-push $Na8608f00
+push $Na8d62400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4071,7 +4083,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na8775600 [stack 0]
+set Na8eceb00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4093,7 +4105,7 @@ set Na8775600 [stack 0]
    xpos 34
    ypos -6
   }
-set Na874b900 [stack 0]
+set Na8eccf00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4104,7 +4116,7 @@ set Na874b900 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na8775600
+push $Na8eceb00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4133,7 +4145,7 @@ push $Na8775600
    xpos 158
    ypos 167
   }
-push $Na874b900
+push $Na8eccf00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4212,7 +4224,7 @@ Group {
  addUserKnob {7 dimension_x l radius R 0 10}
  dimension_x {{curve x1 9 x240 6}}
  addUserKnob {7 dimension_y}
- dimension_y 14
+ dimension_y 10
  addUserKnob {7 dimension_z}
  dimension_z 4
  addUserKnob {7 dimension_w}
@@ -4432,7 +4444,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na8888f00 [stack 0]
+set Nbc142400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4454,7 +4466,7 @@ set Na8888f00 [stack 0]
    xpos 34
    ypos -6
   }
-set Na8863200 [stack 0]
+set Nbc140800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4465,7 +4477,7 @@ set Na8863200 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na8888f00
+push $Nbc142400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4494,7 +4506,7 @@ push $Na8888f00
    xpos 158
    ypos 167
   }
-push $Na8863200
+push $Nbc140800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4587,7 +4599,7 @@ push $Na8863200
    xpos 192
    ypos -2
   }
-set Na8816b00 [stack 0]
+set Nbc0e4100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4609,7 +4621,7 @@ set Na8816b00 [stack 0]
    xpos 34
    ypos -6
   }
-set Na8814f00 [stack 0]
+set Nbc0c6400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4620,7 +4632,7 @@ set Na8814f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na8816b00
+push $Nbc0e4100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4649,7 +4661,7 @@ push $Na8816b00
    xpos 158
    ypos 167
   }
-push $Na8814f00
+push $Nbc0c6400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4761,7 +4773,6 @@ Group {
  addUserKnob {7 skybox_lighting_gain l "skybox lighting gain"}
  skybox_lighting_gain 0.5
  addUserKnob {3 skybox_lighting_samples l "skybox lighting samples"}
- skybox_lighting_samples 10
  addUserKnob {7 skybox_shadow_hardness l "skybox shadow hardness" R 1 100}
  skybox_shadow_hardness 1
  addUserKnob {7 skybox_lighting_blur l "skybox lighting blur"}
@@ -4769,6 +4780,7 @@ Group {
  addUserKnob {6 soften_shadows l "soften shadows" -STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {4 output_type l output M {Scene Position Normal Depth ""}}
+ output_type Depth
 }
  BackdropNode {
   inputs 0
@@ -4861,7 +4873,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set Na815c800 [stack 0]
+set N6edc9d00 [stack 0]
  Blur {
   size {{"parent.skybox_lighting_blur * sky_dot.format.height / 2"}}
   name Blur
@@ -4907,7 +4919,7 @@ set Na815c800 [stack 0]
   xpos -48
   ypos -1309
  }
-set Na812cf00 [stack 0]
+set N6edaa400 [stack 0]
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_light_properties1
@@ -4922,7 +4934,7 @@ set Na812cf00 [stack 0]
   xpos -232
   ypos -866
  }
-push $Na812cf00
+push $N6edaa400
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_light_properties
@@ -4937,7 +4949,7 @@ push $Na812cf00
   xpos -113
   ypos -864
  }
-push $Na812cf00
+push $N6edaa400
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_light
@@ -4977,7 +4989,7 @@ push $Na812cf00
   xpos 641
   ypos -1318
  }
-set Na8108100 [stack 0]
+set N6ed89600 [stack 0]
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_surface
@@ -4992,7 +5004,7 @@ set Na8108100 [stack 0]
   xpos 322
   ypos -863
  }
-push $Na8108100
+push $N6ed89600
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_shape_mods_1
@@ -5007,7 +5019,7 @@ push $Na8108100
   xpos 780
   ypos -865
  }
-push $Na8108100
+push $N6ed89600
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_shape_mods_0
@@ -5022,7 +5034,7 @@ push $Na8108100
   xpos 641
   ypos -864
  }
-push $Na8108100
+push $N6ed89600
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_shape
@@ -5037,7 +5049,7 @@ push $Na8108100
   xpos 473
   ypos -863
  }
-push $Na8108100
+push $N6ed89600
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_colour
@@ -5052,7 +5064,7 @@ push $Na8108100
   xpos 165
   ypos -864
  }
-push $Na8108100
+push $N6ed89600
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_dimensions
@@ -5067,7 +5079,7 @@ push $Na8108100
   xpos 1227
   ypos -857
  }
-push $Na8108100
+push $N6ed89600
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_rotation_wall_thickness
@@ -5082,7 +5094,7 @@ push $Na8108100
   xpos 1076
   ypos -854
  }
-push $Na8108100
+push $N6ed89600
  Shuffle2 {
   fromInput1 {{0} B}
   in1 sdf_position_scale
@@ -5097,7 +5109,7 @@ push $Na8108100
   xpos 934
   ypos -859
  }
-push $Na815c800
+push $N6edc9d00
  Constant {
   inputs 0
   name Constant1
@@ -5169,16 +5181,53 @@ push $Na815c800
   ypos -122
  }
 end_group
-set Na8175600 [stack 0]
 Write {
- file /home/ob1/software/nuke/dev/raymarch/images/trap_fractal/no_lights/no_lights.####.exr
+ file /home/ob1/software/nuke/dev/raymarch/images/trap_fractal/depth/depth.####.exr
  file_type exr
  write_ACES_compliant_EXR true
  first_part rgba
- version 2
+ version 4
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  name Write1
- xpos 18503
- ypos 1291
+ xpos 18315
+ ypos 1270
+}
+SmartVector {
+ inputs 0
+ name SmartVector1
+ xpos 18951
+ ypos 1418
+}
+MotionBlur2D {
+ inputs 0
+ name MotionBlur2D1
+ xpos 19130
+ ypos 1443
+}
+Read {
+ inputs 0
+ file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/trap_fractal/depth/depth.####.exr
+ format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ last 240
+ origlast 240
+ origset true
+ name Read5
+ xpos 19125
+ ypos 1292
+}
+Read {
+ inputs 0
+ file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/trap_fractal/lights/lights.####.exr
+ format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ last 240
+ origlast 240
+ origset true
+ name Read3
+ xpos 19204
+ ypos 1027
 }
 Read {
  inputs 0
@@ -5189,37 +5238,420 @@ Read {
  origlast 240
  origset true
  name Read4
- xpos 19312
- ypos 966
+ xpos 19338
+ ypos 1027
 }
-set N9a6ac100 [stack 0]
-HueShift {
- saturation 0.41
- color_saturation 1.14
- hue_rotation -12
- name HueShift1
- xpos 19024
- ypos 1357
-}
-push $N9a6ac100
-push $Na8175600
-Viewer {
+Merge2 {
  inputs 2
- frame 1
- frame_range 1-240
- colour_sample_bbox {0.2001953125 0.1083984375 0.2006835938 0.1088867188}
- name Viewer1
- xpos 18204
- ypos 1446
+ operation out
+ mix 0.91
+ name Merge1
+ xpos 19263
+ ypos 1199
+}
+HueShift {
+ saturation 0.29
+ color_saturation 1.86
+ hue_rotation {{curve x1 -180 x240 180}}
+ brightness 1.54
+ name HueShift1
+ xpos 19263
+ ypos 1255
+}
+Shuffle2 {
+ inputs 2
+ fromInput1 {{0} B A}
+ fromInput2 {{0} B A}
+ in2 rgb
+ out2 depth
+ mappings "5 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3 rgba.alpha 0 3 rgba.red 1 0 depth.Z 1 0"
+ name Shuffle1
+ xpos 19263
+ ypos 1321
+}
+Retime {
+ input.last 240
+ reverse true
+ output.last 240
+ after bounce
+ time ""
+ name Retime2
+ xpos 19263
+ ypos 1361
+}
+set Ncd2d8800 [stack 0]
+push $Ncd2d8800
+ZDefocus2 {
+ inputs 2
+ math depth
+ center 0.2225952744
+ focal_point {249 525}
+ dof 0.3149999976
+ size 1.85
+ max_size 2.3
+ legacy_resize_mode false
+ show_legacy_resize_mode false
+ name ZDefocus1
+ xpos 19315
+ ypos 1409
+}
+Write {
+ file /home/ob1/software/nuke/dev/raymarch/images/trap_fractal/final/final.####.exr
+ file_type exr
+ write_ACES_compliant_EXR true
+ first_part rgba
+ version 1
+ in_colorspace scene_linear
+ out_colorspace scene_linear
+ name Write2
+ xpos 19320
+ ypos 1464
+}
+Read {
+ inputs 0
+ file_type mov
+ file /home/ob1/software/nuke/dev/raymarch/images/trap_fractal/final_half.mp4
+ format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ last 240
+ origlast 240
+ origset true
+ name Read7
+ xpos 19903
+ ypos 1584
+}
+Read {
+ inputs 0
+ file_type mov
+ file /home/ob1/software/nuke/dev/raymarch/images/trap_fractal/final_h264.mp4
+ format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ last 479
+ origlast 479
+ origset true
+ name Read8
+ xpos 19890
+ ypos 1457
 }
 Read {
  inputs 0
  file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/kloppenheim_02_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
+ file /home/ob1/software/nuke/dev/raymarch/images/trap_fractal/final/final.####.exr
+ format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ last 240
+ origlast 240
  origset true
- auto_alpha true
- name Read1
- xpos 18921
- ypos 794
+ name Read6
+ xpos 19488
+ ypos 1399
+}
+Grade {
+ blackpoint 0.004
+ whitepoint 0.94
+ black -0.018
+ white 1.34
+ multiply 1.04
+ gamma 0.92
+ name Grade1
+ xpos 19488
+ ypos 1504
+}
+Retime {
+ input.last 240
+ reverse true
+ output.last 240
+ after bounce
+ time ""
+ name Retime1
+ xpos 19488
+ ypos 1539
+}
+Group {
+ name AntialiasingFilter
+ tile_color 0xc17a4aff
+ label "(\[value antialiasing])"
+ note_font "Verdana Bold"
+ xpos 19488
+ ypos 1593
+ disable true
+ addUserKnob {20 Antialiasing}
+ addUserKnob {41 channels T Matrix3.channels}
+ addUserKnob {26 ""}
+ addUserKnob {4 antialiasing t "Select which filter you want to apply: you have 3 intensity for the antialiasing filter and other 3 for to tweak the aliasing and get the image sharper" M {"- aliasing high" "- aliasing medium" "- aliasing low" none "+ antialiasing low" "+ antialiasing medium" "+ antialiasing high" ""}}
+ antialiasing "+ antialiasing low"
+ addUserKnob {6 blackClamp l "black clamp" t "Aliasing filter can give you negative values" +STARTLINE}
+ blackClamp true
+ addUserKnob {6 whiteClamp l "white clamp" t "Aliasing filter can give you values over 1 in the alpha channel" -STARTLINE}
+ addUserKnob {6 normalize l INVISIBLE -STARTLINE +INVISIBLE}
+ normalize true
+ addUserKnob {26 ""}
+ addUserKnob {41 maskChannel l "mask channel" T Keymix1.maskChannel}
+ addUserKnob {41 invertMask l invert -STARTLINE T Keymix1.invertMask}
+ addUserKnob {26 ""}
+ addUserKnob {41 mix T Keymix1.mix}
+ addUserKnob {26 ""}
+ addUserKnob {26 email l "" +STARTLINE T "<b><font color='SandyBrown'>Antialiasing filter  v2.0</font></b><br>\n<font size=“1”><i>by Andrea Geremia</i><br>\n<br>\nandrea.geremia89@gmail.com<br>\nwww.andreageremia.it</font> "}
+}
+ Reformat {
+  inputs 0
+  type "to box"
+  box_width 10
+  box_height 10
+  box_fixed true
+  name Reformat1
+  xpos 207
+  ypos -40
+ }
+ Shuffle {
+  alpha white
+  name Shuffle1
+  xpos 207
+  ypos 40
+ }
+ Input {
+  inputs 0
+  name mask
+  xpos 55
+  ypos -187
+  number 1
+ }
+ Switch {
+  inputs 2
+  which {{"!\[exists parent.input1]"}}
+  name Switch3
+  xpos 55
+  ypos 40
+ }
+ Dot {
+  name Dot8
+  xpos 88
+  ypos 432
+ }
+ Input {
+  inputs 0
+  name src
+  xpos -1152
+  ypos -390
+ }
+set Ncd371d00 [stack 0]
+ Dot {
+  name Dot3
+  xpos -1119
+  ypos -180
+ }
+set Ncd371600 [stack 0]
+ Dot {
+  name Dot9
+  xpos -1005
+  ypos -180
+ }
+set Ncd370f00 [stack 0]
+ Dot {
+  name Dot10
+  xpos -858
+  ypos -180
+ }
+set Ncd370800 [stack 0]
+ Dot {
+  name Dot4
+  xpos -623
+  ypos -180
+ }
+ Matrix {
+  channels {{{parent.Matrix3.channels}}}
+  matrix {
+      {1 1 1}
+      {1 1 1}
+      {1 1 1}
+    }
+  normalize true
+  name Matrix8
+  label "ANTIALIASING HIGH"
+  xpos -656
+  ypos -34
+ }
+push $Ncd370800
+ Matrix {
+  channels {{{parent.Matrix3.channels}}}
+  matrix {
+      {1 2 1}
+      {2 4 2}
+      {1 2 1}
+    }
+  normalize true
+  name Matrix5
+  label "ANTIALIASING MEDIUM"
+  xpos -891
+  ypos -24
+ }
+push $Ncd370f00
+ Matrix {
+  channels {{{parent.Matrix3.channels}}}
+  matrix {
+      {0 1 0}
+      {1 2 1}
+      {0 1 0}
+    }
+  normalize true
+  name Matrix6
+  label "ANTIALIASING LOW"
+  xpos -1038
+  ypos -26
+ }
+push $Ncd371600
+push $Ncd371600
+ Dot {
+  name Dot12
+  xpos -1309
+  ypos -180
+ }
+set Ncd316400 [stack 0]
+ Matrix {
+  channels {{{parent.Matrix3.channels}}}
+  matrix {
+      {0 -0.5 0}
+      {-0.5 3 -0.5}
+      {0 -0.5 0}
+    }
+  normalize {{parent.normalize}}
+  name Matrix10
+  label "ALIASING LOW"
+  xpos -1342
+  ypos -65
+ }
+push $Ncd316400
+ Dot {
+  name Dot5
+  xpos -1464
+  ypos -180
+ }
+set Ncd315600 [stack 0]
+ Matrix {
+  channels {{{parent.Matrix3.channels}}}
+  matrix {
+      {0 -1 0}
+      {-1 5 -1}
+      {0 -1 0}
+    }
+  normalize true
+  name Matrix7
+  label "ALIASING MEDIUM"
+  xpos -1497
+  ypos -59
+ }
+push $Ncd315600
+ Dot {
+  name Dot13
+  xpos -1699
+  ypos -180
+ }
+ Matrix {
+  channels {{{parent.Matrix3.channels}}}
+  matrix {
+      {-1 -1 -1}
+      {-1 9 -1}
+      {-1 -1 -1}
+    }
+  normalize {{parent.normalize}}
+  name Matrix4
+  label "ALIASING HIGH"
+  xpos -1732
+  ypos -58
+ }
+ Switch {
+  inputs 7
+  which {{parent.antialiasing}}
+  name Switch1
+  xpos -1152
+  ypos 244
+ }
+ Clamp {
+  channels {{{parent.Matrix3.channels}}}
+  minimum_enable {{parent.blackClamp}}
+  maximum_enable {{parent.whiteClamp}}
+  name Clamp1
+  xpos -1152
+  ypos 323
+ }
+ Dot {
+  name Dot2
+  xpos -1119
+  ypos 432
+ }
+push $Ncd371d00
+ Dot {
+  name Dot1
+  xpos -234
+  ypos -388
+ }
+ Keymix {
+  inputs 3
+  name Keymix1
+  xpos -267
+  ypos 426
+ }
+ Output {
+  name Output1
+  xpos -267
+  ypos 516
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote2
+  label "<b>sharp        ."
+  note_font_size 20
+  xpos -1486
+  ypos -239
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote1
+  label "<b>antialiasing        ."
+  note_font_size 20
+  xpos -925
+  ypos -226
+ }
+ Matrix {
+  inputs 0
+  channels rgba
+  matrix {
+      {0 0 0}
+      {0 1 0}
+      {0 0 0}
+    }
+  name Matrix3
+  xpos -1936
+  ypos -79
+ }
+end_group
+Write {
+ file /home/ob1/software/nuke/dev/raymarch/images/trap_fractal/final_h264.mp4
+ file_type mov
+ mov64_format "mp4 (MP4 (MPEG-4 Part 14))"
+ mov64_codec h264
+ mov64_fps 20
+ mov_prores_codec_profile "ProRes 4:4:4:4 XQ 12-bit"
+ mov_h264_codec_profile "High 4:2:0 8-bit"
+ mov64_pixel_format {{0}}
+ mov64_quality Best
+ mov64_fast_start true
+ mov64_write_timecode true
+ mov64_gop_size 12
+ mov64_b_frames 0
+ mov64_bitrate 50000
+ mov64_bitrate_tolerance 0
+ mov64_quality_min 1
+ mov64_quality_max 1
+ checkHashOnRead false
+ version 7
+ name Write3
+ xpos 19488
+ ypos 1660
+}
+Viewer {
+ frame 442
+ frame_range 1-479
+ fps 20
+ colour_sample_bbox {0.2001953125 0.1083984375 0.2006835938 0.1088867188}
+ name Viewer1
+ xpos 19195
+ ypos 1698
 }
