@@ -84,7 +84,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int softenSkyLightShadows;
         int skyLightFormatWidth;
         int skyLightFormatHeight;
-        int skyLightSamples;
 
         // Ray params
         int subdivisions;
@@ -92,6 +91,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int maxBounces;
         float maxRayDistance;
         int maxRaySteps;
+        int diffuseSamples;
         float hitTolerance;
         float shadowBias;
 
@@ -162,7 +162,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(softenSkyLightShadows, "Soften SkyBox Shadows", 1);
         defineParam(skyLightFormatHeight, "SkyBox Lighting Height", 512);
         defineParam(skyLightFormatWidth, "SkyBox Lighting Width", 1024);
-        defineParam(skyLightSamples, "SkyBox Lighting Samples", 5);
 
         // Ray params
         defineParam(subdivisions, "Pixel Subdivisions", 0);
@@ -170,6 +169,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(maxRaySteps, "Max Ray Steps", 128);
         defineParam(maxBounces, "Max Bounces", 1);
+        defineParam(diffuseSamples, "Diffuse Lighting Samples", 5);
         defineParam(hitTolerance, "Hit Tolerance", 0.001f);
         defineParam(shadowBias, "Shadow Bias", 1.0f);
 
@@ -794,7 +794,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             // Add HDRI lighting
             float3 rayDirection = surfaceNormal;
             float3 seedVal = seed * fabs(pointOnSurface) + 0.5773f;
-            for (int iteration=1; iteration <= skyLightSamples; iteration++)
+            for (int iteration=1; iteration <= diffuseSamples; iteration++)
             {
                 float4 hitSurface = float4(0);
                 float4 hitColour = float4(0);
@@ -802,7 +802,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 rayDirection = roughen(
                     surfaceNormal,
                     saturate(1.0f - surface.x - surface.y),
-                    seedVal + iteration / (float) skyLightSamples
+                    seedVal + iteration / (float) diffuseSamples
                 );
                 currentLightIntensity = lightIntensityOnSurface(
                     pointOnSurface,
@@ -831,7 +831,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 );
                 lightIntensity += (
                     (currentLightIntensity + float2(hitSurface.z, 0.0f))
-                    / (float) skyLightSamples
+                    / (float) diffuseSamples
                 );
             }
         }
