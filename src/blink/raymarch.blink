@@ -324,12 +324,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     /**
      * Compute the minimum distance to an object in the scene
      */
-    float getMinDistanceToObjectInScene(
+    float2 getMinDistanceToObjectInScene(
             const float3 &rayOrigin,
             float4 &colour,
             float4 &surface)
     {
         float distance = maxRayDistance;
+        float id = 0.0f;
 
         // numChildren, transformedRay, nextDistance, colour, refractive
         // index, surface, blendStrength, mods
@@ -430,6 +431,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                                 colour = blendedColour;
                                 surface = blendedSurface;
+
+                                id = (float) (i + 1) * objectTextureHeight + j;
                             }
                             for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
                             {
@@ -470,6 +473,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                             colour = blendedColour;
                             surface = blendedSurface;
+
+                            id = (float) (i + 1) * objectTextureHeight + j;
                         }
                     }
                 }
@@ -525,7 +530,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             }
         }
 
-        return distance;
+        return float2(distance, id);
     }
 
 
@@ -548,7 +553,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 rayOrigin,
                 colour,
                 surface
-            ));
+            ).x);
             const float stepDistanceSquared = stepDistance * stepDistance;
             float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);
             shadowIntensity = min(
@@ -584,7 +589,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int iterations = 0;
         while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
         {
-            float stepDistance = fabs(getMinDistanceToObjectInScene(rayOrigin, colour, surface));
+            float stepDistance = fabs(getMinDistanceToObjectInScene(rayOrigin, colour, surface).x);
 
             if (stepDistance < hitTolerance)
             {
@@ -617,7 +622,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 rayOrigin + stepDistance * rayDirection,
                 colour,
                 surface
-            ));
+            ).x);
             occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;
             occlusionScaleFactor *= 0.95;
         }
@@ -817,25 +822,25 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 point + offset0 * epsilon,
                 colour,
                 surface
-            )
+            ).x
             + offset1
             * getMinDistanceToObjectInScene(
                 point + offset1 * epsilon,
                 colour,
                 surface
-            )
+            ).x
             + offset2
             * getMinDistanceToObjectInScene(
                 point + offset2 * epsilon,
                 colour,
                 surface
-            )
+            ).x
             + offset3
             * getMinDistanceToObjectInScene(
                 point + offset3 * epsilon,
                 colour,
                 surface
-            )
+            ).x
         );
     }
 
@@ -878,6 +883,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         float lastStepDistance = 1.0f;
 
+        float id = 0.0f;
+
         int bounces = 0;
         int iterations = 1;
         while (currentRayIndex < numRays)
@@ -902,11 +909,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             while (distanceTravelled < rayDistance && iterations <= maxRaySteps)
             {
-                const float signedStepDistance = getMinDistanceToObjectInScene(
+                const float2 result = getMinDistanceToObjectInScene(
                     origin,
                     colour,
                     surface
                 );
+                const float signedStepDistance = result.x;
                 const float stepDistance = fabs(signedStepDistance);
 
                 distanceTravelled += stepDistance;
@@ -914,6 +922,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                 if (stepDistance < hitTolerance * distanceTravelled)
                 {
+                    if (bounces == 0)
+                    {
+                        id = result.y;
+                    }
+
                     const float3 surfacePosition = origin - direction * hitTolerance;
                     float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
                         surfacePosition
@@ -937,7 +950,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 surfacePosition.x,
                                 surfacePosition.y,
                                 surfacePosition.z,
-                                1
+                                id
                             );
                         }
                         if (outputType == 2)
@@ -946,7 +959,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 surfaceNormal.x,
                                 surfaceNormal.y,
                                 surfaceNormal.z,
-                                1
+                                id
                             );
                         }
                         if (outputType == 3)
@@ -955,7 +968,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 distanceTravelled,
                                 0,
                                 0,
-                                1
+                                id
                             );
                         }
                     }
@@ -984,7 +997,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     if (bounces >= numBounces)
                     {
-                        rayColour.w = 1.0f;
+                        rayColour.w = id;
                         return rayColour;
                     }
 
@@ -1092,7 +1105,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             currentRayIndex++;
         }
 
-        rayColour.w = bounces > 0;
+        rayColour.w = (bounces > 0) * id;
         return rayColour;
     }
 
