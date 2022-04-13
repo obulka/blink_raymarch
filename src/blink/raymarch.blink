@@ -655,7 +655,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         float distanceToLight;
         float3 lightDirection;
-        float3 shadowOffsetLightDirection;
         float intensityAtPosition = getLightData(
             pointOnSurface,
             surfaceNormal,
@@ -665,8 +664,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             falloff,
             maxRayDistance,
             distanceToLight,
-            lightDirection,
-            shadowOffsetLightDirection
+            lightDirection
         );
         float3 surfaceOffset = surfaceOffsetPoint(
             pointOnSurface,
@@ -683,7 +681,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         if (lightType < 0)
         {
             shadowIntensityAtPosition = computeSoftShadow(
-                normalize(shadowOffsetLightDirection),
+                lightDirection,
                 distanceToLight,
                 shadow_hardness,
                 surfaceOffset
@@ -692,7 +690,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         else
         {
             shadowIntensityAtPosition = computeShadow(
-                normalize(shadowOffsetLightDirection),
+                lightDirection,
                 distanceToLight,
                 surfaceOffset
             );

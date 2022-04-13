@@ -8,11 +8,9 @@ inline void directionalLightData(
         const float3 &light,
         const float maxRayDistance,
         float3 &lightDirection,
-        float3 &shadowOffsetLightDirection,
         float &distanceToLight)
 {
     lightDirection = -light;
-    shadowOffsetLightDirection = lightDirection;
     distanceToLight = maxRayDistance;
 }
 
@@ -21,12 +19,10 @@ inline void pointLightData(
         const float3 &pointOnSurface,
         const float3 &light,
         float3 &lightDirection,
-        float3 &shadowOffsetLightDirection,
         float &distanceToLight)
 {
     lightDirection = light - pointOnSurface;
-    shadowOffsetLightDirection = lightDirection;
-    distanceToLight = length(shadowOffsetLightDirection);
+    distanceToLight = length(lightDirection);
 }
 
 
@@ -34,11 +30,9 @@ inline void domeLightData(
         const float maxRayDistance,
         const float3 &light,
         float3 &lightDirection,
-        float3 &shadowOffsetLightDirection,
         float &distanceToLight)
 {
     lightDirection = light;
-    shadowOffsetLightDirection = lightDirection;
     distanceToLight = maxRayDistance;
 }
 
@@ -52,8 +46,7 @@ float getLightData(
         const float falloff,
         const float maxRayDistance,
         float &distanceToLight,
-        float3 &lightDirection,
-        float3 &shadowOffsetLightDirection)
+        float3 &lightDirection)
 {
     if (lightType == 1)
     {
@@ -63,7 +56,6 @@ float getLightData(
             light,
             maxRayDistance,
             lightDirection,
-            shadowOffsetLightDirection,
             distanceToLight
         );
     }
@@ -74,7 +66,6 @@ float getLightData(
             pointOnSurface,
             light,
             lightDirection,
-            shadowOffsetLightDirection,
             distanceToLight
         );
     }
@@ -85,7 +76,6 @@ float getLightData(
             maxRayDistance,
             light,
             lightDirection,
-            shadowOffsetLightDirection,
             distanceToLight
         );
     }
