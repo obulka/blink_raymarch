@@ -564,7 +564,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             if (stepDistance < hitTolerance)
             {
-                surface.z /= pow(distanceTravelled, 4);
+                surface.z /= pow(1.0f + distanceTravelled, 4);
                 shadowIntensity = saturate(shadowIntensity);
                 return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
             }
@@ -597,7 +597,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             if (stepDistance < hitTolerance)
             {
-                surface.z /= pow(distanceTravelled, 4);
+                surface.z /= pow(1.0f + distanceTravelled, 4);
                 return 0;
             }
 
@@ -802,7 +802,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 rayDirection = roughen(
                     surfaceNormal,
                     saturate(1.0f - surface.x - surface.y),
-                    seedVal + iteration / (float) diffuseSamples
+                    rayDirection * seedVal + iteration / (float) diffuseSamples
                 );
                 currentLightIntensity = lightIntensityOnSurface(
                     pointOnSurface,
@@ -816,19 +816,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     hitSurface
                 );
                 const float4 skyLightColour = readSkyLightValue(rayDirection);
-                lightColour = blend(
-                    saturate(hitColour),
-                    blend(
-                        saturate(skyLightColour),
-                        saturate(lightColour),
-                        saturate(
-                            length(skyLightColour)
-                            * currentLightIntensity.x
-                            * currentLightIntensity.y
-                        )
-                    ),
-                    saturate(hitSurface.z)
-                );
+                lightColour += (
+                    currentLightIntensity.x
+                    * currentLightIntensity.y
+                    * skyLightColour
+                    + hitSurface.z * hitColour
+                ) / (float) diffuseSamples;
                 lightIntensity += (
                     (currentLightIntensity + float2(hitSurface.z, 0.0f))
                     / (float) diffuseSamples

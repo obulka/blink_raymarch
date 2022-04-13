@@ -80,5 +80,5 @@ float getLightData(
         );
     }
 
-    return intensity / pow(distanceToLight, falloff);
+    return intensity / pow(1.0f + distanceToLight, falloff);
 }
