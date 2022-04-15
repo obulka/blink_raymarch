@@ -848,11 +848,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The normalized surface normal
      */
-    float3 estimateSurfaceNormal(const float3 &point) {
+    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint) {
         float4 colour;
         float4 surface;
 
-        const float epsilon = hitTolerance;
+        const float epsilon = hitTolerance * pixelFootprint;
 
         const float3 offset0 = 0.5773f * float3(1, -1, -1);
         const float3 offset1 = 0.5773f * float3(-1, -1, 1);
@@ -973,7 +973,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     const float3 surfacePosition = origin - direction * hitTolerance;
                     float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
-                        surfacePosition
+                        surfacePosition,
+                        distanceTravelled
                     );
 
                     if (surface.w > 0.0f)
