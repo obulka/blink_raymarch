@@ -99,7 +99,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float refractiveIndex;
 
         // Shape Textures
-        int objectTextureHeight;
         int objectTextureWidth;
 
         // Light textures
@@ -177,7 +176,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(refractiveIndex, "Index of Refraction", 1.0f);
 
         // Shape Counts
-        defineParam(objectTextureHeight, "Object Texture Height", 0);
         defineParam(objectTextureWidth, "Object Texture Width", 0);
 
         // Light Counts
@@ -326,92 +324,94 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float2 getMinDistanceToObjectInScene(
             const float3 &rayOrigin,
+            const float pixelFootprint,
             float4 &colour,
             float4 &surface)
     {
         float distance = maxRayDistance;
         float id = 0.0f;
 
-        // numChildren, transformedRay, nextDistance, colour, refractive
-        // index, surface, blendStrength, mods
-        float parentStack[MAX_CHILD_DEPTH][1 + 3 + 1 + 3 + 1 +  4 + 1 + 1];
+        // numChildren, transformedRay, mods, nextDistance, colour, refractive
+        // index, surface, blendStrength
+        float parentStack[MAX_CHILD_DEPTH][1 + 3 + 1 + 1 + 3 + 1 +  4 + 1];
         int parentStackLength = 0;
 
-        for (int i=0; i < objectTextureHeight; i++)
+        for (int j=0; j < objectTextureWidth; j++)
         {
-            for (int j=0; j < objectTextureWidth; j++)
+            SampleType(positions) position = positions(j, 0);
+            SampleType(rotations) rotation = rotations(j, 0);
+            SampleType(dimensions) dimension = dimensions(j, 0);
+            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
+            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
+            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
+            SampleType(colours) surfaceColour = colours(j, 0);
+            SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);
+
+            const int modifications = (int) shapeProperty.y;
+            const float scale = position.w;
+
+            const float blendStrength = shapeProperty.w;
+            int numChildren = (int) shapeProperty.z;
+
+            float nextDistance = maxRayDistance;
+
+            int stackLastIndex = parentStackLength - 1;
+
+            float4 blendedColour = surfaceColour;
+            float4 blendedSurface = surfaceProperty;
+            if (numChildren <= 0)
             {
-                SampleType(positions) position = positions(j, i);
-                SampleType(rotations) rotation = rotations(j, i);
-                SampleType(dimensions) dimension = dimensions(j, i);
-                SampleType(shapeProperties) shapeProperty = shapeProperties(j, i);
-                SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, i);
-                SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, i);
-                SampleType(colours) surfaceColour = colours(j, i);
-                SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, i);
-
-                const int modifications = (int) shapeProperty.y;
-                const float scale = position.w;
-
-                const float blendStrength = shapeProperty.w;
-                int numChildren = (int) shapeProperty.z;
-
-                float nextDistance = maxRayDistance;
-
-                int stackLastIndex = parentStackLength - 1;
-
-                float4 blendedColour = surfaceColour;
-                float4 blendedSurface = surfaceProperty;
-                if (numChildren <= 0)
+                // No Children left, compute interactions with parent
+                if (parentStackLength > 0)
                 {
-                    // No Children left, compute interactions with parent
-                    if (parentStackLength > 0)
+                    const float3 parentTransformedRay = float3(
+                        parentStack[stackLastIndex][1],
+                        parentStack[stackLastIndex][2],
+                        parentStack[stackLastIndex][3]
+                    );
+
+                    // Use parent transform to position child
+                    const float3 transformedRay = transformRay(
+                        parentTransformedRay,
+                        float3(position.x, position.y, position.z),
+                        float3(rotation.x, rotation.y, rotation.z),
+                        modifications,
+                        modParameters0,
+                        modParameters1
+                    );
+
+                    // Get distance to this child
+                    nextDistance = getNextDistance(
+                        transformedRay,
+                        (int) shapeProperty.x,
+                        dimension,
+                        scale,
+                        modifications,
+                        modParameters1.w,
+                        rotation.w,
+                        blendedColour
+                    );
+
+                    do
                     {
-                        const float3 parentTransformedRay = float3(
-                            parentStack[stackLastIndex][1],
-                            parentStack[stackLastIndex][2],
-                            parentStack[stackLastIndex][3]
-                        );
+                        const int parentModifications = (int) parentStack[stackLastIndex][4];
 
-                        // Use parent transform to position child
-                        const float3 transformedRay = transformRay(
-                            parentTransformedRay,
-                            float3(position.x, position.y, position.z),
-                            float3(rotation.x, rotation.y, rotation.z),
-                            modifications,
-                            modParameters0,
-                            modParameters1
-                        );
-
-                        // Get distance to this child
-                        nextDistance = getNextDistance(
-                            transformedRay,
-                            (int) shapeProperty.x,
-                            dimension,
-                            scale,
-                            modifications,
-                            modParameters1.w,
-                            rotation.w,
-                            blendedColour
-                        );
-
-                        do
+                        if (!(parentModifications & 4096))
                         {
-                            const float parentNextDistance = parentStack[stackLastIndex][4];
+                            const float parentNextDistance = parentStack[stackLastIndex][5];
                             const float4 parentSurfaceColour = float4(
-                                parentStack[stackLastIndex][5],
                                 parentStack[stackLastIndex][6],
                                 parentStack[stackLastIndex][7],
-                                parentStack[stackLastIndex][8]
+                                parentStack[stackLastIndex][8],
+                                parentStack[stackLastIndex][9]
                             );
                             const float4 parentSurfaceProperty = float4(
-                                parentStack[stackLastIndex][9],
                                 parentStack[stackLastIndex][10],
                                 parentStack[stackLastIndex][11],
-                                parentStack[stackLastIndex][12]
+                                parentStack[stackLastIndex][12],
+                                parentStack[stackLastIndex][13]
                             );
-                            const float parentBlendStrength = parentStack[stackLastIndex][13];
-                            const int parentModifications = (int) parentStack[stackLastIndex][14];
+                            const float parentBlendStrength = parentStack[stackLastIndex][14];
 
                             // Compute interaction between parent and this child
                             nextDistance = performChildInteraction(
@@ -424,49 +424,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 blendedSurface,
                                 parentBlendStrength
                             );
-                            // Update the global min distance (and surface/colour)
-                            if (fabs(nextDistance) < fabs(distance))
-                            {
-                                distance = nextDistance;
-
-                                colour = blendedColour;
-                                surface = blendedSurface;
-
-                                id = (float) (i + 1) * objectTextureHeight + j;
-                            }
-                            for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
-                            {
-                                parentStack[parentIndex][0]--;
-                            }
-
-                            numChildren = parentStack[stackLastIndex][0];
                         }
-                        while (numChildren <= 0 && --stackLastIndex >= 0);
 
-                        parentStackLength = stackLastIndex + 1;
-                    }
-                    else
-                    {
-                        const float3 transformedRay = transformRay(
-                            rayOrigin,
-                            float3(position.x, position.y, position.z),
-                            float3(rotation.x, rotation.y, rotation.z),
-                            modifications,
-                            modParameters0,
-                            modParameters1
-                        );
-
-                        nextDistance = getNextDistance(
-                            transformedRay,
-                            (int) shapeProperty.x,
-                            dimension,
-                            scale,
-                            modifications,
-                            modParameters1.w,
-                            rotation.w,
-                            blendedColour
-                        );
-
+                        // Update the global min distance (and surface/colour)
                         if (fabs(nextDistance) < fabs(distance))
                         {
                             distance = nextDistance;
@@ -474,23 +434,23 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             colour = blendedColour;
                             surface = blendedSurface;
 
-                            id = (float) (i + 1) * objectTextureHeight + j;
+                            id = (float) j;
                         }
+
+                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
+                        {
+                            parentStack[parentIndex][0]--;
+                        }
+                        numChildren = parentStack[stackLastIndex][0];
                     }
+                    while (numChildren <= 0 && --stackLastIndex >= 0);
+
+                    parentStackLength = stackLastIndex + 1;
                 }
-                else
+                else if (!(modifications & 4096))
                 {
-                    // Node has Children, push it to the stack for later
-                    // processing when we have its children
-                    float3 parentTransformedRay = rayOrigin;
-                    if (parentStackLength > 0)
-                    {
-                        parentTransformedRay.x = parentStack[stackLastIndex][1];
-                        parentTransformedRay.y = parentStack[stackLastIndex][2];
-                        parentTransformedRay.z = parentStack[stackLastIndex][3];
-                    }
                     const float3 transformedRay = transformRay(
-                        parentTransformedRay,
+                        rayOrigin,
                         float3(position.x, position.y, position.z),
                         float3(rotation.x, rotation.y, rotation.z),
                         modifications,
@@ -509,22 +469,84 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         blendedColour
                     );
 
+                    if (fabs(nextDistance) < fabs(distance))
+                    {
+                        distance = nextDistance;
+
+                        colour = blendedColour;
+                        surface = blendedSurface;
+
+                        id = (float) j;
+                    }
+                }
+            }
+            else
+            {
+                // Node has Children, push it to the stack for later
+                // processing when we have its children
+                float3 parentTransformedRay = rayOrigin;
+                if (parentStackLength > 0)
+                {
+                    parentTransformedRay.x = parentStack[stackLastIndex][1];
+                    parentTransformedRay.y = parentStack[stackLastIndex][2];
+                    parentTransformedRay.z = parentStack[stackLastIndex][3];
+                }
+                const float3 transformedRay = transformRay(
+                    parentTransformedRay,
+                    float3(position.x, position.y, position.z),
+                    float3(rotation.x, rotation.y, rotation.z),
+                    modifications,
+                    modParameters0,
+                    modParameters1
+                );
+
+                nextDistance = getNextDistance(
+                    transformedRay,
+                    (int) shapeProperty.x,
+                    dimension,
+                    scale,
+                    modifications,
+                    modParameters1.w,
+                    rotation.w,
+                    blendedColour
+                );
+
+                if (
+                    modifications & 4096
+                    && nextDistance > hitTolerance * (pixelFootprint + 1.0f)
+                ) {
+                    // This was tagged as a boundary object, skip its children
+                    // since we arent close to hitting it
+                    if (fabs(nextDistance) < fabs(distance))
+                    {
+                        distance = nextDistance;
+
+                        colour = blendedColour;
+                        surface = blendedSurface;
+
+                        id = (float) j;
+                    }
+
+                    j += numChildren;
+                }
+                else
+                {
                     // parentStack.push()
                     parentStack[parentStackLength][0] = numChildren;
                     parentStack[parentStackLength][1] = transformedRay.x;
                     parentStack[parentStackLength][2] = transformedRay.y;
                     parentStack[parentStackLength][3] = transformedRay.z;
-                    parentStack[parentStackLength][4] = nextDistance;
-                    parentStack[parentStackLength][5] = blendedColour.x;
-                    parentStack[parentStackLength][6] = blendedColour.y;
-                    parentStack[parentStackLength][7] = blendedColour.z;
-                    parentStack[parentStackLength][8] = blendedColour.w;
-                    parentStack[parentStackLength][9] = blendedSurface.x;
-                    parentStack[parentStackLength][10] = blendedSurface.y;
-                    parentStack[parentStackLength][11] = blendedSurface.z;
-                    parentStack[parentStackLength][12] = blendedSurface.w;
-                    parentStack[parentStackLength][13] = blendStrength;
-                    parentStack[parentStackLength][14] = (float) modifications;
+                    parentStack[parentStackLength][4] = (float) modifications;
+                    parentStack[parentStackLength][5] = nextDistance;
+                    parentStack[parentStackLength][6] = blendedColour.x;
+                    parentStack[parentStackLength][7] = blendedColour.y;
+                    parentStack[parentStackLength][8] = blendedColour.z;
+                    parentStack[parentStackLength][9] = blendedColour.w;
+                    parentStack[parentStackLength][10] = blendedSurface.x;
+                    parentStack[parentStackLength][11] = blendedSurface.y;
+                    parentStack[parentStackLength][12] = blendedSurface.z;
+                    parentStack[parentStackLength][13] = blendedSurface.w;
+                    parentStack[parentStackLength][14] = blendStrength;
                     parentStackLength++;
                 }
             }
@@ -549,11 +571,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int iterations = 0;
         while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
         {
-            const float stepDistance = fabs(getMinDistanceToObjectInScene(
-                rayOrigin,
-                colour,
-                surface
-            ).x);
+            const float stepDistance = fabs(
+                getMinDistanceToObjectInScene(
+                    rayOrigin,
+                    distanceTravelled,
+                    colour,
+                    surface
+                ).x
+            );
             const float stepDistanceSquared = stepDistance * stepDistance;
             float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);
             shadowIntensity = min(
@@ -562,7 +587,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 / max(0.0f, distanceTravelled - softOffset)
             );
 
-            if (stepDistance < hitTolerance)
+            if (stepDistance < hitTolerance * distanceTravelled)
             {
                 surface.z /= pow(1.0f + distanceTravelled, 4);
                 shadowIntensity = saturate(shadowIntensity);
@@ -593,9 +618,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int iterations = 0;
         while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
         {
-            float stepDistance = fabs(getMinDistanceToObjectInScene(rayOrigin, colour, surface).x);
+            float stepDistance = fabs(
+                getMinDistanceToObjectInScene(
+                    rayOrigin,
+                    distanceTravelled,
+                    colour,
+                    surface
+                ).x
+            );
 
-            if (stepDistance < hitTolerance)
+            if (stepDistance < hitTolerance * distanceTravelled)
             {
                 surface.z /= pow(1.0f + distanceTravelled, 4);
                 return 0;
@@ -627,6 +659,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;
             float distanceToClosestObject = fabs(getMinDistanceToObjectInScene(
                 rayOrigin + stepDistance * rayDirection,
+                1.0f,
                 colour,
                 surface
             ).x);
@@ -863,24 +896,28 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             offset0
             * getMinDistanceToObjectInScene(
                 point + offset0 * epsilon,
+                pixelFootprint,
                 colour,
                 surface
             ).x
             + offset1
             * getMinDistanceToObjectInScene(
                 point + offset1 * epsilon,
+                pixelFootprint,
                 colour,
                 surface
             ).x
             + offset2
             * getMinDistanceToObjectInScene(
                 point + offset2 * epsilon,
+                pixelFootprint,
                 colour,
                 surface
             ).x
             + offset3
             * getMinDistanceToObjectInScene(
                 point + offset3 * epsilon,
+                pixelFootprint,
                 colour,
                 surface
             ).x
@@ -955,6 +992,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             {
                 const float2 result = getMinDistanceToObjectInScene(
                     origin,
+                    distanceTravelled,
                     colour,
                     surface
                 );
