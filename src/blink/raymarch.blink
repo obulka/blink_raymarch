@@ -361,8 +361,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float4 blendedSurface = surfaceProperty;
             if (numChildren <= 0)
             {
+                bool objectIsNotBound = !(modifications & 4096);
+
                 // No Children left, compute interactions with parent
-                if (parentStackLength > 0)
+                if (parentStackLength > 0 && objectIsNotBound)
                 {
                     const float3 parentTransformedRay = float3(
                         parentStack[stackLastIndex][1],
@@ -447,7 +449,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     parentStackLength = stackLastIndex + 1;
                 }
-                else if (!(modifications & 4096))
+                else if (objectIsNotBound)
                 {
                     const float3 transformedRay = transformRay(
                         rayOrigin,
