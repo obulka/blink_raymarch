@@ -45,514 +45,6 @@ Root {
  logLut Cineon
  floatLut linear
 }
-BackdropNode {
- inputs 0
- name lights
- xpos 18428
- ypos 511
- bdwidth 231
- bdheight 432
-}
-Group {
- inputs 0
- name sdf_light2
- xpos 18490
- ypos 721
- addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type M {None Directional Point "Ambient Occlusion"}}
- type Point
- addUserKnob {13 dir_pos l direction/position}
- dir_pos {2 -0.2 0}
- addUserKnob {7 intensity}
- intensity 0.1
- addUserKnob {7 falloff R 0 5}
- falloff 4
- addUserKnob {18 colour}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 shadow_hardness l "shadow hardness" R 1 100}
- shadow_hardness 75
- addUserKnob {6 soften_shadows l "soften shadows" -STARTLINE}
-}
- Input {
-  inputs 0
-  name Input1
-  xpos 922
-  ypos 30
- }
- Dot {
-  name Dot1
-  xpos 956
-  ypos 488
- }
-add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
- Constant {
-  inputs 0
-  channels sdf_light
-  color {{parent.dir_pos.x} {parent.dir_pos.y} {parent.dir_pos.z} {parent.intensity}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light
-  xpos 434
-  ypos 12
- }
- Dot {
-  name Dot9
-  xpos 468
-  ypos 279
- }
-add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
- Constant {
-  inputs 0
-  channels sdf_light_properties
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props
-  xpos 561
-  ypos 12
- }
- Dot {
-  name Dot6
-  xpos 591
-  ypos 282
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 501
-  ypos 380
- }
-add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
- Constant {
-  inputs 0
-  channels sdf_light_properties1
-  color {{parent.shadow_hardness} {parent.falloff} 0 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props1
-  xpos 697
-  ypos 12
- }
- Dot {
-  name Dot2
-  xpos 727
-  ypos 282
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 693
-  ypos 380
- }
- Group {
-  inputs 2
-  name sdf_merge2
-  xpos 693
-  ypos 484
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N7dcf5a0 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N7de2da0 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N7dcf5a0
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N7de2da0
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 693
-  ypos 562
- }
-end_group
-Group {
- name sdf_light3
- xpos 18490
- ypos 779
- addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type M {None Directional Point "Ambient Occlusion"}}
- type Point
- addUserKnob {13 dir_pos l direction/position}
- dir_pos {2 0.2 0}
- addUserKnob {7 intensity}
- intensity 0.1
- addUserKnob {7 falloff R 0 5}
- falloff 4
- addUserKnob {18 colour}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 shadow_hardness l "shadow hardness" R 1 100}
- shadow_hardness 50
- addUserKnob {6 soften_shadows l "soften shadows" -STARTLINE}
-}
- Input {
-  inputs 0
-  name Input1
-  xpos 922
-  ypos 30
- }
- Dot {
-  name Dot1
-  xpos 956
-  ypos 488
- }
- Constant {
-  inputs 0
-  channels sdf_light
-  color {{parent.dir_pos.x} {parent.dir_pos.y} {parent.dir_pos.z} {parent.intensity}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light
-  xpos 434
-  ypos 12
- }
- Dot {
-  name Dot9
-  xpos 468
-  ypos 279
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props
-  xpos 561
-  ypos 12
- }
- Dot {
-  name Dot6
-  xpos 591
-  ypos 282
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 501
-  ypos 380
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties1
-  color {{parent.shadow_hardness} {parent.falloff} 0 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props1
-  xpos 697
-  ypos 12
- }
- Dot {
-  name Dot2
-  xpos 727
-  ypos 282
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 693
-  ypos 380
- }
- Group {
-  inputs 2
-  name sdf_merge2
-  xpos 693
-  ypos 484
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N7ef09b0 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N7f041b0 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N7ef09b0
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N7f041b0
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 693
-  ypos 562
- }
-end_group
 Read {
  inputs 0
  file_type exr
@@ -574,504 +66,6 @@ Read {
  xpos 19035
  ypos 789
 }
-Group {
- inputs 0
- name sdf_light1
- xpos 18490
- ypos 844
- addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type M {None Directional Point "Ambient Occlusion"}}
- type Point
- addUserKnob {13 dir_pos l direction/position}
- dir_pos {0.5 0.75 0.75}
- addUserKnob {7 intensity}
- intensity 100
- addUserKnob {7 falloff R 0 5}
- falloff 4
- addUserKnob {18 colour}
- colour {1 0 0}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 shadow_hardness l "shadow hardness" R 1 100}
- shadow_hardness 11
- addUserKnob {6 soften_shadows l "soften shadows" -STARTLINE}
-}
- Input {
-  inputs 0
-  name Input1
-  xpos 922
-  ypos 30
- }
- Dot {
-  name Dot1
-  xpos 956
-  ypos 488
- }
- Constant {
-  inputs 0
-  channels sdf_light
-  color {{parent.dir_pos.x} {parent.dir_pos.y} {parent.dir_pos.z} {parent.intensity}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light
-  xpos 434
-  ypos 12
- }
- Dot {
-  name Dot9
-  xpos 468
-  ypos 279
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props
-  xpos 561
-  ypos 12
- }
- Dot {
-  name Dot6
-  xpos 591
-  ypos 282
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 501
-  ypos 380
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties1
-  color {{parent.shadow_hardness} {parent.falloff} 0 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props1
-  xpos 697
-  ypos 12
- }
- Dot {
-  name Dot2
-  xpos 727
-  ypos 282
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 693
-  ypos 380
- }
- Group {
-  inputs 2
-  name sdf_merge2
-  xpos 693
-  ypos 484
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N8056930 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N806a130 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N8056930
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N806a130
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 693
-  ypos 562
- }
-end_group
-Group {
- inputs 0
- name sdf_light
- xpos 18490
- ypos 902
- addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type M {None Directional Point "Ambient Occlusion"}}
- type Point
- addUserKnob {13 dir_pos l direction/position}
- dir_pos {0 1 0}
- addUserKnob {7 intensity}
- intensity 10
- addUserKnob {7 falloff R 0 5}
- falloff 4
- addUserKnob {18 colour}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 shadow_hardness l "shadow hardness" R 1 100}
- shadow_hardness 10
- addUserKnob {6 soften_shadows l "soften shadows" -STARTLINE}
-}
- Input {
-  inputs 0
-  name Input1
-  xpos 922
-  ypos 30
- }
- Dot {
-  name Dot1
-  xpos 956
-  ypos 488
- }
- Constant {
-  inputs 0
-  channels sdf_light
-  color {{parent.dir_pos.x} {parent.dir_pos.y} {parent.dir_pos.z} {parent.intensity}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light
-  xpos 434
-  ypos 12
- }
- Dot {
-  name Dot9
-  xpos 468
-  ypos 279
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props
-  xpos 561
-  ypos 12
- }
- Dot {
-  name Dot6
-  xpos 591
-  ypos 282
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 501
-  ypos 380
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties1
-  color {{parent.shadow_hardness} {parent.falloff} 0 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props1
-  xpos 697
-  ypos 12
- }
- Dot {
-  name Dot2
-  xpos 727
-  ypos 282
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 693
-  ypos 380
- }
- Group {
-  inputs 2
-  name sdf_merge2
-  xpos 693
-  ypos 484
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N8176fc0 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N818a7c0 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N8176fc0
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N818a7c0
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 693
-  ypos 562
- }
-end_group
 Read {
  inputs 0
  file_type exr
@@ -1097,7 +91,6 @@ Dot {
  xpos 18955
  ypos 998
 }
-set N82512a0 [stack 0]
 Axis2 {
  inputs 0
  name Axis2
@@ -1115,24 +108,6 @@ Dot {
  xpos 18709
  ypos 1001
 }
-set N8288ee0 [stack 0]
-push 0
-sdf_primitive {
- inputs 0
- name sdf_primitive1
- xpos 19022
- ypos 1181
- dimension_y 10
- dimension_z 4
-}
-ray_march {
- inputs 4
- name ray_march1
- xpos 19020
- ypos 1323
-}
-push $N82512a0
-push $N8288ee0
 push 0
 Group {
  inputs 0
@@ -1140,7 +115,7 @@ Group {
  onCreate "__import__('sdf.sdf_primitive', fromlist='SDFPrimitive').SDFPrimitive.handle_node_created()"
  knobChanged "__import__('sdf.sdf_primitive', fromlist='SDFPrimitive').SDFPrimitive.handle_knob_changed()"
  tile_color 0xffffffff
- label "\n"
+ label sphere
  xpos 18311
  ypos 1079
  addUserKnob {20 User l "SDF Primitive"}
@@ -1377,7 +352,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N8855e00 [stack 0]
+set N9806560 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1399,7 +374,7 @@ set N8855e00 [stack 0]
    xpos 34
    ypos -6
   }
-set N8869600 [stack 0]
+set N9819d60 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1410,7 +385,7 @@ set N8869600 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8855e00
+push $N9806560
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1439,7 +414,7 @@ push $N8855e00
    xpos 158
    ypos 167
   }
-push $N8869600
+push $N9819d60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1532,7 +507,7 @@ push $N8869600
    xpos 192
    ypos -2
   }
-set N8916070 [stack 0]
+set N98c6a10 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1554,7 +529,7 @@ set N8916070 [stack 0]
    xpos 34
    ypos -6
   }
-set N8929870 [stack 0]
+set N98da210 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1565,7 +540,7 @@ set N8929870 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8916070
+push $N98c6a10
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1594,7 +569,7 @@ push $N8916070
    xpos 158
    ypos 167
   }
-push $N8929870
+push $N98da210
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1804,7 +779,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set N8a169d0 [stack 0]
+set N99c7370 [stack 0]
  Blur {
   size {{"parent.skybox_lighting_blur * sky_dot.format.height / 2"}}
   name Blur
@@ -1824,6 +799,7 @@ set N8a169d0 [stack 0]
   xpos 1912
   ypos -1362
  }
+add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
  Constant {
   inputs 0
   channels sdf_light
@@ -1850,7 +826,8 @@ set N8a169d0 [stack 0]
   xpos -48
   ypos -1309
  }
-set N8a5b840 [stack 0]
+set N9a0c1e0 [stack 0]
+add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -1864,7 +841,8 @@ set N8a5b840 [stack 0]
   xpos -232
   ypos -866
  }
-push $N8a5b840
+push $N9a0c1e0
+add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -1876,7 +854,7 @@ push $N8a5b840
   xpos -113
   ypos -864
  }
-push $N8a5b840
+push $N9a0c1e0
  Shuffle {
   in sdf_light
   name light
@@ -1913,7 +891,7 @@ push $N8a5b840
   xpos 641
   ypos -1318
  }
-set N8abede0 [stack 0]
+set N9a6f780 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -1925,7 +903,7 @@ set N8abede0 [stack 0]
   xpos 322
   ypos -863
  }
-push $N8abede0
+push $N9a6f780
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -1937,7 +915,7 @@ push $N8abede0
   xpos 780
   ypos -865
  }
-push $N8abede0
+push $N9a6f780
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -1949,7 +927,7 @@ push $N8abede0
   xpos 641
   ypos -864
  }
-push $N8abede0
+push $N9a6f780
  Shuffle {
   in sdf_shape
   name shape
@@ -1961,7 +939,7 @@ push $N8abede0
   xpos 473
   ypos -863
  }
-push $N8abede0
+push $N9a6f780
  Shuffle {
   in sdf_colour
   name colour
@@ -1973,7 +951,7 @@ push $N8abede0
   xpos 165
   ypos -864
  }
-push $N8abede0
+push $N9a6f780
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -1985,7 +963,7 @@ push $N8abede0
   xpos 1227
   ypos -857
  }
-push $N8abede0
+push $N9a6f780
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -1997,7 +975,7 @@ push $N8abede0
   xpos 1076
   ypos -854
  }
-push $N8abede0
+push $N9a6f780
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -2009,7 +987,7 @@ push $N8abede0
   xpos 934
   ypos -859
  }
-push $N8a169d0
+push $N99c7370
  Constant {
   inputs 0
   name Constant1
@@ -2116,6 +1094,255 @@ Viewer {
  frame 1
  frame_range 1-479
  name Viewer1
- xpos 18745
- ypos 1404
+ xpos 18311
+ ypos 1306
 }
+Group {
+ inputs 0
+ name sdf_light
+ xpos 18427
+ ypos 957
+ addUserKnob {20 User l "SDF LIght"}
+ addUserKnob {4 type M {None Directional Point "Ambient Occlusion"}}
+ type Point
+ addUserKnob {13 dir_pos l direction/position}
+ dir_pos {0 1 0}
+ addUserKnob {7 intensity}
+ intensity 10
+ addUserKnob {7 falloff R 0 5}
+ falloff 4
+ addUserKnob {18 colour}
+ colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 shadow_hardness l "shadow hardness" R 1 100}
+ shadow_hardness 10
+ addUserKnob {6 soften_shadows l "soften shadows" -STARTLINE}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos 922
+  ypos 30
+ }
+ Dot {
+  name Dot1
+  xpos 956
+  ypos 488
+ }
+ Constant {
+  inputs 0
+  channels sdf_light
+  color {{parent.dir_pos.x} {parent.dir_pos.y} {parent.dir_pos.z} {parent.intensity}}
+  format "1 1 0 0 1 1 1 1x1"
+  name light
+  xpos 434
+  ypos 12
+ }
+ Dot {
+  name Dot9
+  xpos 468
+  ypos 279
+ }
+ Constant {
+  inputs 0
+  channels sdf_light_properties
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
+  format "1 1 0 0 1 1 1 1x1"
+  name light_props
+  xpos 561
+  ypos 12
+ }
+ Dot {
+  name Dot6
+  xpos 591
+  ypos 282
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 501
+  ypos 380
+ }
+ Constant {
+  inputs 0
+  channels sdf_light_properties1
+  color {{parent.shadow_hardness} {parent.falloff} 0 0}
+  format "1 1 0 0 1 1 1 1x1"
+  name light_props1
+  xpos 697
+  ypos 12
+ }
+ Dot {
+  name Dot2
+  xpos 727
+  ypos 282
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy2
+  xpos 693
+  ypos 380
+ }
+ Group {
+  inputs 2
+  name sdf_merge2
+  xpos 693
+  ypos 484
+  disable {{"\[exists parent.input0] ? 0 : 1"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N9127d10 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N913b510 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N9127d10
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N913b510
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Output {
+  name Output1
+  xpos 693
+  ypos 562
+ }
+end_group

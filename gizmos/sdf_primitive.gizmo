@@ -2,13 +2,15 @@ Gizmo {
  inputs 2
  onCreate "__import__('sdf.sdf_primitive', fromlist='SDFPrimitive').SDFPrimitive.handle_node_created()"
  knobChanged "__import__('sdf.sdf_primitive', fromlist='SDFPrimitive').SDFPrimitive.handle_knob_changed()"
+ tile_color 0xffffffff
+ label sphere
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
  dimension_x 0.5
- addUserKnob {7 dimension_y l height t "The height (y) of the rhombus." +HIDDEN}
- dimension_y 0.75
- addUserKnob {7 dimension_z l depth t "The depth (z) of the rhombus, this the extruded dimension, or thickness." +HIDDEN}
+ addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN}
+ dimension_y 0.25
+ addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN}
  dimension_z 0.25
  addUserKnob {7 dimension_w l "corner radius" t "The radius of the corners of the rhombus' xy-plane parallel  face." +HIDDEN}
  dimension_w 0.05
@@ -23,7 +25,6 @@ Gizmo {
  addUserKnob {26 ""}
  addUserKnob {18 colour}
  colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection}
  addUserKnob {7 transmission}
  addUserKnob {7 refractive_index l "refractive index" R 1 4}
@@ -41,7 +42,6 @@ Gizmo {
  addUserKnob {26 div1 l "" +STARTLINE}
  addUserKnob {19 repetition_params l repetition}
  repetition_params {0 0 0 0}
- addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
  addUserKnob {26 ""}
  addUserKnob {7 blend_strength l "blend strength" +DISABLED}
@@ -236,7 +236,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N7ce5f40 [stack 0]
+set N9806560 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -258,7 +258,7 @@ set N7ce5f40 [stack 0]
    xpos 34
    ypos -6
   }
-set N7cf9740 [stack 0]
+set N9819d60 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -269,7 +269,7 @@ set N7cf9740 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7ce5f40
+push $N9806560
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -298,7 +298,7 @@ push $N7ce5f40
    xpos 158
    ypos 167
   }
-push $N7cf9740
+push $N9819d60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -391,7 +391,7 @@ push $N7cf9740
    xpos 192
    ypos -2
   }
-set N7da5180 [stack 0]
+set N98c6a10 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -413,7 +413,7 @@ set N7da5180 [stack 0]
    xpos 34
    ypos -6
   }
-set N7db9190 [stack 0]
+set N98da210 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -424,7 +424,7 @@ set N7db9190 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7da5180
+push $N98c6a10
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -453,7 +453,7 @@ push $N7da5180
    xpos 158
    ypos 167
   }
-push $N7db9190
+push $N98da210
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
