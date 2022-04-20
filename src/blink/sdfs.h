@@ -212,7 +212,7 @@ float distanceToDeathStar(
  * The conical shape has its tip at the origin and opens up the y-axis.
  *
  * @arg position: The point to get the distance to, from the object.
- * @arg radius: The radius of the sphere to cut the angle out of
+ * @arg radius: The radius of the sphere to cut the angle out of.
  * @arg angle: The angle between the edge of the solid angle and the
  *     y-axis on [0-PI] measured between the y-axis and wall of the
  *     solid angle.
@@ -292,7 +292,7 @@ float distanceToRectangularPrismFrame(
         const float depth,
         const float thickness)
 {
-    const float3 prismToPosition = fabs(position) - float3(width, height, depth);
+    const float3 prismToPosition = fabs(position) - float3(width, height, depth) / 2.0f;
     const float3 innerReflected = fabs(prismToPosition + thickness) - thickness;
 
     return min(
@@ -478,7 +478,7 @@ inline float distanceToCapsule(
  * @arg position: The point to get the distance to, from the object.
  * @arg angle: The angle between the tip and base of the cone [0-PI/2)
  *     measured between the y-axis and wall of the cone.
- * @arg height: The height of the cone, cannot be 0.
+ * @arg height: The height (y-axis) of the cone. Cannot be 0.
  *
  * @returns: The minimum distance from the point to the shape.
  */
@@ -557,9 +557,10 @@ float distanceToInfiniteCone(const float3 &position, const float angle)
  * Oriented along the y-axis.
  *
  * @arg position: The point to get the distance to, from the object.
- * @arg height: The radius of the capsule
- * @arg lowerRadius: The radius of the cone at y = -height/2
- * @arg upperRadius: The radius of the cone at y = height/2
+ * @arg height: The height (y-axis) of the cone, centered at the origin
+ *     Cannot be 0.
+ * @arg lowerRadius: The radius of the cone at y = -height/2.
+ * @arg upperRadius: The radius of the cone at y = height/2.
  *
  * @returns: The minimum distance from the point to the shape.
  */
@@ -612,9 +613,9 @@ float distanceToCappedCone(
  * Oriented along the y-axis.
  *
  * @arg position: The point to get the distance to, from the object.
- * @arg height: The radius of the capsule.
- * @arg lowerRadius: The radius of the cone at y = 0
- * @arg upperRadius: The radius of the cone at y = height
+ * @arg height: The height (y-axis) of the rounded cone.
+ * @arg lowerRadius: The radius of the cone at y = 0.
+ * @arg upperRadius: The radius of the cone at y = height.
  *
  * @returns: The minimum distance from the point to the shape.
  */
@@ -712,6 +713,36 @@ float distanceToCappedTorus(
         + ringRadius * ringRadius
         - 2.0f * ringRadius * capFactor
     ) - tubeRadius;
+}
+
+
+/**
+ * Compute the min distance from a point to a chain link.
+ *
+ * @arg position: The point to get the distance to, from the object.
+ * @arg ringRadius: The radius (xy-plane) of the ring of the torus that
+ *     will be stretched to create the link.
+ * @arg tubeRadius: The radius of the tube that makes the link.
+ * @arg height: The height (y-axis) to elongate the torus.
+ *
+ * @returns: The minimum distance from the point to the shape.
+ */
+float distanceToLink(
+        const float3 &position,
+        const float ringRadius,
+        const float tubeRadius,
+        const float height)
+{
+    const float heightDifference = fabs(position.y) - height / 2.0f;
+
+    const float distanceInXYPlane = distanceToCircle(
+        float2(position.x, positivePart(heightDifference)),
+        ringRadius
+    );
+    return distanceToCircle(
+        float2(distanceInXYPlane, position.z),
+        tubeRadius
+    );
 }
 
 
@@ -816,44 +847,15 @@ float distanceToOctahedron(
 
 
 /**
- * Compute the min distance from a point to a chain link.
- *
- * @arg position: The point to get the distance to, from the object.
- * @arg width: The width (x-axis) of the link,
- *     measured from origin to center of the 'tube'.
- * @arg height: The height (y-axis) of the link
- *     measured from origin to the base of the cap (ie. 0 is a torus).
- * @arg tubeRadius: The radius of the tube that makes the link.
- *
- * @returns: The minimum distance from the point to the shape.
- */
-float distanceToLink(
-        const float3 &position,
-        const float width,
-        const float height,
-        const float tubeRadius)
-{
-    const float heightDifference = fabs(position.y) - height;
-
-    const float distanceInXYPlane = distanceToCircle(
-        float2(position.x, positivePart(heightDifference)),
-        width
-    );
-    return distanceToCircle(
-        float2(distanceInXYPlane, position.z),
-        tubeRadius
-    );
-}
-
-
-/**
  * Compute the min distance from a point to a mandelbulb.
  *
  * @arg position: The point to get the distance to, from the object.
  * @arg power: One greater than the axes of symmetry in the xy-plane.
  * @arg iterations: The number of iterations to compute, the higher this
- *     is the slower it will compute, but the 'deeper' the fractal will
- *     have detail.
+ *     is the slower it will be to compute, but the deeper the fractal
+ *     will have detail.
+ * @arg maxSquareRadius: When the square radius has reached this length,
+ *     stop iterating.
  *
  * @returns: The minimum distance from the point to the shape.
  */
@@ -934,9 +936,9 @@ float distanceToMandelbulb(
  *     17: rounded cone
  *     18: torus
  *     19: capped torus
- *     20: hexagonal prism
- *     21: octahedron
- *     22: link
+ *     20: link
+ *     21: hexagonal prism
+ *     22: octahedron
  *     23: mandelbulb
  * @arg dimensions: The radius of the 'tube' of the torus, the radius of
  *     the 'ring', and the angle to cap at in range (0-PI).
@@ -1103,20 +1105,20 @@ float distanceToObject(
     }
     if (shapeType == 20)
     {
-        return distanceToHexagonalPrism(position, dimensions.x, dimensions.y);
-    }
-    if (shapeType == 21)
-    {
-        return distanceToOctahedron(position, dimensions.x);
-    }
-    if (shapeType == 22)
-    {
         return distanceToLink(
             position,
             dimensions.x,
             dimensions.y,
             dimensions.z
         );
+    }
+    if (shapeType == 21)
+    {
+        return distanceToHexagonalPrism(position, dimensions.x, dimensions.y);
+    }
+    if (shapeType == 22)
+    {
+        return distanceToOctahedron(position, dimensions.x);
     }
 
     return 0;

@@ -1,11 +1,10 @@
 import os
 
 
-os.environ["FN_BLINK_INCLUDE_PATHS"] = os.path.join(
-    os.path.dirname(__file__),
-    "src/blink",
-)
+_file_dir = os.path.dirname(__file__)
 
-nuke.pluginAddPath("./gizmos")
-nuke.pluginAddPath("./python")
-nuke.pluginAddPath("./plugins")
+os.environ["FN_BLINK_INCLUDE_PATHS"] = os.path.join(_file_dir, "src", "blink")
+
+nuke.pluginAddPath(os.path.join(_file_dir, "src", "python"))
+nuke.pluginAddPath(os.path.join(_file_dir, "gizmos"))
+nuke.pluginAddPath(os.path.join(_file_dir, "plugins"))
