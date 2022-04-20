@@ -4,6 +4,20 @@ import nuke
 
 
 class SDFPrimitive():
+    shape_knob_name = "shape"
+    hollow_knob_name = "hollow"
+    wall_thickness_knob_name = "wall_thickness"
+    elongate_knob_name = "elongate"
+    elongation_knob_name = "elongation"
+
+    knob_names_only_enabled_if_parent = (
+        "is_bound",
+        "blend_strength",
+        "blend_type",
+    )
+
+    sibling_input_index = 0
+    children_input_index = 1
 
     dimensional_knob_prefix = "dimension_"
     dimensional_knob_defaults = {
@@ -333,16 +347,40 @@ class SDFPrimitive():
     }
 
     @staticmethod
+    def handle_node_created():
+        """Setup a newly created node"""
+        created_node = nuke.thisNode()
+
+        SDFPrimitive._handle_input_changed(created_node)
+
+    @staticmethod
     def handle_knob_changed():
+        """Handle a knob changed event"""
         changed_knob = nuke.thisKnob()
-        if changed_knob.name() == "shape":
+        changed_knob_name = changed_knob.name()
+
+        if changed_knob_name == SDFPrimitive.shape_knob_name:
             SDFPrimitive._handle_shape_changed(nuke.thisNode(), changed_knob)
+
+        elif changed_knob_name == SDFPrimitive.hollow_knob_name:
+            SDFPrimitive._handle_hollow_changed(nuke.thisNode(), changed_knob)
+
+        elif changed_knob_name == SDFPrimitive.elongate_knob_name:
+            SDFPrimitive._handle_elongate_changed(nuke.thisNode(), changed_knob)
+
+        elif changed_knob_name == "inputChange":
+            SDFPrimitive._handle_input_changed(nuke.thisNode())
 
     @staticmethod
     def _handle_shape_changed(node, shape_knob):
-        default_values = SDFPrimitive.dimensional_knob_defaults[
-            shape_knob.enumName(int(shape_knob.getValue()))
-        ]
+        """Dynamically enable/disable and change the labels/tooltips/values
+        of the dimensional knobs when the selected shape has changed.
+
+        Args:
+            node (nuke.Node): The sdf_primitive node whose knob changed.
+            shape_knob (nuke.Knob): The shape knob that changed.
+        """
+        default_values = SDFPrimitive.dimensional_knob_defaults[shape_knob.value()]
 
         dimensional_knobs = [
             node.knob(SDFPrimitive.dimensional_knob_prefix + axis)
@@ -361,5 +399,36 @@ class SDFPrimitive():
         for dimensional_knob in dimensional_knobs[len(default_values):]:
             dimensional_knob.setVisible(False)
 
+    @staticmethod
+    def _handle_hollow_changed(node, hollow_knob):
+        """Dynamically enable/disable the wall thickness knob depending
+        on whether or not hollowing has been enabled.
 
-SDFPrimitive.handle_knob_changed()
+        Args:
+            node (nuke.Node): The sdf_primitive node whose knob changed.
+            hollow_knob (nuke.Knob): The hollow knob that changed.
+        """
+        node.knob(SDFPrimitive.wall_thickness_knob_name).setEnabled(hollow_knob.value())
+
+    @staticmethod
+    def _handle_elongate_changed(node, elongate_knob):
+        """Dynamically enable/disable the elongation knob depending
+        on whether or not elongate has been enabled.
+
+        Args:
+            node (nuke.Node): The sdf_primitive node whose knob changed.
+            elongate_knob (nuke.Knob): The elongate knob that changed.
+        """
+        node.knob(SDFPrimitive.elongation_knob_name).setEnabled(elongate_knob.value())
+
+    @staticmethod
+    def _handle_input_changed(node):
+        """Dynamically enable/disable the is_bound and blend knobs
+        depending on whether or not the primitive has children.
+
+        Args:
+            node (nuke.Node): The sdf_primitive node whose input changed.
+        """
+        has_child_input = node.input(SDFPrimitive.children_input_index) is not None
+        for knob_name in SDFPrimitive.knob_names_only_enabled_if_parent:
+            node.knob(knob_name).setEnabled(has_child_input)
