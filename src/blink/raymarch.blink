@@ -1,9 +1,9 @@
 #include "camera.h"
 #include "lights.h"
 #include "mmath.h"
+#include "objectInteraction.h"
+#include "sdfModifications.h"
 #include "sdfs.h"
-#include "sdfTransforms.h"
-#include "sdTransforms.h"
 
 
 #define MAX_RAYS_PER_SUBPIXEL 100
