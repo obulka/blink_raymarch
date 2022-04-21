@@ -13,9 +13,7 @@ nuke.toNode("sdf_primitive").knob("onCreate").setValue(
 """
 from collections import OrderedDict
 
-import nuke
-
-from .sdf_knob_manager import SDFKnobManager
+from .knob_manager import SDFKnobManager
 from .utils import KnobChangedCallbacks
 
 
@@ -31,9 +29,10 @@ class SDFPrimitive(SDFKnobManager):
     blend_strength_knob_name = "blend_strength"
     blend_type_knob_name = "blend_type"
 
+    _dimensional_axes = SDFKnobManager._dimensional_axes + ("w",)
+
     _knob_changed_callbacks = KnobChangedCallbacks(SDFKnobManager._knob_changed_callbacks)
 
-    dimensional_knob_prefix = "dimension_"
     dimensional_knob_defaults = {
         "sphere": OrderedDict([
             (
@@ -552,27 +551,7 @@ class SDFPrimitive(SDFKnobManager):
         """Dynamically enable/disable and change the labels/tooltips/values
         of the dimensional knobs when the selected shape has changed.
         """
-        new_shape = self._knob.value()
-        self._node.knob("label").setValue(new_shape)
-
-        default_values = self.dimensional_knob_defaults[new_shape]
-
-        dimensional_knobs = [
-            self._node.knob(self.dimensional_knob_prefix + axis)
-            for axis in ("x", "y", "z", "w")
-        ]
-
-        for (knob_name, knob_values), dimensional_knob in zip(
-            default_values.items(),
-            dimensional_knobs
-        ):
-            dimensional_knob.setVisible(True)
-            dimensional_knob.setLabel(knob_name)
-            dimensional_knob.setValue(knob_values["default"])
-            dimensional_knob.setTooltip(knob_values["tooltip"])
-
-        for dimensional_knob in dimensional_knobs[len(default_values):]:
-            dimensional_knob.setVisible(False)
+        self._dropdown_context_changed()
 
     @_knob_changed_callbacks.register(hollow_knob_name)
     def _hollow_changed(self):

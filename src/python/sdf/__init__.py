@@ -1,5 +1,6 @@
 __all__ = [
-    "sdf_knob_manager",
-    "sdf_primitive",
+    "knob_manager",
+    "light",
+    "primitive",
     "utils",
 ]
