@@ -1,45 +1,50 @@
 Gizmo {
+ onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
+ knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
+ tile_color 0xffffffff
+ label directional
  addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type M {None Directional Point "Ambient Occlusion"}}
- type Point
- addUserKnob {13 dir_pos l direction/position}
- dir_pos {0 1 0}
+ addUserKnob {4 type M {ambient directional point "ambient occlusion" "" ""}}
+ type directional
+ addUserKnob {7 dimension_x l "x direction" t "The x direction of the light." R 0 10}
+ addUserKnob {7 dimension_y l "y direction" t "The y direction of the light." R 0 10}
+ dimension_y -1
+ addUserKnob {7 dimension_z l "z direction" t "The z direction of the light."}
  addUserKnob {7 intensity}
- intensity 10
+ intensity 1
  addUserKnob {7 falloff R 0 5}
- falloff 4
  addUserKnob {18 colour}
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 shadow_hardness l "shadow hardness" R 1 100}
+ addUserKnob {7 shadow_hardness l "shadow hardness" +DISABLED R 1 100}
  shadow_hardness 10
  addUserKnob {6 soften_shadows l "soften shadows" -STARTLINE}
 }
  Input {
   inputs 0
   name Input1
-  xpos 922
+  xpos 803
   ypos 30
  }
  Dot {
   name Dot1
-  xpos 956
+  xpos 837
   ypos 488
  }
 add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
  Constant {
   inputs 0
   channels sdf_light
-  color {{parent.dir_pos.x} {parent.dir_pos.y} {parent.dir_pos.z} {parent.intensity}}
+  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.intensity}}
   format "1 1 0 0 1 1 1 1x1"
   name light
-  xpos 434
-  ypos 12
+  xpos 363
+  ypos 11
  }
  Dot {
   name Dot9
-  xpos 468
-  ypos 279
+  xpos 397
+  ypos 324
  }
 add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
  Constant {
@@ -48,13 +53,8 @@ add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properti
   color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
   format "1 1 0 0 1 1 1 1x1"
   name light_props
-  xpos 561
-  ypos 12
- }
- Dot {
-  name Dot6
-  xpos 591
-  ypos 282
+  xpos 501
+  ypos 11
  }
  Copy {
   inputs 2
@@ -70,27 +70,22 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
   color {{parent.shadow_hardness} {parent.falloff} 0 0}
   format "1 1 0 0 1 1 1 1x1"
   name light_props1
-  xpos 697
+  xpos 646
   ypos 12
- }
- Dot {
-  name Dot2
-  xpos 727
-  ypos 282
  }
  Copy {
   inputs 2
   channels all
   name Copy2
-  xpos 693
+  xpos 642
   ypos 380
  }
  Group {
   inputs 2
-  name sdf_merge2
-  xpos 693
+  name sdf_merge
+  xpos 642
   ypos 484
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
+  disable {{"!(\[exists parent.input0] && !(parent.input0.disable && !\[exists parent.input0.input0]))"}}
   addUserKnob {20 User}
   addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
  }
@@ -116,7 +111,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set N8276c00 [stack 0]
+set N8bed3900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -138,7 +133,7 @@ set N8276c00 [stack 0]
    xpos 34
    ypos -6
   }
-set N828a400 [stack 0]
+set N8bed1d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -149,7 +144,7 @@ set N828a400 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8276c00
+push $N8bed3900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -178,7 +173,7 @@ push $N8276c00
    xpos 158
    ypos 167
   }
-push $N828a400
+push $N8bed1d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -242,7 +237,7 @@ push $N828a400
  end_group
  Output {
   name Output1
-  xpos 693
+  xpos 642
   ypos 562
  }
 end_group

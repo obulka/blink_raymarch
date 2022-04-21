@@ -5,7 +5,7 @@ Gizmo {
  addUserKnob {3 max_rays_per_subpixel l "max rays per subpixel"}
  max_rays_per_subpixel 10
  addUserKnob {3 max_bounces l "max bounces" t "Rays will reflect this many times before they are stopped"}
- max_bounces 1
+ max_bounces 3
  addUserKnob {7 ray_distance l "max ray distance" R 10 10000}
  ray_distance 20
  addUserKnob {3 max_ray_steps l "max ray steps"}
@@ -13,7 +13,7 @@ Gizmo {
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
  hit_tolerance 0.001
  addUserKnob {3 diffuse_lighting_samples l "diffuse lighting samples"}
- diffuse_lighting_samples 3
+ diffuse_lighting_samples 40
  addUserKnob {7 shadow_bias l "shadow bias" t "The surface will be offset by an additional factor of this amount before determining if it is in shadow" R 1 2}
  shadow_bias 1
  addUserKnob {26 ""}
@@ -35,7 +35,6 @@ Gizmo {
  addUserKnob {6 iter_glow_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {26 ""}
  addUserKnob {7 skybox_offset_angle l "skybox offset angle" R 0 360}
- skybox_offset_angle 252
  addUserKnob {7 skybox_lighting_gain l "skybox lighting gain"}
  skybox_lighting_gain 1
  addUserKnob {7 skybox_shadow_hardness l "skybox shadow hardness" R 1 100}
@@ -137,7 +136,7 @@ Gizmo {
   xpos 1695
   ypos -1474
  }
-set N7ea6300 [stack 0]
+set N140b2b00 [stack 0]
  Blur {
   size {{"parent.skybox_lighting_blur * sky_dot.format.height / 2"}}
   name Blur
@@ -184,7 +183,7 @@ add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_lig
   xpos -48
   ypos -1309
  }
-set N7eead90 [stack 0]
+set Nad05b200 [stack 0]
 add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
  Shuffle {
   in sdf_light_properties1
@@ -199,7 +198,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
   xpos -232
   ypos -866
  }
-push $N7eead90
+push $Nad05b200
 add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
  Shuffle {
   in sdf_light_properties
@@ -212,7 +211,7 @@ add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properti
   xpos -113
   ypos -864
  }
-push $N7eead90
+push $Nad05b200
  Shuffle {
   in sdf_light
   name light
@@ -250,7 +249,7 @@ add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.p
   xpos 641
   ypos -1318
  }
-set N7f4e330 [stack 0]
+set Nad032400 [stack 0]
 add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surface.emission sdf_surface.roughness}
  Shuffle {
   in sdf_surface
@@ -263,7 +262,7 @@ add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surfa
   xpos 322
   ypos -863
  }
-push $N7f4e330
+push $Nad032400
 add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elongation_y sdf_shape_mods_1.elongation_z sdf_shape_mods_1.edge_radius}
  Shuffle {
   in sdf_shape_mods_1
@@ -276,7 +275,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
   xpos 780
   ypos -865
  }
-push $N7f4e330
+push $Nad032400
 add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetion_y sdf_shape_mods_0.repetion_z sdf_shape_mods_0.repetion_w}
  Shuffle {
   in sdf_shape_mods_0
@@ -289,7 +288,7 @@ add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetio
   xpos 641
   ypos -864
  }
-push $N7f4e330
+push $Nad032400
 add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.num_children sdf_shape.blend_strength}
  Shuffle {
   in sdf_shape
@@ -302,7 +301,7 @@ add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.n
   xpos 473
   ypos -863
  }
-push $N7f4e330
+push $Nad032400
 add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_b sdf_colour.colour_a}
  Shuffle {
   in sdf_colour
@@ -315,7 +314,7 @@ add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_
   xpos 165
   ypos -864
  }
-push $N7f4e330
+push $Nad032400
 add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y sdf_dimensions.dimension_z sdf_dimensions.dimension_w}
  Shuffle {
   in sdf_dimensions
@@ -328,7 +327,7 @@ add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y 
   xpos 1227
   ypos -857
  }
-push $N7f4e330
+push $Nad032400
 add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sdf_rotation_wall_thickness.rotation_y sdf_rotation_wall_thickness.rotation_z sdf_rotation_wall_thickness.wall_thickness}
  Shuffle {
   in sdf_rotation_wall_thickness
@@ -341,7 +340,7 @@ add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sd
   xpos 1076
   ypos -854
  }
-push $N7f4e330
+push $Nad032400
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -353,7 +352,7 @@ push $N7f4e330
   xpos 934
   ypos -859
  }
-push $N7ea6300
+push $N140b2b00
  Constant {
   inputs 0
   name Constant1
@@ -449,6 +448,11 @@ push $N7ea6300
   name BlinkRayMarcher
   xpos 1661
   ypos -461
+ }
+ Reformat {
+  name Reformat1
+  xpos 1661
+  ypos -400
  }
  Output {
   name Output1

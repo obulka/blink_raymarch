@@ -1,7 +1,7 @@
 Gizmo {
  inputs 2
- onCreate "__import__('sdf.sdf_primitive', fromlist='SDFPrimitive').SDFPrimitive.handle_node_created()"
- knobChanged "__import__('sdf.sdf_primitive', fromlist='SDFPrimitive').SDFPrimitive.handle_knob_changed()"
+ onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
+ knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label sphere
  addUserKnob {20 User l "SDF Primitive"}
@@ -15,16 +15,16 @@ Gizmo {
  addUserKnob {7 dimension_w l "corner radius" t "The radius of the corners of the rhombus' xy-plane parallel  face." +HIDDEN}
  dimension_w 0.05
  addUserKnob {7 wall_thickness l "wall thickness" +DISABLED}
- wall_thickness 0.001
+ wall_thickness 0.01
  addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
  addUserKnob {7 edge_radius l "edge radius"}
  addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
  addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
  addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
- addUserKnob {6 is_bound l "is bound" +DISABLED +STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {18 colour}
  colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection}
  addUserKnob {7 transmission}
  addUserKnob {7 refractive_index l "refractive index" R 1 4}
@@ -34,6 +34,7 @@ Gizmo {
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate}
  addUserKnob {13 rotate}
+ rotate {0 0 10}
  addUserKnob {13 elongation +DISABLED}
  elongation {0.1 0 0}
  addUserKnob {6 elongate -STARTLINE}
@@ -42,11 +43,13 @@ Gizmo {
  addUserKnob {26 div1 l "" +STARTLINE}
  addUserKnob {19 repetition_params l repetition}
  repetition_params {0 0 0 0}
+ addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
  addUserKnob {26 ""}
  addUserKnob {7 blend_strength l "blend strength" +DISABLED}
  blend_strength 0.11
  addUserKnob {4 blend_type l "blend type" -STARTLINE +DISABLED M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
+ addUserKnob {6 is_bound l "is bound" +DISABLED +STARTLINE}
 }
  Input {
   inputs 0
@@ -210,7 +213,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
   name sdf_merge
   xpos 1183
   ypos 822
-  disable {{"\[exists parent.input1] ? 0 : 1"}}
+  disable {{"!(\[exists parent.input1] && !input1.parent.input1.disable)"}}
   addUserKnob {20 User}
   addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
  }
@@ -236,7 +239,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N9806560 [stack 0]
+set N14193200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -258,7 +261,7 @@ set N9806560 [stack 0]
    xpos 34
    ypos -6
   }
-set N9819d60 [stack 0]
+set N14191600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -269,7 +272,7 @@ set N9819d60 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9806560
+push $N14193200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -298,7 +301,7 @@ push $N9806560
    xpos 158
    ypos 167
   }
-push $N9819d60
+push $N14191600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -365,7 +368,7 @@ push $N9819d60
   name sdf_merge1
   xpos 1183
   ypos 900
-  disable {{"\[exists parent.input0] ? 0 : 1"}}
+  disable {{"!(\[exists parent.input0] && !(parent.input0.disable && !\[exists parent.input0.input0]))"}}
   addUserKnob {20 User}
   addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
  }
@@ -391,7 +394,7 @@ push $N9819d60
    xpos 192
    ypos -2
   }
-set N98c6a10 [stack 0]
+set N1413cf00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -413,7 +416,7 @@ set N98c6a10 [stack 0]
    xpos 34
    ypos -6
   }
-set N98da210 [stack 0]
+set N1411f200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -424,7 +427,7 @@ set N98da210 [stack 0]
    xpos -98
    ypos 336
   }
-push $N98c6a10
+push $N1413cf00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -453,7 +456,7 @@ push $N98c6a10
    xpos 158
    ypos 167
   }
-push $N98da210
+push $N1411f200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true

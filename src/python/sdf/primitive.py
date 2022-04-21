@@ -12,8 +12,7 @@ nuke.toNode("sdf_primitive").knob("onCreate").setValue(
 """
 from collections import OrderedDict
 
-from .knob_manager import SDFKnobManager
-from .utils import KnobChangedCallbacks
+from .knob_manager import KnobChangedCallbacks, SDFKnobManager
 
 
 class SDFPrimitive(SDFKnobManager):

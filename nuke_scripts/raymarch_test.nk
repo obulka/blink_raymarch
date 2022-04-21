@@ -216,7 +216,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set Neaed3900 [stack 0]
+set N8bed3900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -238,7 +238,7 @@ set Neaed3900 [stack 0]
    xpos 34
    ypos -6
   }
-set Neaed1d00 [stack 0]
+set N8bed1d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -249,7 +249,7 @@ set Neaed1d00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Neaed3900
+push $N8bed3900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -278,7 +278,7 @@ push $Neaed3900
    xpos 158
    ypos 167
   }
-push $Neaed1d00
+push $N8bed1d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -358,11 +358,11 @@ Group {
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
- dimension_x 0.3
- addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the deeper the fractal will have detail." +HIDDEN}
- dimension_y 10
- addUserKnob {7 dimension_z l "max square radius" t "When the square radius has reached this length, stop iterating." +HIDDEN}
- dimension_z 4
+ dimension_x 0.5
+ addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN}
+ dimension_y 0.25
+ addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN}
+ dimension_z 0.25
  addUserKnob {7 dimension_w l "corner radius" t "The radius of the corners of the rhombus' xy-plane parallel  face." +HIDDEN}
  dimension_w 0.05
  addUserKnob {7 wall_thickness l "wall thickness" +DISABLED}
@@ -590,7 +590,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N41a3200 [stack 0]
+set N14193200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -612,7 +612,7 @@ set N41a3200 [stack 0]
    xpos 34
    ypos -6
   }
-set N41a1600 [stack 0]
+set N14191600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -623,7 +623,7 @@ set N41a1600 [stack 0]
    xpos -98
    ypos 336
   }
-push $N41a3200
+push $N14193200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -652,7 +652,7 @@ push $N41a3200
    xpos 158
    ypos 167
   }
-push $N41a1600
+push $N14191600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -745,7 +745,7 @@ push $N41a1600
    xpos 192
    ypos -2
   }
-set N414cf00 [stack 0]
+set N1413cf00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -767,7 +767,7 @@ set N414cf00 [stack 0]
    xpos 34
    ypos -6
   }
-set N412f200 [stack 0]
+set N1411f200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -778,7 +778,7 @@ set N412f200 [stack 0]
    xpos -98
    ypos 336
   }
-push $N414cf00
+push $N1413cf00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -807,7 +807,7 @@ push $N414cf00
    xpos 158
    ypos 167
   }
-push $N412f200
+push $N1411f200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -882,11 +882,10 @@ Group {
  ypos 1223
  addUserKnob {20 User l "Ray March"}
  addUserKnob {3 pixel_subdivisions l "pixel subdivisions" t "Subdivide the pixel and cast a ray for each subdivision, resulting in 2^subdivisions rays"}
- pixel_subdivisions 1
  addUserKnob {3 max_rays_per_subpixel l "max rays per subpixel"}
  max_rays_per_subpixel 10
  addUserKnob {3 max_bounces l "max bounces" t "Rays will reflect this many times before they are stopped"}
- max_bounces 1
+ max_bounces 3
  addUserKnob {7 ray_distance l "max ray distance" R 10 10000}
  ray_distance 20
  addUserKnob {3 max_ray_steps l "max ray steps"}
@@ -894,6 +893,7 @@ Group {
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
  hit_tolerance 0.001
  addUserKnob {3 diffuse_lighting_samples l "diffuse lighting samples"}
+ diffuse_lighting_samples 40
  addUserKnob {7 shadow_bias l "shadow bias" t "The surface will be offset by an additional factor of this amount before determining if it is in shadow" R 1 2}
  shadow_bias 1
  addUserKnob {26 ""}
@@ -1016,7 +1016,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set N40c2b00 [stack 0]
+set N140b2b00 [stack 0]
  Blur {
   size {{"parent.skybox_lighting_blur * sky_dot.format.height / 2"}}
   name Blur
@@ -1062,7 +1062,7 @@ set N40c2b00 [stack 0]
   xpos -48
   ypos -1309
  }
-set Nffdd7200 [stack 0]
+set Nad05b200 [stack 0]
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -1076,7 +1076,7 @@ set Nffdd7200 [stack 0]
   xpos -232
   ypos -866
  }
-push $Nffdd7200
+push $Nad05b200
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -1088,7 +1088,7 @@ push $Nffdd7200
   xpos -113
   ypos -864
  }
-push $Nffdd7200
+push $Nad05b200
  Shuffle {
   in sdf_light
   name light
@@ -1125,7 +1125,7 @@ push $Nffdd7200
   xpos 641
   ypos -1318
  }
-set Nffdae400 [stack 0]
+set Nad032400 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -1137,7 +1137,7 @@ set Nffdae400 [stack 0]
   xpos 322
   ypos -863
  }
-push $Nffdae400
+push $Nad032400
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -1149,7 +1149,7 @@ push $Nffdae400
   xpos 780
   ypos -865
  }
-push $Nffdae400
+push $Nad032400
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -1161,7 +1161,7 @@ push $Nffdae400
   xpos 641
   ypos -864
  }
-push $Nffdae400
+push $Nad032400
  Shuffle {
   in sdf_shape
   name shape
@@ -1173,7 +1173,7 @@ push $Nffdae400
   xpos 473
   ypos -863
  }
-push $Nffdae400
+push $Nad032400
  Shuffle {
   in sdf_colour
   name colour
@@ -1185,7 +1185,7 @@ push $Nffdae400
   xpos 165
   ypos -864
  }
-push $Nffdae400
+push $Nad032400
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -1197,7 +1197,7 @@ push $Nffdae400
   xpos 1227
   ypos -857
  }
-push $Nffdae400
+push $Nad032400
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -1209,7 +1209,7 @@ push $Nffdae400
   xpos 1076
   ypos -854
  }
-push $Nffdae400
+push $Nad032400
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -1221,7 +1221,7 @@ push $Nffdae400
   xpos 934
   ypos -859
  }
-push $N40c2b00
+push $N140b2b00
  Constant {
   inputs 0
   name Constant1
