@@ -1,14 +1,13 @@
 """Knob management for sdf lights.
 
-
 # Add on knob changed callback to sdf_light group:
 nuke.toNode("sdf_light").knob("knobChanged").setValue(
-    "__import__('sdf.sdf_light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
+    "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
 )
 
 # Add on node create callback to sdf_light group:
 nuke.toNode("sdf_light").knob("onCreate").setValue(
-    "__import__('sdf.sdf_light', fromlist='SDFLight').SDFLight().handle_node_created()"
+    "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
 )
 """
 from collections import OrderedDict
@@ -87,18 +86,33 @@ class SDFLight(SDFKnobManager):
         ]),
     }
 
+    def _update_ambient_dependent_knobs(self):
+        """Enable/disable the knobs that are not used by ambient lights"""
+        not_ambient = "ambient" not in self._knob.value()
+
+        self._node.knob(self.falloff_knob_name).setEnabled(not_ambient)
+
+        soften_shadows_knob = self._node.knob(self.soften_shadows_knob_name)
+        soften_shadows_knob.setEnabled(not_ambient)
+        self._node.knob(self.shadow_hardness_knob_name).setEnabled(
+            not_ambient and soften_shadows_knob.value(),
+        )
+
     @_knob_changed_callbacks.register(type_knob_name)
     def _type_changed(self):
         """Dynamically enable/disable and change the labels/tooltips/values
         of the dimensional knobs when the selected type has changed.
         """
-        self._dropdown_context_changed()
-
-        self._node.knob(self.falloff_knob_name).setEnabled("ambient" not in self._knob.name())
+        self._dropdown_context_changed(
+            self.dimensional_knob_defaults,
+            self.dimensional_context_knob_names,
+            set_node_label=True,
+        )
+        self._update_ambient_dependent_knobs()
 
     @_knob_changed_callbacks.register(soften_shadows_knob_name)
     def _soften_shadows_changed(self):
-        """Dynamically enable/disable the wall thickness knob depending
+        """Dynamically enable/disable the wall soften shadows knob depending
         on whether or not hollowing has been enabled.
         """
         self._node.knob(self.shadow_hardness_knob_name).setEnabled(self._knob.value())

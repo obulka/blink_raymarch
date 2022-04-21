@@ -1,14 +1,13 @@
 """Knob management for sdf primitives.
 
-
 # Add on knob changed callback to sdf_primitive group:
 nuke.toNode("sdf_primitive").knob("knobChanged").setValue(
-    "__import__('sdf.sdf_primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
+    "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
 )
 
 # Add on node create callback to sdf_primitive group:
 nuke.toNode("sdf_primitive").knob("onCreate").setValue(
-    "__import__('sdf.sdf_primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
+    "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
 )
 """
 from collections import OrderedDict
@@ -551,7 +550,11 @@ class SDFPrimitive(SDFKnobManager):
         """Dynamically enable/disable and change the labels/tooltips/values
         of the dimensional knobs when the selected shape has changed.
         """
-        self._dropdown_context_changed()
+        self._dropdown_context_changed(
+            self.dimensional_knob_defaults,
+            self.dimensional_context_knob_names,
+            set_node_label=True,
+        )
 
     @_knob_changed_callbacks.register(hollow_knob_name)
     def _hollow_changed(self):

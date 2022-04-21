@@ -16,13 +16,20 @@ class SDFKnobManager(KnobManager):
 
     _dimensional_axes = ("x", "y", "z")
     _dimensional_knob_prefix = "dimension_"
-    dimensional_knob_defaults = {}
 
     def __init__(self):
         """Initialize the manager"""
         super(SDFKnobManager, self).__init__()
 
         self._knob_names_only_enabled_if_parent = set()
+
+    @property
+    def dimensional_context_knob_names(self):
+        """"""
+        return [
+            self._node.knob(self._dimensional_knob_prefix + axis)
+            for axis in self._dimensional_axes
+        ]
 
     @_knob_changed_callbacks.register(colour_knob_name)
     def _colour_changed(self):
@@ -38,28 +45,29 @@ class SDFKnobManager(KnobManager):
         for knob_name in self._knob_names_only_enabled_if_parent:
             self._node.knob(knob_name).setEnabled(has_child_input)
 
-    def _dropdown_context_changed(self):
+    def _dropdown_context_changed(self, default_dict, context_knobs, set_node_label=False):
         """Dynamically enable/disable and change the labels/tooltips/values
         of the dimensional knobs when the dropdown has changed.
+
+        Args:
+            default_dict (dict(str, OrderedDict(str, dict()))): The
+                default values for the context sensitive knobs.
         """
         new_value = self._knob.value()
-        self._node.knob("label").setValue(new_value)
 
-        default_values = self.dimensional_knob_defaults.get(new_value, {})
+        if set_node_label:
+            self._node.knob("label").setValue(new_value)
 
-        dimensional_knobs = [
-            self._node.knob(self._dimensional_knob_prefix + axis)
-            for axis in self._dimensional_axes
-        ]
+        default_values = default_dict.get(new_value, {})
 
-        for (knob_name, knob_values), dimensional_knob in zip(
+        for (knob_name, knob_values), context_knob in zip(
             default_values.items(),
-            dimensional_knobs
+            context_knobs
         ):
-            dimensional_knob.setVisible(True)
-            dimensional_knob.setLabel(knob_name)
-            dimensional_knob.setValue(knob_values["default"])
-            dimensional_knob.setTooltip(knob_values["tooltip"])
+            context_knob.setVisible(True)
+            context_knob.setLabel(knob_name)
+            context_knob.setValue(knob_values["default"])
+            context_knob.setTooltip(knob_values["tooltip"])
 
-        for dimensional_knob in dimensional_knobs[len(default_values):]:
-            dimensional_knob.setVisible(False)
+        for context_knob in context_knobs[len(default_values):]:
+            context_knob.setVisible(False)

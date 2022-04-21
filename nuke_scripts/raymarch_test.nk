@@ -2,30 +2,29 @@
 version 13.0 v2
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="1976" y="188" w="1252" h="1376" screen="0">
+    <window x="1976" y="188" w="2504" h="1376" maximized="1" screen="0">
         <splitter orientation="1">
             <split size="40"/>
             <dock id="" hideTitles="1" activePageId="Toolbar.1">
                 <page id="Toolbar.1"/>
             </dock>
-            <split size="589" stretch="1"/>
+            <split size="1841" stretch="1"/>
             <splitter orientation="2">
                 <split size="783"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
                 <split size="550"/>
-                <dock id="" activePageId="DAG.1">
+                <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
                 </dock>
             </splitter>
             <split size="615"/>
-            <dock id="" activePageId="uk.co.thefoundry.scripteditor.1" focus="true">
+            <dock id="" activePageId="Properties.1">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
-                <page id="uk.co.thefoundry.scripteditor.1"/>
             </dock>
         </splitter>
     </window>
@@ -98,7 +97,7 @@ Camera2 {
 Dot {
  name Dot18
  xpos 18709
- ypos 1001
+ ypos 1000
 }
 Group {
  inputs 0
@@ -106,16 +105,16 @@ Group {
  onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
  knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
  tile_color 0xffffffff
- label ambient
- selected true
+ label directional
  xpos 18311
- ypos 1000
+ ypos 1005
  addUserKnob {20 User l "SDF LIght"}
  addUserKnob {4 type M {ambient directional point "ambient occlusion" "" ""}}
- addUserKnob {7 dimension_x l "x direction" t "The x direction of the light." +HIDDEN R 0 10}
- addUserKnob {7 dimension_y l "y direction" t "The y direction of the light." +HIDDEN R 0 10}
+ type directional
+ addUserKnob {7 dimension_x l "x direction" t "The x direction of the light." R 0 10}
+ addUserKnob {7 dimension_y l "y direction" t "The y direction of the light." R 0 10}
  dimension_y -1
- addUserKnob {7 dimension_z l "z direction" t "The z direction of the light." +HIDDEN}
+ addUserKnob {7 dimension_z l "z direction" t "The z direction of the light."}
  addUserKnob {7 intensity}
  intensity 1
  addUserKnob {7 falloff R 0 5}
@@ -217,7 +216,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set N78452b00 [stack 0]
+set Neaed3900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -239,7 +238,7 @@ set N78452b00 [stack 0]
    xpos 34
    ypos -6
   }
-set N78450f00 [stack 0]
+set Neaed1d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -250,7 +249,7 @@ set N78450f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N78452b00
+push $Neaed3900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -279,7 +278,7 @@ push $N78452b00
    xpos 158
    ypos 167
   }
-push $N78450f00
+push $Neaed1d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -354,12 +353,12 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label sphere
- xpos 18151
- ypos 1000
+ xpos 18140
+ ypos 1005
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
- dimension_x 0.1
+ dimension_x 0.3
  addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the deeper the fractal will have detail." +HIDDEN}
  dimension_y 10
  addUserKnob {7 dimension_z l "max square radius" t "When the square radius has reached this length, stop iterating." +HIDDEN}
@@ -367,13 +366,12 @@ Group {
  addUserKnob {7 dimension_w l "corner radius" t "The radius of the corners of the rhombus' xy-plane parallel  face." +HIDDEN}
  dimension_w 0.05
  addUserKnob {7 wall_thickness l "wall thickness" +DISABLED}
- wall_thickness 0.001
+ wall_thickness 0.01
  addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
  addUserKnob {7 edge_radius l "edge radius"}
  addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
  addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
  addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
- addUserKnob {6 is_bound l "is bound" +DISABLED +STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {18 colour}
  colour {1 1 1}
@@ -402,6 +400,7 @@ Group {
  addUserKnob {7 blend_strength l "blend strength" +DISABLED}
  blend_strength 0.11
  addUserKnob {4 blend_type l "blend type" -STARTLINE +DISABLED M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
+ addUserKnob {6 is_bound l "is bound" +DISABLED +STARTLINE}
 }
  Input {
   inputs 0
@@ -591,7 +590,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set Nc414e400 [stack 0]
+set N41a3200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -613,7 +612,7 @@ set Nc414e400 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc414c800 [stack 0]
+set N41a1600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -624,7 +623,7 @@ set Nc414c800 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc414e400
+push $N41a3200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -653,7 +652,7 @@ push $Nc414e400
    xpos 158
    ypos 167
   }
-push $Nc414c800
+push $N41a1600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -746,7 +745,7 @@ push $Nc414c800
    xpos 192
    ypos -2
   }
-set Nc40f0100 [stack 0]
+set N414cf00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -768,7 +767,7 @@ set Nc40f0100 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc40d6400 [stack 0]
+set N412f200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -779,7 +778,7 @@ set Nc40d6400 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc40f0100
+push $N414cf00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -808,7 +807,7 @@ push $Nc40f0100
    xpos 158
    ypos 167
   }
-push $Nc40d6400
+push $N412f200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1017,7 +1016,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set Nc405dd00 [stack 0]
+set N40c2b00 [stack 0]
  Blur {
   size {{"parent.skybox_lighting_blur * sky_dot.format.height / 2"}}
   name Blur
@@ -1063,7 +1062,7 @@ set Nc405dd00 [stack 0]
   xpos -48
   ypos -1309
  }
-set N8d266400 [stack 0]
+set Nffdd7200 [stack 0]
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -1077,7 +1076,7 @@ set N8d266400 [stack 0]
   xpos -232
   ypos -866
  }
-push $N8d266400
+push $Nffdd7200
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -1089,7 +1088,7 @@ push $N8d266400
   xpos -113
   ypos -864
  }
-push $N8d266400
+push $Nffdd7200
  Shuffle {
   in sdf_light
   name light
@@ -1126,7 +1125,7 @@ push $N8d266400
   xpos 641
   ypos -1318
  }
-set N8d241600 [stack 0]
+set Nffdae400 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -1138,7 +1137,7 @@ set N8d241600 [stack 0]
   xpos 322
   ypos -863
  }
-push $N8d241600
+push $Nffdae400
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -1150,7 +1149,7 @@ push $N8d241600
   xpos 780
   ypos -865
  }
-push $N8d241600
+push $Nffdae400
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -1162,7 +1161,7 @@ push $N8d241600
   xpos 641
   ypos -864
  }
-push $N8d241600
+push $Nffdae400
  Shuffle {
   in sdf_shape
   name shape
@@ -1174,7 +1173,7 @@ push $N8d241600
   xpos 473
   ypos -863
  }
-push $N8d241600
+push $Nffdae400
  Shuffle {
   in sdf_colour
   name colour
@@ -1186,7 +1185,7 @@ push $N8d241600
   xpos 165
   ypos -864
  }
-push $N8d241600
+push $Nffdae400
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -1198,7 +1197,7 @@ push $N8d241600
   xpos 1227
   ypos -857
  }
-push $N8d241600
+push $Nffdae400
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -1210,7 +1209,7 @@ push $N8d241600
   xpos 1076
   ypos -854
  }
-push $N8d241600
+push $Nffdae400
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -1222,7 +1221,7 @@ push $N8d241600
   xpos 934
   ypos -859
  }
-push $Nc405dd00
+push $N40c2b00
  Constant {
   inputs 0
   name Constant1
