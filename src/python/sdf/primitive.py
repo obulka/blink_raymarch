@@ -551,7 +551,7 @@ class SDFPrimitive(SDFKnobManager):
         """
         self._dropdown_context_changed(
             self.dimensional_knob_defaults,
-            self.dimensional_context_knob_names,
+            self.dimensional_context_knobs,
             set_node_label=True,
         )
 

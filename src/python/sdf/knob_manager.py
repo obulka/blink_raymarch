@@ -41,9 +41,7 @@ class KnobManager():
 
     @_knob_changed_callbacks.register("inputChange")
     def _input_changed(self):
-        """Dynamically enable/disable the is_bound and blend knobs
-        depending on whether or not the primitive has children.
-        """
+        """Called when the input has changed"""
         pass
 
 
@@ -67,8 +65,10 @@ class SDFKnobManager(KnobManager):
         self._knob_names_only_enabled_if_parent = set()
 
     @property
-    def dimensional_context_knob_names(self):
-        """"""
+    def dimensional_context_knobs(self):
+        """list(nuke.Knob): The context knobs for an sdf node's
+                dimensional parameters.
+        """
         return [
             self._node.knob(self._dimensional_knob_prefix + axis)
             for axis in self._dimensional_axes
@@ -81,7 +81,7 @@ class SDFKnobManager(KnobManager):
 
     @_knob_changed_callbacks.register("inputChange")
     def _input_changed(self):
-        """Dynamically enable/disable the is_bound and blend knobs
+        """Dynamically enable/disable the is bound and blend knobs
         depending on whether or not the primitive has children.
         """
         has_child_input = self._node.input(self.children_input_index) is not None
