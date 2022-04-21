@@ -1,24 +1,37 @@
+"""Knob management for sdf primitives.
+
+
+# Add on knob changed callback to sdf_primitive group:
+nuke.toNode("sdf_primitive").knob("knobChanged").setValue(
+    "__import__('sdf.sdf_primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
+)
+
+# Add on node create callback to sdf_primitive group:
+nuke.toNode("sdf_primitive").knob("onCreate").setValue(
+    "__import__('sdf.sdf_primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
+)
+"""
 from collections import OrderedDict
 
 import nuke
 
+from .sdf_knob_manager import SDFKnobManager
+from .utils import KnobChangedCallbacks
 
-class SDFPrimitive():
+
+class SDFPrimitive(SDFKnobManager):
+    """Knob manager for primitive shapes in signed distance fields."""
+
     shape_knob_name = "shape"
     hollow_knob_name = "hollow"
     wall_thickness_knob_name = "wall_thickness"
     elongate_knob_name = "elongate"
     elongation_knob_name = "elongation"
-    colour_knob_name = "colour"
+    is_bound_knob_name = "is_bound"
+    blend_strength_knob_name = "blend_strength"
+    blend_type_knob_name = "blend_type"
 
-    knob_names_only_enabled_if_parent = (
-        "is_bound",
-        "blend_strength",
-        "blend_type",
-    )
-
-    sibling_input_index = 0
-    children_input_index = 1
+    _knob_changed_callbacks = KnobChangedCallbacks(SDFKnobManager._knob_changed_callbacks)
 
     dimensional_knob_prefix = "dimension_"
     dimensional_knob_defaults = {
@@ -524,82 +537,28 @@ class SDFPrimitive():
         ]),
     }
 
-    @staticmethod
-    def __float_to_8bit_colour(colour_value):
-        """Convert a floating point value to 8bit
+    def __init__(self):
+        """Initialize the manager"""
+        super(SDFPrimitive, self).__init__()
 
-        Args:
-            colour_value (float): The value to convert.
+        self._knob_names_only_enabled_if_parent = {
+            SDFPrimitive.is_bound_knob_name,
+            SDFPrimitive.blend_strength_knob_name,
+            SDFPrimitive.blend_type_knob_name,
+        }
 
-        Returns:
-            int: The 8bit colour value.
-        """
-        return int(max(0, min(round(colour_value * 255.), 255)))
-
-    @staticmethod
-    def __rgb_to_hex(rgb_value):
-        """Convert a floating point rgb value to hex.
-
-        Args:
-            rgb_value (list(float)): The value to convert.
-
-        Returns:
-            int: The hex colour value.
-        """
-        return int(
-            "0x{0:02x}{1:02x}{2:02x}{3:02x}".format(
-                SDFPrimitive.__float_to_8bit_colour(rgb_value[0]),
-                SDFPrimitive.__float_to_8bit_colour(rgb_value[1]),
-                SDFPrimitive.__float_to_8bit_colour(rgb_value[2]),
-                255,
-            ),
-            0,
-        )
-
-    @staticmethod
-    def handle_node_created():
-        """Setup a newly created node"""
-        created_node = nuke.thisNode()
-
-        SDFPrimitive._handle_input_changed(created_node)
-
-    @staticmethod
-    def handle_knob_changed():
-        """Handle a knob changed event"""
-        changed_knob = nuke.thisKnob()
-        changed_knob_name = changed_knob.name()
-
-        if changed_knob_name == SDFPrimitive.shape_knob_name:
-            SDFPrimitive._handle_shape_changed(nuke.thisNode(), changed_knob)
-
-        elif changed_knob_name == SDFPrimitive.hollow_knob_name:
-            SDFPrimitive._handle_hollow_changed(nuke.thisNode(), changed_knob)
-
-        elif changed_knob_name == SDFPrimitive.elongate_knob_name:
-            SDFPrimitive._handle_elongate_changed(nuke.thisNode(), changed_knob)
-
-        elif changed_knob_name == SDFPrimitive.colour_knob_name:
-            SDFPrimitive._handle_colour_changed(nuke.thisNode(), changed_knob)
-
-        elif changed_knob_name == "inputChange":
-            SDFPrimitive._handle_input_changed(nuke.thisNode())
-
-    @staticmethod
-    def _handle_shape_changed(node, shape_knob):
+    @_knob_changed_callbacks.register(shape_knob_name)
+    def _shape_changed(self):
         """Dynamically enable/disable and change the labels/tooltips/values
         of the dimensional knobs when the selected shape has changed.
-
-        Args:
-            node (nuke.Node): The sdf_primitive node whose knob changed.
-            shape_knob (nuke.Knob): The shape knob that changed.
         """
-        new_shape = shape_knob.value()
-        node.knob("label").setValue(new_shape)
+        new_shape = self._knob.value()
+        self._node.knob("label").setValue(new_shape)
 
-        default_values = SDFPrimitive.dimensional_knob_defaults[new_shape]
+        default_values = self.dimensional_knob_defaults[new_shape]
 
         dimensional_knobs = [
-            node.knob(SDFPrimitive.dimensional_knob_prefix + axis)
+            self._node.knob(self.dimensional_knob_prefix + axis)
             for axis in ("x", "y", "z", "w")
         ]
 
@@ -615,46 +574,16 @@ class SDFPrimitive():
         for dimensional_knob in dimensional_knobs[len(default_values):]:
             dimensional_knob.setVisible(False)
 
-    @staticmethod
-    def _handle_hollow_changed(node, hollow_knob):
+    @_knob_changed_callbacks.register(hollow_knob_name)
+    def _hollow_changed(self):
         """Dynamically enable/disable the wall thickness knob depending
         on whether or not hollowing has been enabled.
-
-        Args:
-            node (nuke.Node): The sdf_primitive node whose knob changed.
-            hollow_knob (nuke.Knob): The hollow knob that changed.
         """
-        node.knob(SDFPrimitive.wall_thickness_knob_name).setEnabled(hollow_knob.value())
+        self._node.knob(self.wall_thickness_knob_name).setEnabled(self._knob.value())
 
-    @staticmethod
-    def _handle_elongate_changed(node, elongate_knob):
+    @_knob_changed_callbacks.register(elongate_knob_name)
+    def _elongate_changed(self):
         """Dynamically enable/disable the elongation knob depending
         on whether or not elongate has been enabled.
-
-        Args:
-            node (nuke.Node): The sdf_primitive node whose knob changed.
-            elongate_knob (nuke.Knob): The elongate knob that changed.
         """
-        node.knob(SDFPrimitive.elongation_knob_name).setEnabled(elongate_knob.value())
-
-    @staticmethod
-    def _handle_colour_changed(node, colour_knob):
-        """Change the node colour to match the object for easier ID.
-
-        Args:
-            node (nuke.Node): The sdf_primitive node whose knob changed.
-            colour_knob (nuke.Knob): The colour knob that changed.
-        """
-        node.knob("tile_color").setValue(SDFPrimitive.__rgb_to_hex(colour_knob.value()))
-
-    @staticmethod
-    def _handle_input_changed(node):
-        """Dynamically enable/disable the is_bound and blend knobs
-        depending on whether or not the primitive has children.
-
-        Args:
-            node (nuke.Node): The sdf_primitive node whose input changed.
-        """
-        has_child_input = node.input(SDFPrimitive.children_input_index) is not None
-        for knob_name in SDFPrimitive.knob_names_only_enabled_if_parent:
-            node.knob(knob_name).setEnabled(has_child_input)
+        self._node.knob(self.elongation_knob_name).setEnabled(self._knob.value())
