@@ -440,7 +440,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             colour = blendedColour;
                             surface = blendedSurface;
 
-                            id = (float) j;
+                            id = (float) j + 1.0f;
                         }
 
                         for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
@@ -482,7 +482,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         colour = blendedColour;
                         surface = blendedSurface;
 
-                        id = (float) j;
+                        id = (float) j + 1.0f;
                     }
                 }
             }
@@ -530,7 +530,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         colour = blendedColour;
                         surface = blendedSurface;
 
-                        id = (float) j;
+                        id = (float) j + 1.0f;
                     }
 
                     j += numChildren;
@@ -840,7 +840,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                 rayDirection = roughen(
                     surfaceNormal,
-                    saturate(1.0f - surface.x - surface.y),
+                    diffuse,
                     rayDirection * seedVal + iteration / (float) hdriLightSamples
                 );
                 currentLightIntensity = lightIntensityOnSurface(
@@ -854,7 +854,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     hitColour,
                     hitSurface
                 );
-                const float4 hdriLightColour = readHDRILightValue(rayDirection);
+                const float4 hdriLightColour = float4(1);//readHDRILightValue(rayDirection);
                 lightColour += (
                     currentLightIntensity.x
                     * currentLightIntensity.y
@@ -891,7 +891,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float4 colour;
         float4 surface;
 
-        const float epsilon = hitTolerance * pixelFootprint;
+        const float epsilon = hitTolerance;
 
         const float3 offset0 = 0.5773f * float3(1, -1, -1);
         const float3 offset1 = 0.5773f * float3(-1, -1, 1);
