@@ -854,7 +854,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     hitColour,
                     hitSurface
                 );
-                const float4 hdriLightColour = float4(1);//readHDRILightValue(rayDirection);
+                const float4 hdriLightColour = readHDRILightValue(rayDirection);
                 lightColour += (
                     currentLightIntensity.x
                     * currentLightIntensity.y
