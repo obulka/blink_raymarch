@@ -25,6 +25,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <dock id="" activePageId="Properties.1">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
+                <page id="uk.co.thefoundry.scripteditor.1"/>
             </dock>
         </splitter>
     </window>
@@ -68,6 +69,13 @@ Read {
  xpos 18896
  ypos 821
 }
+Viewer {
+ inputs 0
+ frame_range 1-479
+ name Viewer1
+ xpos 18313
+ ypos 1285
+}
 Group {
  inputs 0
  name sdf_light
@@ -78,21 +86,20 @@ Group {
  xpos 18305
  ypos 1015
  addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type M {ambient directional point "ambient occlusion" "" ""}}
+ addUserKnob {4 type t "The type of light." M {ambient directional point "ambient occlusion"}}
  type directional
- addUserKnob {7 dimension_x l "x direction" t "The x direction of the light." R 0 10}
- addUserKnob {7 dimension_y l "y direction" t "The y direction of the light." R 0 10}
- addUserKnob {7 dimension_z l "z direction" t "The z direction of the light."}
- dimension_z -1
- addUserKnob {7 intensity}
+ addUserKnob {7 dimension_x l "x direction" t "The x direction of the light." R -1 1}
+ addUserKnob {7 dimension_y l "y direction" t "The y direction of the light." R -1 1}
+ dimension_y -1
+ addUserKnob {7 dimension_z l "z direction" t "The z direction of the light." R -1 1}
+ addUserKnob {7 intensity t "The intensity of the light." R 0 10}
  intensity 1
- addUserKnob {7 falloff R 0 5}
- addUserKnob {18 colour}
+ addUserKnob {7 falloff t "The power of the light's intensity falloff. Four is physically accurate." R 0 5}
+ addUserKnob {18 colour t "The colour of the light."}
  colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 shadow_hardness l "shadow hardness" +DISABLED R 1 100}
+ addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." +DISABLED R 1 100}
  shadow_hardness 10
- addUserKnob {6 soften_shadows l "soften shadows" -STARTLINE}
+ addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
 }
  Input {
   inputs 0
@@ -368,7 +375,7 @@ Group {
  xpos 18120
  ypos 1047
  addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox}}
+ addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape mandelbox
  addUserKnob {7 dimension_x l scale t "The amount to scale the position between folds. Can be negative or positive." R -5 5}
  dimension_x -1.75
@@ -897,50 +904,48 @@ Group {
  xpos 18313
  ypos 1222
  addUserKnob {20 User l "Ray March"}
- addUserKnob {3 pixel_subdivisions l "pixel subdivisions" t "Subdivide the pixel and cast a ray for each subdivision, resulting in 2^subdivisions rays"}
- addUserKnob {3 max_rays_per_subpixel l "max rays per subpixel"}
+ addUserKnob {3 pixel_subdivisions l "pixel subdivisions" t "Subdivide the pixel and cast a ray for each subdivision, resulting in 2^subdivisions rays being sent from the camera."}
+ addUserKnob {3 max_rays_per_subpixel l "max rays per subpixel" t "For each subpixel the number of spawned rays will be capped at this value. This excludes shadow rays."}
  max_rays_per_subpixel 10
- addUserKnob {3 max_bounces l "max bounces" t "Rays will reflect this many times before they are stopped"}
+ addUserKnob {3 max_bounces l "max bounces" t "Limits the number of times the rays can intersect an object per subpixel."}
  max_bounces 2
- addUserKnob {7 ray_distance l "max ray distance" R 10 10000}
+ addUserKnob {7 ray_distance l "max ray distance" t "Each ray, once spawned is only allowed to travel this distance before it is culled." R 10 10000}
  ray_distance 20
- addUserKnob {3 max_ray_steps l "max ray steps"}
+ addUserKnob {3 max_ray_steps l "max ray steps" t "Limit the number of steps a ray can be marched before it is culled. Shadow rays are given half this number of steps."}
  max_ray_steps 1000
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
  hit_tolerance 0.001
- addUserKnob {7 shadow_bias l "shadow bias" t "The surface will be offset by an additional factor of this amount before determining if it is in shadow" R 1 2}
+ addUserKnob {7 shadow_bias l "shadow bias" t "The surface will be offset by an additional factor of this amount before determining whether or not it is in shadow." R 1 2}
  shadow_bias 1
  addUserKnob {26 ""}
- addUserKnob {7 refractive_index l "refractive index" R 1 4}
+ addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the medium that the camera is currently in." R 1 4}
  refractive_index 1
  addUserKnob {26 ""}
- addUserKnob {7 haze l "haze amount"}
- addUserKnob {7 haze_start l "haze start"}
+ addUserKnob {7 haze l "haze amount" t "The strength of a linear hazing effect."}
+ addUserKnob {7 haze_start l "haze start" t "The haze will only begin taking effect after the ray has travelled this distance from the camera." R 0 5}
  haze_start 2
- addUserKnob {7 haze_distance l "haze distance"}
+ addUserKnob {7 haze_distance l "haze distance" t "The haze will reach its maximum value after travelling this far past 'haze start'." R 0 5}
  haze_distance 3
- addUserKnob {19 haze_colour l "haze colour"}
+ addUserKnob {19 haze_colour l "haze colour" t "The colour of the haze."}
  haze_colour {1 1 1 0}
- addUserKnob {6 haze_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {26 ""}
- addUserKnob {7 iter_glow l "iter glow" t "The more steps it takes to compute a pixel the more it will glow" R 0 0.1}
- addUserKnob {19 iter_glow_colour l "iter glow colour"}
+ addUserKnob {7 iter_glow l "iter glow" t "The more steps a ray takes to compute a pixel the more it will take on the 'iter glow colour'. This can be used to view the slowest regions of the image or just to have a neat glowing effect." R 0 0.1}
+ addUserKnob {19 iter_glow_colour l "iter glow colour" t "The colour of the 'iter glow'."}
  iter_glow_colour {1 0 0 0}
- addUserKnob {6 iter_glow_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {26 ""}
- addUserKnob {7 hdri_offset_angle l "hdri offset angle" R 0 360}
+ addUserKnob {7 hdri_offset_angle l "hdri offset angle" t "Rotate the hdri image by this amount around the y-axis." R 0 360}
  hdri_offset_angle 180
- addUserKnob {3 hdri_lighting_samples l "hdri lighting samples"}
+ addUserKnob {3 hdri_lighting_samples l "hdri lighting samples" t "The number of rays spawned to compute the diffuse, hdri image based lighting. These rays will also be affected by any emissive objects in the scene."}
  hdri_lighting_samples 20
- addUserKnob {7 hdri_lighting_gain l "hdri lighting gain"}
+ addUserKnob {7 hdri_lighting_gain l "hdri lighting gain" t "Multiply the hdri lighting intensity by this amount."}
  hdri_lighting_gain 1
- addUserKnob {7 hdri_lighting_blur l "hdri lighting blur"}
+ addUserKnob {7 hdri_lighting_blur l "hdri lighting blur" t "Blur the hdri image by a factor of this amount before using it for the lighting in the scene."}
  hdri_lighting_blur 0.5
- addUserKnob {7 hdri_shadow_hardness l "hdri shadow hardness" R 1 100}
+ addUserKnob {7 hdri_shadow_hardness l "hdri shadow hardness" t "Use soft shadows with this hardness if 'soften shadows' is enabled. Probably will not have much effect but give it a go." R 1 100}
  hdri_shadow_hardness 1
- addUserKnob {6 soften_shadows l "soften shadows" -STARTLINE}
+ addUserKnob {6 soften_shadows l "soften shadows" t "Enable soft shadows when computing the hdri image based lighting." -STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {4 output_type l output M {Scene Position Normal Depth ""}}
+ addUserKnob {4 output_type l output t "The AOV type to output." M {Scene Position Normal Depth}}
 }
  BackdropNode {
   inputs 0
@@ -1346,10 +1351,3 @@ push $N9000dd00
   ypos -122
  }
 end_group
-Viewer {
- inputs 0
- frame_range 1-479
- name Viewer1
- xpos 18313
- ypos 1285
-}
