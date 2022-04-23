@@ -542,6 +542,46 @@ class SDFPrimitive(SDFKnobManager):
                 },
             ),
         ]),
+        "mandelbox": OrderedDict([
+            (
+                "scale",
+                {
+                    "default": -1.75,
+                    "tooltip": (
+                        "The amount to scale the position between folds. "
+                        "Can be negative or positive."
+                    ),
+                },
+            ),
+            (
+                "iterations",
+                {
+                    "default": 12.,
+                    "tooltip": (
+                        "The number of iterations to compute, the higher this "
+                        "is the slower it will be to compute, but the more detail "
+                        "the fractal will have."
+                    ),
+                },
+            ),
+            (
+                "min square radius",
+                {
+                    "default": 0.001,
+                    "tooltip": "The minimum square radius to use when spherically folding.",
+                },
+            ),
+            (
+                "folding limit",
+                {
+                    "default": 0.8,
+                    "tooltip": (
+                        "Clamp the position between +/- this value when performing "
+                        "the box fold."
+                    ),
+                },
+            ),
+        ]),
     }
 
     def __init__(self):

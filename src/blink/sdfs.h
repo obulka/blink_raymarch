@@ -911,6 +911,92 @@ float distanceToMandelbulb(
 }
 
 
+inline float3 boxFold(const float3 &position, const float3 &foldingLimit)
+{
+    return clamp(position, -foldingLimit, foldingLimit) * 2.0f - position;
+}
+
+
+inline float4 sphereFold(
+        const float4 &position,
+        const float radiusSquared,
+        const float minSquareRadius)
+{
+    return position * saturate(max(minSquareRadius / radiusSquared, minSquareRadius));
+}
+
+
+/**
+ * Compute the min distance from a point to a mandelbox.
+ *
+ * @arg position: The point to get the distance to, from the object.
+ * @arg scale:
+ * @arg iterations: The number of iterations to compute, the higher this
+ *     is the slower it will be to compute, but the deeper the fractal
+ *     will have detail.
+ *
+ * @returns: The minimum distance from the point to the shape.
+ */
+float distanceToMandelbox(
+        const float3 &position,
+        const float scale,
+        const int iterations,
+        const float minSquareRadius,
+        const float foldingLimit)
+{
+    const float4 scaleVector = float4(
+        scale,
+        scale,
+        scale,
+        fabs(scale)
+    ) / minSquareRadius;
+
+    const float4 initialPosition = float4(
+        position.x,
+        position.y,
+        position.z,
+        1.0f
+    );
+    float4 currentPosition = initialPosition;
+
+    const float3 foldingLimit3 = float3(foldingLimit);
+
+    for (int i=0; i < iterations; i++)
+    {
+        float3 currentPosition3 = float3(
+            currentPosition.x,
+            currentPosition.y,
+            currentPosition.z
+        );
+        currentPosition3 = boxFold(currentPosition3, foldingLimit3);
+
+        const float radiusSquared = dot(currentPosition3, currentPosition3);
+        currentPosition = sphereFold(
+            float4(
+                currentPosition3.x,
+                currentPosition3.y,
+                currentPosition3.z,
+                currentPosition.w
+            ),
+            radiusSquared,
+            minSquareRadius
+        );
+
+        currentPosition = scaleVector * currentPosition + initialPosition;
+    }
+
+    return (
+        length(
+            float3(
+                currentPosition.x,
+                currentPosition.y,
+                currentPosition.z
+            ) - fabs(scale - 1.0f)
+        ) / currentPosition.w - pow(fabs(scale), (float) (1 - iterations))
+    );
+}
+
+
 /**
  * Compute the min distance from a point to a geometric object.
  *
@@ -967,6 +1053,16 @@ float distanceToObject(
             saturate(dimensions.w)
         );
         return distance;
+    }
+    if (shapeType == 24)
+    {
+        return distanceToMandelbox(
+            position,
+            dimensions.x,
+            (int) dimensions.y,
+            dimensions.z,
+            dimensions.w
+        );
     }
     if (shapeType == 0)
     {
