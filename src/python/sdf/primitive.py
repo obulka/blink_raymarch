@@ -27,6 +27,8 @@ class SDFPrimitive(SDFKnobManager):
     is_bound_knob_name = "is_bound"
     blend_strength_knob_name = "blend_strength"
     blend_type_knob_name = "blend_type"
+    reflection_knob_name = "reflection"
+    transmission_knob_name = "transmission"
 
     _dimensional_axes = SDFKnobManager._dimensional_axes + ("w",)
 
@@ -683,3 +685,21 @@ class SDFPrimitive(SDFKnobManager):
         on whether or not elongate has been enabled.
         """
         self._node.knob(self.elongation_knob_name).setEnabled(self._knob.value())
+
+    @_knob_changed_callbacks.register(reflection_knob_name)
+    def _reflection_changed(self):
+        """Ensure that reflection + transmission <= 1"""
+        reflection = self._knob.value()
+        transmission_knob = self._node.knob(self.transmission_knob_name)
+
+        if reflection + transmission_knob.value() > 1.:
+            transmission_knob.setValue(1. - reflection)
+
+    @_knob_changed_callbacks.register(transmission_knob_name)
+    def _transmission_changed(self):
+        """Ensure that reflection + transmission <= 1"""
+        transmission = self._knob.value()
+        reflection_knob = self._node.knob(self.reflection_knob_name)
+
+        if transmission + reflection_knob.value() > 1.:
+            reflection_knob.setValue(1. - transmission)

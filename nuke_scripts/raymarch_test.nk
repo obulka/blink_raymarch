@@ -185,7 +185,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set Nb0cd6400 [stack 0]
+set N25aee400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -207,7 +207,7 @@ set Nb0cd6400 [stack 0]
    xpos 34
    ypos -6
   }
-set Nb0cd4800 [stack 0]
+set N25aec800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -218,7 +218,7 @@ set Nb0cd4800 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nb0cd6400
+push $N25aee400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -247,7 +247,7 @@ push $Nb0cd6400
    xpos 158
    ypos 167
   }
-push $Nb0cd4800
+push $N25aec800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -378,31 +378,33 @@ Group {
  dimension_z 0.001
  addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold." R 0.01 2}
  dimension_w 0.8
- addUserKnob {7 wall_thickness l "wall thickness" +DISABLED}
+ addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
  wall_thickness 0.01
- addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
- addUserKnob {7 edge_radius l "edge radius"}
- addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
- addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
- addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
+ addUserKnob {6 hollow t "If enabled, the object will be hollow, with a thickness of 'wall thickness'." -STARTLINE}
+ addUserKnob {7 edge_radius l "edge radius" t "This parameter increases the hit tolerance by the specified amount for this specific object, having the effect of rounding off the edges."}
+ addUserKnob {6 mirror_x l "mirror x" t "Mirror the shape in the yz-plane." +STARTLINE}
+ addUserKnob {6 mirror_y l "mirror y" t "Mirror the shape in the xz-plane." -STARTLINE}
+ addUserKnob {6 mirror_z l "mirror z" t "Mirror the shape in the xy-plane." -STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {18 colour}
+ addUserKnob {18 colour t "The diffuse colour of the shape."}
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 reflection}
- addUserKnob {7 transmission}
- addUserKnob {7 refractive_index l "refractive index" R 1 4}
+ addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.58
+ addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
+ transmission 0.155
+ addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
- addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- addUserKnob {7 emission}
+ addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {13 translate}
- addUserKnob {13 rotate}
+ addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
+ addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
  rotate {45 30 0}
- addUserKnob {13 elongation +DISABLED}
+ addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
  elongation {0.1 0 0}
- addUserKnob {6 elongate -STARTLINE}
- addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
+ addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
+ addUserKnob {7 uniform_scale l "uniform scale" t "The scale of the object in its local coordinate space, along all axes." R 0 10}
  uniform_scale 1
  addUserKnob {26 div1 l "" +STARTLINE}
  addUserKnob {19 repetition_params l repetition}
@@ -410,11 +412,11 @@ Group {
  addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
  addUserKnob {26 ""}
- addUserKnob {7 blend_strength l "blend strength" +DISABLED}
+ addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected." +DISABLED}
  blend_strength 0.56
- addUserKnob {4 blend_type l "blend type" -STARTLINE +DISABLED M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
+ addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: All children of this object will be subtracted from this object, leaving holes.\n    Intersection: Only the region where this object and its children overlap will remain.\n    Smooth Union: All children will smoothly blend together with this object according to the 'blend strength'.\n    Smooth Subtraction: All children of this object will be subtracted from this object, leaving holes that are smoothed according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object and its children overlap will remain, and the remaining regions will be smoothed according to the 'blend strength'." -STARTLINE +DISABLED M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection"}}
  blend_type "Smooth Union"
- addUserKnob {6 is_bound l "is bound" +DISABLED +STARTLINE}
+ addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera." +DISABLED +STARTLINE}
 }
  Input {
   inputs 0
@@ -604,7 +606,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N4122400 [stack 0]
+set N900fe400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -626,7 +628,7 @@ set N4122400 [stack 0]
    xpos 34
    ypos -6
   }
-set N4120800 [stack 0]
+set N900fc800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -637,7 +639,7 @@ set N4120800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N4122400
+push $N900fe400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -666,7 +668,7 @@ push $N4122400
    xpos 158
    ypos 167
   }
-push $N4120800
+push $N900fc800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -759,7 +761,7 @@ push $N4120800
    xpos 192
    ypos -2
   }
-set N40c4100 [stack 0]
+set N900a0100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -781,7 +783,7 @@ set N40c4100 [stack 0]
    xpos 34
    ypos -6
   }
-set N40aa400 [stack 0]
+set N90086400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -792,7 +794,7 @@ set N40aa400 [stack 0]
    xpos -98
    ypos 336
   }
-push $N40c4100
+push $N900a0100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -821,7 +823,7 @@ push $N40c4100
    xpos 158
    ypos 167
   }
-push $N40aa400
+push $N90086400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1031,7 +1033,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set N4031d00 [stack 0]
+set N9000dd00 [stack 0]
  Blur {
   size {{"parent.hdri_lighting_blur * hdri_dot.format.height / 2"}}
   name Blur
@@ -1077,7 +1079,7 @@ set N4031d00 [stack 0]
   xpos -48
   ypos -1309
  }
-set Nc1bc2400 [stack 0]
+set N441c6400 [stack 0]
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -1091,7 +1093,7 @@ set Nc1bc2400 [stack 0]
   xpos -232
   ypos -866
  }
-push $Nc1bc2400
+push $N441c6400
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -1103,7 +1105,7 @@ push $Nc1bc2400
   xpos -113
   ypos -864
  }
-push $Nc1bc2400
+push $N441c6400
  Shuffle {
   in sdf_light
   name light
@@ -1140,7 +1142,7 @@ push $Nc1bc2400
   xpos 641
   ypos -1318
  }
-set Nc1b91600 [stack 0]
+set N44195600 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -1152,7 +1154,7 @@ set Nc1b91600 [stack 0]
   xpos 322
   ypos -863
  }
-push $Nc1b91600
+push $N44195600
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -1164,7 +1166,7 @@ push $Nc1b91600
   xpos 780
   ypos -865
  }
-push $Nc1b91600
+push $N44195600
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -1176,7 +1178,7 @@ push $Nc1b91600
   xpos 641
   ypos -864
  }
-push $Nc1b91600
+push $N44195600
  Shuffle {
   in sdf_shape
   name shape
@@ -1188,7 +1190,7 @@ push $Nc1b91600
   xpos 473
   ypos -863
  }
-push $Nc1b91600
+push $N44195600
  Shuffle {
   in sdf_colour
   name colour
@@ -1200,7 +1202,7 @@ push $Nc1b91600
   xpos 165
   ypos -864
  }
-push $Nc1b91600
+push $N44195600
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -1212,7 +1214,7 @@ push $Nc1b91600
   xpos 1227
   ypos -857
  }
-push $Nc1b91600
+push $N44195600
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -1224,7 +1226,7 @@ push $Nc1b91600
   xpos 1076
   ypos -854
  }
-push $Nc1b91600
+push $N44195600
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -1236,7 +1238,7 @@ push $Nc1b91600
   xpos 934
   ypos -859
  }
-push $N4031d00
+push $N9000dd00
  Constant {
   inputs 0
   name Constant1
