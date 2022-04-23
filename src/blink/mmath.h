@@ -331,7 +331,7 @@ inline float3 sphericalUnitVectorToCartesion(const float2 &angles)
 }
 
 
-inline float2 normalizeAngles1(const float2 &angles)
+inline float2 normalizeAngles(const float2 &angles)
 {
     float2 normalizedAngles = float2(
         fmod(angles.x, 2.0f * PI),
@@ -344,7 +344,7 @@ inline float2 normalizeAngles1(const float2 &angles)
 }
 
 
-float2 normalizeAngles(const float2 &angles)
+float2 normalizeAngles1(const float2 &angles)
 {
     float normalizedTheta = angles.x;
     float normalizedPhi = angles.y;
@@ -620,7 +620,9 @@ void createCameraRay(
 
 
 /**
- * Invert a 4x4 matrix
+ * Invert a 4x4 matrix.
+ * 
+ * Turns out float4x4 has a .invert() method so this is 
  *
  * @arg m: The matrix to invert
  * @arg invOut: The location to store the inverted matrix

@@ -105,7 +105,7 @@ class SDFKnobManager(KnobManager):
 
         for (knob_name, knob_values), context_knob in zip(
             default_values.items(),
-            context_knobs
+            context_knobs,
         ):
             context_knob.setVisible(True)
             context_knob.setLabel(knob_name)

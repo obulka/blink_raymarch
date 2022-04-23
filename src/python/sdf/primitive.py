@@ -531,6 +531,16 @@ class SDFPrimitive(SDFKnobManager):
                     ),
                 },
             ),
+            (
+                "orbital trap blend strength",
+                {
+                    "default": 1.,
+                    "tooltip": (
+                        "Transition between orbital trap based colouring and "
+                        "the colour provided by the 'colour' knob."
+                    ),
+                },
+            ),
         ]),
     }
 

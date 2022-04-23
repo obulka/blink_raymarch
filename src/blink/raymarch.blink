@@ -15,8 +15,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // the input for format, process called once per pixel
     Image<eRead, eAccessPoint, eEdgeNone> noise;
 
-    // the skybox in latlong format
-    Image<eRead, eAccessRandom, eEdgeConstant> skyBox;
+    // the hdribox in latlong format
+    Image<eRead, eAccessRandom, eEdgeNone> hdri;
 
 
     // the shape positons.xyz, scale.w
@@ -55,8 +55,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // shadow hardness.x
     Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;
 
-    // the skybox in latlong format
-    Image<eRead, eAccessRandom, eEdgeNone> skyBoxLight;
+    // the hdribox in latlong format
+    Image<eRead, eAccessRandom, eEdgeNone> hdriLight;
 
     // the output image
     Image<eWrite> dst;
@@ -76,14 +76,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float formatWidth;
         float formatHeight;
 
-        float skyBoxOffsetAngle;
-        int skyFormatWidth;
-        int skyFormatHeight;
-        float skyLightGain;
-        float skyLightShadowHardness;
-        int softenSkyLightShadows;
-        int skyLightFormatWidth;
-        int skyLightFormatHeight;
+        float hdriOffsetAngle;
+        int hdriFormatWidth;
+        int hdriFormatHeight;
+        int hdriLightSamples;
+        float hdriLightGain;
+        float hdriLightShadowHardness;
+        int softenHDRILightShadows;
+        int hdriLightFormatWidth;
+        int hdriLightFormatHeight;
 
         // Ray params
         int subdivisions;
@@ -91,7 +92,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int maxBounces;
         float maxRayDistance;
         int maxRaySteps;
-        int diffuseSamples;
         float hitTolerance;
         float shadowBias;
 
@@ -125,9 +125,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int numSubPixels;
         float subdividedPixelSize;
 
-        float2 skyBoxPixelSize;
-        float2 skyLightPixelSize;
-        float skyBoxOffsetRadians;
+        float2 hdriPixelSize;
+        float2 hdriLightPixelSize;
+        float hdriOffsetRadians;
 
 
 
@@ -153,14 +153,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         // Image params
         defineParam(formatHeight, "Screen Height", 2160.0f);
         defineParam(formatWidth, "Screen Width", 3840.0f);
-        defineParam(skyBoxOffsetAngle, "SkyBox Offset Angle", 0.0f);
-        defineParam(skyFormatHeight, "SkyBox Height", 1024);
-        defineParam(skyFormatWidth, "SkyBox Width", 2048);
-        defineParam(skyLightGain, "SkyBox Lighting Gain", 0.1f);
-        defineParam(skyLightShadowHardness, "SkyBox Shadow Hardness", 1.0f);
-        defineParam(softenSkyLightShadows, "Soften SkyBox Shadows", 1);
-        defineParam(skyLightFormatHeight, "SkyBox Lighting Height", 512);
-        defineParam(skyLightFormatWidth, "SkyBox Lighting Width", 1024);
+        defineParam(hdriOffsetAngle, "HDRI Offset Angle", 0.0f);
+        defineParam(hdriFormatHeight, "HDRI Height", 1024);
+        defineParam(hdriFormatWidth, "HDRI Width", 2048);
+        defineParam(hdriLightSamples, "HDRI Lighting Samples", 5);
+        defineParam(hdriLightGain, "HDRI Lighting Gain", 0.1f);
+        defineParam(hdriLightShadowHardness, "HDRI Shadow Hardness", 1.0f);
+        defineParam(softenHDRILightShadows, "Soften HDRI Shadows", 1);
+        defineParam(hdriLightFormatHeight, "HDRI Lighting Height", 512);
+        defineParam(hdriLightFormatWidth, "HDRI Lighting Width", 1024);
 
         // Ray params
         defineParam(subdivisions, "Pixel Subdivisions", 0);
@@ -168,7 +169,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(maxRaySteps, "Max Ray Steps", 128);
         defineParam(maxBounces, "Max Bounces", 1);
-        defineParam(diffuseSamples, "Diffuse Lighting Samples", 5);
         defineParam(hitTolerance, "Hit Tolerance", 0.001f);
         defineParam(shadowBias, "Shadow Bias", 1.0f);
 
@@ -215,49 +215,53 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         subdividedPixelSize = 1.0f / (float) subPixelDivisions;
         numSubPixels = pow(subPixelDivisions, 2);
 
-        skyBoxPixelSize = float2(skyFormatWidth / (2 * PI), skyFormatHeight / PI);
-        skyLightPixelSize = float2(skyLightFormatWidth / (2 * PI), skyLightFormatHeight / PI);
-        skyBoxOffsetRadians = skyBoxOffsetAngle * PI / 180.0f;
+        hdriPixelSize = float2(hdriFormatWidth / (2 * PI), hdriFormatHeight / PI);
+        hdriLightPixelSize = float2(hdriLightFormatWidth / (2 * PI), hdriLightFormatHeight / PI);
+        hdriOffsetRadians = hdriOffsetAngle * PI / 180.0f;
     }
 
 
     /**
-     * Get the value of sky the ray would hit at infinite distance
+     * Get the value of hdri the ray would hit at infinite distance
      */
-    float4 readSkyValue(float3 rayDirection)
+    float4 readHDRIValue(float3 rayDirection)
     {
-        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);
+        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, hdriOffsetRadians);
 
+        // Should be able to say image access is eEdgeClamped and not do this
+        // but I see nan pixels sooo... :(
         const float2 indices = clamp(
             float2(
-                skyBoxPixelSize.x * angles.x,
-                skyFormatHeight - (skyBoxPixelSize.y * angles.y)
+                hdriPixelSize.x * angles.x,
+                hdriFormatHeight - (hdriPixelSize.y * angles.y)
             ),
             float2(0),
-            float2(skyFormatWidth, skyFormatHeight) - 1.0f
+            float2(hdriFormatWidth, hdriFormatHeight) - 1.0f
         );
 
-        return bilinear(skyBox, indices.x, indices.y);
+        return bilinear(hdri, indices.x, indices.y);
     }
 
 
     /**
-     * Get the value of sky the ray would hit at infinite distance
+     * Get the value of hdri the ray would hit at infinite distance
      */
-    float4 readSkyLightValue(float3 rayDirection)
+    float4 readHDRILightValue(float3 rayDirection)
     {
-        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, skyBoxOffsetRadians);
+        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, hdriOffsetRadians);
 
+        // Should be able to say image access is eEdgeClamped and not do this
+        // but I see nan pixels sooo... :(
         const float2 indices = clamp(
             float2(
-                skyLightPixelSize.x * angles.x,
-                skyLightFormatHeight - (skyLightPixelSize.y * angles.y)
+                hdriLightPixelSize.x * angles.x,
+                hdriLightFormatHeight - (hdriLightPixelSize.y * angles.y)
             ),
             float2(0),
-            float2(skyLightFormatWidth, skyLightFormatHeight) - 1.0f
+            float2(hdriLightFormatWidth, hdriLightFormatHeight) - 1.0f
         );
 
-        return bilinear(skyBoxLight, indices.x, indices.y);
+        return bilinear(hdriLight, indices.x, indices.y);
     }
 
 
@@ -829,7 +833,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             // Add HDRI lighting
             float3 rayDirection = surfaceNormal;
             float3 seedVal = seed * fabs(pointOnSurface) + 0.5773f;
-            for (int iteration=1; iteration <= diffuseSamples; iteration++)
+            for (int iteration=1; iteration <= hdriLightSamples; iteration++)
             {
                 float4 hitSurface = float4(0);
                 float4 hitColour = float4(0);
@@ -837,29 +841,29 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 rayDirection = roughen(
                     surfaceNormal,
                     saturate(1.0f - surface.x - surface.y),
-                    rayDirection * seedVal + iteration / (float) diffuseSamples
+                    rayDirection * seedVal + iteration / (float) hdriLightSamples
                 );
                 currentLightIntensity = lightIntensityOnSurface(
                     pointOnSurface,
                     surfaceNormal,
                     rayDirection,
-                    softenSkyLightShadows * 100,
-                    skyLightGain,
+                    softenHDRILightShadows * 100,
+                    hdriLightGain,
                     0.0f,
-                    skyLightShadowHardness,
+                    hdriLightShadowHardness,
                     hitColour,
                     hitSurface
                 );
-                const float4 skyLightColour = readSkyLightValue(rayDirection);
+                const float4 hdriLightColour = readHDRILightValue(rayDirection);
                 lightColour += (
                     currentLightIntensity.x
                     * currentLightIntensity.y
-                    * skyLightColour
+                    * hdriLightColour
                     + hitSurface.z * hitColour
-                ) / (float) diffuseSamples;
+                ) / (float) hdriLightSamples;
                 lightIntensity += (
                     (currentLightIntensity + float2(hitSurface.z, 0.0f))
-                    / (float) diffuseSamples
+                    / (float) hdriLightSamples
                 );
             }
         }
@@ -1179,7 +1183,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         iterGlowColour,
                         blend(
                             hazeColour,
-                            saturate(readSkyValue(direction)),
+                            saturate(readHDRIValue(direction)),
                             getHazeAmount(distanceTravelled)
                         ),
                         saturate(iterGlowAmount * iterations)
