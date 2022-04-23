@@ -111,6 +111,7 @@ class SDFKnobManager(KnobManager):
             context_knob.setLabel(knob_name)
             context_knob.setValue(knob_values["default"])
             context_knob.setTooltip(knob_values["tooltip"])
+            context_knob.setRange(*knob_values["range"])
 
         for context_knob in context_knobs[len(default_values):]:
             context_knob.setVisible(False)

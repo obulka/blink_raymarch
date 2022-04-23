@@ -11,6 +11,7 @@ nuke.toNode("sdf_primitive").knob("onCreate").setValue(
 )
 """
 from collections import OrderedDict
+from math import pi
 
 from .knob_manager import KnobChangedCallbacks, SDFKnobManager
 
@@ -37,6 +38,7 @@ class SDFPrimitive(SDFKnobManager):
                 "radius",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the sphere.",
                 },
             ),
@@ -46,6 +48,7 @@ class SDFPrimitive(SDFKnobManager):
                 "x radius",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The radius along the x-axis of the ellipsoid.",
                 },
             ),
@@ -53,6 +56,7 @@ class SDFPrimitive(SDFKnobManager):
                 "y radius",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": "The radius along the y-axis of the ellipsoid.",
                 },
             ),
@@ -60,6 +64,7 @@ class SDFPrimitive(SDFKnobManager):
                 "z radius",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": "The radius along the z-axis of the ellipsoid.",
                 },
             ),
@@ -69,6 +74,7 @@ class SDFPrimitive(SDFKnobManager):
                 "radius",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the sphere.",
                 },
             ),
@@ -76,6 +82,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": "The height (y-axis) below which the sphere is culled.",
                 },
             ),
@@ -85,6 +92,7 @@ class SDFPrimitive(SDFKnobManager):
                 "radius",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the sphere.",
                 },
             ),
@@ -92,6 +100,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": "The height (y-axis) at which an opening is created.",
                 },
             ),
@@ -99,6 +108,7 @@ class SDFPrimitive(SDFKnobManager):
                 "thickness",
                 {
                     "default": .05,
+                    "range": (0., 1.),
                     "tooltip": "The thickness of the walls of the hollow sphere.",
                 },
             ),
@@ -108,6 +118,7 @@ class SDFPrimitive(SDFKnobManager):
                 "solid radius",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the sphere that remains solid.",
                 },
             ),
@@ -115,6 +126,7 @@ class SDFPrimitive(SDFKnobManager):
                 "hollow radius",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the sphere that is cut from the solid.",
                 },
             ),
@@ -122,6 +134,7 @@ class SDFPrimitive(SDFKnobManager):
                 "hollow height",
                 {
                     "default": .75,
+                    "range": (0., 10.),
                     "tooltip": (
                         "The height (y-axis) of the center of the sphere that is cut "
                         "from the solid, above solidRadius + hollowRadius, the result "
@@ -135,6 +148,7 @@ class SDFPrimitive(SDFKnobManager):
                 "radius",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the sphere to cut the angle out of.",
                 },
             ),
@@ -142,6 +156,7 @@ class SDFPrimitive(SDFKnobManager):
                 "angle",
                 {
                     "default": 1.,
+                    "range": (0., pi),
                     "tooltip": (
                         "The angle between the edge of the solid angle and the "
                         "y-axis on [0-PI] measured between the y-axis and wall of the "
@@ -155,6 +170,7 @@ class SDFPrimitive(SDFKnobManager):
                 "width",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The width (x) of the prism.",
                 },
             ),
@@ -162,6 +178,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .75,
+                    "range": (0., 10.),
                     "tooltip": "The height (y) of the prism.",
                 },
             ),
@@ -169,6 +186,7 @@ class SDFPrimitive(SDFKnobManager):
                 "depth",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": "The depth (z) of the prism.",
                 },
             ),
@@ -178,6 +196,7 @@ class SDFPrimitive(SDFKnobManager):
                 "width",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The width (x) of the frame.",
                 },
             ),
@@ -185,6 +204,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .75,
+                    "range": (0., 10.),
                     "tooltip": "The height (y) of the frame.",
                 },
             ),
@@ -192,6 +212,7 @@ class SDFPrimitive(SDFKnobManager):
                 "depth",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": "The depth (z) of the frame.",
                 },
             ),
@@ -199,6 +220,7 @@ class SDFPrimitive(SDFKnobManager):
                 "thickness",
                 {
                     "default": .05,
+                    "range": (0., 1.),
                     "tooltip": "The thickness of the frame.",
                 },
             ),
@@ -208,6 +230,7 @@ class SDFPrimitive(SDFKnobManager):
                 "width",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The width (x) of the rhombus.",
                 },
             ),
@@ -215,6 +238,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .75,
+                    "range": (0., 10.),
                     "tooltip": "The height (y) of the rhombus.",
                 },
             ),
@@ -222,6 +246,7 @@ class SDFPrimitive(SDFKnobManager):
                 "depth",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": (
                         "The depth (z) of the rhombus, this the extruded dimension, "
                         "or thickness."
@@ -232,6 +257,7 @@ class SDFPrimitive(SDFKnobManager):
                 "corner radius",
                 {
                     "default": .05,
+                    "range": (0., 1.),
                     "tooltip": (
                         "The radius of the corners of the rhombus' xy-plane parallel "
                         " face."
@@ -244,6 +270,7 @@ class SDFPrimitive(SDFKnobManager):
                 "base",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The equalateral triangles edge length (xy-plane).",
                 },
             ),
@@ -251,6 +278,7 @@ class SDFPrimitive(SDFKnobManager):
                 "depth",
                 {
                     "default": .75,
+                    "range": (0., 10.),
                     "tooltip": "The depth (z-axis) of the prism.",
                 },
             ),
@@ -260,6 +288,7 @@ class SDFPrimitive(SDFKnobManager):
                 "radius",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The radius (xz-plane) of the cylinder.",
                 },
             ),
@@ -267,6 +296,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .75,
+                    "range": (0., 10.),
                     "tooltip": "The height (y-axis) of the cylinder.",
                 },
             ),
@@ -276,6 +306,7 @@ class SDFPrimitive(SDFKnobManager):
                 "radius",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The radius (xz-plane) of the cylinder.",
                 },
             ),
@@ -285,6 +316,7 @@ class SDFPrimitive(SDFKnobManager):
                 "normal x",
                 {
                     "default": 0.,
+                    "range": (0., 1.),
                     "tooltip": "The x component of the normal direction of the plane.",
                 },
             ),
@@ -292,6 +324,7 @@ class SDFPrimitive(SDFKnobManager):
                 "normal y",
                 {
                     "default": 0.,
+                    "range": (0., 1.),
                     "tooltip": "The y component of the normal direction of the plane.",
                 },
             ),
@@ -299,6 +332,7 @@ class SDFPrimitive(SDFKnobManager):
                 "normal z",
                 {
                     "default": 1.,
+                    "range": (0., 1.),
                     "tooltip": "The z component of the normal direction of the plane.",
                 },
             ),
@@ -308,6 +342,7 @@ class SDFPrimitive(SDFKnobManager):
                 "radius",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the capsule.",
                 },
             ),
@@ -315,6 +350,7 @@ class SDFPrimitive(SDFKnobManager):
                 "negative height",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": "The distance along the negative y-axis before entering the dome.",
                 },
             ),
@@ -322,6 +358,7 @@ class SDFPrimitive(SDFKnobManager):
                 "positive height",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": "The distance along the positive y-axis before entering the dome.",
                 },
             ),
@@ -331,6 +368,7 @@ class SDFPrimitive(SDFKnobManager):
                 "angle",
                 {
                     "default": .5,
+                    "range": (0., pi / 2.),
                     "tooltip": (
                         "The angle between the tip and base of the cone [0-PI/2) "
                         "measured between the y-axis and wall of the cone."
@@ -341,6 +379,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .33,
+                    "range": (0., 10.),
                     "tooltip": "The height (y-axis) of the cone. Cannot be 0.",
                 },
             ),
@@ -350,6 +389,7 @@ class SDFPrimitive(SDFKnobManager):
                 "angle",
                 {
                     "default": .5,
+                    "range": (0., pi / 2.),
                     "tooltip": (
                         "The angle between the tip and base of the cone [0-PI/2) "
                         "measured between the y-axis and wall of the cone."
@@ -362,6 +402,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": (
                         "The height (y-axis) of the cone, centered at the origin. "
                         "Cannot be 0."
@@ -372,6 +413,7 @@ class SDFPrimitive(SDFKnobManager):
                 "lower radius",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the cone at y = -height/2.",
                 },
             ),
@@ -379,6 +421,7 @@ class SDFPrimitive(SDFKnobManager):
                 "upper radius",
                 {
                     "default": .25,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the cone at y = height/2.",
                 },
             ),
@@ -388,6 +431,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .3,
+                    "range": (0., 10.),
                     "tooltip": "The height (y-axis) of the rounded cone.",
                 },
             ),
@@ -395,6 +439,7 @@ class SDFPrimitive(SDFKnobManager):
                 "lower radius",
                 {
                     "default": .2,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the cone at y = 0.",
                 },
             ),
@@ -402,6 +447,7 @@ class SDFPrimitive(SDFKnobManager):
                 "upper radius",
                 {
                     "default": .1,
+                    "range": (0., 10.),
                     "tooltip": "The radius of the cone at y = height.",
                 },
             ),
@@ -411,6 +457,7 @@ class SDFPrimitive(SDFKnobManager):
                 "ring radius",
                 {
                     "default": .3,
+                    "range": (0., 10.),
                     "tooltip": "The radius (xy-plane) of the ring of the torus.",
                 },
             ),
@@ -418,6 +465,7 @@ class SDFPrimitive(SDFKnobManager):
                 "tube radius",
                 {
                     "default": .2,
+                    "range": (0., 5.),
                     "tooltip": "The radius of the tube of the torus.",
                 },
             ),
@@ -427,6 +475,7 @@ class SDFPrimitive(SDFKnobManager):
                 "ring radius",
                 {
                     "default": .3,
+                    "range": (0., 10.),
                     "tooltip": "The radius (xy-plane) of the ring of the torus.",
                 },
             ),
@@ -434,6 +483,7 @@ class SDFPrimitive(SDFKnobManager):
                 "tube radius",
                 {
                     "default": .2,
+                    "range": (0., 5.),
                     "tooltip": "The radius of the tube of the torus.",
                 },
             ),
@@ -441,6 +491,7 @@ class SDFPrimitive(SDFKnobManager):
                 "cap angle",
                 {
                     "default": 1.,
+                    "range": (0., pi),
                     "tooltip": (
                         "The angle (xy-plane, symmetric about y-axis) to cap at, in "
                         "the range (0-PI)."
@@ -453,6 +504,7 @@ class SDFPrimitive(SDFKnobManager):
                 "ring radius",
                 {
                     "default": .3,
+                    "range": (0., 10.),
                     "tooltip": (
                         "The radius (xy-plane) of the ring of the torus that will be "
                         "stretched to create the link."
@@ -463,6 +515,7 @@ class SDFPrimitive(SDFKnobManager):
                 "tube radius",
                 {
                     "default": .2,
+                    "range": (0., 5.),
                     "tooltip": "The radius of the tube that makes the link.",
                 },
             ),
@@ -470,6 +523,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .1,
+                    "range": (0., 10.),
                     "tooltip": "The height (y-axis) to elongate the torus.",
                 },
             ),
@@ -479,6 +533,7 @@ class SDFPrimitive(SDFKnobManager):
                 "height",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The height (y) of the prism.",
                 },
             ),
@@ -486,6 +541,7 @@ class SDFPrimitive(SDFKnobManager):
                 "depth",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": "The depth (z) of the prism.",
                 },
             ),
@@ -495,6 +551,7 @@ class SDFPrimitive(SDFKnobManager):
                 "radial extent",
                 {
                     "default": .5,
+                    "range": (0., 10.),
                     "tooltip": (
                         "The maximum distance along the x, y, and z axes. "
                         "ie. The vertices are at +/-radial_extent on the x, y, and z axes."
@@ -507,6 +564,7 @@ class SDFPrimitive(SDFKnobManager):
                 "power",
                 {
                     "default": 8.,
+                    "range": (2., 30.),
                     "tooltip": "One greater than the axes of symmetry in the xy-plane.",
                 },
             ),
@@ -514,6 +572,7 @@ class SDFPrimitive(SDFKnobManager):
                 "iterations",
                 {
                     "default": 10.,
+                    "range": (1., 30.),
                     "tooltip": (
                         "The number of iterations to compute, the higher this "
                         "is the slower it will be to compute, but the deeper the "
@@ -525,6 +584,7 @@ class SDFPrimitive(SDFKnobManager):
                 "max square radius",
                 {
                     "default": 4.,
+                    "range": (1., 9.),
                     "tooltip": (
                         "When the square radius has reached this length, stop "
                         "iterating."
@@ -535,6 +595,7 @@ class SDFPrimitive(SDFKnobManager):
                 "orbital trap blend strength",
                 {
                     "default": 1.,
+                    "range": (0., 1.),
                     "tooltip": (
                         "Transition between orbital trap based colouring and "
                         "the colour provided by the 'colour' knob."
@@ -547,6 +608,7 @@ class SDFPrimitive(SDFKnobManager):
                 "scale",
                 {
                     "default": -1.75,
+                    "range": (-5., 5.),
                     "tooltip": (
                         "The amount to scale the position between folds. "
                         "Can be negative or positive."
@@ -557,6 +619,7 @@ class SDFPrimitive(SDFKnobManager):
                 "iterations",
                 {
                     "default": 12.,
+                    "range": (1., 30.),
                     "tooltip": (
                         "The number of iterations to compute, the higher this "
                         "is the slower it will be to compute, but the more detail "
@@ -568,6 +631,7 @@ class SDFPrimitive(SDFKnobManager):
                 "min square radius",
                 {
                     "default": 0.001,
+                    "range": (0.00001, 0.1),
                     "tooltip": "The minimum square radius to use when spherically folding.",
                 },
             ),
@@ -575,6 +639,7 @@ class SDFPrimitive(SDFKnobManager):
                 "folding limit",
                 {
                     "default": 0.8,
+                    "range": (0.01, 2.),
                     "tooltip": (
                         "Clamp the position between +/- this value when performing "
                         "the box fold."

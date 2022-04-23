@@ -1,5 +1,4 @@
 #! /usr/local/Nuke13.0v2/libnuke-13.0.2.so -nx
-#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/mandelbox_test0.png" format:"1024 778 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 479" fps:"0" colorspace:"default (sRGB)" datatype:"16 bit" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 13.0 v2
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
@@ -11,11 +10,11 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             </dock>
             <split size="1841" stretch="1"/>
             <splitter orientation="2">
-                <split size="668"/>
+                <split size="783"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="665"/>
+                <split size="550"/>
                 <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
@@ -186,7 +185,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set N60132b00 [stack 0]
+set Nb0cd6400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -208,7 +207,7 @@ set N60132b00 [stack 0]
    xpos 34
    ypos -6
   }
-set N60130f00 [stack 0]
+set Nb0cd4800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -219,7 +218,7 @@ set N60130f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N60132b00
+push $Nb0cd6400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -248,7 +247,7 @@ push $N60132b00
    xpos 158
    ypos 167
   }
-push $N60130f00
+push $Nb0cd4800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -348,7 +347,7 @@ Axis2 {
  ypos 816
 }
 Camera3 {
- translate {0 0 3}
+ translate {0 0 5}
  name Camera1
  xpos 18541
  ypos 916
@@ -371,13 +370,13 @@ Group {
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox}}
  shape mandelbox
- addUserKnob {7 dimension_x l scale t "The amount to scale the position between folds. Can be negative or positive." R 0 10}
+ addUserKnob {7 dimension_x l scale t "The amount to scale the position between folds. Can be negative or positive." R -5 5}
  dimension_x -1.75
- addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the more detail the fractal will have."}
- dimension_y 20
- addUserKnob {7 dimension_z l "min square radius" t "The minimum square radius to use when spherically folding."}
+ addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the more detail the fractal will have." R 1 30}
+ dimension_y 12
+ addUserKnob {7 dimension_z l "min square radius" t "The minimum square radius to use when spherically folding." R 1e-05 0.1}
  dimension_z 0.001
- addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold."}
+ addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold." R 0.01 2}
  dimension_w 0.8
  addUserKnob {7 wall_thickness l "wall thickness" +DISABLED}
  wall_thickness 0.01
@@ -605,7 +604,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N46682b00 [stack 0]
+set N4122400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -627,7 +626,7 @@ set N46682b00 [stack 0]
    xpos 34
    ypos -6
   }
-set N46680f00 [stack 0]
+set N4120800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -638,7 +637,7 @@ set N46680f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N46682b00
+push $N4122400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -667,7 +666,7 @@ push $N46682b00
    xpos 158
    ypos 167
   }
-push $N46680f00
+push $N4120800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -760,7 +759,7 @@ push $N46680f00
    xpos 192
    ypos -2
   }
-set N46628800 [stack 0]
+set N40c4100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -782,7 +781,7 @@ set N46628800 [stack 0]
    xpos 34
    ypos -6
   }
-set N465feb00 [stack 0]
+set N40aa400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -793,7 +792,7 @@ set N465feb00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N46628800
+push $N40c4100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -822,7 +821,7 @@ push $N46628800
    xpos 158
    ypos 167
   }
-push $N465feb00
+push $N40aa400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -894,10 +893,9 @@ Group {
  inputs 4
  name ray_march
  xpos 18313
- ypos 1223
+ ypos 1222
  addUserKnob {20 User l "Ray March"}
  addUserKnob {3 pixel_subdivisions l "pixel subdivisions" t "Subdivide the pixel and cast a ray for each subdivision, resulting in 2^subdivisions rays"}
- pixel_subdivisions 1
  addUserKnob {3 max_rays_per_subpixel l "max rays per subpixel"}
  max_rays_per_subpixel 10
  addUserKnob {3 max_bounces l "max bounces" t "Rays will reflect this many times before they are stopped"}
@@ -907,7 +905,7 @@ Group {
  addUserKnob {3 max_ray_steps l "max ray steps"}
  max_ray_steps 1000
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
- hit_tolerance 0.0001
+ hit_tolerance 0.001
  addUserKnob {7 shadow_bias l "shadow bias" t "The surface will be offset by an additional factor of this amount before determining if it is in shadow" R 1 2}
  shadow_bias 1
  addUserKnob {26 ""}
@@ -931,7 +929,7 @@ Group {
  addUserKnob {7 hdri_offset_angle l "hdri offset angle" R 0 360}
  hdri_offset_angle 180
  addUserKnob {3 hdri_lighting_samples l "hdri lighting samples"}
- hdri_lighting_samples 40
+ hdri_lighting_samples 20
  addUserKnob {7 hdri_lighting_gain l "hdri lighting gain"}
  hdri_lighting_gain 1
  addUserKnob {7 hdri_lighting_blur l "hdri lighting blur"}
@@ -1033,7 +1031,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set Na80f6400 [stack 0]
+set N4031d00 [stack 0]
  Blur {
   size {{"parent.hdri_lighting_blur * hdri_dot.format.height / 2"}}
   name Blur
@@ -1079,7 +1077,7 @@ set Na80f6400 [stack 0]
   xpos -48
   ypos -1309
  }
-set Na80ceb00 [stack 0]
+set Nc1bc2400 [stack 0]
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -1093,7 +1091,7 @@ set Na80ceb00 [stack 0]
   xpos -232
   ypos -866
  }
-push $Na80ceb00
+push $Nc1bc2400
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -1105,7 +1103,7 @@ push $Na80ceb00
   xpos -113
   ypos -864
  }
-push $Na80ceb00
+push $Nc1bc2400
  Shuffle {
   in sdf_light
   name light
@@ -1142,7 +1140,7 @@ push $Na80ceb00
   xpos 641
   ypos -1318
  }
-set Na80a9d00 [stack 0]
+set Nc1b91600 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -1154,7 +1152,7 @@ set Na80a9d00 [stack 0]
   xpos 322
   ypos -863
  }
-push $Na80a9d00
+push $Nc1b91600
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -1166,7 +1164,7 @@ push $Na80a9d00
   xpos 780
   ypos -865
  }
-push $Na80a9d00
+push $Nc1b91600
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -1178,7 +1176,7 @@ push $Na80a9d00
   xpos 641
   ypos -864
  }
-push $Na80a9d00
+push $Nc1b91600
  Shuffle {
   in sdf_shape
   name shape
@@ -1190,7 +1188,7 @@ push $Na80a9d00
   xpos 473
   ypos -863
  }
-push $Na80a9d00
+push $Nc1b91600
  Shuffle {
   in sdf_colour
   name colour
@@ -1202,7 +1200,7 @@ push $Na80a9d00
   xpos 165
   ypos -864
  }
-push $Na80a9d00
+push $Nc1b91600
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -1214,7 +1212,7 @@ push $Na80a9d00
   xpos 1227
   ypos -857
  }
-push $Na80a9d00
+push $Nc1b91600
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -1226,7 +1224,7 @@ push $Na80a9d00
   xpos 1076
   ypos -854
  }
-push $Na80a9d00
+push $Nc1b91600
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -1238,7 +1236,7 @@ push $Na80a9d00
   xpos 934
   ypos -859
  }
-push $Na80f6400
+push $N4031d00
  Constant {
   inputs 0
   name Constant1
@@ -1346,29 +1344,10 @@ push $Na80f6400
   ypos -122
  }
 end_group
-Write {
- file /home/ob1/software/nuke/dev/raymarch/images/mandelbox_test0.png
- file_type png
- datatype "16 bit"
- checkHashOnRead false
- version 1
- name Write1
- xpos 18576
- ypos 1349
-}
-Read {
- inputs 0
- file_type png
- file /home/ob1/software/nuke/dev/raymarch/images/mandelbox_test0.png
- format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
- origset true
- name Read3
- xpos 18922
- ypos 1238
-}
 Viewer {
+ inputs 0
  frame_range 1-479
  name Viewer1
- xpos 18850
- ypos 1470
+ xpos 18313
+ ypos 1285
 }

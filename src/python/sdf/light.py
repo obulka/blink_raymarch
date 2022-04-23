@@ -33,6 +33,7 @@ class SDFLight(SDFKnobManager):
                 "x direction",
                 {
                     "default": 0.,
+                    "range": (-1., 1.),
                     "tooltip": "The x direction of the light.",
                 },
             ),
@@ -40,6 +41,7 @@ class SDFLight(SDFKnobManager):
                 "y direction",
                 {
                     "default": -1.,
+                    "range": (-1., 1.),
                     "tooltip": "The y direction of the light.",
                 },
             ),
@@ -47,6 +49,7 @@ class SDFLight(SDFKnobManager):
                 "z direction",
                 {
                     "default": 0.,
+                    "range": (-1., 1.),
                     "tooltip": "The z direction of the light.",
                 },
             ),
@@ -56,6 +59,7 @@ class SDFLight(SDFKnobManager):
                 "x position",
                 {
                     "default": 0.,
+                    "range": (-10., 10.),
                     "tooltip": "The x position of the light.",
                 },
             ),
@@ -63,6 +67,7 @@ class SDFLight(SDFKnobManager):
                 "y position",
                 {
                     "default": 1.,
+                    "range": (-10., 10.),
                     "tooltip": "The y position of the light.",
                 },
             ),
@@ -70,6 +75,7 @@ class SDFLight(SDFKnobManager):
                 "z position",
                 {
                     "default": 0.,
+                    "range": (-10., 10.),
                     "tooltip": "The z position of the light.",
                 },
             ),
@@ -78,7 +84,8 @@ class SDFLight(SDFKnobManager):
             (
                 "iterations",
                 {
-                    "default": 5,
+                    "default": 5.,
+                    "range": (1., 10.),
                     "tooltip": "The number of iterations to compute.",
                 },
             ),
