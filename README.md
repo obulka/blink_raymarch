@@ -10,7 +10,7 @@ This gizmo lets you choose the shape, dimensions, location, and surface properti
 
 The surface properties include reflection, transmission, diffuse colour, roughness, and emission. You can select the refractive index of the object as well as the medium the camera, and therefore the ray, starts in.
 
-You can elongate, mirror, repeat, and hollow the object.
+You can elongate, mirror, repeat (both finitely and infinitely) with no extra memory cost, and hollow the objects as well.
 
 The current available shapes are:
 - sphere
