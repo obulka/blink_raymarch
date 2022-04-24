@@ -633,7 +633,7 @@ class SDFPrimitive(SDFKnobManager):
                 "min square radius",
                 {
                     "default": 0.001,
-                    "range": (0.00001, 0.1),
+                    "range": (0.001, 1.),
                     "tooltip": "The minimum square radius to use when spherically folding.",
                 },
             ),
@@ -644,7 +644,7 @@ class SDFPrimitive(SDFKnobManager):
                     "range": (0.01, 2.),
                     "tooltip": (
                         "Clamp the position between +/- this value when performing "
-                        "the box fold."
+                        "the box fold. Higher values will result in a denser fractal."
                     ),
                 },
             ),

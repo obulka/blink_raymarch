@@ -1,6 +1,6 @@
 #include "camera.h"
 #include "lights.h"
-#include "mmath.h"
+#include "math.h"
 #include "objectInteraction.h"
 #include "sdfModifications.h"
 #include "sdfs.h"
