@@ -4,6 +4,7 @@ This project contains three gizmos that allow you to ray march a wide variety of
 
 ![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164967826-a08327e6-a1d4-448b-823b-94f06df8f16d.png)
 
+![test_trap_bulb_done_reduced](https://user-images.githubusercontent.com/21975584/164971000-9af61158-432b-427e-ae3d-64b21342596c.png)
 
 ## Setup
 
