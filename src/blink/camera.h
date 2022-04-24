@@ -1,7 +1,12 @@
+// Copyright 2022 by Owen Bulka.
+// All rights reserved.
+// This file is released under the "MIT License Agreement".
+// Please see the LICENSE.md file that should have been included as part
+// of this package.
+
 //
 // Camera Utilities
 //
-//#include "mmath.h"
 
 
 float fieldOfView(const float focalLength)

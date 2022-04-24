@@ -8,7 +8,7 @@ Gizmo {
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
  dimension_x 0.5
- addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN R 0 10}
+ addUserKnob {7 dimension_y l height t "The height (y-axis) below which the sphere is culled." +HIDDEN R 0 10}
  dimension_y 0.25
  addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN R 0 10}
  dimension_z 0.25
@@ -239,7 +239,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N5ae66b00 [stack 0]
+set Nb6a62b00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -261,7 +261,7 @@ set N5ae66b00 [stack 0]
    xpos 34
    ypos -6
   }
-set N5ae64f00 [stack 0]
+set Nb6a60f00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -272,7 +272,7 @@ set N5ae64f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5ae66b00
+push $Nb6a62b00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -301,7 +301,7 @@ push $N5ae66b00
    xpos 158
    ypos 167
   }
-push $N5ae64f00
+push $Nb6a60f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -394,7 +394,7 @@ push $N5ae64f00
    xpos 192
    ypos -2
   }
-set N5ae0c800 [stack 0]
+set Nb6a08800 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -416,7 +416,7 @@ set N5ae0c800 [stack 0]
    xpos 34
    ypos -6
   }
-set N5adeeb00 [stack 0]
+set Nb69eab00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -427,7 +427,7 @@ set N5adeeb00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5ae0c800
+push $Nb6a08800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -456,7 +456,7 @@ push $N5ae0c800
    xpos 158
    ypos 167
   }
-push $N5adeeb00
+push $Nb69eab00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
