@@ -1,5 +1,5 @@
-#! /usr/local/Nuke12.1v5/libnuke-12.1.5.so -nx
-version 12.1 v5
+#! /usr/local/Nuke13.0v2/libnuke-13.0.2.so -nx
+version 13.0 v2
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
     <window x="1976" y="188" w="2504" h="1376" maximized="1" screen="0">
@@ -22,7 +22,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                 </dock>
             </splitter>
             <split size="615"/>
-            <dock id="" activePageId="Properties.1">
+            <dock id="" activePageId="uk.co.thefoundry.scripteditor.1">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
                 <page id="uk.co.thefoundry.scripteditor.1"/>
@@ -42,6 +42,7 @@ Root {
  colorManagement Nuke
  workingSpaceLUT linear
  monitorLut sRGB
+ monitorOutLUT rec709
  int8Lut sRGB
  int16Lut sRGB
  logLut Cineon
@@ -102,8 +103,8 @@ Axis2 {
 Camera2 {
  translate {0 0 3}
  name Camera1
- xpos 18481
- ypos 890
+ xpos 18482
+ ypos 911
 }
 Dot {
  name Dot18
@@ -361,7 +362,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N7b76810 [stack 0]
+set N4368ab00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -383,7 +384,7 @@ set N7b76810 [stack 0]
    xpos 34
    ypos -6
   }
-set N7b8a010 [stack 0]
+set N43688f00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -394,7 +395,7 @@ set N7b8a010 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7b76810
+push $N4368ab00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -423,7 +424,7 @@ push $N7b76810
    xpos 158
    ypos 167
   }
-push $N7b8a010
+push $N43688f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -516,7 +517,7 @@ push $N7b8a010
    xpos 192
    ypos -2
   }
-set N7c36fe0 [stack 0]
+set N43630800 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -538,7 +539,7 @@ set N7c36fe0 [stack 0]
    xpos 34
    ypos -6
   }
-set N7c4a7e0 [stack 0]
+set N43612b00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -549,7 +550,7 @@ set N7c4a7e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7c36fe0
+push $N43630800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -578,7 +579,7 @@ push $N7c36fe0
    xpos 158
    ypos 167
   }
-push $N7c4a7e0
+push $N43612b00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -792,7 +793,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set N7d3b310 [stack 0]
+set Nc40c1d00 [stack 0]
  Blur {
   size {{"parent.hdri_lighting_blur * hdri_dot.format.height / 2"}}
   name Blur
@@ -839,7 +840,7 @@ add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_lig
   xpos -48
   ypos -1309
  }
-set N7d7fb40 [stack 0]
+set Nc4096400 [stack 0]
 add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
  Shuffle {
   in sdf_light_properties1
@@ -854,7 +855,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
   xpos -232
   ypos -866
  }
-push $N7d7fb40
+push $Nc4096400
 add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
  Shuffle {
   in sdf_light_properties
@@ -867,7 +868,7 @@ add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properti
   xpos -113
   ypos -864
  }
-push $N7d7fb40
+push $Nc4096400
  Shuffle {
   in sdf_light
   name light
@@ -904,7 +905,7 @@ push $N7d7fb40
   xpos 641
   ypos -1318
  }
-set N7de31c0 [stack 0]
+set Nc4065600 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -916,7 +917,7 @@ set N7de31c0 [stack 0]
   xpos 322
   ypos -863
  }
-push $N7de31c0
+push $Nc4065600
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -928,7 +929,7 @@ push $N7de31c0
   xpos 780
   ypos -865
  }
-push $N7de31c0
+push $Nc4065600
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -940,7 +941,7 @@ push $N7de31c0
   xpos 641
   ypos -864
  }
-push $N7de31c0
+push $Nc4065600
  Shuffle {
   in sdf_shape
   name shape
@@ -952,7 +953,7 @@ push $N7de31c0
   xpos 473
   ypos -863
  }
-push $N7de31c0
+push $Nc4065600
  Shuffle {
   in sdf_colour
   name colour
@@ -964,7 +965,7 @@ push $N7de31c0
   xpos 165
   ypos -864
  }
-push $N7de31c0
+push $Nc4065600
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -976,7 +977,7 @@ push $N7de31c0
   xpos 1227
   ypos -857
  }
-push $N7de31c0
+push $Nc4065600
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -988,7 +989,7 @@ push $N7de31c0
   xpos 1076
   ypos -854
  }
-push $N7de31c0
+push $Nc4065600
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -1000,7 +1001,7 @@ push $N7de31c0
   xpos 934
   ypos -859
  }
-push $N7d3b310
+push $Nc40c1d00
  Constant {
   inputs 0
   name Constant1
@@ -1351,7 +1352,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N81910b0 [stack 0]
+set N5c79eb00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1373,7 +1374,7 @@ set N81910b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N81a48b0 [stack 0]
+set N5c79cf00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1384,7 +1385,7 @@ set N81a48b0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N81910b0
+push $N5c79eb00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1413,7 +1414,7 @@ push $N81910b0
    xpos 158
    ypos 167
   }
-push $N81a48b0
+push $N5c79cf00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1506,7 +1507,7 @@ push $N81a48b0
    xpos 192
    ypos -2
   }
-set N8250950 [stack 0]
+set N5c938800 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1528,7 +1529,7 @@ set N8250950 [stack 0]
    xpos 34
    ypos -6
   }
-set N8264150 [stack 0]
+set N5c91eb00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1539,7 +1540,7 @@ set N8264150 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8250950
+push $N5c938800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1568,7 +1569,7 @@ push $N8250950
    xpos 158
    ypos 167
   }
-push $N8264150
+push $N5c91eb00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1750,7 +1751,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N7ff17c0 [stack 0]
+set N5c8a8100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1772,7 +1773,7 @@ set N7ff17c0 [stack 0]
    xpos 34
    ypos -6
   }
-set N8004fc0 [stack 0]
+set Na419e400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1783,7 +1784,7 @@ set N8004fc0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7ff17c0
+push $N5c8a8100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1812,7 +1813,7 @@ push $N7ff17c0
    xpos 158
    ypos 167
   }
-push $N8004fc0
+push $Na419e400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true

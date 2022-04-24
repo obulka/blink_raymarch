@@ -10,7 +10,16 @@ _LOGGER = logging.getLogger(__file__)
 
 
 class KnobChangedCallbacks(dict):
+    """Class to register knob callbacks using decorators."""
+
     def register(self, knob_name):
+        """Register the decorated function as a callback of the knob
+        given by knob_name.
+
+        Args:
+            knob_name (str): The name of the knob this is a callback
+                for.
+        """
         def decorated(method):
             self[knob_name] = method
             return method
@@ -42,7 +51,6 @@ class KnobManager(object):
     @_knob_changed_callbacks.register("inputChange")
     def _input_changed(self):
         """Called when the input has changed"""
-        pass
 
 
 class SDFKnobManager(KnobManager):
