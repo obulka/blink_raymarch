@@ -124,12 +124,12 @@ Group {
  tile_color 0xffffffff
  label sphere
  xpos 18178
- ypos 1028
+ ypos 1022
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
  dimension_x 0.5
- addUserKnob {7 dimension_y l height t "The height (y-axis) below which the sphere is culled." +HIDDEN R 0 10}
+ addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN R 0 10}
  dimension_y 0.25
  addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN R 0 10}
  dimension_z 0.25
@@ -171,6 +171,8 @@ Group {
  addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected." +DISABLED}
  blend_strength 0.5
  addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera." +DISABLED +STARTLINE}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
  Input {
   inputs 0
@@ -699,6 +701,8 @@ Group {
  addUserKnob {6 soften_shadows l "soften shadows" t "Enable soft shadows when computing the hdri image based lighting." -STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {4 output_type l output t "The AOV type to output." M {Scene Position Normal Depth}}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
  BackdropNode {
   inputs 0
@@ -1120,8 +1124,8 @@ Group {
  knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
  tile_color 0xffffffff
  label directional
- xpos 18313
- ypos 1028
+ xpos 18319
+ ypos 1031
  addUserKnob {20 User l "SDF LIght"}
  addUserKnob {4 type t "The type of light." M {ambient directional point "ambient occlusion"}}
  type directional
@@ -1138,6 +1142,8 @@ Group {
  addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." +DISABLED R 1 100}
  shadow_hardness 10
  addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
  Input {
   inputs 0

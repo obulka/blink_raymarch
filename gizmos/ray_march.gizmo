@@ -44,6 +44,8 @@ Gizmo {
  addUserKnob {6 soften_shadows l "soften shadows" t "Enable soft shadows when computing the hdri image based lighting." -STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {4 output_type l output t "The AOV type to output." M {Scene Position Normal Depth}}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
  BackdropNode {
   inputs 0
