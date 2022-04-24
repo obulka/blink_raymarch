@@ -2,9 +2,9 @@
 
 This project contains three gizmos that allow you to ray march a wide variety of shapes utilizing the GPU.
 
-![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164967826-a08327e6-a1d4-448b-823b-94f06df8f16d.png)
+![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164989275-4eb4791c-df89-4332-981d-aac79b607762.png)
 
-![test_trap_bulb_done_reduced](https://user-images.githubusercontent.com/21975584/164971000-9af61158-432b-427e-ae3d-64b21342596c.png)
+![test_trap_bulb_done_reduced](https://user-images.githubusercontent.com/21975584/164989470-d13cabe2-8eb1-42de-becb-bd2672b14538.png)
 
 ## Setup
 
