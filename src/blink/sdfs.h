@@ -906,12 +906,7 @@ float distanceToMandelbulb(
         }
     }
 
-    trapColour = saturate(float4(
-        trapColour.x,
-        trapColour.y,
-        trapColour.z,
-        trapColour.w
-    ));
+    trapColour = saturate(trapColour);
 
     return 0.25f * log(radiusSquared) * sqrt(radiusSquared) / dradius;
 }
@@ -951,8 +946,6 @@ float distanceToMandelbox(
         const float foldingLimit,
         float4 &trapColour)
 {
-    const float3 foldingLimit3 = float3(foldingLimit);
-
     const float4 scaleVector = float4(
         scale,
         scale,
@@ -967,21 +960,19 @@ float distanceToMandelbox(
         1.0f
     );
     float4 currentPosition = initialPosition;
-    float3 currentPosition3 = float3(
-        currentPosition.x,
-        currentPosition.y,
-        currentPosition.z
-    );
 
-    float radiusSquared = dot(currentPosition3, currentPosition3);
-    float3 absPosition = fabs(currentPosition3);
-    trapColour = float4(absPosition.x, absPosition.y, absPosition.z, radiusSquared);
+    const float3 foldingLimit3 = float3(foldingLimit);
 
     for (int i=0; i < iterations; i++)
     {
+        float3 currentPosition3 = float3(
+            currentPosition.x,
+            currentPosition.y,
+            currentPosition.z
+        );
         currentPosition3 = boxFold(currentPosition3, foldingLimit3);
 
-        radiusSquared = dot(currentPosition3, currentPosition3);
+        const float radiusSquared = dot(currentPosition3, currentPosition3);
         currentPosition = sphereFold(
             float4(
                 currentPosition3.x,
@@ -994,25 +985,13 @@ float distanceToMandelbox(
         );
 
         currentPosition = scaleVector * currentPosition + initialPosition;
-        currentPosition3 = float3(
-            currentPosition.x,
-            currentPosition.y,
-            currentPosition.z
-        );
-        absPosition = fabs(currentPosition3);
-        radiusSquared = dot(currentPosition3, currentPosition3);
         trapColour = min(
             trapColour,
-            float4(absPosition.x, absPosition.y, absPosition.z, radiusSquared)
+            fabs(currentPosition)
         );
     }
 
-    trapColour = saturate(float4(
-        trapColour.x,
-        trapColour.y,
-        trapColour.z,
-        trapColour.w
-    ));
+    trapColour = saturate(trapColour);
 
     return (
         length(
