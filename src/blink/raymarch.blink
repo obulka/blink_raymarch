@@ -22,7 +22,8 @@
 
 kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 {
-    // the input for format, process called once per pixel
+    // the input which specifies the format, process is called once per pixel
+    // in this image, which also provides random seeds
     Image<eRead, eAccessPoint, eEdgeNone> noise;
 
     // the hdribox in latlong format

@@ -948,8 +948,11 @@ float distanceToMandelbox(
         const float scale,
         const int iterations,
         const float minSquareRadius,
-        const float foldingLimit)
+        const float foldingLimit,
+        float4 &trapColour)
 {
+    const float3 foldingLimit3 = float3(foldingLimit);
+
     const float4 scaleVector = float4(
         scale,
         scale,
@@ -964,19 +967,21 @@ float distanceToMandelbox(
         1.0f
     );
     float4 currentPosition = initialPosition;
+    float3 currentPosition3 = float3(
+        currentPosition.x,
+        currentPosition.y,
+        currentPosition.z
+    );
 
-    const float3 foldingLimit3 = float3(foldingLimit);
+    float radiusSquared = dot(currentPosition3, currentPosition3);
+    float3 absPosition = fabs(currentPosition3);
+    trapColour = float4(absPosition.x, absPosition.y, absPosition.z, radiusSquared);
 
     for (int i=0; i < iterations; i++)
     {
-        float3 currentPosition3 = float3(
-            currentPosition.x,
-            currentPosition.y,
-            currentPosition.z
-        );
         currentPosition3 = boxFold(currentPosition3, foldingLimit3);
 
-        const float radiusSquared = dot(currentPosition3, currentPosition3);
+        radiusSquared = dot(currentPosition3, currentPosition3);
         currentPosition = sphereFold(
             float4(
                 currentPosition3.x,
@@ -989,7 +994,25 @@ float distanceToMandelbox(
         );
 
         currentPosition = scaleVector * currentPosition + initialPosition;
+        currentPosition3 = float3(
+            currentPosition.x,
+            currentPosition.y,
+            currentPosition.z
+        );
+        absPosition = fabs(currentPosition3);
+        radiusSquared = dot(currentPosition3, currentPosition3);
+        trapColour = min(
+            trapColour,
+            float4(absPosition.x, absPosition.y, absPosition.z, radiusSquared)
+        );
     }
+
+    trapColour = saturate(float4(
+        trapColour.x,
+        trapColour.y,
+        trapColour.z,
+        trapColour.w
+    ));
 
     return (
         length(
@@ -1068,7 +1091,8 @@ float distanceToObject(
             dimensions.x,
             (int) dimensions.y,
             dimensions.z,
-            dimensions.w
+            dimensions.w,
+            trapColour
         );
     }
     if (shapeType == 0)
