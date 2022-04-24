@@ -1,6 +1,9 @@
 # BlinkScript Ray Marcher for Nuke
 
-This project contains three gizmos that allow you to ray march a wide variety of shapes on the GPU.
+This project contains three gizmos that allow you to ray march a wide variety of shapes utilizing the GPU.
+
+![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164967826-a08327e6-a1d4-448b-823b-94f06df8f16d.png)
+
 
 ## Setup
 
