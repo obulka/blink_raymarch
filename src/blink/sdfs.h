@@ -1026,6 +1026,7 @@ float distanceToMandelbox(
  *     21: hexagonal prism
  *     22: octahedron
  *     23: mandelbulb
+ *     24: mandelbox
  * @arg dimensions: The radius of the 'tube' of the torus, the radius of
  *     the 'ring', and the angle to cap at in range (0-PI).
  *

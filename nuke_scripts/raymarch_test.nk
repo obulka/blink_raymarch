@@ -19,6 +19,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
+                    <page id="DAG.2"/>
                 </dock>
             </splitter>
             <split size="615"/>
@@ -1665,7 +1666,7 @@ Group {
 }
  Input {
   inputs 0
-  name Input1
+  name siblings
   xpos 803
   ypos 30
  }
