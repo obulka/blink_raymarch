@@ -2,6 +2,10 @@
 
 This project contains three gizmos that allow you to ray march a wide variety of shapes on the GPU.
 
+## Setup
+
+Simply clone/download this repo and add the top level directory to your Nuke path. The gizmos will appear in the nodes menu, and all callbacks and the `FN_BLINK_INCLUDE_PATHS` will be set up automatically.
+
 ## Gizmos
 
 ### sdf_primitive
