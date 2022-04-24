@@ -17,7 +17,7 @@ class KnobChangedCallbacks(dict):
         return decorated
 
 
-class KnobManager():
+class KnobManager(object):
     """Knob manager for primitive shapes in signed distance fields."""
 
     _knob_changed_callbacks = KnobChangedCallbacks()

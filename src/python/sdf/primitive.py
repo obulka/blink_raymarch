@@ -720,7 +720,9 @@ class SDFPrimitive(SDFKnobManager):
 
     @_knob_changed_callbacks.register(repetition_knob_name)
     def _repetition_changed(self):
-        """"""
+        """Change the repetition knobs based on which type of repetition
+        has been selected.
+        """
         self._dropdown_context_changed(
             self.repetition_knob_defaults,
             self.repetition_context_knobs,
@@ -757,3 +759,23 @@ class SDFPrimitive(SDFKnobManager):
 
         if transmission + reflection_knob.value() > 1.:
             reflection_knob.setValue(1. - transmission)
+
+    @_knob_changed_callbacks.register(blend_type_knob_name)
+    def _blend_type_changed(self):
+        """Enable/disable the blend strength knob depending on the blend
+        type.
+        """
+        self._node.knob(self.blend_strength_knob_name).setEnabled(
+            self._knob.value().startswith("smooth"),
+        )
+
+    @_knob_changed_callbacks.register("inputChange")
+    def _input_changed(self):
+        """Enable/disable the knobs that only apply if this object has
+        children.
+        """
+        super(SDFPrimitive, self)._input_changed()
+
+        self._knob = self._node.knob(self.blend_type_knob_name)
+        if self._knob.enabled():
+            self._blend_type_changed()
