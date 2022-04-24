@@ -27,7 +27,7 @@ class SDFLight(SDFKnobManager):
 
     dimensional_knob_prefix = "dimension_"
     dimensional_knob_defaults = {
-        "ambient": OrderedDict([]),
+        "ambient": OrderedDict(),
         "directional": OrderedDict([
             (
                 "x direction",

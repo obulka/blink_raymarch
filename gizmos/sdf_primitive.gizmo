@@ -1,3 +1,5 @@
+#! /usr/local/Nuke13.0v2/libnuke-13.0.2.so -nx
+version 13.0 v2
 Gizmo {
  inputs 2
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
@@ -5,40 +7,39 @@ Gizmo {
  tile_color 0xffffffff
  label sphere
  addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {4 shape M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb ""}}
+ addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
  dimension_x 0.5
- addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN}
- dimension_y 0.25
- addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN}
- dimension_z 0.25
- addUserKnob {7 dimension_w l "corner radius" t "The radius of the corners of the rhombus' xy-plane parallel  face." +HIDDEN}
- dimension_w 0.05
- addUserKnob {7 wall_thickness l "wall thickness" +DISABLED}
+ addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the more detail the fractal will have." +HIDDEN R 1 30}
+ dimension_y 12
+ addUserKnob {7 dimension_z l "min square radius" t "The minimum square radius to use when spherically folding." +HIDDEN R 1e-05 0.1}
+ dimension_z 0.01
+ addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold." +HIDDEN R 0.01 2}
+ dimension_w 1
+ addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
  wall_thickness 0.01
- addUserKnob {6 hollow t "If true, the object will be hollow, with a thickness of 'Wall Thickness'" -STARTLINE}
- addUserKnob {7 edge_radius l "edge radius"}
- addUserKnob {6 mirror_x l "mirror x" +STARTLINE}
- addUserKnob {6 mirror_y l "mirror y" -STARTLINE}
- addUserKnob {6 mirror_z l "mirror z" -STARTLINE}
+ addUserKnob {6 hollow t "If enabled, the object will be hollow, with a thickness of 'wall thickness'." -STARTLINE}
+ addUserKnob {7 edge_radius l "edge radius" t "This parameter increases the hit tolerance by the specified amount for this specific object, having the effect of rounding off the edges."}
+ addUserKnob {6 mirror_x l "mirror x" t "Mirror the shape in the yz-plane." +STARTLINE}
+ addUserKnob {6 mirror_y l "mirror y" t "Mirror the shape in the xz-plane." -STARTLINE}
+ addUserKnob {6 mirror_z l "mirror z" t "Mirror the shape in the xy-plane." -STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {18 colour}
+ addUserKnob {18 colour t "The diffuse colour of the shape."}
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 reflection}
- addUserKnob {7 transmission}
- addUserKnob {7 refractive_index l "refractive index" R 1 4}
+ addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
+ addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
- addUserKnob {7 roughness t "Scatter the light more the higher this value is.\nIncrease the \"Pixel Subdivisions\" to clean up the noise."}
- addUserKnob {7 emission}
+ addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {13 translate}
- addUserKnob {13 rotate}
- rotate {0 0 10}
- addUserKnob {13 elongation +DISABLED}
+ addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
+ addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
+ addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
  elongation {0.1 0 0}
- addUserKnob {6 elongate -STARTLINE}
- addUserKnob {7 uniform_scale l "uniform scale" R 0 10}
+ addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
+ addUserKnob {7 uniform_scale l "uniform scale" t "The scale of the object in its local coordinate space, along all axes." R 0 10}
  uniform_scale 1
  addUserKnob {26 div1 l "" +STARTLINE}
  addUserKnob {19 repetition_params l repetition}
@@ -46,10 +47,11 @@ Gizmo {
  addUserKnob {6 repetition_params_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {4 repetition_type l type -STARTLINE M {None Finite Infinite "" "" ""}}
  addUserKnob {26 ""}
- addUserKnob {7 blend_strength l "blend strength" +DISABLED}
- blend_strength 0.11
- addUserKnob {4 blend_type l "blend type" -STARTLINE +DISABLED M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection" ""}}
- addUserKnob {6 is_bound l "is bound" +DISABLED +STARTLINE}
+ addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected." +DISABLED}
+ blend_strength 0.56
+ addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: All children of this object will be subtracted from this object, leaving holes.\n    Intersection: Only the region where this object and its children overlap will remain.\n    Smooth Union: All children will smoothly blend together with this object according to the 'blend strength'.\n    Smooth Subtraction: All children of this object will be subtracted from this object, leaving holes that are smoothed according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object and its children overlap will remain, and the remaining regions will be smoothed according to the 'blend strength'." -STARTLINE +DISABLED M {Union Subtraction Intersection "Smooth Union" "Smooth Subtraction" "Smooth Intersection"}}
+ blend_type "Smooth Union"
+ addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera." +DISABLED +STARTLINE}
 }
  Input {
   inputs 0
@@ -239,7 +241,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N14193200 [stack 0]
+set N2410dd00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -261,7 +263,7 @@ set N14193200 [stack 0]
    xpos 34
    ypos -6
   }
-set N14191600 [stack 0]
+set N2410c100 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -272,7 +274,7 @@ set N14191600 [stack 0]
    xpos -98
    ypos 336
   }
-push $N14193200
+push $N2410dd00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -301,7 +303,7 @@ push $N14193200
    xpos 158
    ypos 167
   }
-push $N14191600
+push $N2410c100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -394,7 +396,7 @@ push $N14191600
    xpos 192
    ypos -2
   }
-set N1413cf00 [stack 0]
+set N24097900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -416,7 +418,7 @@ set N1413cf00 [stack 0]
    xpos 34
    ypos -6
   }
-set N1411f200 [stack 0]
+set N24095d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -427,7 +429,7 @@ set N1411f200 [stack 0]
    xpos -98
    ypos 336
   }
-push $N1413cf00
+push $N24097900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -456,7 +458,7 @@ push $N1413cf00
    xpos 158
    ypos 167
   }
-push $N1411f200
+push $N24095d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true

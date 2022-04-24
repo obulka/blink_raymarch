@@ -29,6 +29,9 @@ class SDFPrimitive(SDFKnobManager):
     blend_type_knob_name = "blend_type"
     reflection_knob_name = "reflection"
     transmission_knob_name = "transmission"
+    repetition_knob_name = "repetition"
+    repetition_params_knob_name = "repetition_params"
+    repetition_spacing_knob_name = "repetition_spacing"
 
     _dimensional_axes = SDFKnobManager._dimensional_axes + ("w",)
 
@@ -651,6 +654,36 @@ class SDFPrimitive(SDFKnobManager):
         ]),
     }
 
+    repetition_knob_defaults = {
+        "none": OrderedDict(),
+        "finite": OrderedDict([
+            (
+                "limits",
+                {
+                    "default": [3., 3., 0.],
+                    "tooltip": "The distance along each positive axis to repeat the objects.",
+                },
+            ),
+            (
+                "spacing",
+                {
+                    "default": 1.1,
+                    "range": (0., 10.),
+                    "tooltip": "The spacing between the objects.",
+                },
+            ),
+        ]),
+        "infinite": OrderedDict([
+            (
+                "spacing",
+                {
+                    "default": [1.1, 1.1, 100.],
+                    "tooltip": "The spacing along each positive axis to repeat the objects.",
+                },
+            ),
+        ]),
+    }
+
     def __init__(self):
         """Initialize the manager"""
         super(SDFPrimitive, self).__init__()
@@ -661,6 +694,19 @@ class SDFPrimitive(SDFKnobManager):
             SDFPrimitive.blend_type_knob_name,
         }
 
+    @property
+    def repetition_context_knobs(self):
+        """list(nuke.Knob): The context knobs for an sdf node's
+                dimensional parameters.
+        """
+        return [
+            self._node.knob(repetition_knob)
+            for repetition_knob in (
+                self.repetition_params_knob_name,
+                self.repetition_spacing_knob_name,
+            )
+        ]
+
     @_knob_changed_callbacks.register(shape_knob_name)
     def _shape_changed(self):
         """Dynamically enable/disable and change the labels/tooltips/values
@@ -670,6 +716,14 @@ class SDFPrimitive(SDFKnobManager):
             self.dimensional_knob_defaults,
             self.dimensional_context_knobs,
             set_node_label=True,
+        )
+
+    @_knob_changed_callbacks.register(repetition_knob_name)
+    def _repetition_changed(self):
+        """"""
+        self._dropdown_context_changed(
+            self.repetition_knob_defaults,
+            self.repetition_context_knobs,
         )
 
     @_knob_changed_callbacks.register(hollow_knob_name)
