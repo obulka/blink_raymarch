@@ -45,7 +45,7 @@ This gizmo allows you to light the scene with point, directional, or simple ambi
 
 ### ray_march
 
-This gizmo renders the scene using a ray marching algorithm, with support for hdri image based lighting.
+This gizmo renders the scene using a ray marching algorithm, with support for hdri image based lighting. You can inptut a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
 
 ## References
 - https://iquilezles.org/articles/distfunctions/
