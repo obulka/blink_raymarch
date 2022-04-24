@@ -1,5 +1,3 @@
-#! /usr/local/Nuke13.0v2/libnuke-13.0.2.so -nx
-version 13.0 v2
 Gizmo {
  onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
  knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
@@ -113,7 +111,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set Nc8c39d00 [stack 0]
+set Ne7f16400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -135,7 +133,7 @@ set Nc8c39d00 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc8c38100 [stack 0]
+set Ne7f14800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -146,7 +144,7 @@ set Nc8c38100 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc8c39d00
+push $Ne7f16400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -175,7 +173,7 @@ push $Nc8c39d00
    xpos 158
    ypos 167
   }
-push $Nc8c38100
+push $Ne7f14800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true

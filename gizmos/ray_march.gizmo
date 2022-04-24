@@ -1,7 +1,6 @@
-#! /usr/local/Nuke13.0v2/libnuke-13.0.2.so -nx
-version 13.0 v2
 Gizmo {
  inputs 4
+ knobChanged "__import__('sdf.ray_march', fromlist='RayMarch').RayMarch().handle_knob_changed()"
  addUserKnob {20 User l "Ray March"}
  addUserKnob {3 pixel_subdivisions l "pixel subdivisions" t "Subdivide the pixel and cast a ray for each subdivision, resulting in 2^subdivisions rays being sent from the camera."}
  addUserKnob {3 max_rays_per_subpixel l "max rays per subpixel" t "For each subpixel the number of spawned rays will be capped at this value. This excludes shadow rays."}
@@ -13,7 +12,7 @@ Gizmo {
  addUserKnob {3 max_ray_steps l "max ray steps" t "Limit the number of steps a ray can be marched before it is culled. Shadow rays are given half this number of steps."}
  max_ray_steps 1000
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
- hit_tolerance 0.001
+ hit_tolerance 0.005
  addUserKnob {7 shadow_bias l "shadow bias" t "The surface will be offset by an additional factor of this amount before determining whether or not it is in shadow." R 1 2}
  shadow_bias 1
  addUserKnob {26 ""}
@@ -39,9 +38,9 @@ Gizmo {
  addUserKnob {7 hdri_lighting_gain l "hdri lighting gain" t "Multiply the hdri lighting intensity by this amount."}
  hdri_lighting_gain 1
  addUserKnob {7 hdri_lighting_blur l "hdri lighting blur" t "Blur the hdri image by a factor of this amount before using it for the lighting in the scene."}
- hdri_lighting_blur 1
- addUserKnob {7 hdri_shadow_hardness l "hdri shadow hardness" t "Use soft shadows with this hardness if 'soften shadows' is enabled. Probably will not have much effect but give it a go." R 1 100}
- hdri_shadow_hardness 1
+ hdri_lighting_blur 0.5
+ addUserKnob {7 hdri_shadow_hardness l "hdri shadow hardness" t "Use soft shadows with this hardness if 'soften shadows' is enabled. Probably will not have much effect but give it a go." +DISABLED R 1 100}
+ hdri_shadow_hardness 10
  addUserKnob {6 soften_shadows l "soften shadows" t "Enable soft shadows when computing the hdri image based lighting." -STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {4 output_type l output t "The AOV type to output." M {Scene Position Normal Depth}}
@@ -137,7 +136,7 @@ Gizmo {
   xpos 1695
   ypos -1474
  }
-set Nd9be1600 [stack 0]
+set N70071600 [stack 0]
  Blur {
   size {{"parent.hdri_lighting_blur * hdri_dot.format.height / 2"}}
   name Blur
@@ -184,7 +183,7 @@ add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_lig
   xpos -48
   ypos -1309
  }
-set Nd9ba9d00 [stack 0]
+set N20145d00 [stack 0]
 add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
  Shuffle {
   in sdf_light_properties1
@@ -199,7 +198,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
   xpos -232
   ypos -866
  }
-push $Nd9ba9d00
+push $N20145d00
 add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
  Shuffle {
   in sdf_light_properties
@@ -212,7 +211,7 @@ add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properti
   xpos -113
   ypos -864
  }
-push $Nd9ba9d00
+push $N20145d00
  Shuffle {
   in sdf_light
   name light
@@ -250,7 +249,7 @@ add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.p
   xpos 641
   ypos -1318
  }
-set Nd9b7cf00 [stack 0]
+set N20120f00 [stack 0]
 add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surface.emission sdf_surface.roughness}
  Shuffle {
   in sdf_surface
@@ -263,7 +262,7 @@ add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surfa
   xpos 322
   ypos -863
  }
-push $Nd9b7cf00
+push $N20120f00
 add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elongation_y sdf_shape_mods_1.elongation_z sdf_shape_mods_1.edge_radius}
  Shuffle {
   in sdf_shape_mods_1
@@ -276,7 +275,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
   xpos 780
   ypos -865
  }
-push $Nd9b7cf00
+push $N20120f00
 add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetion_y sdf_shape_mods_0.repetion_z sdf_shape_mods_0.repetion_w}
  Shuffle {
   in sdf_shape_mods_0
@@ -289,7 +288,7 @@ add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetio
   xpos 641
   ypos -864
  }
-push $Nd9b7cf00
+push $N20120f00
 add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.num_children sdf_shape.blend_strength}
  Shuffle {
   in sdf_shape
@@ -302,7 +301,7 @@ add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.n
   xpos 473
   ypos -863
  }
-push $Nd9b7cf00
+push $N20120f00
 add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_b sdf_colour.colour_a}
  Shuffle {
   in sdf_colour
@@ -315,7 +314,7 @@ add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_
   xpos 165
   ypos -864
  }
-push $Nd9b7cf00
+push $N20120f00
 add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y sdf_dimensions.dimension_z sdf_dimensions.dimension_w}
  Shuffle {
   in sdf_dimensions
@@ -328,7 +327,7 @@ add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y 
   xpos 1227
   ypos -857
  }
-push $Nd9b7cf00
+push $N20120f00
 add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sdf_rotation_wall_thickness.rotation_y sdf_rotation_wall_thickness.rotation_z sdf_rotation_wall_thickness.wall_thickness}
  Shuffle {
   in sdf_rotation_wall_thickness
@@ -341,7 +340,7 @@ add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sd
   xpos 1076
   ypos -854
  }
-push $Nd9b7cf00
+push $N20120f00
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -353,7 +352,7 @@ push $Nd9b7cf00
   xpos 934
   ypos -859
  }
-push $Nd9be1600
+push $N70071600
  Constant {
   inputs 0
   name Constant1

@@ -81,8 +81,8 @@ class SDFKnobManager(KnobManager):
 
     @_knob_changed_callbacks.register("inputChange")
     def _input_changed(self):
-        """Dynamically enable/disable the is bound and blend knobs
-        depending on whether or not the primitive has children.
+        """Enable/disable the knobs that only apply if this object has
+        children.
         """
         has_child_input = self._node.input(self.children_input_index) is not None
         for knob_name in self._knob_names_only_enabled_if_parent:
@@ -90,11 +90,17 @@ class SDFKnobManager(KnobManager):
 
     def _dropdown_context_changed(self, default_dict, context_knobs, set_node_label=False):
         """Dynamically enable/disable and change the labels/tooltips/values
-        of the dimensional knobs when the dropdown has changed.
+        of the context knobs dependent on dropdown knobs.
 
         Args:
             default_dict (dict(str, OrderedDict(str, dict()))): The
                 default values for the context sensitive knobs.
+
+            context_knobs (list(nuke.Knob)): The knobs that change with
+                the context.
+
+            set_node_label (bool): Set the node's label to the context
+                value if True.
         """
         new_value = self._knob.value()
 

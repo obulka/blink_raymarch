@@ -25,6 +25,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <dock id="" activePageId="Properties.1">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
+                <page id="uk.co.thefoundry.scripteditor.1"/>
             </dock>
         </splitter>
     </window>
@@ -50,6 +51,16 @@ Root {
 Read {
  inputs 0
  file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/studio_small_02_4k.exr
+ format "4096 2048 0 0 4096 2048 1 4K_LatLong"
+ origset true
+ name Read2
+ xpos 18896
+ ypos 821
+}
+Read {
+ inputs 0
+ file_type exr
  file /home/ob1/software/nuke/dev/raymarch/images/ninomaru_teien_4k.exr
  format "4096 2048 0 0 4096 2048 1 4K_LatLong"
  origset true
@@ -58,263 +69,6 @@ Read {
  xpos 18647
  ypos 815
 }
-Read {
- inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/studio_small_02_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
- origset true
- name Read2
- xpos 18896
- ypos 821
-}
-Group {
- inputs 0
- name sdf_light
- onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
- knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
- tile_color 0xffffffff
- label directional
- xpos 18328
- ypos 1048
- addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type t "The type of light." M {ambient directional point "ambient occlusion"}}
- type directional
- addUserKnob {7 dimension_x l "x direction" t "The x direction of the light." R -1 1}
- addUserKnob {7 dimension_y l "y direction" t "The y direction of the light." R -1 1}
- dimension_y -1
- addUserKnob {7 dimension_z l "z direction" t "The z direction of the light." R -1 1}
- addUserKnob {7 intensity t "The intensity of the light." R 0 10}
- intensity 1
- addUserKnob {7 falloff t "The power of the light's intensity falloff. Four is physically accurate." R 0 5}
- addUserKnob {18 colour t "The colour of the light."}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." +DISABLED R 1 100}
- shadow_hardness 10
- addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
-}
- Input {
-  inputs 0
-  name Input1
-  xpos 803
-  ypos 30
- }
- Dot {
-  name Dot1
-  xpos 837
-  ypos 488
- }
-add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
- Constant {
-  inputs 0
-  channels sdf_light
-  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.intensity}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light
-  xpos 363
-  ypos 11
- }
- Dot {
-  name Dot9
-  xpos 397
-  ypos 324
- }
-add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
- Constant {
-  inputs 0
-  channels sdf_light_properties
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props
-  xpos 501
-  ypos 11
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 501
-  ypos 380
- }
-add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
- Constant {
-  inputs 0
-  channels sdf_light_properties1
-  color {{parent.shadow_hardness} {parent.falloff} 0 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props1
-  xpos 646
-  ypos 12
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 642
-  ypos 380
- }
- Group {
-  inputs 2
-  name sdf_merge
-  xpos 642
-  ypos 484
-  disable {{"!(\[exists parent.input0] && !(parent.input0.disable && !\[exists parent.input0.input0]))"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N8aa02400 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N8aa00800 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N8aa02400
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N8aa00800
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 642
-  ypos 562
- }
-end_group
 Read {
  inputs 0
  file_type exr
@@ -338,26 +92,31 @@ Reformat {
 Dot {
  name Dot19
  xpos 18811
- ypos 1022
+ ypos 1101
 }
 Axis2 {
  inputs 0
  name Axis2
- xpos 18541
- ypos 816
+ xpos 18482
+ ypos 813
 }
 Camera3 {
  translate {0 0 3}
  name Camera1
- xpos 18540
- ypos 909
+ xpos 18481
+ ypos 906
 }
 Dot {
  name Dot18
- xpos 18565
- ypos 1024
+ xpos 18505
+ ypos 1123
 }
-push 0
+Dot {
+ inputs 0
+ name Dot1
+ xpos 18347
+ ypos 1127
+}
 Group {
  inputs 0
  name sdf_primitive
@@ -366,7 +125,7 @@ Group {
  tile_color 0xffffffff
  label sphere
  xpos 18178
- ypos 1045
+ ypos 1028
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
@@ -603,7 +362,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set Nf01d6b00 [stack 0]
+set N7015a400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -625,7 +384,7 @@ set Nf01d6b00 [stack 0]
    xpos 34
    ypos -6
   }
-set Nf01d4f00 [stack 0]
+set N70158800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -636,7 +395,7 @@ set Nf01d4f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nf01d6b00
+push $N7015a400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -665,7 +424,7 @@ push $Nf01d6b00
    xpos 158
    ypos 167
   }
-push $Nf01d4f00
+push $N70158800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -758,7 +517,7 @@ push $Nf01d4f00
    xpos 192
    ypos -2
   }
-set Nf0184800 [stack 0]
+set N700fc100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -780,7 +539,7 @@ set Nf0184800 [stack 0]
    xpos 34
    ypos -6
   }
-set Nf0166b00 [stack 0]
+set N700e2400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -791,7 +550,7 @@ set Nf0166b00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nf0184800
+push $N700fc100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -820,7 +579,7 @@ push $Nf0184800
    xpos 158
    ypos 167
   }
-push $Nf0166b00
+push $N700e2400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -888,9 +647,15 @@ push $Nf0166b00
   ypos 1002
  }
 end_group
+Dot {
+ name Dot2
+ xpos 18212
+ ypos 1119
+}
 Group {
  inputs 4
  name ray_march
+ knobChanged "__import__('sdf.ray_march', fromlist='RayMarch').RayMarch().handle_knob_changed()"
  xpos 18313
  ypos 1221
  addUserKnob {20 User l "Ray March"}
@@ -930,9 +695,9 @@ Group {
  addUserKnob {7 hdri_lighting_gain l "hdri lighting gain" t "Multiply the hdri lighting intensity by this amount."}
  hdri_lighting_gain 1
  addUserKnob {7 hdri_lighting_blur l "hdri lighting blur" t "Blur the hdri image by a factor of this amount before using it for the lighting in the scene."}
- hdri_lighting_blur 1
- addUserKnob {7 hdri_shadow_hardness l "hdri shadow hardness" t "Use soft shadows with this hardness if 'soften shadows' is enabled. Probably will not have much effect but give it a go." R 1 100}
- hdri_shadow_hardness 1
+ hdri_lighting_blur 0.5
+ addUserKnob {7 hdri_shadow_hardness l "hdri shadow hardness" t "Use soft shadows with this hardness if 'soften shadows' is enabled. Probably will not have much effect but give it a go." +DISABLED R 1 100}
+ hdri_shadow_hardness 10
  addUserKnob {6 soften_shadows l "soften shadows" t "Enable soft shadows when computing the hdri image based lighting." -STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {4 output_type l output t "The AOV type to output." M {Scene Position Normal Depth}}
@@ -1028,7 +793,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set Nf00ee400 [stack 0]
+set N70071600 [stack 0]
  Blur {
   size {{"parent.hdri_lighting_blur * hdri_dot.format.height / 2"}}
   name Blur
@@ -1048,6 +813,7 @@ set Nf00ee400 [stack 0]
   xpos 1839
   ypos -564
  }
+add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
  Constant {
   inputs 0
   channels sdf_light
@@ -1074,7 +840,8 @@ set Nf00ee400 [stack 0]
   xpos -48
   ypos -1309
  }
-set Na82eab00 [stack 0]
+set N20145d00 [stack 0]
+add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -1088,7 +855,8 @@ set Na82eab00 [stack 0]
   xpos -232
   ypos -866
  }
-push $Na82eab00
+push $N20145d00
+add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -1100,7 +868,7 @@ push $Na82eab00
   xpos -113
   ypos -864
  }
-push $Na82eab00
+push $N20145d00
  Shuffle {
   in sdf_light
   name light
@@ -1137,7 +905,7 @@ push $Na82eab00
   xpos 641
   ypos -1318
  }
-set Na82c1d00 [stack 0]
+set N20120f00 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -1149,7 +917,7 @@ set Na82c1d00 [stack 0]
   xpos 322
   ypos -863
  }
-push $Na82c1d00
+push $N20120f00
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -1161,7 +929,7 @@ push $Na82c1d00
   xpos 780
   ypos -865
  }
-push $Na82c1d00
+push $N20120f00
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -1173,7 +941,7 @@ push $Na82c1d00
   xpos 641
   ypos -864
  }
-push $Na82c1d00
+push $N20120f00
  Shuffle {
   in sdf_shape
   name shape
@@ -1185,7 +953,7 @@ push $Na82c1d00
   xpos 473
   ypos -863
  }
-push $Na82c1d00
+push $N20120f00
  Shuffle {
   in sdf_colour
   name colour
@@ -1197,7 +965,7 @@ push $Na82c1d00
   xpos 165
   ypos -864
  }
-push $Na82c1d00
+push $N20120f00
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -1209,7 +977,7 @@ push $Na82c1d00
   xpos 1227
   ypos -857
  }
-push $Na82c1d00
+push $N20120f00
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -1221,7 +989,7 @@ push $Na82c1d00
   xpos 1076
   ypos -854
  }
-push $Na82c1d00
+push $N20120f00
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -1233,7 +1001,7 @@ push $Na82c1d00
   xpos 934
   ypos -859
  }
-push $Nf00ee400
+push $N70071600
  Constant {
   inputs 0
   name Constant1
@@ -1345,5 +1113,249 @@ Viewer {
  frame_range 1-479
  name Viewer1
  xpos 18313
- ypos 1279
+ ypos 1317
 }
+Group {
+ inputs 0
+ name sdf_light
+ onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
+ knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
+ tile_color 0xffffffff
+ label directional
+ xpos 18313
+ ypos 1028
+ addUserKnob {20 User l "SDF LIght"}
+ addUserKnob {4 type t "The type of light." M {ambient directional point "ambient occlusion"}}
+ type directional
+ addUserKnob {7 dimension_x l "x direction" t "The x direction of the light." R -1 1}
+ addUserKnob {7 dimension_y l "y direction" t "The y direction of the light." R -1 1}
+ dimension_y -1
+ addUserKnob {7 dimension_z l "z direction" t "The z direction of the light." R -1 1}
+ addUserKnob {7 intensity t "The intensity of the light." R 0 10}
+ intensity 1
+ addUserKnob {7 falloff t "The power of the light's intensity falloff. Four is physically accurate." R 0 5}
+ addUserKnob {18 colour t "The colour of the light."}
+ colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." +DISABLED R 1 100}
+ shadow_hardness 10
+ addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos 803
+  ypos 30
+ }
+ Dot {
+  name Dot1
+  xpos 837
+  ypos 488
+ }
+ Constant {
+  inputs 0
+  channels sdf_light
+  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.intensity}}
+  format "1 1 0 0 1 1 1 1x1"
+  name light
+  xpos 363
+  ypos 11
+ }
+ Dot {
+  name Dot9
+  xpos 397
+  ypos 324
+ }
+ Constant {
+  inputs 0
+  channels sdf_light_properties
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
+  format "1 1 0 0 1 1 1 1x1"
+  name light_props
+  xpos 501
+  ypos 11
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 501
+  ypos 380
+ }
+ Constant {
+  inputs 0
+  channels sdf_light_properties1
+  color {{parent.shadow_hardness} {parent.falloff} 0 0}
+  format "1 1 0 0 1 1 1 1x1"
+  name light_props1
+  xpos 646
+  ypos 12
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy2
+  xpos 642
+  ypos 380
+ }
+ Group {
+  inputs 2
+  name sdf_merge
+  xpos 642
+  ypos 484
+  disable {{"!(\[exists parent.input0] && !(parent.input0.disable && !\[exists parent.input0.input0]))"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set Ne7f16400 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set Ne7f14800 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $Ne7f16400
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $Ne7f14800
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Output {
+  name Output1
+  xpos 642
+  ypos 562
+ }
+end_group

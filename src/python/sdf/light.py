@@ -25,7 +25,6 @@ class SDFLight(SDFKnobManager):
 
     _knob_changed_callbacks = KnobChangedCallbacks(SDFKnobManager._knob_changed_callbacks)
 
-    dimensional_knob_prefix = "dimension_"
     dimensional_knob_defaults = {
         "ambient": OrderedDict(),
         "directional": OrderedDict([
@@ -107,7 +106,7 @@ class SDFLight(SDFKnobManager):
     @_knob_changed_callbacks.register(type_knob_name)
     def _type_changed(self):
         """Dynamically enable/disable and change the labels/tooltips/values
-        of the dimensional knobs when the selected type has changed.
+        of the context knobs when the selected type has changed.
         """
         self._dropdown_context_changed(
             self.dimensional_knob_defaults,
@@ -118,7 +117,7 @@ class SDFLight(SDFKnobManager):
 
     @_knob_changed_callbacks.register(soften_shadows_knob_name)
     def _soften_shadows_changed(self):
-        """Dynamically enable/disable the wall soften shadows knob depending
-        on whether or not hollowing has been enabled.
+        """Dynamically enable/disable the shadow hardness knob depending
+        on whether or not shadow softening has been enabled.
         """
         self._node.knob(self.shadow_hardness_knob_name).setEnabled(self._knob.value())
