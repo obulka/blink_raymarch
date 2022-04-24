@@ -10,11 +10,11 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             </dock>
             <split size="1841" stretch="1"/>
             <splitter orientation="2">
-                <split size="925"/>
+                <split size="783"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="408"/>
+                <split size="550"/>
                 <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
@@ -32,7 +32,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 }
 Root {
  inputs 0
- name /home/ob1/software/nuke/dev/raymarch/examples/raymarch_test.nk
+ name /home/ob1/software/nuke/dev/raymarch/examples/mandelbox.nk
  frame 14
  format "4096 3112 0 0 4096 3112 1 4K_Super_35(full-ap)"
  proxy_type scale
@@ -46,100 +46,177 @@ Root {
  logLut Cineon
  floatLut linear
 }
-Read {
+Noise {
  inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/studio_small_02_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
- origset true
- name Read6
- xpos 21591
- ypos 872
+ gain 0.755
+ gamma 0.775
+ center {960 540}
+ name Noise7
+ xpos 21414
+ ypos 879
 }
-Read {
+Grade {
+ white 1.94
+ gamma 2.26
+ white_clamp true
+ name Grade49
+ xpos 21414
+ ypos 905
+}
+Crop {
  inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/ninomaru_teien_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
- origset true
- auto_alpha true
- name Read7
- xpos 21342
- ypos 866
+ box {0 0 100 {box.r}}
+ reformat true
+ crop false
+ name Crop6
+ xpos 21317
+ ypos 825
 }
-Read {
- inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/kloppenheim_02_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
- origset true
- auto_alpha true
- name Read8
- xpos 21472
- ypos 869
+Flare {
+ position {{width/2} {height/2}}
+ radius {{(width/2)-4} {(width/2)-1} {width/2}}
+ ring_color 5
+ inner_color 1
+ name Flare2
+ xpos 21317
+ ypos 881
 }
-Reformat {
- format "2048 1024 0 0 2048 1024 1 2K_LatLong"
- scale 0.25
- resize fill
- center false
- name Reformat2
- xpos 21472
- ypos 987
+Merge2 {
+ inputs 2
+ operation multiply
+ name Merge31
+ xpos 21317
+ ypos 905
+}
+Crop {
+ box {0 0 100 {box.r}}
+ reformat true
+ name Crop8
+ xpos 21317
+ ypos 965
+}
+Shuffle2 {
+ fromInput1 {{0} B}
+ fromInput2 {{0} B}
+ mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+ name Shuffle22
+ xpos 21317
+ ypos 989
 }
 Dot {
- name Dot4
- xpos 21506
- ypos 1167
+ name Dot111
+ xpos 21351
+ ypos 1093
 }
-Constant {
+Read {
  inputs 0
- channels rgb
- color 0.01
- format "2048 1024 0 0 2048 1024 1 2K_LatLong"
- name Constant1
- xpos 21360
- ypos 1183
+ file_type png
+ file /home/ob1/software/nuke/dev/raymarch/images/test_trap_box.png
+ format "4096 3112 0 0 4096 3112 1 4K_Super_35(full-ap)"
+ origset true
+ name Read3
+ xpos 21039
+ ypos 957
 }
-Reformat {
- type scale
- format "2048 1024 0 0 2048 1024 1 2K_LatLong"
- scale 0.25
- resize fill
- center false
- name Reformat1
- xpos 21360
- ypos 1272
+Read {
+ inputs 0
+ file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/test_trap_box_depth.exr
+ format "4096 3112 0 0 4096 3112 1 4K_Super_35(full-ap)"
+ origset true
+ name Read1
+ xpos 21174
+ ypos 845
+}
+Shuffle2 {
+ inputs 2
+ fromInput1 {{1} B A}
+ fromInput2 {{0} B A}
+ in2 rgb
+ out2 depth
+ mappings "5 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 1 0 depth.Z 1 0 rgba.alpha 0 3 rgba.alpha 0 3"
+ name Shuffle1
+ xpos 21174
+ ypos 986
+}
+ZDefocus2 {
+ inputs 2
+ math depth
+ center 0.4548339844
+ focal_point {2929 1556}
+ dof 0.5400000215
+ size 41
+ max_size 66
+ layerCurve 4.58
+ legacy_resize_mode false
+ show_legacy_resize_mode false
+ maskChannelMask -rgba.red
+ fringe true
+ name ZDefocus1
+ xpos 21174
+ ypos 1083
+}
+HueShift {
+ color_saturation 0.44
+ hue_rotation -4
+ name HueShift2
+ xpos 21174
+ ypos 1170
+}
+Grade {
+ black -0.0002
+ white 1.1
+ add -0.0001
+ gamma 1.04
+ name Grade1
+ xpos 21174
+ ypos 1230
+}
+Write {
+ file /home/ob1/software/nuke/dev/raymarch/images/mandelbox_trap_test1.png
+ file_type png
+ datatype "16 bit"
+ checkHashOnRead false
+ version 3
+ in_colorspace scene_linear
+ out_colorspace scene_linear
+ name Write2
+ xpos 21174
+ ypos 1302
+}
+Dot {
+ name Dot3
+ xpos 21208
+ ypos 1468
 }
 Axis2 {
  inputs 0
- name Axis1
- xpos 21177
- ypos 864
+ name Axis2
+ xpos 20893
+ ypos 686
 }
 Camera3 {
- translate {0.05 0 1.1}
- rotate {12 0 0}
- focal 7.5
+ translate {0 0 2.5}
+ focal 17.8
  far 100
- name Camera2
- xpos 21176
- ypos 979
+ name Camera1
+ xpos 20892
+ ypos 801
 }
 Dot {
- name Dot5
- xpos 21200
- ypos 1174
+ name Dot18
+ xpos 20916
+ ypos 996
 }
 Group {
  inputs 0
- name sdf_light3
+ name sdf_light2
  onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
  knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
  tile_color 0xffffffff
  label point
- xpos 21008
- ypos 957
+ xpos 20724
+ ypos 739
  addUserKnob {20 User l "SDF LIght"}
  addUserKnob {4 type t "The type of light." M {ambient directional point "ambient occlusion"}}
  type point
@@ -254,7 +331,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set Nc0194100 [stack 0]
+set N48ebab00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -276,7 +353,7 @@ set Nc0194100 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc016e400 [stack 0]
+set N48eb8f00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -287,7 +364,7 @@ set Nc016e400 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc0194100
+push $N48ebab00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -316,7 +393,7 @@ push $Nc0194100
    xpos 158
    ypos 167
   }
-push $Nc016e400
+push $N48eb8f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -385,20 +462,20 @@ push $Nc016e400
  }
 end_group
 Group {
- name sdf_light4
+ name sdf_light1
  onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
  knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
  tile_color 0xffffffff
  label point
- xpos 21008
- ypos 1020
+ xpos 20724
+ ypos 821
  addUserKnob {20 User l "SDF LIght"}
  addUserKnob {4 type t "The type of light." M {ambient directional point "ambient occlusion"}}
  type point
  addUserKnob {7 dimension_x l "x position" t "The x position of the light." R -10 10}
  dimension_x 3
  addUserKnob {7 dimension_y l "y position" t "The y position of the light." R -10 10}
- dimension_y 1
+ dimension_y 2
  addUserKnob {7 dimension_z l "z position" t "The z position of the light." R -10 10}
  dimension_z 4
  addUserKnob {7 intensity t "The intensity of the light." R 0 10}
@@ -503,7 +580,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nc00cb900 [stack 0]
+set Na00f6400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -525,7 +602,7 @@ set Nc00cb900 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc00c9d00 [stack 0]
+set Na00f4800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -536,7 +613,7 @@ set Nc00c9d00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc00cb900
+push $Na00f6400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -565,7 +642,7 @@ push $Nc00cb900
    xpos 158
    ypos 167
   }
-push $Nc00c9d00
+push $Na00f4800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -634,13 +711,13 @@ push $Nc00c9d00
  }
 end_group
 Group {
- name sdf_light5
+ name sdf_light
  onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
  knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
  tile_color 0xffffffff
  label "ambient occlusion"
- xpos 21008
- ypos 1085
+ xpos 20724
+ ypos 893
  addUserKnob {20 User l "SDF LIght"}
  addUserKnob {4 type t "The type of light." M {ambient directional point "ambient occlusion"}}
  type "ambient occlusion"
@@ -650,7 +727,7 @@ Group {
  dimension_y -1
  addUserKnob {7 dimension_z l "z direction" t "The z direction of the light." +HIDDEN R -1 1}
  addUserKnob {7 intensity t "The intensity of the light." R 0 10}
- intensity 0.15
+ intensity 0.1
  addUserKnob {7 falloff t "The power of the light's intensity falloff. Four is physically accurate." +DISABLED R 0 5}
  addUserKnob {18 colour t "The colour of the light."}
  colour {1 1 1}
@@ -749,7 +826,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na8187200 [stack 0]
+set Na0065d00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -771,7 +848,7 @@ set Na8187200 [stack 0]
    xpos 34
    ypos -6
   }
-set Na8185600 [stack 0]
+set Na0064100 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -782,7 +859,7 @@ set Na8185600 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na8187200
+push $Na0065d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -811,7 +888,7 @@ push $Na8187200
    xpos 158
    ypos 167
   }
-push $Na8185600
+push $Na0064100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -880,30 +957,30 @@ push $Na8185600
  }
 end_group
 Dot {
- name Dot6
- xpos 21042
- ypos 1178
+ name Dot1
+ xpos 20758
+ ypos 1000
 }
 Group {
  inputs 0
- name sdf_primitive1
+ name sdf_primitive
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
- label mandelbulb
- xpos 20873
- ypos 1084
+ label mandelbox
+ xpos 20589
+ ypos 896
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
- shape mandelbulb
- addUserKnob {7 dimension_x l power t "One greater than the axes of symmetry in the xy-plane." R 2 30}
- dimension_x 15
- addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the deeper the fractal will have detail." R 1 30}
- dimension_y 10
- addUserKnob {7 dimension_z l "max square radius" t "When the square radius has reached this length, stop iterating." R 1 9}
- dimension_z 4
- addUserKnob {7 dimension_w l "orbital trap blend strength" t "Transition between orbital trap based colouring and the colour provided by the 'colour' knob."}
- dimension_w 1
+ shape mandelbox
+ addUserKnob {7 dimension_x l scale t "The amount to scale the position between folds. Can be negative or positive." R -5 5}
+ dimension_x -1.75
+ addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the more detail the fractal will have." R 1 30}
+ dimension_y 17
+ addUserKnob {7 dimension_z l "min square radius" t "The minimum square radius to use when spherically folding." R 0.001 1}
+ dimension_z 0.0313758388
+ addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold. Higher values will result in a denser fractal." R 0.01 2}
+ dimension_w 0.7166666662
  addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
  wall_thickness 0.01
  addUserKnob {6 hollow t "If enabled, the object will be hollow, with a thickness of 'wall thickness'." -STARTLINE}
@@ -924,7 +1001,7 @@ Group {
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
  addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
- rotate {65 50 0}
+ rotate {45 15 0}
  addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
  elongation {0.1 0 0}
  addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
@@ -1132,7 +1209,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set Na82aab00 [stack 0]
+set N51dd1600 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1154,7 +1231,7 @@ set Na82aab00 [stack 0]
    xpos 34
    ypos -6
   }
-set Na82a8f00 [stack 0]
+set N51da3900 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1165,7 +1242,7 @@ set Na82a8f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na82aab00
+push $N51dd1600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1194,7 +1271,7 @@ push $Na82aab00
    xpos 158
    ypos 167
   }
-push $Na82a8f00
+push $N51da3900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1287,7 +1364,7 @@ push $Na82a8f00
    xpos 192
    ypos -2
   }
-set Na824c800 [stack 0]
+set N701c7200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1309,7 +1386,7 @@ set Na824c800 [stack 0]
    xpos 34
    ypos -6
   }
-set Na8226b00 [stack 0]
+set N701c5600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1320,7 +1397,7 @@ set Na8226b00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na824c800
+push $N701c7200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1349,7 +1426,7 @@ push $Na824c800
    xpos 158
    ypos 167
   }
-push $Na8226b00
+push $N701c5600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1418,18 +1495,19 @@ push $Na8226b00
  }
 end_group
 Dot {
- name Dot7
- xpos 20907
- ypos 1170
+ name Dot2
+ xpos 20623
+ ypos 992
 }
 Group {
  inputs 3
- name ray_march1
+ name ray_march
  knobChanged "__import__('sdf.ray_march', fromlist='RayMarch').RayMarch().handle_knob_changed()"
- xpos 21008
- ypos 1293
+ xpos 20724
+ ypos 1092
  addUserKnob {20 User l "Ray March"}
  addUserKnob {3 pixel_subdivisions l "pixel subdivisions" t "Subdivide the pixel and cast a ray for each subdivision, resulting in 2^subdivisions rays being sent from the camera."}
+ pixel_subdivisions 1
  addUserKnob {3 max_rays_per_subpixel l "max rays per subpixel" t "For each subpixel the number of spawned rays will be capped at this value. This excludes shadow rays."}
  max_rays_per_subpixel 10
  addUserKnob {3 max_bounces l "max bounces" t "Limits the number of times the rays can intersect an object per subpixel."}
@@ -1565,7 +1643,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set Na83b1d00 [stack 0]
+set N70150800 [stack 0]
  Blur {
   size {{"parent.hdri_lighting_blur * hdri_dot.format.height / 2"}}
   name Blur
@@ -1611,7 +1689,7 @@ set Na83b1d00 [stack 0]
   xpos -48
   ypos -1309
  }
-set Na838a400 [stack 0]
+set N70120f00 [stack 0]
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -1625,7 +1703,7 @@ set Na838a400 [stack 0]
   xpos -232
   ypos -866
  }
-push $Na838a400
+push $N70120f00
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -1637,7 +1715,7 @@ push $Na838a400
   xpos -113
   ypos -864
  }
-push $Na838a400
+push $N70120f00
  Shuffle {
   in sdf_light
   name light
@@ -1674,7 +1752,7 @@ push $Na838a400
   xpos 641
   ypos -1318
  }
-set Na8355600 [stack 0]
+set N700f8100 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -1686,7 +1764,7 @@ set Na8355600 [stack 0]
   xpos 322
   ypos -863
  }
-push $Na8355600
+push $N700f8100
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -1698,7 +1776,7 @@ push $Na8355600
   xpos 780
   ypos -865
  }
-push $Na8355600
+push $N700f8100
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -1710,7 +1788,7 @@ push $Na8355600
   xpos 641
   ypos -864
  }
-push $Na8355600
+push $N700f8100
  Shuffle {
   in sdf_shape
   name shape
@@ -1722,7 +1800,7 @@ push $Na8355600
   xpos 473
   ypos -863
  }
-push $Na8355600
+push $N700f8100
  Shuffle {
   in sdf_colour
   name colour
@@ -1734,7 +1812,7 @@ push $Na8355600
   xpos 165
   ypos -864
  }
-push $Na8355600
+push $N700f8100
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -1746,7 +1824,7 @@ push $Na8355600
   xpos 1227
   ypos -857
  }
-push $Na8355600
+push $N700f8100
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -1758,7 +1836,7 @@ push $Na8355600
   xpos 1076
   ypos -854
  }
-push $Na8355600
+push $N700f8100
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -1770,7 +1848,7 @@ push $Na8355600
   xpos 934
   ypos -859
  }
-push $Na83b1d00
+push $N70150800
  Constant {
   inputs 0
   name Constant1
@@ -1878,189 +1956,43 @@ push $Na83b1d00
   ypos -122
  }
 end_group
-set Na83dab00 [stack 0]
-push $Na83dab00
+set N70169600 [stack 0]
+push $N70169600
 HueShift {
  inputs 1+1
  color_saturation 0.82
  hue_rotation -30
- name HueShift3
- xpos 21008
- ypos 1386
+ name HueShift1
+ xpos 20724
+ ypos 1208
  disable true
 }
 Write {
- channels {rgba.red -rgba.green -rgba.blue -rgba.alpha}
- file /home/ob1/software/nuke/dev/raymarch/images/test_trap_bulb_depth.png
- file_type png
- datatype "16 bit"
+ channels {rgba.red -rgba.green -rgba.blue none}
+ file /home/ob1/software/nuke/dev/raymarch/images/test_trap_box_depth.exr
+ file_type exr
+ first_part rgba
  checkHashOnRead false
- version 7
- name Write3
- xpos 21008
- ypos 1630
-}
-Noise {
- inputs 0
- gain 0.755
- gamma 0.775
- center {960 540}
- name Noise7
- xpos 21754
- ypos 1437
-}
-Grade {
- white 1.94
- gamma 2.26
- white_clamp true
- name Grade49
- xpos 21754
- ypos 1463
-}
-Crop {
- inputs 0
- box {0 0 100 {box.r}}
- reformat true
- crop false
- name Crop6
- xpos 21657
- ypos 1383
-}
-Flare {
- position {{width/2} {height/2}}
- radius {{(width/2)-4} {(width/2)-1} {width/2}}
- ring_color 5
- inner_color 1
- name Flare2
- xpos 21657
- ypos 1439
-}
-Merge2 {
- inputs 2
- operation multiply
- name Merge31
- xpos 21657
- ypos 1463
-}
-Crop {
- box {0 0 100 {box.r}}
- reformat true
- name Crop8
- xpos 21657
- ypos 1523
-}
-Shuffle2 {
- fromInput1 {{0} B}
- fromInput2 {{0} B}
- mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
- name Shuffle22
- xpos 21657
- ypos 1547
-}
-Dot {
- name Dot111
- xpos 21691
- ypos 1651
+ version 5
+ in_colorspace scene_linear
+ out_colorspace scene_linear
+ name Write1
+ xpos 20724
+ ypos 1251
 }
 Read {
  inputs 0
  file_type png
- file /home/ob1/software/nuke/dev/raymarch/images/test_trap_bulb_depth.png
+ file /home/ob1/software/nuke/dev/raymarch/images/mandelbox_trap_test1.png
  format "4096 3112 0 0 4096 3112 1 4K_Super_35(full-ap)"
  origset true
  name Read2
- xpos 21494
- ypos 1465
-}
-Read {
- inputs 0
- file_type png
- file /home/ob1/software/nuke/dev/raymarch/images/test_trap_bulb.png
- format "4096 3112 0 0 4096 3112 1 4K_Super_35(full-ap)"
- origset true
- name Read1
- xpos 21366
- ypos 1542
-}
-Shuffle2 {
- inputs 2
- fromInput1 {{0} B A}
- fromInput2 {{1} B A}
- in2 rgb
- out2 depth
- mappings "5 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3 rgba.alpha 0 3 rgba.red 1 0 depth.Z 1 0"
- name Shuffle1
- xpos 21494
- ypos 1571
-}
-ZDefocus2 {
- inputs 2
- center 0.1043254137
- focal_point {1290 2322}
- dof 0.01600000076
- size 12
- legacy_resize_mode false
- show_legacy_resize_mode false
- name ZDefocus1
- xpos 21494
- ypos 1641
-}
-HueShift {
- color_saturation 0.53
- name HueShift1
- xpos 21495
- ypos 1703
-}
-Grade {
- blackpoint -0.001
- whitepoint 0.62
- black -0.008
- white 1.44
- multiply 1.06
- add -0.008
- gamma 1.04
- name Grade1
- xpos 21495
- ypos 1758
-}
-Write {
- file /home/ob1/software/nuke/dev/raymarch/images/test_trap_bulb_done.png
- file_type png
- datatype "16 bit"
- checkHashOnRead false
- version 1
- name Write1
- xpos 21495
- ypos 1812
+ xpos 21255
+ ypos 1433
 }
 Viewer {
  frame_range 1-100
  name Viewer1
- xpos 21494
- ypos 1932
-}
-Read {
- inputs 0
- file_type png
- file /home/ob1/software/nuke/dev/raymarch/images/test_trap_bulb_done.png
- format "4096 3112 0 0 4096 3112 1 4K_Super_35(full-ap)"
- origset true
- name Read3
- xpos 21861
- ypos 1648
-}
-Reformat {
- format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
- name Reformat3
- xpos 21861
- ypos 1754
-}
-Write {
- file /home/ob1/software/nuke/dev/raymarch/images/test_trap_bulb_done_reduced.png
- file_type png
- checkHashOnRead false
- version 2
- name Write2
- xpos 21861
- ypos 1861
+ xpos 21172
+ ypos 1613
 }

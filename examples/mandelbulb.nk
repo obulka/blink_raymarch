@@ -10,11 +10,11 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             </dock>
             <split size="1841" stretch="1"/>
             <splitter orientation="2">
-                <split size="925"/>
+                <split size="783"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="408"/>
+                <split size="550"/>
                 <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
@@ -32,7 +32,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 }
 Root {
  inputs 0
- name /home/ob1/software/nuke/dev/raymarch/examples/raymarch_test.nk
+ name /home/ob1/software/nuke/dev/raymarch/examples/mandelbulb.nk
  frame 14
  format "4096 3112 0 0 4096 3112 1 4K_Super_35(full-ap)"
  proxy_type scale
@@ -45,71 +45,6 @@ Root {
  int16Lut sRGB
  logLut Cineon
  floatLut linear
-}
-Read {
- inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/studio_small_02_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
- origset true
- name Read6
- xpos 21591
- ypos 872
-}
-Read {
- inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/ninomaru_teien_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
- origset true
- auto_alpha true
- name Read7
- xpos 21342
- ypos 866
-}
-Read {
- inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/kloppenheim_02_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
- origset true
- auto_alpha true
- name Read8
- xpos 21472
- ypos 869
-}
-Reformat {
- format "2048 1024 0 0 2048 1024 1 2K_LatLong"
- scale 0.25
- resize fill
- center false
- name Reformat2
- xpos 21472
- ypos 987
-}
-Dot {
- name Dot4
- xpos 21506
- ypos 1167
-}
-Constant {
- inputs 0
- channels rgb
- color 0.01
- format "2048 1024 0 0 2048 1024 1 2K_LatLong"
- name Constant1
- xpos 21360
- ypos 1183
-}
-Reformat {
- type scale
- format "2048 1024 0 0 2048 1024 1 2K_LatLong"
- scale 0.25
- resize fill
- center false
- name Reformat1
- xpos 21360
- ypos 1272
 }
 Axis2 {
  inputs 0
@@ -254,7 +189,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set Nc0194100 [stack 0]
+set Nb5402400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -276,7 +211,7 @@ set Nc0194100 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc016e400 [stack 0]
+set Nb5400800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -287,7 +222,7 @@ set Nc016e400 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc0194100
+push $Nb5402400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -316,7 +251,7 @@ push $Nc0194100
    xpos 158
    ypos 167
   }
-push $Nc016e400
+push $Nb5400800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -503,7 +438,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nc00cb900 [stack 0]
+set Nb5365d00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -525,7 +460,7 @@ set Nc00cb900 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc00c9d00 [stack 0]
+set Nb5364100 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -536,7 +471,7 @@ set Nc00c9d00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc00cb900
+push $Nb5365d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -565,7 +500,7 @@ push $Nc00cb900
    xpos 158
    ypos 167
   }
-push $Nc00c9d00
+push $Nb5364100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -749,7 +684,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na8187200 [stack 0]
+set Nf81c1600 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -771,7 +706,7 @@ set Na8187200 [stack 0]
    xpos 34
    ypos -6
   }
-set Na8185600 [stack 0]
+set Nf8193900 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -782,7 +717,7 @@ set Na8185600 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na8187200
+push $Nf81c1600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -811,7 +746,7 @@ push $Na8187200
    xpos 158
    ypos 167
   }
-push $Na8185600
+push $Nf8193900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1132,7 +1067,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set Na82aab00 [stack 0]
+set Nca690f00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1154,7 +1089,7 @@ set Na82aab00 [stack 0]
    xpos 34
    ypos -6
   }
-set Na82a8f00 [stack 0]
+set Nca66b200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1165,7 +1100,7 @@ set Na82a8f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na82aab00
+push $Nca690f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1194,7 +1129,7 @@ push $Na82aab00
    xpos 158
    ypos 167
   }
-push $Na82a8f00
+push $Nca66b200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1287,7 +1222,7 @@ push $Na82a8f00
    xpos 192
    ypos -2
   }
-set Na824c800 [stack 0]
+set Nca612b00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1309,7 +1244,7 @@ set Na824c800 [stack 0]
    xpos 34
    ypos -6
   }
-set Na8226b00 [stack 0]
+set Nca610f00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1320,7 +1255,7 @@ set Na8226b00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na824c800
+push $Nca612b00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1349,7 +1284,7 @@ push $Na824c800
    xpos 158
    ypos 167
   }
-push $Na8226b00
+push $Nca610f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1565,7 +1500,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set Na83b1d00 [stack 0]
+set Nca5a0100 [stack 0]
  Blur {
   size {{"parent.hdri_lighting_blur * hdri_dot.format.height / 2"}}
   name Blur
@@ -1611,7 +1546,7 @@ set Na83b1d00 [stack 0]
   xpos -48
   ypos -1309
  }
-set Na838a400 [stack 0]
+set Nca77c800 [stack 0]
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -1625,7 +1560,7 @@ set Na838a400 [stack 0]
   xpos -232
   ypos -866
  }
-push $Na838a400
+push $Nca77c800
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -1637,7 +1572,7 @@ push $Na838a400
   xpos -113
   ypos -864
  }
-push $Na838a400
+push $Nca77c800
  Shuffle {
   in sdf_light
   name light
@@ -1674,7 +1609,7 @@ push $Na838a400
   xpos 641
   ypos -1318
  }
-set Na8355600 [stack 0]
+set Nca723900 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -1686,7 +1621,7 @@ set Na8355600 [stack 0]
   xpos 322
   ypos -863
  }
-push $Na8355600
+push $Nca723900
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -1698,7 +1633,7 @@ push $Na8355600
   xpos 780
   ypos -865
  }
-push $Na8355600
+push $Nca723900
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -1710,7 +1645,7 @@ push $Na8355600
   xpos 641
   ypos -864
  }
-push $Na8355600
+push $Nca723900
  Shuffle {
   in sdf_shape
   name shape
@@ -1722,7 +1657,7 @@ push $Na8355600
   xpos 473
   ypos -863
  }
-push $Na8355600
+push $Nca723900
  Shuffle {
   in sdf_colour
   name colour
@@ -1734,7 +1669,7 @@ push $Na8355600
   xpos 165
   ypos -864
  }
-push $Na8355600
+push $Nca723900
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -1746,7 +1681,7 @@ push $Na8355600
   xpos 1227
   ypos -857
  }
-push $Na8355600
+push $Nca723900
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -1758,7 +1693,7 @@ push $Na8355600
   xpos 1076
   ypos -854
  }
-push $Na8355600
+push $Nca723900
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -1770,7 +1705,7 @@ push $Na8355600
   xpos 934
   ypos -859
  }
-push $Na83b1d00
+push $Nca5a0100
  Constant {
   inputs 0
   name Constant1
@@ -1878,8 +1813,8 @@ push $Na83b1d00
   ypos -122
  }
 end_group
-set Na83dab00 [stack 0]
-push $Na83dab00
+set Nca5c4f00 [stack 0]
+push $Nca5c4f00
 HueShift {
  inputs 1+1
  color_saturation 0.82
@@ -1896,6 +1831,8 @@ Write {
  datatype "16 bit"
  checkHashOnRead false
  version 7
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  name Write3
  xpos 21008
  ypos 1630
@@ -1906,16 +1843,16 @@ Noise {
  gamma 0.775
  center {960 540}
  name Noise7
- xpos 21754
- ypos 1437
+ xpos 21650
+ ypos 1256
 }
 Grade {
  white 1.94
  gamma 2.26
  white_clamp true
  name Grade49
- xpos 21754
- ypos 1463
+ xpos 21650
+ ypos 1282
 }
 Crop {
  inputs 0
@@ -1923,8 +1860,8 @@ Crop {
  reformat true
  crop false
  name Crop6
- xpos 21657
- ypos 1383
+ xpos 21553
+ ypos 1202
 }
 Flare {
  position {{width/2} {height/2}}
@@ -1932,35 +1869,35 @@ Flare {
  ring_color 5
  inner_color 1
  name Flare2
- xpos 21657
- ypos 1439
+ xpos 21553
+ ypos 1258
 }
 Merge2 {
  inputs 2
  operation multiply
  name Merge31
- xpos 21657
- ypos 1463
+ xpos 21553
+ ypos 1282
 }
 Crop {
  box {0 0 100 {box.r}}
  reformat true
  name Crop8
- xpos 21657
- ypos 1523
+ xpos 21553
+ ypos 1342
 }
 Shuffle2 {
  fromInput1 {{0} B}
  fromInput2 {{0} B}
  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
  name Shuffle22
- xpos 21657
- ypos 1547
+ xpos 21553
+ ypos 1366
 }
 Dot {
  name Dot111
- xpos 21691
- ypos 1651
+ xpos 21587
+ ypos 1470
 }
 Read {
  inputs 0
@@ -1969,8 +1906,8 @@ Read {
  format "4096 3112 0 0 4096 3112 1 4K_Super_35(full-ap)"
  origset true
  name Read2
- xpos 21494
- ypos 1465
+ xpos 21390
+ ypos 1284
 }
 Read {
  inputs 0
@@ -1979,8 +1916,8 @@ Read {
  format "4096 3112 0 0 4096 3112 1 4K_Super_35(full-ap)"
  origset true
  name Read1
- xpos 21366
- ypos 1542
+ xpos 21262
+ ypos 1361
 }
 Shuffle2 {
  inputs 2
@@ -1990,26 +1927,28 @@ Shuffle2 {
  out2 depth
  mappings "5 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3 rgba.alpha 0 3 rgba.red 1 0 depth.Z 1 0"
  name Shuffle1
- xpos 21494
- ypos 1571
+ xpos 21390
+ ypos 1390
 }
 ZDefocus2 {
  inputs 2
- center 0.1043254137
- focal_point {1290 2322}
- dof 0.01600000076
+ math depth
+ center 0.2297707796
+ focal_point {2456 824}
+ dof 0.07800000161
  size 12
+ filter_type image
  legacy_resize_mode false
  show_legacy_resize_mode false
  name ZDefocus1
- xpos 21494
- ypos 1641
+ xpos 21390
+ ypos 1460
 }
 HueShift {
  color_saturation 0.53
  name HueShift1
- xpos 21495
- ypos 1703
+ xpos 21391
+ ypos 1522
 }
 Grade {
  blackpoint -0.001
@@ -2020,24 +1959,18 @@ Grade {
  add -0.008
  gamma 1.04
  name Grade1
- xpos 21495
- ypos 1758
+ xpos 21391
+ ypos 1577
 }
 Write {
  file /home/ob1/software/nuke/dev/raymarch/images/test_trap_bulb_done.png
  file_type png
  datatype "16 bit"
  checkHashOnRead false
- version 1
+ version 2
  name Write1
- xpos 21495
- ypos 1812
-}
-Viewer {
- frame_range 1-100
- name Viewer1
- xpos 21494
- ypos 1932
+ xpos 21391
+ ypos 1631
 }
 Read {
  inputs 0
@@ -2046,21 +1979,12 @@ Read {
  format "4096 3112 0 0 4096 3112 1 4K_Super_35(full-ap)"
  origset true
  name Read3
- xpos 21861
- ypos 1648
+ xpos 21490
+ ypos 1614
 }
-Reformat {
- format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
- name Reformat3
- xpos 21861
- ypos 1754
-}
-Write {
- file /home/ob1/software/nuke/dev/raymarch/images/test_trap_bulb_done_reduced.png
- file_type png
- checkHashOnRead false
- version 2
- name Write2
- xpos 21861
- ypos 1861
+Viewer {
+ frame_range 1-100
+ name Viewer1
+ xpos 21490
+ ypos 1807
 }
