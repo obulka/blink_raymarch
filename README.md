@@ -12,6 +12,32 @@ The surface properties include reflection, transmission, diffuse colour, roughne
 
 You can elongate, mirror, repeat, and hollow the object.
 
+The current available shapes are:
+- sphere
+- ellipsoid
+- cut sphere
+- hollow sphere
+- death star
+- solid angle
+- rectangular prism
+- rectangular prism frame
+- rhombus
+- triangular prism
+- cylinder
+- infinite cylinder
+- plane
+- capsule
+- cone
+- infinite cone
+- capped cone
+- rounded cone
+- torus
+- capped torus
+- link
+- hexagonal prism
+- octahedron
+- mandelbulb
+- mandelbox
 
 ### sdf_light
 
@@ -20,3 +46,7 @@ This gizmo allows you to light the scene with point, directional, or simple ambi
 ### ray_march
 
 This gizmo renders the scene using a ray marching algorithm, with support for hdri image based lighting.
+
+## References
+- https://iquilezles.org/articles/distfunctions/
+- http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-v-the-mandelbulb-different-de-approximations/
