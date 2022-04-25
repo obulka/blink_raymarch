@@ -25,7 +25,7 @@ The surface properties include:
 
 You can select the refractive index of the object as well as the medium the camera, and therefore the ray, starts in.
 
-You can elongate, mirror, repeat (both finitely and infinitely) with no extra memory cost, and hollow the objects as well.
+You can elongate, mirror, repeat finitely and infinitely with no extra memory cost, and hollow the objects.
 
 The current available shapes are:
 - sphere
