@@ -16,7 +16,14 @@ Simply clone/download this repo and add the top level directory to your Nuke pat
 
 This gizmo lets you choose the shape, dimensions, location, and surface properties of an object. It takes other sdf_primitives as inputs, and all nodes in the 'children' input will be positioned relative to it. The children will also interact with the shape according to your selection, allowing you to intersect, subtract, and blend the objects. You can also use any shape as a bounding volume of its children in order to improve performance.
 
-The surface properties include reflection, transmission, diffuse colour, roughness, and emission. You can select the refractive index of the object as well as the medium the camera, and therefore the ray, starts in.
+The surface properties include:
+- reflection
+- transmission
+- diffuse colour
+- roughness
+- emission
+
+You can select the refractive index of the object as well as the medium the camera, and therefore the ray, starts in.
 
 You can elongate, mirror, repeat (both finitely and infinitely) with no extra memory cost, and hollow the objects as well.
 
