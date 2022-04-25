@@ -1,6 +1,6 @@
 # BlinkScript Ray Marcher for Nuke
 
-This project contains three gizmos that allow you to ray march a wide variety of shapes utilizing the GPU.
+This project contains three gizmos that allow you to ray march a wide variety of shapes, including fractals, utilizing the GPU.
 
 ![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164989275-4eb4791c-df89-4332-981d-aac79b607762.png)
 
@@ -49,7 +49,13 @@ The current available shapes are:
 
 ### sdf_light
 
-This gizmo allows you to light the scene with point, directional, or simple ambient lighting. You can choose the colour, intensity, and falloff of the light. You can also soften the shadows with a slider.
+This gizmo allows you to light the scene with a few different light types, namely:
+- point
+- directional
+- ambient
+- ambient occlusion
+
+You can choose the colour, intensity, and falloff of the light. You can also soften the shadows with a slider.
 
 ### ray_march
 
