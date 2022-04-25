@@ -1,6 +1,6 @@
 # BlinkScript Ray Marcher for Nuke
 
-This project contains three gizmos that allow you to ray march a wide variety of shapes utilizing the GPU.
+This project contains three gizmos that allow you to ray march a wide variety of shapes, including fractals, utilizing the GPU.
 
 ![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164989275-4eb4791c-df89-4332-981d-aac79b607762.png)
 
@@ -16,9 +16,16 @@ Simply clone/download this repo and add the top level directory to your Nuke pat
 
 This gizmo lets you choose the shape, dimensions, location, and surface properties of an object. It takes other sdf_primitives as inputs, and all nodes in the 'children' input will be positioned relative to it. The children will also interact with the shape according to your selection, allowing you to intersect, subtract, and blend the objects. You can also use any shape as a bounding volume of its children in order to improve performance.
 
-The surface properties include reflection, transmission, diffuse colour, roughness, and emission. You can select the refractive index of the object as well as the medium the camera, and therefore the ray, starts in.
+The surface properties include:
+- reflection
+- transmission
+- diffuse colour
+- roughness
+- emission
 
-You can elongate, mirror, repeat (both finitely and infinitely) with no extra memory cost, and hollow the objects as well.
+You can select the refractive index of the object as well as the medium the camera, and therefore the ray, starts in.
+
+You can elongate, mirror, repeat finitely and infinitely with no extra memory cost, and hollow the objects.
 
 The current available shapes are:
 - sphere
@@ -49,7 +56,13 @@ The current available shapes are:
 
 ### sdf_light
 
-This gizmo allows you to light the scene with point, directional, or simple ambient lighting. You can choose the colour, intensity, and falloff of the light. You can also soften the shadows with a slider.
+This gizmo allows you to light the scene with a few different light types, namely:
+- point
+- directional
+- ambient
+- ambient occlusion
+
+You can choose the colour, intensity, and falloff of the light. You can also soften the shadows with a slider.
 
 ### ray_march
 
