@@ -408,6 +408,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 objectIsBound
                 && nextDistance > hitTolerance * (pixelFootprint + 1.0f)
             ) {
+                if (fabs(nextDistance) < fabs(distance))
+                {
+                    distance = nextDistance;
+
+                    colour = blendedColour;
+                    surface = blendedSurface;
+
+                    id = (float) stackLastIndex + 2.0f;
+                }
+
                 // This was tagged as a boundary object, skip its children
                 // since we arent close to hitting it
                 j += numChildren;
@@ -417,10 +427,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     parentStack[parentIndex][0] -= numChildren + 1;
                 }
 
+                numChildren = parentStack[stackLastIndex][0];
                 if (parentStackLength > 0)
                 {
                     // pop stack
-                    numChildren = parentStack[stackLastIndex][0];
                     nextDistance = parentStack[stackLastIndex][5];
                     blendedColour = float4(
                         parentStack[stackLastIndex][6],
@@ -436,10 +446,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     );
                     stackLastIndex--;
                     parentStackLength--;
-                }
-                else
-                {
-                    numChildren = 0;
                 }
             }
 
@@ -490,7 +496,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             colour = blendedColour;
                             surface = blendedSurface;
 
-                            id = (float) stackLastIndex + 1.0f;
+                            id = (float) stackLastIndex + 2.0f;
                         }
 
                         for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
@@ -510,7 +516,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     colour = blendedColour;
                     surface = blendedSurface;
 
-                    id = (float) stackLastIndex + 1.0f;
+                    id = (float) parentStackLength + 1.0f;
                 }
             }
             else
