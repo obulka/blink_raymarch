@@ -347,12 +347,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float id = 0.0f;
 
         // numChildren, transformedRay, mods, nextDistance, colour, refractive
-        // index, surface, blendStrength
+        // index, surface, blendStrength, objectId
         float parentStack[MAX_CHILD_DEPTH][1 + 3 + 1 + 1 + 3 + 1 +  4 + 1 + 1];
         int parentStackLength = 0;
 
         for (int j=0; j < objectTextureWidth; j++)
         {
+            // Read in the shape properties
             SampleType(positions) position = positions(j, 0);
             SampleType(rotations) rotation = rotations(j, 0);
             SampleType(dimensions) dimension = dimensions(j, 0);
@@ -373,6 +374,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float4 blendedColour = surfaceColour;
             float4 blendedSurface = surfaceProperty;
 
+            // Position relative to the parent if we have any
             float3 parentTransformedRay = rayOrigin;
             if (parentStackLength > 0)
             {
@@ -403,8 +405,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 blendedColour
             );
 
-            float potentialId = (float) j + 1.0f;
+            // Track which object was hit for the alpha channel
+            float objectId = (float) j + 1.0f;
 
+            // If this is a bounding volume, we can skip its children
+            // if we aren't close to or inside it
             if (
                 modifications & 4096
                 && nextDistance > hitTolerance * (pixelFootprint + 1.0f)
@@ -416,7 +421,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     colour = blendedColour;
                     surface = blendedSurface;
 
-                    id = potentialId;
+                    id = objectId;
                 }
 
                 // This was tagged as a boundary object, skip its children
@@ -428,13 +433,16 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     parentStack[parentIndex][0] -= numChildren + 1.0f;
                 }
 
+                // If there are no parents, or still children of the parent
+                // we do not need to compute anything further for this loop
                 if (parentStackLength <= 0 || parentStack[stackLastIndex][0] > 0.0f)
                 {
                     continue;
                 }
-                // pop stack
-                numChildren = parentStack[stackLastIndex][0];
 
+                // pop stack, we know that there should be no more children
+                // if we did not continue
+                numChildren = 0.0f;
                 nextDistance = parentStack[stackLastIndex][5];
                 blendedColour = float4(
                     parentStack[stackLastIndex][6],
@@ -448,7 +456,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     parentStack[stackLastIndex][12],
                     parentStack[stackLastIndex][13]
                 );
-                potentialId = parentStack[stackLastIndex][15];
+                objectId = parentStack[stackLastIndex][15];
                 stackLastIndex--;
                 parentStackLength--;
             }
@@ -462,6 +470,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     {
                         const int parentModifications = (int) parentStack[stackLastIndex][4];
 
+                        // Do not need to interact with bounding volumes,
+                        // however, they are in the stack for relative positioning
+                        // if they weren't then we would have to manually move
+                        // the bounding box to follow the children
                         if (!(parentModifications & 4096))
                         {
                             const float parentNextDistance = parentStack[stackLastIndex][5];
@@ -482,7 +494,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                             if (nextDistance > parentNextDistance)
                             {
-                                potentialId = parentPotentialId;
+                                objectId = parentPotentialId;
                             }
 
                             // Compute interaction between parent and this child
@@ -506,7 +518,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             colour = blendedColour;
                             surface = blendedSurface;
 
-                            id = potentialId;
+                            id = objectId;
                         }
 
                         for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
@@ -526,7 +538,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     colour = blendedColour;
                     surface = blendedSurface;
 
-                    id = potentialId;
+                    id = objectId;
                 }
             }
             else
@@ -549,7 +561,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 parentStack[parentStackLength][12] = blendedSurface.z;
                 parentStack[parentStackLength][13] = blendedSurface.w;
                 parentStack[parentStackLength][14] = blendStrength;
-                parentStack[parentStackLength][15] = potentialId;
+                parentStack[parentStackLength][15] = objectId;
                 parentStackLength++;
             }
         }
