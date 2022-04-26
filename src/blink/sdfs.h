@@ -1111,7 +1111,11 @@ float distanceToObject(
     }
     if (shapeType == 5)
     {
-        return distanceToSolidAngle(position, dimensions.x, dimensions.y);
+        return distanceToSolidAngle(
+            position,
+            dimensions.x,
+            degreesToRadians(dimensions.y)
+        );
     }
     if (shapeType == 6)
     {
@@ -1172,11 +1176,15 @@ float distanceToObject(
     }
     if (shapeType == 14)
     {
-        return distanceToCone(position, dimensions.x, dimensions.y);
+        return distanceToCone(
+            position,
+            degreesToRadians(dimensions.x),
+            dimensions.y
+        );
     }
     if (shapeType == 15)
     {
-        return distanceToInfiniteCone(position, dimensions.x);
+        return distanceToInfiniteCone(position, degreesToRadians(dimensions.x));
     }
     if (shapeType == 16)
     {
@@ -1206,7 +1214,7 @@ float distanceToObject(
             position,
             dimensions.x,
             dimensions.y,
-            dimensions.z
+            degreesToRadians(dimensions.z)
         );
     }
     if (shapeType == 20)

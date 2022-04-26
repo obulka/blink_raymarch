@@ -16,7 +16,6 @@ nuke.toNode("sdf_primitive").knob("onCreate").setValue(
 )
 """
 from collections import OrderedDict
-from math import pi
 
 from .knob_manager import KnobChangedCallbacks, SDFKnobManager
 
@@ -165,11 +164,11 @@ class SDFPrimitive(SDFKnobManager):
             (
                 "angle",
                 {
-                    "default": 1.,
-                    "range": (0., pi),
+                    "default": 30.,
+                    "range": (0., 180.),
                     "tooltip": (
                         "The angle between the edge of the solid angle and the "
-                        "y-axis on [0-PI] measured between the y-axis and wall of the "
+                        "y-axis on [0-180] measured between the y-axis and wall of the "
                         "solid angle."
                     ),
                 },
@@ -377,8 +376,8 @@ class SDFPrimitive(SDFKnobManager):
             (
                 "angle",
                 {
-                    "default": .5,
-                    "range": (0., pi / 2.),
+                    "default": 30.,
+                    "range": (0., 90.),
                     "tooltip": (
                         "The angle between the tip and base of the cone [0-PI/2) "
                         "measured between the y-axis and wall of the cone."
@@ -398,10 +397,10 @@ class SDFPrimitive(SDFKnobManager):
             (
                 "angle",
                 {
-                    "default": .5,
-                    "range": (0., pi / 2.),
+                    "default": 30.,
+                    "range": (0., 90.),
                     "tooltip": (
-                        "The angle between the tip and base of the cone [0-PI/2) "
+                        "The angle between the tip and base of the cone [0-90) "
                         "measured between the y-axis and wall of the cone."
                     ),
                 },
@@ -500,11 +499,11 @@ class SDFPrimitive(SDFKnobManager):
             (
                 "cap angle",
                 {
-                    "default": 1.,
-                    "range": (0., pi),
+                    "default": 30.,
+                    "range": (0., 180.),
                     "tooltip": (
                         "The angle (xy-plane, symmetric about y-axis) to cap at, in "
-                        "the range (0-PI)."
+                        "the range (0-180.)."
                     ),
                 },
             ),

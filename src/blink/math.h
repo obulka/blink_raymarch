@@ -9,6 +9,42 @@
 //
 
 
+inline float degreesToRadians(const float angle)
+{
+    return angle * PI / 180.0f;
+}
+
+
+inline float radiansToDegrees(const float angle)
+{
+    return angle * 180.0f / PI;
+}
+
+
+inline float2 degreesToRadians(const float2 &angle)
+{
+    return angle * PI / 180.0f;
+}
+
+
+inline float2 radiansToDegrees(const float2 &angle)
+{
+    return angle * 180.0f / PI;
+}
+
+
+inline float3 degreesToRadians(const float3 &angle)
+{
+    return angle * PI / 180.0f;
+}
+
+
+inline float3 radiansToDegrees(const float3 &angle)
+{
+    return angle * 180.0f / PI;
+}
+
+
 inline float fract(float value)
 {
     return value - floor(value);
