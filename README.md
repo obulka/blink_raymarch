@@ -68,7 +68,7 @@ You can choose the colour, intensity, and falloff of the light. You can also sof
 
 This gizmo renders the scene using a ray marching algorithm, with support for hdri image based lighting. You can inptut a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
 
-The AOV output options are:
+The AOV options are:
 - scene
 - normal
 - position
