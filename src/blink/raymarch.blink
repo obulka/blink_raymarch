@@ -366,7 +366,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const float scale = position.w;
 
             const float blendStrength = shapeProperty.w;
-            int numChildren = (int) shapeProperty.z;
+            float numChildren = shapeProperty.z;
 
             int stackLastIndex = parentStackLength - 1;
 
@@ -405,9 +405,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
             float potentialId = (float) j + 1.0f;
 
-            bool objectIsBound = modifications & 4096;
             if (
-                objectIsBound
+                modifications & 4096
                 && nextDistance > hitTolerance * (pixelFootprint + 1.0f)
             ) {
                 if (fabs(nextDistance) < fabs(distance))
@@ -426,33 +425,35 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                 for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
                 {
-                    parentStack[parentIndex][0] -= numChildren + 1;
+                    parentStack[parentIndex][0] -= numChildren + 1.0f;
                 }
 
-                numChildren = parentStack[stackLastIndex][0];
-                if (parentStackLength > 0)
+                if (parentStackLength <= 0 || parentStack[stackLastIndex][0] > 0.0f)
                 {
-                    // pop stack
-                    nextDistance = parentStack[stackLastIndex][5];
-                    blendedColour = float4(
-                        parentStack[stackLastIndex][6],
-                        parentStack[stackLastIndex][7],
-                        parentStack[stackLastIndex][8],
-                        parentStack[stackLastIndex][9]
-                    );
-                    blendedSurface = float4(
-                        parentStack[stackLastIndex][10],
-                        parentStack[stackLastIndex][11],
-                        parentStack[stackLastIndex][12],
-                        parentStack[stackLastIndex][13]
-                    );
-                    potentialId = parentStack[stackLastIndex][15];
-                    stackLastIndex--;
-                    parentStackLength--;
+                    continue;
                 }
+                // pop stack
+                numChildren = parentStack[stackLastIndex][0];
+
+                nextDistance = parentStack[stackLastIndex][5];
+                blendedColour = float4(
+                    parentStack[stackLastIndex][6],
+                    parentStack[stackLastIndex][7],
+                    parentStack[stackLastIndex][8],
+                    parentStack[stackLastIndex][9]
+                );
+                blendedSurface = float4(
+                    parentStack[stackLastIndex][10],
+                    parentStack[stackLastIndex][11],
+                    parentStack[stackLastIndex][12],
+                    parentStack[stackLastIndex][13]
+                );
+                potentialId = parentStack[stackLastIndex][15];
+                stackLastIndex--;
+                parentStackLength--;
             }
 
-            if (numChildren <= 0)
+            if (numChildren <= 0.0f)
             {
                 // No Children left, compute interactions with parent
                 if (parentStackLength > 0)
@@ -514,7 +515,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         }
                         numChildren = parentStack[stackLastIndex][0];
                     }
-                    while (numChildren <= 0 && --stackLastIndex >= 0);
+                    while (numChildren <= 0.0f && --stackLastIndex >= 0);
 
                     parentStackLength = stackLastIndex + 1;
                 }
