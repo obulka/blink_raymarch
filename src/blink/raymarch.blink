@@ -336,6 +336,13 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
     /**
      * Compute the minimum distance to an object in the scene
+     * 
+     * @arg rayOrigin: The origin position of the ray.
+     * @arg pixelFootprint: A value proportional to the amount of world
+     *     space that fills a pixel, like the distance from camera.
+     * @arg colour: Location to store the colour of the hit object.
+     * @arg surface: Location to store the surface properties of the hit
+     *     object.
      */
     float2 getMinDistanceToObjectInScene(
             const float3 &rayOrigin,
@@ -414,6 +421,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 modifications & 4096
                 && nextDistance > hitTolerance * (pixelFootprint + 1.0f)
             ) {
+                // Update the min distance if this bounding volume is closest.
+                // Otherwise we could step through it, or if every object in
+                // the scene is inside it, we would not step forward at all
                 if (fabs(nextDistance) < fabs(distance))
                 {
                     distance = nextDistance;
@@ -466,6 +476,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 // No Children left, compute interactions with parent
                 if (parentStackLength > 0)
                 {
+                    // Process this object, along with all parents that do not
+                    // have any more children
                     do
                     {
                         const int parentModifications = (int) parentStack[stackLastIndex][4];
@@ -521,16 +533,22 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             id = objectId;
                         }
 
+                        // Decrement the number of children each parent has
                         for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
                         {
                             parentStack[parentIndex][0]--;
                         }
+
+                        // Get the number of children still remaining for the parent
+                        // If there are still children, we can break out of this loop
+                        // to process the rest of them before the parent itself
                         numChildren = parentStack[stackLastIndex][0];
                     }
                     while (numChildren <= 0.0f && --stackLastIndex >= 0);
 
                     parentStackLength = stackLastIndex + 1;
                 }
+                // No parents to interact with, simply check the distance
                 else if (fabs(nextDistance) < fabs(distance))
                 {
                     distance = nextDistance;
@@ -544,7 +562,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             else
             {
                 // Node has Children, push it to the stack for later
-                // processing when we have its children
+                // processing when we have all its children
                 // parentStack.push()
                 parentStack[parentStackLength][0] = numChildren;
                 parentStack[parentStackLength][1] = transformedRay.x;
