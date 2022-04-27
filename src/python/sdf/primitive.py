@@ -789,9 +789,7 @@ class SDFPrimitive(SDFKnobManager):
 
     @_knob_changed_callbacks.register(is_bound_knob_name)
     def _is_bound_changed(self):
-        """Enable/disable the blend strength knob depending on the blend
-        type.
-        """
+        """Enable/disable the blend strength knob and blend type."""
         not_bound = not self._knob.value()
         blend_type_knob = self._node.knob(self.blend_type_knob_name)
         blend_type_knob.setEnabled(not_bound)

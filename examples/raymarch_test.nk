@@ -1,5 +1,5 @@
 #! /usr/local/Nuke13.0v2/libnuke-13.0.2.so -nx
-#write_info Write3 file:"/home/ob1/software/nuke/dev/raymarch/images/test_trap_bulb_depth.png" format:"640 480 1" chans:":rgba.red:" framerange:"1 63" fps:"0" colorspace:"default (sRGB)" datatype:"16 bit" transfer:"unknown" views:"main" colorManagement:"Nuke"
+#write_info Write3 file:"/home/ob1/software/nuke/dev/raymarch/images/snowman/snowman.%04d.exr" format:"640 480 1" chans:":rgba.red:rgba.green:rgba.blue:rgba.alpha:" framerange:"1 63" fps:"0" colorspace:"default (linear)" datatype:"16 bit half" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 13.0 v2
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
@@ -69,45 +69,12 @@ Read {
 Read {
  inputs 0
  file_type exr
- file /home/ob1/Downloads/winter_lake_01_4k.exr
+ file /home/ob1/software/nuke/dev/raymarch/images/studio_small_02_4k.exr
  format "4096 2048 0 0 4096 2048 1 4K_LatLong"
  origset true
- name Read1
- xpos 550
- ypos 8
-}
-Reformat {
- format "2048 1024 0 0 2048 1024 1 2K_LatLong"
- scale 0.25
- resize fill
- center false
- name Reformat2
- xpos 550
- ypos 129
-}
-Dot {
- name Dot4
- xpos 584
- ypos 309
-}
-Axis2 {
- inputs 0
- rotate {-20 0 0}
- name Axis1
- xpos 255
- ypos 3
-}
-Camera3 {
- translate {0 1 10}
- focal 58.5
- name Camera1
- xpos 255
- ypos 110
-}
-Dot {
- name Dot5
- xpos 278
- ypos 316
+ name Read6
+ xpos 912
+ ypos 14
 }
 Group {
  inputs 0
@@ -231,7 +198,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set N3580d600 [stack 0]
+set N8e069600 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -253,7 +220,7 @@ set N3580d600 [stack 0]
    xpos 34
    ypos -6
   }
-set N357eb900 [stack 0]
+set N8e037900 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -264,7 +231,7 @@ set N357eb900 [stack 0]
    xpos -98
    ypos 336
   }
-push $N3580d600
+push $N8e069600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -293,7 +260,7 @@ push $N3580d600
    xpos 158
    ypos 167
   }
-push $N357eb900
+push $N8e037900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -369,6 +336,7 @@ Group {
  label point
  xpos 85
  ypos 84
+ disable true
  addUserKnob {20 User l "SDF LIght"}
  addUserKnob {4 type t "The type of light." M {ambient directional point "ambient occlusion"}}
  type point
@@ -479,7 +447,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N3576cf00 [stack 0]
+set N8dfc4f00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -501,7 +469,7 @@ set N3576cf00 [stack 0]
    xpos 34
    ypos -6
   }
-set N3554b200 [stack 0]
+set N8dfab200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -512,7 +480,7 @@ set N3554b200 [stack 0]
    xpos -98
    ypos 336
   }
-push $N3576cf00
+push $N8dfc4f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -541,7 +509,7 @@ push $N3576cf00
    xpos 158
    ypos 167
   }
-push $N3554b200
+push $N8dfab200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -609,7 +577,64 @@ push $N3554b200
   ypos 562
  }
 end_group
+Read {
+ inputs 0
+ file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/snowman/snowman_test.####.exr
+ format "640 480 0 0 640 480 1 PC_Video"
+ last 63
+ origlast 63
+ origset true
+ name Read2
+ xpos 793
+ ypos 314
+}
+Read {
+ inputs 0
+ file_type exr
+ file /home/ob1/Downloads/winter_lake_01_4k.exr
+ format "4096 2048 0 0 4096 2048 1 4K_LatLong"
+ origset true
+ name Read1
+ xpos 550
+ ypos 8
+}
+Reformat {
+ format "2048 1024 0 0 2048 1024 1 2K_LatLong"
+ scale 0.25
+ resize fill
+ center false
+ name Reformat2
+ xpos 550
+ ypos 129
+}
+Dot {
+ name Dot4
+ xpos 584
+ ypos 309
+}
+Axis2 {
+ inputs 0
+ rotate {-20 0 0}
+ name Axis1
+ xpos 255
+ ypos 3
+}
+Camera3 {
+ translate {0 1 10}
+ rotate {-2.9 0 0}
+ focal 58.5
+ name Camera1
+ xpos 255
+ ypos 110
+}
+Dot {
+ name Dot5
+ xpos 278
+ ypos 316
+}
 Group {
+ inputs 0
  name sdf_light4
  onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
  knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
@@ -727,7 +752,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N451e1600 [stack 0]
+set Nf40d0f00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -749,7 +774,7 @@ set N451e1600 [stack 0]
    xpos 34
    ypos -6
   }
-set N451af900 [stack 0]
+set Nf40a7200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -760,7 +785,7 @@ set N451af900 [stack 0]
    xpos -98
    ypos 336
   }
-push $N451e1600
+push $Nf40d0f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -789,7 +814,7 @@ push $N451e1600
    xpos 158
    ypos 167
   }
-push $N451af900
+push $Nf40a7200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -973,7 +998,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N45140f00 [stack 0]
+set Nf4040800 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -995,7 +1020,7 @@ set N45140f00 [stack 0]
    xpos 34
    ypos -6
   }
-set N4511b200 [stack 0]
+set Nac7beb00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1006,7 +1031,7 @@ set N4511b200 [stack 0]
    xpos -98
    ypos 336
   }
-push $N45140f00
+push $Nf4040800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1035,7 +1060,7 @@ push $N45140f00
    xpos 158
    ypos 167
   }
-push $N4511b200
+push $Nac7beb00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1140,6 +1165,7 @@ Group {
  colour 0.1
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.025
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
@@ -1356,7 +1382,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N26d64f00 [stack 0]
+set Nac6fc100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1378,7 +1404,7 @@ set N26d64f00 [stack 0]
    xpos 34
    ypos -6
   }
-set N26d3f200 [stack 0]
+set Nd810a400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1389,7 +1415,7 @@ set N26d3f200 [stack 0]
    xpos -98
    ypos 336
   }
-push $N26d64f00
+push $Nac6fc100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1418,7 +1444,7 @@ push $N26d64f00
    xpos 158
    ypos 167
   }
-push $N26d3f200
+push $Nd810a400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1511,7 +1537,7 @@ push $N26d3f200
    xpos 192
    ypos -2
   }
-set N26ce6b00 [stack 0]
+set Nd80b9d00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1533,7 +1559,7 @@ set N26ce6b00 [stack 0]
    xpos 34
    ypos -6
   }
-set N26ce4f00 [stack 0]
+set Nd80b8100 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1544,7 +1570,7 @@ set N26ce4f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N26ce6b00
+push $Nd80b9d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1573,7 +1599,7 @@ push $N26ce6b00
    xpos 158
    ypos 167
   }
-push $N26ce4f00
+push $Nd80b8100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1672,6 +1698,7 @@ Group {
  colour {0 0 0}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.1
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
@@ -1880,7 +1907,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N8c10eb00 [stack 0]
+set Nc41a1d00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1902,7 +1929,7 @@ set N8c10eb00 [stack 0]
    xpos 34
    ypos -6
   }
-set N8c10cf00 [stack 0]
+set Nc41a0100 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1913,7 +1940,7 @@ set N8c10cf00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8c10eb00
+push $Nc41a1d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1942,7 +1969,7 @@ push $N8c10eb00
    xpos 158
    ypos 167
   }
-push $N8c10cf00
+push $Nc41a0100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2035,7 +2062,7 @@ push $N8c10cf00
    xpos 192
    ypos -2
   }
-set N8c0b8800 [stack 0]
+set Nc4127900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2057,7 +2084,7 @@ set N8c0b8800 [stack 0]
    xpos 34
    ypos -6
   }
-set N602b2b00 [stack 0]
+set Nc4125d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2068,7 +2095,7 @@ set N602b2b00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8c0b8800
+push $Nc4127900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2097,7 +2124,7 @@ push $N8c0b8800
    xpos 158
    ypos 167
   }
-push $N602b2b00
+push $Nc4125d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2195,6 +2222,7 @@ Group {
  colour {0 0 0}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.1
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
@@ -2403,7 +2431,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N601fc800 [stack 0]
+set N9ee9f900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2425,7 +2453,7 @@ set N601fc800 [stack 0]
    xpos 34
    ypos -6
   }
-set N603ceb00 [stack 0]
+set N9ee9dd00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2436,7 +2464,7 @@ set N603ceb00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N601fc800
+push $N9ee9f900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2465,7 +2493,7 @@ push $N601fc800
    xpos 158
    ypos 167
   }
-push $N603ceb00
+push $N9ee9dd00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2558,7 +2586,7 @@ push $N603ceb00
    xpos 192
    ypos -2
   }
-set N60376400 [stack 0]
+set N9ec49600 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2580,7 +2608,7 @@ set N60376400 [stack 0]
    xpos 34
    ypos -6
   }
-set N60374800 [stack 0]
+set N9ec2b900 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2591,7 +2619,7 @@ set N60374800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N60376400
+push $N9ec49600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2620,7 +2648,7 @@ push $N60376400
    xpos 158
    ypos 167
   }
-push $N60374800
+push $N9ec2b900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2720,6 +2748,7 @@ Group {
  colour 0.1
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.025
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
@@ -2929,7 +2958,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N740de400 [stack 0]
+set N9eb65600 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2951,7 +2980,7 @@ set N740de400 [stack 0]
    xpos 34
    ypos -6
   }
-set N740dc800 [stack 0]
+set N9ed37900 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2962,7 +2991,7 @@ set N740dc800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N740de400
+push $N9eb65600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2991,7 +3020,7 @@ push $N740de400
    xpos 158
    ypos 167
   }
-push $N740dc800
+push $N9ed37900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3084,7 +3113,7 @@ push $N740dc800
    xpos 192
    ypos -2
   }
-set N74080100 [stack 0]
+set N9ecdf200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3106,7 +3135,7 @@ set N74080100 [stack 0]
    xpos 34
    ypos -6
   }
-set N7405a400 [stack 0]
+set N9ecdd600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3117,7 +3146,7 @@ set N7405a400 [stack 0]
    xpos -98
    ypos 336
   }
-push $N74080100
+push $N9ecdf200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3146,7 +3175,7 @@ push $N74080100
    xpos 158
    ypos 167
   }
-push $N7405a400
+push $N9ecdd600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3454,7 +3483,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N60154100 [stack 0]
+set N9edf7200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3476,7 +3505,7 @@ set N60154100 [stack 0]
    xpos 34
    ypos -6
   }
-set N60122400 [stack 0]
+set N9edf5600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3487,7 +3516,7 @@ set N60122400 [stack 0]
    xpos -98
    ypos 336
   }
-push $N60154100
+push $N9edf7200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3516,7 +3545,7 @@ push $N60154100
    xpos 158
    ypos 167
   }
-push $N60122400
+push $N9edf5600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3609,7 +3638,7 @@ push $N60122400
    xpos 192
    ypos -2
   }
-set N44fd5d00 [stack 0]
+set N9ed9cf00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3631,7 +3660,7 @@ set N44fd5d00 [stack 0]
    xpos 34
    ypos -6
   }
-set N44fd4100 [stack 0]
+set N9ed77200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3642,7 +3671,7 @@ set N44fd4100 [stack 0]
    xpos -98
    ypos 336
   }
-push $N44fd5d00
+push $N9ed9cf00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3671,7 +3700,7 @@ push $N44fd5d00
    xpos 158
    ypos 167
   }
-push $N44fd4100
+push $N9ed77200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3771,10 +3800,12 @@ Group {
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.01
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ roughness 0.1
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
@@ -3980,7 +4011,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N44f01d00 [stack 0]
+set N9eac0f00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4002,7 +4033,7 @@ set N44f01d00 [stack 0]
    xpos 34
    ypos -6
   }
-set N44f00100 [stack 0]
+set N9ea9b200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4013,7 +4044,7 @@ set N44f00100 [stack 0]
    xpos -98
    ypos 336
   }
-push $N44f01d00
+push $N9eac0f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4042,7 +4073,7 @@ push $N44f01d00
    xpos 158
    ypos 167
   }
-push $N44f00100
+push $N9ea9b200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4135,7 +4166,7 @@ push $N44f00100
    xpos 192
    ypos -2
   }
-set N45077900 [stack 0]
+set N9e83ab00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4157,7 +4188,7 @@ set N45077900 [stack 0]
    xpos 34
    ypos -6
   }
-set N45075d00 [stack 0]
+set N9e838f00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4168,7 +4199,7 @@ set N45075d00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N45077900
+push $N9e83ab00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4197,7 +4228,7 @@ push $N45077900
    xpos 158
    ypos 167
   }
-push $N45075d00
+push $N9e838f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4302,6 +4333,7 @@ Group {
  refractive_index 1
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
+ emission {{curve x1 0 x63 1}}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
  addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
@@ -4505,7 +4537,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N44170800 [stack 0]
+set N9e946b00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4527,7 +4559,7 @@ set N44170800 [stack 0]
    xpos 34
    ypos -6
   }
-set N4414eb00 [stack 0]
+set N9e944f00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4538,7 +4570,7 @@ set N4414eb00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N44170800
+push $N9e946b00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4567,7 +4599,7 @@ push $N44170800
    xpos 158
    ypos 167
   }
-push $N4414eb00
+push $N9e944f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4660,7 +4692,7 @@ push $N4414eb00
    xpos 192
    ypos -2
   }
-set N374a2400 [stack 0]
+set N9e8f8800 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4682,7 +4714,7 @@ set N374a2400 [stack 0]
    xpos 34
    ypos -6
   }
-set N374a0800 [stack 0]
+set N9e8dab00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4693,7 +4725,7 @@ set N374a0800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N374a2400
+push $N9e8f8800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4722,7 +4754,7 @@ push $N374a2400
    xpos 158
    ypos 167
   }
-push $N374a0800
+push $N9e8dab00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4837,7 +4869,7 @@ Group {
  elongation {0.1 0 0}
  addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
  addUserKnob {7 uniform_scale l "uniform scale" t "The scale of the object in its local coordinate space, along all axes." R 0 10}
- uniform_scale 0.1
+ uniform_scale 0.12
  addUserKnob {26 div1 l "" +STARTLINE}
  addUserKnob {4 repetition t "Repeat objects in the scene with no extra memory consumption. Note that if the repeated objects overlap some strange things can occur." -STARTLINE M {none finite infinite "" ""}}
  addUserKnob {13 repetition_params l spacing t "The spacing along each positive axis to repeat the objects." +HIDDEN}
@@ -5033,7 +5065,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N375b2400 [stack 0]
+set N9ea14800 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5055,7 +5087,7 @@ set N375b2400 [stack 0]
    xpos 34
    ypos -6
   }
-set N375b0800 [stack 0]
+set N9e9eab00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5066,7 +5098,7 @@ set N375b0800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N375b2400
+push $N9ea14800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5095,7 +5127,7 @@ push $N375b2400
    xpos 158
    ypos 167
   }
-push $N375b0800
+push $N9e9eab00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5188,7 +5220,7 @@ push $N375b0800
    xpos 192
    ypos -2
   }
-set N37564100 [stack 0]
+set N9e98e400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5210,7 +5242,7 @@ set N37564100 [stack 0]
    xpos 34
    ypos -6
   }
-set N3753e400 [stack 0]
+set N9e98c800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5221,7 +5253,7 @@ set N3753e400 [stack 0]
    xpos -98
    ypos 336
   }
-push $N37564100
+push $N9e98e400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5250,7 +5282,7 @@ push $N37564100
    xpos 158
    ypos 167
   }
-push $N3753e400
+push $N9e98c800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5351,10 +5383,12 @@ Group {
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.01
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ roughness 0.1
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
@@ -5562,7 +5596,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N440c8100 [stack 0]
+set N9e6a6400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5584,7 +5618,7 @@ set N440c8100 [stack 0]
    xpos 34
    ypos -6
   }
-set N4409a400 [stack 0]
+set N9e6a4800 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5595,7 +5629,7 @@ set N4409a400 [stack 0]
    xpos -98
    ypos 336
   }
-push $N440c8100
+push $N9e6a6400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5624,7 +5658,7 @@ push $N440c8100
    xpos 158
    ypos 167
   }
-push $N4409a400
+push $N9e6a4800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5717,7 +5751,7 @@ push $N4409a400
    xpos 192
    ypos -2
   }
-set N44049d00 [stack 0]
+set N9e658100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5739,7 +5773,7 @@ set N44049d00 [stack 0]
    xpos 34
    ypos -6
   }
-set N44048100 [stack 0]
+set N9e42e400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5750,7 +5784,7 @@ set N44048100 [stack 0]
    xpos -98
    ypos 336
   }
-push $N44049d00
+push $N9e658100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5779,7 +5813,7 @@ push $N44049d00
    xpos 158
    ypos 167
   }
-push $N44048100
+push $N9e42e400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5878,10 +5912,12 @@ Group {
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.01
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ roughness 0.1
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
@@ -6088,7 +6124,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N37311d00 [stack 0]
+set N9e36c100 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6110,7 +6146,7 @@ set N37311d00 [stack 0]
    xpos 34
    ypos -6
   }
-set N37310100 [stack 0]
+set N9e53a400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6121,7 +6157,7 @@ set N37310100 [stack 0]
    xpos -98
    ypos 336
   }
-push $N37311d00
+push $N9e36c100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6150,7 +6186,7 @@ push $N37311d00
    xpos 158
    ypos 167
   }
-push $N37310100
+push $N9e53a400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6243,7 +6279,7 @@ push $N37310100
    xpos 192
    ypos -2
   }
-set N37097900 [stack 0]
+set N9e4f1d00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6265,7 +6301,7 @@ set N37097900 [stack 0]
    xpos 34
    ypos -6
   }
-set N37095d00 [stack 0]
+set N9e4f0100 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6276,7 +6312,7 @@ set N37095d00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N37097900
+push $N9e4f1d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6305,7 +6341,7 @@ push $N37097900
    xpos 158
    ypos 167
   }
-push $N37095d00
+push $N9e4f0100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6616,7 +6652,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N371af900 [stack 0]
+set N9e5fdd00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6638,7 +6674,7 @@ set N371af900 [stack 0]
    xpos 34
    ypos -6
   }
-set N371add00 [stack 0]
+set N9e5fc100 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6649,7 +6685,7 @@ set N371add00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N371af900
+push $N9e5fdd00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6678,7 +6714,7 @@ push $N371af900
    xpos 158
    ypos 167
   }
-push $N371add00
+push $N9e5fc100
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6771,7 +6807,7 @@ push $N371add00
    xpos 192
    ypos -2
   }
-set N3715d600 [stack 0]
+set N9e58b900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6793,7 +6829,7 @@ set N3715d600 [stack 0]
    xpos 34
    ypos -6
   }
-set N3713b900 [stack 0]
+set N9e589d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6804,7 +6840,7 @@ set N3713b900 [stack 0]
    xpos -98
    ypos 336
   }
-push $N3715d600
+push $N9e58b900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6833,7 +6869,7 @@ push $N3715d600
    xpos 158
    ypos 167
   }
-push $N3713b900
+push $N9e589d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6933,10 +6969,12 @@ Group {
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.01
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ roughness 0.1
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
@@ -7142,7 +7180,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N37271600 [stack 0]
+set N9e29b900 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7164,7 +7202,7 @@ set N37271600 [stack 0]
    xpos 34
    ypos -6
   }
-set N3724f900 [stack 0]
+set N9e299d00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7175,7 +7213,7 @@ set N3724f900 [stack 0]
    xpos -98
    ypos 336
   }
-push $N37271600
+push $N9e29b900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7204,7 +7242,7 @@ push $N37271600
    xpos 158
    ypos 167
   }
-push $N3724f900
+push $N9e299d00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7297,7 +7335,7 @@ push $N3724f900
    xpos 192
    ypos -2
   }
-set N371eb200 [stack 0]
+set N9e03d600 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7319,7 +7357,7 @@ set N371eb200 [stack 0]
    xpos 34
    ypos -6
   }
-set N371e9600 [stack 0]
+set N9e023900 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7330,7 +7368,7 @@ set N371e9600 [stack 0]
    xpos -98
    ypos 336
   }
-push $N371eb200
+push $N9e03d600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7359,7 +7397,7 @@ push $N371eb200
    xpos 158
    ypos 167
   }
-push $N371e9600
+push $N9e023900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7459,10 +7497,12 @@ Group {
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.01
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ roughness 0.1
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
@@ -7668,7 +7708,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N36f03200 [stack 0]
+set N9df55600 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7690,7 +7730,7 @@ set N36f03200 [stack 0]
    xpos 34
    ypos -6
   }
-set N36f01600 [stack 0]
+set N9e12f900 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7701,7 +7741,7 @@ set N36f01600 [stack 0]
    xpos -98
    ypos 336
   }
-push $N36f03200
+push $N9df55600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7730,7 +7770,7 @@ push $N36f03200
    xpos 158
    ypos 167
   }
-push $N36f01600
+push $N9e12f900
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7823,7 +7863,7 @@ push $N36f01600
    xpos 192
    ypos -2
   }
-set N36ca8f00 [stack 0]
+set N9e0db200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7845,7 +7885,7 @@ set N36ca8f00 [stack 0]
    xpos 34
    ypos -6
   }
-set N36c8b200 [stack 0]
+set N9e0d9600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7856,7 +7896,7 @@ set N36c8b200 [stack 0]
    xpos -98
    ypos 336
   }
-push $N36ca8f00
+push $N9e0db200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7885,7 +7925,7 @@ push $N36ca8f00
    xpos 158
    ypos 167
   }
-push $N36c8b200
+push $N9e0d9600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7985,10 +8025,12 @@ Group {
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ reflection 0.1
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ roughness 0.01
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
@@ -8194,7 +8236,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N36bc8f00 [stack 0]
+set N9e1e7200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8216,7 +8258,7 @@ set N36bc8f00 [stack 0]
    xpos 34
    ypos -6
   }
-set N36d93200 [stack 0]
+set N9e1e5600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8227,7 +8269,7 @@ set N36d93200 [stack 0]
    xpos -98
    ypos 336
   }
-push $N36bc8f00
+push $N9e1e7200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8256,7 +8298,7 @@ push $N36bc8f00
    xpos 158
    ypos 167
   }
-push $N36d93200
+push $N9e1e5600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8349,7 +8391,7 @@ push $N36d93200
    xpos 192
    ypos -2
   }
-set N36d46b00 [stack 0]
+set N9e198f00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8371,7 +8413,7 @@ set N36d46b00 [stack 0]
    xpos 34
    ypos -6
   }
-set N36d44f00 [stack 0]
+set N9e16f200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8382,7 +8424,7 @@ set N36d44f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N36d46b00
+push $N9e198f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8411,7 +8453,7 @@ push $N36d46b00
    xpos 158
    ypos 167
   }
-push $N36d44f00
+push $N9e16f200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8485,17 +8527,18 @@ Dot {
  ypos 312
 }
 Group {
- inputs 3
+ inputs 4
  name ray_march1
  knobChanged "__import__('sdf.ray_march', fromlist='RayMarch').RayMarch().handle_knob_changed()"
  xpos 169
  ypos 420
  addUserKnob {20 User l "Ray March"}
  addUserKnob {3 pixel_subdivisions l "pixel subdivisions" t "Subdivide the pixel and cast a ray for each subdivision, resulting in 2^subdivisions rays being sent from the camera."}
+ pixel_subdivisions 1
  addUserKnob {3 max_rays_per_subpixel l "max rays per subpixel" t "For each subpixel the number of spawned rays will be capped at this value. This excludes shadow rays."}
  max_rays_per_subpixel 10
  addUserKnob {3 max_bounces l "max bounces" t "Limits the number of times the rays can intersect an object per subpixel."}
- max_bounces 3
+ max_bounces 5
  addUserKnob {7 ray_distance l "max ray distance" t "Each ray, once spawned is only allowed to travel this distance before it is culled." R 10 10000}
  ray_distance 100
  addUserKnob {3 max_ray_steps l "max ray steps" t "Limit the number of steps a ray can be marched before it is culled. Shadow rays are given half this number of steps."}
@@ -8523,6 +8566,7 @@ Group {
  addUserKnob {26 ""}
  addUserKnob {7 hdri_offset_angle l "hdri offset angle" t "Rotate the hdri image by this amount around the y-axis." R 0 360}
  addUserKnob {3 hdri_lighting_samples l "hdri lighting samples" t "The number of rays spawned to compute the diffuse, hdri image based lighting. These rays will also be affected by any emissive objects in the scene."}
+ hdri_lighting_samples 10
  addUserKnob {7 hdri_lighting_gain l "hdri lighting gain" t "Multiply the hdri lighting intensity by this amount."}
  hdri_lighting_gain 1
  addUserKnob {7 hdri_lighting_blur l "hdri lighting blur" t "Blur the hdri image by a factor of this amount before using it for the lighting in the scene."}
@@ -8626,7 +8670,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set N36cd0100 [stack 0]
+set N9def6400 [stack 0]
  Blur {
   size {{"parent.hdri_lighting_blur * hdri_dot.format.height / 2"}}
   name Blur
@@ -8672,7 +8716,7 @@ set N36cd0100 [stack 0]
   xpos -48
   ypos -1309
  }
-set N36ea0800 [stack 0]
+set N9ded2b00 [stack 0]
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -8686,7 +8730,7 @@ set N36ea0800 [stack 0]
   xpos -232
   ypos -866
  }
-push $N36ea0800
+push $N9ded2b00
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -8698,7 +8742,7 @@ push $N36ea0800
   xpos -113
   ypos -864
  }
-push $N36ea0800
+push $N9ded2b00
  Shuffle {
   in sdf_light
   name light
@@ -8735,7 +8779,7 @@ push $N36ea0800
   xpos 641
   ypos -1318
  }
-set N36e4b900 [stack 0]
+set N9dea9d00 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -8747,7 +8791,7 @@ set N36e4b900 [stack 0]
   xpos 322
   ypos -863
  }
-push $N36e4b900
+push $N9dea9d00
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -8759,7 +8803,7 @@ push $N36e4b900
   xpos 780
   ypos -865
  }
-push $N36e4b900
+push $N9dea9d00
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -8771,7 +8815,7 @@ push $N36e4b900
   xpos 641
   ypos -864
  }
-push $N36e4b900
+push $N9dea9d00
  Shuffle {
   in sdf_shape
   name shape
@@ -8783,7 +8827,7 @@ push $N36e4b900
   xpos 473
   ypos -863
  }
-push $N36e4b900
+push $N9dea9d00
  Shuffle {
   in sdf_colour
   name colour
@@ -8795,7 +8839,7 @@ push $N36e4b900
   xpos 165
   ypos -864
  }
-push $N36e4b900
+push $N9dea9d00
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -8807,7 +8851,7 @@ push $N36e4b900
   xpos 1227
   ypos -857
  }
-push $N36e4b900
+push $N9dea9d00
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -8819,7 +8863,7 @@ push $N36e4b900
   xpos 1076
   ypos -854
  }
-push $N36e4b900
+push $N9dea9d00
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -8831,7 +8875,7 @@ push $N36e4b900
   xpos 934
   ypos -859
  }
-push $N36cd0100
+push $N9def6400
  Constant {
   inputs 0
   name Constant1
@@ -8939,8 +8983,16 @@ push $N36cd0100
   ypos -122
  }
 end_group
-set N36cf4f00 [stack 0]
-push $N36cf4f00
+set N9df1b200 [stack 0]
+Viewer {
+ frame 1
+ frame_range 1-63
+ name Viewer1
+ xpos 371
+ ypos 493
+}
+push $N9df1b200
+push $N9df1b200
 HueShift {
  inputs 1+1
  color_saturation 0.82
@@ -8951,31 +9003,14 @@ HueShift {
  disable true
 }
 Write {
- channels {rgba.red -rgba.green -rgba.blue -rgba.alpha}
- file /home/ob1/software/nuke/dev/raymarch/images/test_trap_bulb_depth.png
- file_type png
- datatype "16 bit"
+ channels rgba
+ file /home/ob1/software/nuke/dev/raymarch/images/snowman/snowman.####.exr
+ file_type exr
+ write_ACES_compliant_EXR true
+ first_part rgba
  checkHashOnRead false
- version 7
+ version 8
  name Write3
  xpos 169
  ypos 659
-}
-Read {
- inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/studio_small_02_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
- origset true
- name Read6
- xpos 912
- ypos 14
-}
-push $N36cf4f00
-Viewer {
- frame 1
- frame_range 1-63
- name Viewer1
- xpos 334
- ypos 453
 }
