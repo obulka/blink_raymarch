@@ -87,6 +87,11 @@ class SDFKnobManager(KnobManager):
             for axis in self._dimensional_axes
         ]
 
+    @property
+    def has_children(self):
+        """bool: True if a node is connected to the 'children' input."""
+        return self._node.input(self.children_input_index) is not None
+    
     @_knob_changed_callbacks.register(colour_knob_name)
     def _colour_changed(self):
         """Change the node colour to match the object for easier ID."""
@@ -97,7 +102,7 @@ class SDFKnobManager(KnobManager):
         """Enable/disable the knobs that only apply if this object has
         children.
         """
-        has_child_input = self._node.input(self.children_input_index) is not None
+        has_child_input = self.has_children
         for knob_name in self._knob_names_only_enabled_if_parent:
             self._node.knob(knob_name).setEnabled(has_child_input)
 
