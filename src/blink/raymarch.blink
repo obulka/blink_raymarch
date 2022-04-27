@@ -478,10 +478,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 if (parentStackLength > 0)
                 {
                     // Process this object, along with all parents that do not
-                    // have any more children
-                    do
+                    // have any more children, removing them from the stack,
+                    // but descend all the way down the stack, without removing
+                    // the objects that still have children
+                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)
                     {
-                        const int parentModifications = (int) parentStack[stackLastIndex][5];
+                        const int parentModifications = (int) parentStack[stackIndex][5];
 
                         // Do not need to interact with bounding volumes.
                         // They are in the stack for relative positioning
@@ -489,24 +491,24 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         // the bounding box to follow the children
                         if (!(parentModifications & 4096))
                         {
-                            const float parentNextDistance = parentStack[stackLastIndex][6];
+                            const float parentNextDistance = parentStack[stackIndex][6];
                             const float4 parentSurfaceColour = float4(
-                                parentStack[stackLastIndex][7],
-                                parentStack[stackLastIndex][8],
-                                parentStack[stackLastIndex][9],
-                                parentStack[stackLastIndex][10]
+                                parentStack[stackIndex][7],
+                                parentStack[stackIndex][8],
+                                parentStack[stackIndex][9],
+                                parentStack[stackIndex][10]
                             );
                             const float4 parentSurfaceProperty = float4(
-                                parentStack[stackLastIndex][11],
-                                parentStack[stackLastIndex][12],
-                                parentStack[stackLastIndex][13],
-                                parentStack[stackLastIndex][14]
+                                parentStack[stackIndex][11],
+                                parentStack[stackIndex][12],
+                                parentStack[stackIndex][13],
+                                parentStack[stackIndex][14]
                             );
                             if (nextDistance > parentNextDistance)
                             {
-                                objectId = parentStack[stackLastIndex][15];
+                                objectId = parentStack[stackIndex][15];
                             }
-                            const float parentBlendStrength = parentStack[stackLastIndex][16];
+                            const float parentBlendStrength = parentStack[stackIndex][16];
 
                             // Compute interaction between parent and this child
                             nextDistance = performChildInteraction(
@@ -519,33 +521,35 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 blendedSurface,
                                 parentBlendStrength
                             );
+
+                            // Update the global min distance (and surface/colour)
+                            if (fabs(nextDistance) < fabs(distance))
+                            {
+                                distance = nextDistance;
+
+                                colour = blendedColour;
+                                surface = blendedSurface;
+
+                                id = objectId;
+                            }
+
+                            // Get the number of children still remaining for the parent
+                            // If there are still children, we can break out of this loop
+                            // to process the rest of them before the parent itself
+                            numChildren = parentStack[stackIndex][0];
+
+                            if (numChildren <= 1.0f)
+                            {
+                                // Decrement the number of children each parent has
+                                for (int parentIndex=stackIndex; parentIndex >= 0; parentIndex--)
+                                {
+                                    parentStack[parentIndex][0]--;
+                                }
+                                parentStackLength--;
+                                numChildren--;
+                            }
                         }
-
-                        // Update the global min distance (and surface/colour)
-                        if (fabs(nextDistance) < fabs(distance))
-                        {
-                            distance = nextDistance;
-
-                            colour = blendedColour;
-                            surface = blendedSurface;
-
-                            id = objectId;
-                        }
-
-                        // Decrement the number of children each parent has
-                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
-                        {
-                            parentStack[parentIndex][0]--;
-                        }
-
-                        // Get the number of children still remaining for the parent
-                        // If there are still children, we can break out of this loop
-                        // to process the rest of them before the parent itself
-                        numChildren = parentStack[stackLastIndex][0];
                     }
-                    while (numChildren <= 0.0f && --stackLastIndex >= 0);
-
-                    parentStackLength = stackLastIndex + 1;
                 }
                 // No parents to interact with, simply check the distance
                 else if (fabs(nextDistance) < fabs(distance))
