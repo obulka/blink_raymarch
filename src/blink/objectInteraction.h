@@ -19,7 +19,7 @@ inline float union_(
         const float4 &surface0,
         float4 &surface1)
 {
-    if (distance0 < distance1)
+    if (fabs(distance0) < fabs(distance1))
     {
         colour1 = colour0;
         surface1 = surface0;
@@ -74,7 +74,7 @@ inline float smoothUnion(
         float4 &surface1,
         const float blendSize)
 {
-    float amount = clamp(0.5f + 0.5f * (distance1 - distance0) / blendSize, 0.0f, 1.0f);
+    float amount = saturate(0.5f + 0.5f * (fabs(distance1) - fabs(distance0)) / blendSize);
 
     colour1 = blend(colour0, colour1, amount);
     surface1 = blend(surface0, surface1, amount);
@@ -92,7 +92,7 @@ inline float smoothSubtraction(
         float4 &surface1,
         const float blendSize)
 {
-    float amount = clamp(0.5f - 0.5f * (distance1 + distance0) / blendSize, 0.0f, 1.0f);
+    float amount = saturate(0.5f - 0.5f * (distance1 + distance0) / blendSize);
 
     colour1 = blend(colour0, colour1, amount);
     surface1 = blend(surface0, surface1, amount);
@@ -110,7 +110,7 @@ inline float smoothIntersection(
         float4 &surface1,
         const float blendSize)
 {
-    float amount = clamp(0.5f - 0.5f * (distance1 - distance0) / blendSize, 0.0f, 1.0f);
+    float amount = saturate(0.5f - 0.5f * (distance1 - distance0) / blendSize);
 
     colour1 = blend(colour0, colour1, amount);
     surface1 = blend(surface0, surface1, amount);

@@ -112,7 +112,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int objectTextureWidth;
 
         // Light textures
-        int lightTextureHeight;
         int lightTextureWidth;
 
         float hazeAmount;
@@ -188,7 +187,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(objectTextureWidth, "Object Texture Width", 0);
 
         // Light Counts
-        defineParam(lightTextureHeight, "Light Texture Height", 0);
         defineParam(lightTextureWidth, "Light Texture Width", 0);
 
         defineParam(hazeAmount, "Haze Amount", 0.0f);
@@ -835,46 +833,43 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         lightColour = surface.z * surfaceColour;
 
         float2 currentLightIntensity;
-        for (int i=0; i < lightTextureHeight; i++)
+        for (int i=0; i < lightTextureWidth; i++)
         {
-            for (int j=0; j < lightTextureWidth; j++)
+            float4 hitSurface = float4(0);
+            float4 hitColour = float4(0);
+
+            SampleType(lights) light = lights(i, 0);
+            SampleType(lightProperties) lightProperty = lightProperties(i, 0);
+            SampleType(lightProperties1) lightProperty1 = lightProperties1(i, 0);
+
+            int lightType = (int) lightProperty.w;
+            if (lightType == 0)
             {
-                float4 hitSurface = float4(0);
-                float4 hitColour = float4(0);
-
-                SampleType(lights) light = lights(j, i);
-                SampleType(lightProperties) lightProperty = lightProperties(j, i);
-                SampleType(lightProperties1) lightProperty1 = lightProperties1(j, i);
-
-                int lightType = (int) lightProperty.w;
-                if (lightType == 0)
-                {
-                    currentLightIntensity = float2(light.w, 1);
-                }
-                else
-                {
-                    currentLightIntensity = lightIntensityOnSurface(
-                        pointOnSurface,
-                        surfaceNormal,
-                        float3(light.x, light.y, light.z),
-                        lightType,
-                        light.w,
-                        lightProperty1.y,
-                        lightProperty1.x,
-                        hitColour,
-                        hitSurface
-                    );
-                    lightColour += hitSurface.z * hitColour;
-                    lightIntensity += float2(hitSurface.z, 1.0f);
-                }
-                lightColour += currentLightIntensity.x * currentLightIntensity.y * float4(
-                    lightProperty.x,
-                    lightProperty.y,
-                    lightProperty.z,
-                    0.0f
-                );
-                lightIntensity += currentLightIntensity;
+                currentLightIntensity = float2(light.w, 1);
             }
+            else
+            {
+                currentLightIntensity = lightIntensityOnSurface(
+                    pointOnSurface,
+                    surfaceNormal,
+                    float3(light.x, light.y, light.z),
+                    lightType,
+                    light.w,
+                    lightProperty1.y,
+                    lightProperty1.x,
+                    hitColour,
+                    hitSurface
+                );
+                lightColour += hitSurface.z * hitColour;
+                lightIntensity += float2(hitSurface.z, 1.0f);
+            }
+            lightColour += currentLightIntensity.x * currentLightIntensity.y * float4(
+                lightProperty.x,
+                lightProperty.y,
+                lightProperty.z,
+                0.0f
+            );
+            lightIntensity += currentLightIntensity;
         }
 
         const float diffuse = saturate(1.0f - surface.x - surface.y);
