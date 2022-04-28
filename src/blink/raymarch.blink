@@ -27,7 +27,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessPoint, eEdgeNone> noise;
 
     // the hdribox in latlong format
-    Image<eRead, eAccessRandom, eEdgeNone> hdri;
+    Image<eRead, eAccessRandom, eEdgeClamped> hdri;
 
 
     // the shape positons.xyz, scale.w
@@ -67,7 +67,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;
 
     // the hdribox in latlong format
-    Image<eRead, eAccessRandom, eEdgeNone> hdriLight;
+    Image<eRead, eAccessRandom, eEdgeClamped> hdriLight;
 
     // the output image
     Image<eWrite> dst;
@@ -90,7 +90,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float hdriOffsetAngle;
         int hdriFormatWidth;
         int hdriFormatHeight;
-        int hdriLightSamples;
         float hdriLightGain;
         float hdriLightShadowHardness;
         int softenHDRILightShadows;
@@ -167,7 +166,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(hdriOffsetAngle, "HDRI Offset Angle", 0.0f);
         defineParam(hdriFormatHeight, "HDRI Height", 1024);
         defineParam(hdriFormatWidth, "HDRI Width", 2048);
-        defineParam(hdriLightSamples, "HDRI Lighting Samples", 5);
         defineParam(hdriLightGain, "HDRI Lighting Gain", 0.1f);
         defineParam(hdriLightShadowHardness, "HDRI Shadow Hardness", 1.0f);
         defineParam(softenHDRILightShadows, "Soften HDRI Shadows", 1);
@@ -232,6 +230,21 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    // /**
+    //  * Get the value of hdri the ray would hit at infinite distance
+    //  */
+    // float4 readHDRIValue(float3 rayDirection)
+    // {
+    //     const float2 angles = cartesionUnitVectorToSpherical(rayDirection, hdriOffsetRadians);
+
+    //     // Why does bilinear give nans? :(
+    //     return hdri(
+    //         round(hdriPixelSize.x * angles.x) - 1,
+    //         round(hdriFormatHeight - (hdriPixelSize.y * angles.y)) - 1
+    //     );
+    // }
+
+
     /**
      * Get the value of hdri the ray would hit at infinite distance
      */
@@ -254,9 +267,21 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    /**
-     * Get the value of hdri the ray would hit at infinite distance
-     */
+    // /**
+    //  * Get the value of hdri the ray would hit at infinite distance
+    //  */
+    // float4 readHDRILightValue(float3 rayDirection)
+    // {
+    //     const float2 angles = cartesionUnitVectorToSpherical(rayDirection, hdriOffsetRadians);
+
+    //     // Why does bilinear give nans? :(
+    //     return hdriLightGain * hdriLight(
+    //         round(hdriLightPixelSize.x * angles.x) - 1,
+    //         round(hdriLightFormatHeight - (hdriLightPixelSize.y * angles.y)) - 1
+    //     );
+    // }
+
+
     float4 readHDRILightValue(float3 rayDirection)
     {
         const float2 angles = cartesionUnitVectorToSpherical(rayDirection, hdriOffsetRadians);
@@ -272,7 +297,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float2(hdriLightFormatWidth, hdriLightFormatHeight) - 1.0f
         );
 
-        return bilinear(hdriLight, indices.x, indices.y);
+        return hdriLightGain * bilinear(hdriLight, indices.x, indices.y);
     }
 
 
@@ -855,42 +880,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         const float diffuse = saturate(1.0f - surface.x - surface.y);
         if (diffuse > hitTolerance)
         {
-            // Add HDRI lighting
-            float3 rayDirection = surfaceNormal;
-            float3 seedVal = seed * fabs(pointOnSurface) + 0.5773f;
-            for (int iteration=1; iteration <= hdriLightSamples; iteration++)
-            {
-                float4 hitSurface = float4(0);
-                float4 hitColour = float4(0);
-
-                rayDirection = roughen(
-                    surfaceNormal,
-                    diffuse,
-                    rayDirection * seedVal + iteration / (float) hdriLightSamples
-                );
-                currentLightIntensity = lightIntensityOnSurface(
-                    pointOnSurface,
-                    surfaceNormal,
-                    rayDirection,
-                    softenHDRILightShadows * 100,
-                    hdriLightGain,
-                    0.0f,
-                    hdriLightShadowHardness,
-                    hitColour,
-                    hitSurface
-                );
-                const float4 hdriLightColour = readHDRILightValue(rayDirection);
-                lightColour += (
-                    currentLightIntensity.x
-                    * currentLightIntensity.y
-                    * hdriLightColour
-                    + hitSurface.z * hitColour
-                ) / (float) hdriLightSamples;
-                lightIntensity += (
-                    (currentLightIntensity + float2(hitSurface.z, 0.0f))
-                    / (float) hdriLightSamples
-                );
-            }
+            const float4 hdriLightColour = readHDRILightValue(surfaceNormal);
+            lightColour += diffuse * hdriLightColour;
+            lightIntensity.x += diffuse * length(
+                float3(
+                    hdriLightColour.x,
+                    hdriLightColour.y,
+                    hdriLightColour.z
+                )
+            );
         }
 
         lightColour = saturate(lightColour);
