@@ -386,32 +386,20 @@ inline float2 normalizeAngles(const float2 &angles)
 }
 
 
-float2 normalizeAngles1(const float2 &angles)
-{
-    float normalizedTheta = angles.x;
-    float normalizedPhi = angles.y;
-    if (normalizedPhi <= 0.0f)
-    {
-        normalizedPhi = -normalizedPhi;
-        normalizedTheta += PI;
-    }
-    else if (normalizedPhi > PI)
-    {
-        normalizedPhi = 2.0f * PI - normalizedPhi;
-        normalizedTheta += PI;
-    }
-    normalizedTheta = fmod(normalizedTheta, 2.0f * PI),
-    normalizedTheta += 2.0f * PI * (normalizedTheta < 0.0f);
-
-    return float2(normalizedTheta, normalizedPhi);
-}
-
-
 float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float thetaOffset)
 {
     return normalizeAngles(float2(
         atan2(rayDirection.z, rayDirection.x) + thetaOffset,
         acos(rayDirection.y)
+    ));
+}
+
+
+float2 cartesionUnitVectorToSpherical(const float3 &rayDirection)
+{
+    return normalizeAngles(float2(
+        atan2(rayDirection.y, rayDirection.x),
+        acos(rayDirection.z)
     ));
 }
 
@@ -427,11 +415,18 @@ float sphericalUnitDot(const float2 &vector0, const float2 &vector1)
 
 inline float2 uvPositionToAngles(const float2 &uvPosition)
 {
-    return normalizeAngles(
-        float2(
-            uvPosition.x * 2.0f * PI,
-            uvPosition.y * PI
-        )
+    return float2(
+        (uvPosition.x + 1.0f) * PI,
+        (1.0f - uvPosition.y) * PI / 2.0f
+    );
+}
+
+
+inline float2 pixelsToUV(const float2 &pixelLocation, const float2 &format)
+{
+    return float2(
+        2.0f * pixelLocation.x / format.x - 1.0f,
+        2.0f * pixelLocation.y / format.y - 1.0f
     );
 }
 

@@ -21,15 +21,6 @@ float aspectRatio(const float height_, const float width_)
 }
 
 
-float2 pixelsToUV(const float2 &pixelLocation, const float2 &format)
-{
-    return float2(
-        2.0f * pixelLocation.x / format.x - 1.0f,
-        2.0f * pixelLocation.y / format.y - 1.0f
-    );
-}
-
-
 /**
  * Create a projection matrix for the camera
  */

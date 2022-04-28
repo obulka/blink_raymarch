@@ -1,0 +1,88 @@
+#include "math.h"
+
+
+kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
+{
+    Image<eRead, eAccessRandom, eEdgeClamped> hdri; // the input image
+    Image<eWrite> dst; // the output image
+
+    param:
+        int hdriFormatWidth;
+        int hdriFormatHeight;
+        int2 samples;
+
+    local:
+        float2 hdriPixelSize;
+        float3 up;
+        float2 sampleStep;
+
+
+    // In define(), parameters can be given labels and default values.
+    void define()
+    {
+        defineParam(hdriFormatHeight, "HDRI Lighting Height", 1024);
+        defineParam(hdriFormatWidth, "HDRI Lighting Width", 2048);
+        defineParam(samples, "Samples", int2(100, 50));
+    }
+
+
+    void init()
+    {
+        hdriPixelSize = float2(hdriFormatWidth / (2.0f * PI), hdriFormatHeight / PI);
+        up = float3(0, 1, 0);
+
+        sampleStep = float2(
+            2.0f * PI / (float) samples.x,
+            PI / (2.0f * (float) samples.y)
+        );
+    }
+
+
+    /**
+     * Get the value of hdri the ray would hit at infinite distance
+     */
+    float4 readHDRIValue(float3 rayDirection)
+    {
+        const float2 angles = cartesionUnitVectorToSpherical(rayDirection);
+
+        // Why does bilinear give nans? :(
+        return hdri(
+            round(hdriPixelSize.x * angles.x) - 1,
+            round(hdriFormatHeight - (hdriPixelSize.y * angles.y)) - 1
+        );
+    }
+
+
+    void process(int2 pos)
+    {
+        const float2 uvPosition = pixelsToUV(
+            float2(pos.x, pos.y),
+            float2(hdriFormatWidth, hdriFormatHeight)
+        );
+        const float3 direction = sphericalUnitVectorToCartesion(
+            uvPositionToAngles(uvPosition)
+        );
+
+        const float3 tangentRight = normalize(cross(up, direction));
+        const float3 tangentUp = normalize(cross(direction, tangentRight));
+
+        float4 irradiance = float4(0);
+
+        for (float theta = 0.0f; theta < 2.0f * PI; theta += sampleStep.x)
+        {
+            for (float phi = PI / 2.0f; phi > 0.0f; phi -= sampleStep.y)
+            {
+                const float3 tangent = sphericalUnitVectorToCartesion(float2(theta, phi));
+                const float3 sampleDirection = (
+                    tangent.x * tangentRight
+                    + tangent.y * tangentUp
+                    + tangent.z * direction
+                );
+
+                irradiance += readHDRIValue(sampleDirection) * cos(phi) * sin(phi);
+            }
+        }
+
+        dst() = PI * irradiance / (float) (samples.x * samples.y);
+    }
+};

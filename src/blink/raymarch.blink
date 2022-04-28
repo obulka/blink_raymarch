@@ -540,7 +540,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         // Decrement the number of children each parent has
                         for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
                         {
-                            parentStack[parentIndex][0]--;
+                            parentStack[parentIndex][0] -= 1.0f;
                         }
 
                         // Get the number of children still remaining for the parent
@@ -806,14 +806,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &seed,
             float4 &lightColour)
     {
-        if (surface.z > 0.0f)
-        {
-            lightColour = saturate(surfaceColour);
-            return saturate(surface.z);
-        }
-
-        float2 lightIntensity = float2(0, 0);
-        lightColour = float4(0);
+        float2 lightIntensity = float2(surface.z, 0);
+        lightColour = surface.z * surfaceColour;
 
         float2 currentLightIntensity;
         for (int i=0; i < lightTextureHeight; i++)
