@@ -6,6 +6,10 @@ This project contains three gizmos that allow you to ray march a wide variety of
 
 ![test_trap_bulb_done_reduced](https://user-images.githubusercontent.com/21975584/164989470-d13cabe2-8eb1-42de-becb-bd2672b14538.png)
 
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/21975584/165710806-19b473e3-8d11-4cd8-8b49-55bf3d1a4544.gif" alt="animated" />
+</p>
+
 ## Setup
 
 Simply clone/download this repo and add the top level directory to your Nuke path. The gizmos will appear in the nodes menu, and all callbacks and the `FN_BLINK_INCLUDE_PATHS` will be set up automatically.
