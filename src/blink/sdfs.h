@@ -1035,8 +1035,11 @@ float distanceToMandelbox(
  *     22: octahedron
  *     23: mandelbulb
  *     24: mandelbox
+ *     25: mandelbox (no trap colour)
  * @arg dimensions: The radius of the 'tube' of the torus, the radius of
  *     the 'ring', and the angle to cap at in range (0-PI).
+ * @arg surfaceColour: The colour of the surface will be stored here.
+ *     This will only be modified by the fractals (23-25).
  *
  * @returns: The minimum distance from the point to the shape.
  */
@@ -1044,7 +1047,7 @@ float distanceToObject(
         const float3 &position,
         const int shapeType,
         const float4 &dimensions,
-        float4 &trapColour)
+        float4 &surfaceColour)
 {
     if (shapeType == 23)
     {
@@ -1056,23 +1059,30 @@ float distanceToObject(
             dimensions.z,
             colour
         );
-        trapColour = blend(
+        surfaceColour = blend(
             colour,
-            trapColour,
+            surfaceColour,
             saturate(dimensions.w)
         );
         return distance;
     }
-    if (shapeType == 24)
+    if (shapeType == 24 || shapeType == 25)
     {
-        return distanceToMandelbox(
+        float4 colour = surfaceColour;
+        const float distance = distanceToMandelbox(
             position,
             dimensions.x,
             (int) dimensions.y,
             dimensions.z,
             dimensions.w,
-            trapColour
+            colour
         );
+        surfaceColour = blend(
+            surfaceColour,
+            colour,
+            (float)(shapeType == 25)
+        );
+        return distance;
     }
     if (shapeType == 0)
     {

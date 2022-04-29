@@ -8,12 +8,14 @@ Gizmo {
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
  dimension_x 0.5
- addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the deeper the fractal will have detail." +HIDDEN R 1 30}
- dimension_y 10
- addUserKnob {7 dimension_z l "max square radius" t "When the square radius has reached this length, stop iterating." +HIDDEN R 1 9}
- dimension_z 4
- addUserKnob {7 dimension_w l "orbital trap blend strength" t "Transition between orbital trap based colouring and the colour provided by the 'colour' knob." +HIDDEN}
- dimension_w 1
+ addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the more detail the fractal will have." +HIDDEN R 1 30}
+ dimension_y 12
+ addUserKnob {7 dimension_z l "min square radius" t "The minimum square radius to use when spherically folding." +HIDDEN R 0.001 1}
+ dimension_z 0.001
+ addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold. Higher values will result in a denser fractal." +HIDDEN R 0.01 2}
+ dimension_w 0.8
+ addUserKnob {6 use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." +HIDDEN +STARTLINE}
+ use_trap_colour true
  addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
  wall_thickness 0.01
  addUserKnob {6 hollow t "If enabled, the object will be hollow, with a thickness of 'wall thickness'." -STARTLINE}
@@ -147,7 +149,7 @@ add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.n
  Constant {
   inputs 0
   channels sdf_shape
-  color {{parent.shape} {"parent.repetition | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0) | (parent.is_bound ? 4096 : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
+  color {{"parent.shape + (parent.shape == 24 && !parent.use_trap_colour)"} {"parent.repetition | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0) | (parent.is_bound ? 4096 : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
   format "1 1 0 0 1 1 1 1x1"
   name shape
   xpos 806
@@ -242,7 +244,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N8dfa890 [stack 0]
+set N72733c0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -264,7 +266,7 @@ set N8dfa890 [stack 0]
    xpos 34
    ypos -6
   }
-set N8e0e090 [stack 0]
+set N7286bc0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -275,7 +277,7 @@ set N8e0e090 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8dfa890
+push $N72733c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -304,7 +306,7 @@ push $N8dfa890
    xpos 158
    ypos 167
   }
-push $N8e0e090
+push $N7286bc0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -397,7 +399,7 @@ push $N8e0e090
    xpos 192
    ypos -2
   }
-set N8eb9aa0 [stack 0]
+set N7332a10 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -419,7 +421,7 @@ set N8eb9aa0 [stack 0]
    xpos 34
    ypos -6
   }
-set N8ecd2a0 [stack 0]
+set N7346210 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -430,7 +432,7 @@ set N8ecd2a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8eb9aa0
+push $N7332a10
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -459,7 +461,7 @@ push $N8eb9aa0
    xpos 158
    ypos 167
   }
-push $N8ecd2a0
+push $N7346210
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
