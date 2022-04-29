@@ -11,6 +11,21 @@
 //
 
 
+/**
+ * The union of the two distances. Ie. The minimum. The corresponding
+ * colour will be placed in colour1, and the corresponding surface will
+ * be placed in surface1.
+ *
+ * @arg distance0: The first distance.
+ * @arg distance1: The second distance.
+ * @arg distance0: The first distance.
+ * @arg colour0: The first colour.
+ * @arg colour1: The second colour.
+ * @arg surface0: The first surface.
+ * @arg surface1: The second surface.
+ *
+ * @returns: The nearest, modified distance.
+ */
 inline float union_(
         const float distance0,
         const float distance1,
@@ -29,6 +44,21 @@ inline float union_(
 }
 
 
+/**
+ * Subtract the first object from the second. The corresponding
+ * colour will be placed in colour1, and the corresponding surface will
+ * be placed in surface1.
+ *
+ * @arg distance0: The first distance.
+ * @arg distance1: The second distance.
+ * @arg distance0: The first distance.
+ * @arg colour0: The first colour.
+ * @arg colour1: The second colour.
+ * @arg surface0: The first surface.
+ * @arg surface1: The second surface.
+ *
+ * @returns: The nearest, modified distance.
+ */
 inline float subtraction(
         const float distance0,
         const float distance1,
@@ -47,6 +77,21 @@ inline float subtraction(
 }
 
 
+/**
+ * Render only the overlapping region of two objects. The corresponding
+ * colour will be placed in colour1, and the corresponding surface will
+ * be placed in surface1.
+ *
+ * @arg distance0: The first distance.
+ * @arg distance1: The second distance.
+ * @arg distance0: The first distance.
+ * @arg colour0: The first colour.
+ * @arg colour1: The second colour.
+ * @arg surface0: The first surface.
+ * @arg surface1: The second surface.
+ *
+ * @returns: The nearest, modified distance.
+ */
 inline float intersection(
         const float distance0,
         const float distance1,
@@ -65,6 +110,22 @@ inline float intersection(
 }
 
 
+/**
+ * Smoothly blend between two objects. Ie. The minimum. The
+ * corresponding colour will be placed in colour1, and the corresponding
+ * surface will be placed in surface1.
+ *
+ * @arg distance0: The first distance.
+ * @arg distance1: The second distance.
+ * @arg distance0: The first distance.
+ * @arg colour0: The first colour.
+ * @arg colour1: The second colour.
+ * @arg surface0: The first surface.
+ * @arg surface1: The second surface.
+ * @arg blendSize: The amount to blend between the objects.
+ *
+ * @returns: The nearest, modified distance.
+ */
 inline float smoothUnion(
         const float distance0,
         const float distance1,
@@ -83,6 +144,22 @@ inline float smoothUnion(
 }
 
 
+/**
+ * Smoothly blend the subtraction of the first object from the second.
+ * The corresponding colour will be placed in colour1, and the
+ * corresponding surface will be placed in surface1.
+ *
+ * @arg distance0: The first distance.
+ * @arg distance1: The second distance.
+ * @arg distance0: The first distance.
+ * @arg colour0: The first colour.
+ * @arg colour1: The second colour.
+ * @arg surface0: The first surface.
+ * @arg surface1: The second surface.
+ * @arg blendSize: The amount to blend between the objects.
+ *
+ * @returns: The nearest, modified distance.
+ */
 inline float smoothSubtraction(
         const float distance0,
         const float distance1,
@@ -101,6 +178,22 @@ inline float smoothSubtraction(
 }
 
 
+/**
+ * Smoothly blend the overlapping region of two objects. The
+ * corresponding colour will be placed in colour1, and the corresponding
+ * surface will be placed in surface1.
+ *
+ * @arg distance0: The first distance.
+ * @arg distance1: The second distance.
+ * @arg distance0: The first distance.
+ * @arg colour0: The first colour.
+ * @arg colour1: The second colour.
+ * @arg surface0: The first surface.
+ * @arg surface1: The second surface.
+ * @arg blendSize: The amount to blend between the objects.
+ *
+ * @returns: The nearest, modified distance.
+ */
 inline float smoothIntersection(
         const float distance0,
         const float distance1,
@@ -119,6 +212,30 @@ inline float smoothIntersection(
 }
 
 
+/**
+ * Compute the modified distance resulting from the interaction between
+ * two objects. The corresponding colour will be placed in colour1, and
+ * the corresponding surface will be placed in surface1.
+ *
+ * @arg modifications: The modification to perform:
+ *     Each bit will enable a modification:
+ *         bit 7: subtraction
+ *         bit 8: intersection
+ *         bit 9: smooth union
+ *         bit 10: smooth subtraction
+ *         bit 11: smooth intersection
+ *     any other value will default to union.
+ * @arg distance0: The first distance.
+ * @arg distance1: The second distance.
+ * @arg distance0: The first distance.
+ * @arg colour0: The first colour.
+ * @arg colour1: The second colour.
+ * @arg surface0: The first surface.
+ * @arg surface1: The second surface.
+ * @arg blendSize: The amount to blend between the objects.
+ *
+ * @returns: The nearest, modified distance.
+ */
 float performChildInteraction(
         const int modifications,
         const float distance0,

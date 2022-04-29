@@ -413,12 +413,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      * @arg uniformScale: The factor to scale the object by.
      * @arg modifications: The modifications to perform.
      *     Each bit will enable a modification:
-     *         bit 0: finite repetition
-     *         bit 1: infinite repetition
-     *         bit 2: elongation
-     *         bit 3: mirror x
-     *         bit 4: mirror y
-     *         bit 5: mirror z
+     *         bit 6: hollowing
      * @arg edgeRadius: The radius to round the edges by.
      * @arg wallThickness: The thickness of the walls if hollowing the
      *     object.

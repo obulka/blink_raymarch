@@ -11,12 +11,30 @@
 //
 
 
+/**
+ * Infinitely repeat an object in the positive quadrant.
+ *
+ * @arg position: The position of the ray.
+ * @arg spacing: The x, y, and z spacing with which to repeat the
+ *     object.
+ *
+ * @returns: The modified ray position that results in repetion.
+ */
 inline float3 infiniteRepetition(const float3 &position, const float3 &spacing)
 {
     return fmod(position + 0.5f * spacing, spacing) - 0.5f * spacing;
 }
 
 
+/**
+ * Finitely repeat an object in the positive quadrant.
+ *
+ * @arg position: The position of the ray.
+ * @arg limits: The x, y, and z limits of the repetition.
+ * @arg spacing: The spacing with which to repeat the object.
+ *
+ * @returns: The modified ray position that results in repetion.
+ */
 inline float3 finiteRepetition(
         const float3 &position,
         const float3 &limits,
@@ -28,42 +46,103 @@ inline float3 finiteRepetition(
 }
 
 
+/**
+ * Modify a ray to elongate an object.
+ *
+ * @arg position: The position of the ray.
+ * @arg elongation: The amount to elongate the object on each respective
+ *     axis.
+ *
+ * @returns: The modified ray position that results in elongation.
+ */
 inline float3 elongate(const float3 &position, const float3 &elongation)
 {
     return position - clamp(position, -elongation, elongation);
 }
 
 
+/**
+ * Mirror the object in the yz-plane.
+ *
+ * @arg position: The position of the ray.
+ *
+ * @returns: The modified ray position that results in mirroring.
+ */
 inline float3 mirrorX(const float3 &position)
 {
     return float3(fabs(position.x), position.y, position.z);
 }
 
 
+/**
+ * Mirror the object in the xz-plane.
+ *
+ * @arg position: The position of the ray.
+ *
+ * @returns: The modified ray position that results in mirroring.
+ */
 inline float3 mirrorY(const float3 &position)
 {
     return float3(position.x, fabs(position.y), position.z);
 }
 
 
+/**
+ * Mirror the object in the xy-plane.
+ *
+ * @arg position: The position of the ray.
+ *
+ * @returns: The modified ray position that results in mirroring.
+ */
 inline float3 mirrorZ(const float3 &position)
 {
     return float3(position.x, position.y, fabs(position.z));
 }
 
 
-inline float roundEdges(const float distance, float radius)
+/**
+ * Round the edges of an object.
+ *
+ * @arg distance: The distance the ray has travelled.
+ * @arg radius: The radius of the edges.
+ *
+ * @returns: The modified distnace that results in edge rounding.
+ */
+inline float roundEdges(const float distance, const float radius)
 {
     return distance - radius;
 }
 
 
+/**
+ * Round the edges of an object.
+ *
+ * @arg distance: The distance the ray has travelled.
+ * @arg thickness: The thickness of the object's walls.
+ *
+ * @returns: The modified distnace that results in hollowing.
+ */
 inline float hollow(const float distance, const float thickness)
 {
     return fabs(distance) - thickness;
 }
 
 
+/**
+ * Modify the position of a ray, resulting in various effects.
+ *
+ * @arg modifications: The modifications to perform.
+ *     Each bit will enable a modification:
+ *         bit 0: finite repetition
+ *         bit 1: infinite repetition
+ *         bit 2: elongation
+ *         bit 3: mirror x
+ *         bit 4: mirror y
+ *         bit 5: mirror z
+ * @arg repetition: The values to use when repeating the ray.
+ * @arg elongation: The values to use when elongating the ray.
+ * @arg position: The position of the ray.
+ */
 void performShapeModification(
         const int modifications,
         const float4 &repetition,
@@ -107,6 +186,18 @@ void performShapeModification(
 }
 
 
+/**
+ * Modify the distance a ray has travelled, resulting in various
+ * effects.
+ *
+ * @arg modifications: The modifications to perform.
+ *     Each bit will enable a modification:
+ *         bit 6: hollowing
+ * @arg edgeRadius: The radius to round the edges by.
+ * @arg wallThickness: The thickness of the walls if hollowing the
+ *     object.
+ * @arg position: The position of the ray.
+ */
 float performDistanceModification(
         const int modifications,
         const float edgeRadius,
