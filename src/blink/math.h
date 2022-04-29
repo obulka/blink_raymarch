@@ -9,60 +9,134 @@
 //
 
 
+/**
+ * Convert degrees to radians.
+ *
+ * @arg angle: The angle in degrees.
+ *
+ * @returns: The angle in radians.
+ */
 inline float degreesToRadians(const float angle)
 {
     return angle * PI / 180.0f;
 }
 
 
+/**
+ * Convert radians to degrees.
+ *
+ * @arg angle: The angle in radians.
+ *
+ * @returns: The angle in degrees.
+ */
 inline float radiansToDegrees(const float angle)
 {
     return angle * 180.0f / PI;
 }
 
 
+/**
+ * Convert degrees to radians.
+ *
+ * @arg angle: The angle in degrees.
+ *
+ * @returns: The angle in radians.
+ */
 inline float2 degreesToRadians(const float2 &angle)
 {
     return angle * PI / 180.0f;
 }
 
 
+/**
+ * Convert radians to degrees.
+ *
+ * @arg angle: The angle in radians.
+ *
+ * @returns: The angle in degrees.
+ */
 inline float2 radiansToDegrees(const float2 &angle)
 {
     return angle * 180.0f / PI;
 }
 
 
+/**
+ * Convert degrees to radians.
+ *
+ * @arg angle: The angle in degrees.
+ *
+ * @returns: The angle in radians.
+ */
 inline float3 degreesToRadians(const float3 &angle)
 {
     return angle * PI / 180.0f;
 }
 
 
+/**
+ * Convert radians to degrees.
+ *
+ * @arg angle: The angle in radians.
+ *
+ * @returns: The angle in degrees.
+ */
 inline float3 radiansToDegrees(const float3 &angle)
 {
     return angle * 180.0f / PI;
 }
 
 
+/**
+ * Compute the fractional portion of the value. Ex. 3.5 returns 0.5
+ *
+ * @arg value: The value to get the fractional portion of.
+ *
+ * @returns: The fractional portion of the value.
+ */
 inline float fract(float value)
 {
     return value - floor(value);
 }
 
 
+/**
+ * Get a random value on the interval [0, 1].
+ *
+ * @arg seed: The random seed.
+ *
+ * @returns: A random value on the interval [0, 1].
+ */
 inline float random(float seed)
 {
     return fract(sin(seed * 91.3458f) * 47453.5453f);
 }
 
 
+/**
+ * The minimum of three values.
+ *
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg value2: The third value.
+ *
+ * @returns: The minimum of the three values.
+ */
 inline float min(const float value0, const float value1, const float value2)
 {
     return min(value0, min(value1, value2));
 }
 
 
+/**
+ * The maximum of three values.
+ *
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg value2: The third value.
+ *
+ * @returns: The maximum of the three values.
+ */
 inline float max(const float value0, const float value1, const float value2)
 {
     return max(value0, max(value1, value2));
@@ -70,7 +144,66 @@ inline float max(const float value0, const float value1, const float value2)
 
 
 /**
- * Why tf is this necessary? Built-in clamp fails to compile for int3s
+ * Saturate a value ie. clamp between 0 and 1
+ *
+ * @args value: The value to saturate
+ *
+ * @returns: The clamped value
+ */
+inline float saturate(float value)
+{
+    return clamp(value, 0.0f, 1.0f);
+}
+
+
+/**
+ * Saturate a value ie. clamp between 0 and 1
+ *
+ * @args value: The value to saturate
+ *
+ * @returns: The clamped value
+ */
+inline float2 saturate(const float2 &value)
+{
+    return clamp(value, float2(0), float2(1));
+}
+
+
+/**
+ * Saturate a value ie. clamp between 0 and 1
+ *
+ * @args value: The value to saturate
+ *
+ * @returns: The clamped value
+ */
+inline float3 saturate(const float3 &value)
+{
+    return clamp(value, float3(0), float3(1));
+}
+
+
+/**
+ * Saturate a value ie. clamp between 0 and 1
+ *
+ * @args value: The value to saturate
+ *
+ * @returns: The clamped value
+ */
+inline float4 saturate(const float4 &value)
+{
+    return clamp(value, float4(0), float4(1));
+}
+
+
+/**
+ * Custom clamp for int3 because the builtin clamp fails to compile for
+ * int3.
+ *
+ * @arg value: The value to clamp.
+ * @arg lower: The lower bound to clamp to.
+ * @arg upper: The upper bound to clamp to.
+ *
+ * @returns: The clamped value.
  */
 inline int3 clamp_(const int3 value, const int3 lower, const int3 upper)
 {
@@ -84,80 +217,171 @@ inline int3 clamp_(const int3 value, const int3 lower, const int3 upper)
 
 
 /**
- * Why tf is this necessary? Built-in round fails to compile for int3s
+ * Custom round for int3 because the builtin round fails to compile for
+ * int3.
+ *
+ * @arg value: The value to round.
+ *
+ * @returns: The rounded value.
  */
-inline int3 round_(const float3 value0)
+inline int3 round_(const float3 value)
 {
-    return int3(round(value0.x), round(value0.y), round(value0.z));
+    return int3(round(value.x), round(value.y), round(value.z));
 }
 
 
+/**
+ * The maximum component of a vector.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The maximum component of the vector.
+ */
 inline float maxComponent(const float3 &vector)
 {
     return max(vector.x, max(vector.y, vector.z));
 }
 
 
+/**
+ * The maximum component of a vector.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The maximum component of the vector.
+ */
 inline float maxComponent(const float2 &vector)
 {
     return max(vector.x, vector.y);
 }
 
 
+/**
+ * The minimum component of a vector.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The minimum component of the vector.
+ */
 inline float minComponent(const float3 &vector)
 {
     return min(vector.x, min(vector.y, vector.z));
 }
 
 
+/**
+ * The minimum component of a vector.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The minimum component of the vector.
+ */
 inline float minComponent(const float2 &vector)
 {
     return min(vector.x, vector.y);
 }
 
 
+/**
+ * The positive part of the vector. Ie. any negative values will be 0.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The positive part of the vector.
+ */
 inline float4 positivePart(const float4 &vector)
 {
     return max(vector, float4(0));
 }
 
 
+/**
+ * The positive part of the vector. Ie. any negative values will be 0.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The positive part of the vector.
+ */
 inline float3 positivePart(const float3 &vector)
 {
     return max(vector, float3(0));
 }
 
 
+/**
+ * The positive part of the vector. Ie. any negative values will be 0.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The positive part of the vector.
+ */
 inline float2 positivePart(const float2 &vector)
 {
     return max(vector, float2(0));
 }
 
 
+/**
+ * The positive part of the vector. Ie. any negative values will be 0.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The positive part of the vector.
+ */
 inline float positivePart(const float value)
 {
     return max(value, 0.0f);
 }
 
 
+/**
+ * The negative part of the vector. Ie. any positive values will be 0,
+ * and the negative values will be positive.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The negative part of the vector.
+ */
 inline float3 negativePart(const float3 &vector)
 {
     return -min(vector, float3(0));
 }
 
 
+/**
+ * The negative part of the vector. Ie. any positive values will be 0,
+ * and the negative values will be positive.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The negative part of the vector.
+ */
 inline float2 negativePart(const float2 &vector)
 {
     return -min(vector, float2(0));
 }
 
 
+/**
+ * The negative part of the vector. Ie. any positive values will be 0,
+ * and the negative values will be positive.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The negative part of the vector.
+ */
 inline float negativePart(const float value)
 {
     return -min(value, 0.0f);
 }
 
 
+/**
+ * Get a rotation matrix from radian angle values.
+ *
+ * @arg angles: The rotation angles in radians.
+ * @arg out: The location to store the rotation matrix.
+ */
 inline void rotationMatrix(const float3 &angles, float3x3 &out)
 {
     // Why tf can I not init a float3x3 normally??
@@ -176,9 +400,9 @@ inline void rotationMatrix(const float3 &angles, float3x3 &out)
 /**
  * Multiply a 4d vector by a 4x4 matrix.
  *
- * @arg m: The matrix that will transform the vector
- * @arg v: The vector to transform
- * @arg out: The location to store the resulting vector
+ * @arg m: The matrix that will transform the vector.
+ * @arg v: The vector to transform.
+ * @arg out: The location to store the resulting vector.
  */
 inline void matmul(const float4x4 &m, const float4 &v, float4 &out)
 {
@@ -197,9 +421,9 @@ inline void matmul(const float4x4 &m, const float4 &v, float4 &out)
 /**
  * Multiply a 3d vector by a 3x3 matrix.
  *
- * @arg m: The matrix that will transform the vector
- * @arg v: The vector to transform
- * @arg out: The location to store the resulting vector
+ * @arg m: The matrix that will transform the vector.
+ * @arg v: The vector to transform.
+ * @arg out: The location to store the resulting vector.
  */
 inline void matmul(const float3x3 &m, const float3 &v, float3 &out)
 {
@@ -211,6 +435,15 @@ inline void matmul(const float3x3 &m, const float3 &v, float3 &out)
 }
 
 
+/**
+ * Offset a point in a direction.
+ *
+ * @arg point: The point to offset.
+ * @arg direction: The direction to offset in.
+ * @arg offset: The distance to offset the point.
+ *
+ * @returns: The offset point.
+ */
 inline float3 offsetPoint(
         const float3 &point,
         const float3 &direction,
@@ -220,6 +453,17 @@ inline float3 offsetPoint(
 }
 
 
+/**
+ * Offset a point away from the surface of an object.
+ *
+ * @arg surfacePoint: The point to offset.
+ * @arg direction: The direction to offset in.
+ * @arg normal: The normal direction to the surface.
+ * @arg bias: Will increase the offset by this factor.
+ * @arg tolerance: The hit tolerance.
+ *
+ * @returns: The offset point.
+ */
 inline float3 surfaceOffsetPoint(
         const float3 &surfacePoint,
         const float3 &direction,
@@ -231,6 +475,13 @@ inline float3 surfaceOffsetPoint(
 }
 
 
+/**
+ * Randomly redirect the surface normal to give it roughness.
+ *
+ * @arg normal: The normal to redirect.
+ * @arg roughness: The maximum amount to roughen by.
+ * @arg seed: The random seed.
+ */
 float3 roughen(
     const float3 &normal,
     const float roughness,
@@ -253,32 +504,13 @@ float3 roughen(
 }
 
 
-float3 roughen1(
-    const float3 &normal,
-    const float roughness,
-    const float seed)
-{
-    // Use roughness to modify surface normal
-    const float radialOffset = roughness * random(seed);
-    const float angularOffset = 2.0f * PI * random(radialOffset * seed);
-
-    // Update the ray direction to send a scattered cluster of rays
-    float3 rayNormal = normalize(cross(normal, float3(1, 0, 0)));
-    if (length(rayNormal) == 0.0f)
-    {
-        rayNormal = cross(normal, float3(0, 1, 0));
-    }
-    rayNormal = (
-        cos(angularOffset)
-        * rayNormal
-        + sin(angularOffset)
-        * cross(normal, rayNormal)
-    );
-
-    return normalize(radialOffset * rayNormal + normal);
-}
-
-
+/**
+ * The distance from a point to the y-axis.
+ *
+ * @arg position: The position to get the distance from.
+ *
+ * @returns: The distance to the y-axis.
+ */
 inline float distanceToYAxis(const float3 &position)
 {
     return length(float2(position.x, position.z));
@@ -362,6 +594,13 @@ inline float2 cartesianToCylindrical(const float3 &coordinates)
 }
 
 
+/**
+ * Convert a spherical unit vector (unit radius) to cartesion.
+ *
+ * @arg angles: The spherical angles in radians.
+ *
+ * @returns: The equivalent cartesion vector.
+ */
 inline float3 sphericalUnitVectorToCartesion(const float2 &angles)
 {
     const float sinPhi = sin(angles.y);
@@ -373,6 +612,14 @@ inline float3 sphericalUnitVectorToCartesion(const float2 &angles)
 }
 
 
+/**
+ * Get the equivalent theta and phi values that lie between [0, 2 * PI),
+ * and [0, PI) respectively.
+ *
+ * @arg angles: The spherical angles in radians.
+ *
+ * @returns: The equivalent theta and phi.
+ */
 inline float2 normalizeAngles(const float2 &angles)
 {
     float2 normalizedAngles = float2(
@@ -386,6 +633,14 @@ inline float2 normalizeAngles(const float2 &angles)
 }
 
 
+/**
+ * Convert a cartesion unit vector to spherical.
+ *
+ * @arg angles: The cartesion unit vector.
+ * @arg thetaOffset: Offset the theta angle by this amount.
+ *
+ * @returns: The spherical angles in radians.
+ */
 float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float thetaOffset)
 {
     return normalizeAngles(float2(
@@ -395,6 +650,13 @@ float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float th
 }
 
 
+/**
+ * Convert a cartesion unit vector to spherical.
+ *
+ * @arg angles: The cartesion unit vector.
+ *
+ * @returns: The spherical angles in radians.
+ */
 float2 cartesionUnitVectorToSpherical(const float3 &rayDirection)
 {
     return normalizeAngles(float2(
@@ -404,6 +666,14 @@ float2 cartesionUnitVectorToSpherical(const float3 &rayDirection)
 }
 
 
+/**
+ * Spherical unit vector dot product.
+ *
+ * @arg vector0: The first unit vector.
+ * @arg vector1: The second unit vector.
+ *
+ * @returns: The spherical dot product.
+ */
 float sphericalUnitDot(const float2 &vector0, const float2 &vector1)
 {
     return (
@@ -413,6 +683,13 @@ float sphericalUnitDot(const float2 &vector0, const float2 &vector1)
 }
 
 
+/**
+ * Convert the uv position in a latlong image to angles.
+ *
+ * @arg uvPosition: The UV position.
+ *
+ * @returns: The equivalent angles in radians.
+ */
 inline float2 uvPositionToAngles(const float2 &uvPosition)
 {
     return float2(
@@ -422,6 +699,14 @@ inline float2 uvPositionToAngles(const float2 &uvPosition)
 }
 
 
+/**
+ * Convert location of a pixel in an image into UV.
+ *
+ * @arg pixelLocation: The x, and y positions of the pixel.
+ * @arg format: The image width, and height.
+ *
+ * @returns: The UV position.
+ */
 inline float2 pixelsToUV(const float2 &pixelLocation, const float2 &format)
 {
     return float2(
@@ -432,82 +717,47 @@ inline float2 pixelsToUV(const float2 &pixelLocation, const float2 &format)
 
 
 /**
- * Saturate a value ie. clamp between 0 and 1
+ * Blend linearly between two values.
  *
- * @args value: The value to saturate
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg weight: The blend weight, 1 will return value0, and 0 will
+ *     return value1.
  *
- * @returns: The clamped value
+ * @returns: The blended value.
  */
-inline float saturate(float value)
-{
-    return clamp(value, 0.0f, 1.0f);
-}
-
-
-/**
- * Saturate a value ie. clamp between 0 and 1
- *
- * @args value: The value to saturate
- *
- * @returns: The clamped value
- */
-inline float2 saturate(const float2 &value)
-{
-    return clamp(value, float2(0), float2(1));
-}
-
-
-/**
- * Saturate a value ie. clamp between 0 and 1
- *
- * @args value: The value to saturate
- *
- * @returns: The clamped value
- */
-inline float3 saturate(const float3 &value)
-{
-    return clamp(value, float3(0), float3(1));
-}
-
-
-/**
- * Saturate a value ie. clamp between 0 and 1
- *
- * @args value: The value to saturate
- *
- * @returns: The clamped value
- */
-inline float4 saturate(const float4 &value)
-{
-    return clamp(value, float4(0), float4(1));
-}
-
-
-float2 smoothMinN(float value0, float value1, float blendSize, float exponent)
-{
-    float m = 0.5f * pow(
-        positivePart(blendSize - fabs(value0 - value1)) / blendSize,
-        exponent
-    );
-
-    float s = m * blendSize / exponent;
-
-    return (value0 < value1) ? float2(value0 - s, m) : float2(value1 - s, m - 1.0f);
-}
-
-
 inline float blend(const float value0, const float value1, const float weight)
 {
     return value1 + weight * (value0 - value1);
 }
 
 
+/**
+ * Blend linearly between two values.
+ *
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg weight: The blend weight, 1 will return value0, and 0 will
+ *     return value1.
+ *
+ * @returns: The blended value.
+ */
 inline float3 blend(const float3 &value0, const float3 &value1, const float weight)
 {
     return value1 + weight * (value0 - value1);
 }
 
 
+/**
+ * Blend linearly between two values.
+ *
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg weight: The blend weight, 1 will return value0, and 0 will
+ *     return value1.
+ *
+ * @returns: The blended value.
+ */
 inline float4 blend(const float4 &value0, const float4 &value1, const float weight)
 {
     return value1 + weight * (value0 - value1);
@@ -517,8 +767,8 @@ inline float4 blend(const float4 &value0, const float4 &value1, const float weig
 /**
  * Get the position component of a world matrix.
  *
- * @arg worldMatrix: The world matrix
- * @arg position: The location to store the position
+ * @arg worldMatrix: The world matrix.
+ * @arg position: The location to store the position.
  */
 inline void positionFromWorldMatrix(const float4x4 &worldMatrix, float3 &position)
 {
@@ -530,6 +780,12 @@ inline void positionFromWorldMatrix(const float4x4 &worldMatrix, float3 &positio
 }
 
 
+/**
+ * Reflect a ray off of a surface.
+ *
+ * @arg incidentRayDirection: The incident direction.
+ * @arg surfaceNormalDirection: The normal to the surface.
+ */
 inline float3 reflectRayOffSurface(
     const float3 &incidentRayDirection,
     const float3 &surfaceNormalDirection)
@@ -541,6 +797,18 @@ inline float3 reflectRayOffSurface(
 }
 
 
+/**
+ * Refract a ray through a surface.
+ *
+ * @arg incidentRayDirection: The incident direction.
+ * @arg surfaceNormalDirection: The normal to the surface.
+ * @arg incidentRefractiveIndex: The refractive index the incident ray
+ *     is travelling through.
+ * @arg refractedRefractiveIndex: The refractive index the refracted ray
+ *     will be travelling through.
+ *
+ * @returns: The refracted ray direction.
+ */
 inline float3 refractRayThroughSurface(
     const float3 &incidentRayDirection,
     const float3 &surfaceNormalDirection,
@@ -564,6 +832,18 @@ inline float3 refractRayThroughSurface(
 }
 
 
+/**
+ * Compute the schlick, simplified fresnel reflection coefficient.
+ *
+ * @arg incidentRayDirection: The incident direction.
+ * @arg surfaceNormalDirection: The normal to the surface.
+ * @arg incidentRefractiveIndex: The refractive index the incident ray
+ *     is travelling through.
+ * @arg refractedRefractiveIndex: The refractive index the refracted ray
+ *     will be travelling through.
+ *
+ * @returns: The reflection coefficient.
+ */
 inline float schlickReflectionCoefficient(
     const float3 &incidentRayDirection,
     const float3 &surfaceNormalDirection,
@@ -592,6 +872,18 @@ inline float schlickReflectionCoefficient(
 }
 
 
+/**
+ * Compute the fresnel reflection coefficient.
+ *
+ * @arg incidentRayDirection: The incident direction.
+ * @arg surfaceNormalDirection: The normal to the surface.
+ * @arg incidentRefractiveIndex: The refractive index the incident ray
+ *     is travelling through.
+ * @arg refractedRefractiveIndex: The refractive index the refracted ray
+ *     will be travelling through.
+ *
+ * @returns: The reflection coefficient.
+ */
 inline float reflectionCoefficient(
     const float3 &incidentRayDirection,
     const float3 &surfaceNormalDirection,
@@ -631,7 +923,13 @@ inline float reflectionCoefficient(
 
 
 /**
- * Generate a ray out of the camera
+ * Generate a ray out of a camera.
+ *
+ * @arg cameraWorldMatrix: The camera matrix.
+ * @arg inverseProjectionMatrix: The inverse of the projection matrix.
+ * @arg uvPosition: The UV position in the resulting image.
+ * @arg rayOrigin: Will store the origin of the ray.
+ * @arg rayDirection: Will store the direction of the ray.
  */
 void createCameraRay(
         const float4x4 &cameraWorldMatrix,
@@ -653,166 +951,4 @@ void createCameraRay(
         direction
     );
     rayDirection = normalize(float3(direction.x, direction.y, direction.z));
-}
-
-
-/**
- * Invert a 4x4 matrix.
- * 
- * Turns out float4x4 has a .invert() method so this is 
- *
- * @arg m: The matrix to invert
- * @arg invOut: The location to store the inverted matrix
- *
- * @returns: true if it was possible to invert the matrix, flase otherwise
- */
-bool invert4x4(const float4x4 &m, float4x4 &invOut)
-{
-    float4x4 inv;
-    float det;
-
-    inv[0][0] =
-        m[1][1] * m[2][2] * m[3][3] - 
-        m[1][1] * m[2][3] * m[3][2] - 
-        m[2][1] * m[1][2] * m[3][3] + 
-        m[2][1] * m[1][3] * m[3][2] +
-        m[3][1] * m[1][2] * m[2][3] - 
-        m[3][1] * m[1][3] * m[2][2];
-
-    inv[1][0] =
-        -m[1][0] * m[2][2] * m[3][3] + 
-        m[1][0] * m[2][3] * m[3][2] + 
-        m[2][0] * m[1][2] * m[3][3] - 
-        m[2][0] * m[1][3] * m[3][2] - 
-        m[3][0] * m[1][2] * m[2][3] + 
-        m[3][0] * m[1][3] * m[2][2];
-
-    inv[2][0] =
-        m[1][0] * m[2][1] * m[3][3] - 
-        m[1][0] * m[2][3] * m[3][1] - 
-        m[2][0] * m[1][1] * m[3][3] + 
-        m[2][0] * m[1][3] * m[3][1] + 
-        m[3][0] * m[1][1] * m[2][3] - 
-        m[3][0] * m[1][3] * m[2][1];
-
-    inv[3][0] =
-        -m[1][0] * m[2][1] * m[3][2] + 
-        m[1][0] * m[2][2] * m[3][1] +
-        m[2][0] * m[1][1] * m[3][2] - 
-        m[2][0] * m[1][2] * m[3][1] - 
-        m[3][0] * m[1][1] * m[2][2] + 
-        m[3][0] * m[1][2] * m[2][1];
-
-    inv[0][1] =
-        -m[0][1] * m[2][2] * m[3][3] + 
-        m[0][1] * m[2][3] * m[3][2] + 
-        m[2][1] * m[0][2] * m[3][3] - 
-        m[2][1] * m[0][3] * m[3][2] - 
-        m[3][1] * m[0][2] * m[2][3] + 
-        m[3][1] * m[0][3] * m[2][2];
-
-    inv[1][1] =
-        m[0][0] * m[2][2] * m[3][3] - 
-        m[0][0] * m[2][3] * m[3][2] - 
-        m[2][0] * m[0][2] * m[3][3] + 
-        m[2][0] * m[0][3] * m[3][2] + 
-        m[3][0] * m[0][2] * m[2][3] - 
-        m[3][0] * m[0][3] * m[2][2];
-
-    inv[2][1] = 
-        m[0][0] * m[2][1] * m[3][3] + 
-        m[0][0] * m[2][3] * m[3][1] + 
-        m[2][0] * m[0][1] * m[3][3] - 
-        m[2][0] * m[0][3] * m[3][1] - 
-        m[3][0] * m[0][1] * m[2][3] + 
-        m[3][0] * m[0][3] * m[2][1];
-
-    inv[3][1] =
-        m[0][0] * m[2][1] * m[3][2] - 
-        m[0][0] * m[2][2] * m[3][1] - 
-        m[2][0] * m[0][1] * m[3][2] + 
-        m[2][0] * m[0][2] * m[3][1] + 
-        m[3][0] * m[0][1] * m[2][2] - 
-        m[3][0] * m[0][2] * m[2][1];
-
-    inv[0][2] =
-        m[0][1] * m[1][2] * m[3][3] - 
-        m[0][1] * m[1][3] * m[3][2] - 
-        m[1][1] * m[0][2] * m[3][3] + 
-        m[1][1] * m[0][3] * m[3][2] + 
-        m[3][1] * m[0][2] * m[1][3] - 
-        m[3][1] * m[0][3] * m[1][2];
-
-    inv[1][2] =
-        -m[0][0] * m[1][2] * m[3][3] + 
-        m[0][0] * m[1][3] * m[3][2] + 
-        m[1][0] * m[0][2] * m[3][3] - 
-        m[1][0] * m[0][3] * m[3][2] - 
-        m[3][0] * m[0][2] * m[1][3] + 
-        m[3][0] * m[0][3] * m[1][2];
-
-    inv[2][2] =
-        m[0][0] * m[1][1] * m[3][3] - 
-        m[0][0] * m[1][3] * m[3][1] - 
-        m[1][0] * m[0][1] * m[3][3] + 
-        m[1][0] * m[0][3] * m[3][1] + 
-        m[3][0] * m[0][1] * m[1][3] - 
-        m[3][0] * m[0][3] * m[1][1];
-
-    inv[3][2] =
-        -m[0][0] * m[1][1] * m[3][2] + 
-        m[0][0] * m[1][2] * m[3][1] + 
-        m[1][0] * m[0][1] * m[3][2] - 
-        m[1][0] * m[0][2] * m[3][1] - 
-        m[3][0] * m[0][1] * m[1][2] + 
-        m[3][0] * m[0][2] * m[1][1];
-
-    inv[0][3] =
-        -m[0][1] * m[1][2] * m[2][3] + 
-        m[0][1] * m[1][3] * m[2][2] + 
-        m[1][1] * m[0][2] * m[2][3] - 
-        m[1][1] * m[0][3] * m[2][2] - 
-        m[2][1] * m[0][2] * m[1][3] + 
-        m[2][1] * m[0][3] * m[1][2];
-
-    inv[1][3] =
-        m[0][0] * m[1][2] * m[2][3] - 
-        m[0][0] * m[1][3] * m[2][2] - 
-        m[1][0] * m[0][2] * m[2][3] + 
-        m[1][0] * m[0][3] * m[2][2] + 
-        m[2][0] * m[0][2] * m[1][3] - 
-        m[2][0] * m[0][3] * m[1][2];
-
-    inv[2][3] =
-        -m[0][0] * m[1][1] * m[2][3] + 
-        m[0][0] * m[1][3] * m[2][1] + 
-        m[1][0] * m[0][1] * m[2][3] - 
-        m[1][0] * m[0][3] * m[2][1] - 
-        m[2][0] * m[0][1] * m[1][3] + 
-        m[2][0] * m[0][3] * m[1][1];
-
-    inv[3][3] =
-        m[0][0] * m[1][1] * m[2][2] - 
-        m[0][0] * m[1][2] * m[2][1] - 
-        m[1][0] * m[0][1] * m[2][2] + 
-        m[1][0] * m[0][2] * m[2][1] + 
-        m[2][0] * m[0][1] * m[1][2] - 
-        m[2][0] * m[0][2] * m[1][1];
-
-    det = m[0][0] * inv[0][0] + m[0][1] * inv[1][0] + m[0][2] * inv[2][0] + m[0][3] * inv[3][0];
-
-    if (det == 0)
-        return false;
-
-    det = 1.0 / det;
-
-    for (int i=0; i < 4; i++)
-    {
-        for (int j=0; j < 4; j++)
-        {
-            invOut[i][j] = inv[i][j] * det;
-        }
-    }
-
-    return true;
 }

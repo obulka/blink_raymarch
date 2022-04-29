@@ -1456,6 +1456,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
     /**
      * Compute a raymarched pixel value.
+     * 
+     * @arg pos: The x, and y location we are currently processing.
      */
     void process(int2 pos)
     {

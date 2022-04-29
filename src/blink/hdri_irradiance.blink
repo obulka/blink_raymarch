@@ -17,7 +17,9 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
         float2 sampleStep;
 
 
-    // In define(), parameters can be given labels and default values.
+    /**
+     * In define(), parameters can be given labels and default values.
+     */
     void define()
     {
         defineParam(hdriFormatHeight, "HDRI Lighting Height", 1024);
@@ -26,6 +28,10 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * The init() function is run before any calls to process().
+     * Local variables can be initialized here.
+     */
     void init()
     {
         hdriPixelSize = float2(hdriFormatWidth / (2.0f * PI), hdriFormatHeight / PI);
@@ -40,6 +46,10 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
 
     /**
      * Get the value of hdri the ray would hit at infinite distance
+     *
+     * @arg rayDirection: The direction of the ray.
+     *
+     * @returns: The colour of the pixel in the direction of the ray.
      */
     float4 readHDRIValue(float3 rayDirection)
     {
@@ -53,6 +63,11 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Compute the irradiance of a pixel.
+     * 
+     * @arg pos: The x, and y location we are currently processing.
+     */
     void process(int2 pos)
     {
         const float2 uvPosition = pixelsToUV(

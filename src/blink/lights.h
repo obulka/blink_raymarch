@@ -9,40 +9,64 @@
 //
 
 
+/**
+ * Get the direction, and distance of a directional light.
+ *
+ * @arg direction: The direction the light is travelling.
+ * @arg lightDirection: Will store the direction to the light.
+ * @arg distanceToLight: Will store the distance to the light.
+ */
 inline void directionalLightData(
-        const float3 &surfaceNormal,
-        const float3 &light,
+        const float3 &direction,
         const float maxRayDistance,
         float3 &lightDirection,
         float &distanceToLight)
 {
-    lightDirection = -light;
+    lightDirection = -direction;
     distanceToLight = maxRayDistance;
 }
 
 
+/**
+ * Get the direction, and distance of a point light.
+ *
+ * @arg pointOnSurface: The point on the surface to compute the
+ *     light intensity at.
+ * @arg position: The position of the light.
+ * @arg lightDirection: Will store the direction to the light.
+ * @arg distanceToLight: Will store the distance to the light.
+ */
 inline void pointLightData(
         const float3 &pointOnSurface,
-        const float3 &light,
+        const float3 &position,
         float3 &lightDirection,
         float &distanceToLight)
 {
-    lightDirection = light - pointOnSurface;
+    lightDirection = position - pointOnSurface;
     distanceToLight = length(lightDirection);
 }
 
 
-inline void domeLightData(
-        const float maxRayDistance,
-        const float3 &light,
-        float3 &lightDirection,
-        float &distanceToLight)
-{
-    lightDirection = light;
-    distanceToLight = maxRayDistance;
-}
-
-
+/**
+ * Get the direction, distance, and intensity of a light.
+ *
+ * @arg pointOnSurface: The point on the surface to compute the
+ *     light intensity at.
+ * @arg surfaceNormal: The normal direction to the surface.
+ * @arg light: The light properties which depend on the light type.
+ * @arg lightType: The type of light to compute the intensity for.
+ *     0: directional
+ *     1: point
+ *     2: ambient
+ *     3: ambient occlusion
+ * @arg intensity: The light intensity.
+ * @arg falloff: The power of the falloff of the light.
+ * @arg maxRayDistance: The maximum distance a ray can travel.
+ * @arg distanceToLight: Will store the distance to the light.
+ * @arg lightDirection: Will store the direction to the light.
+ *
+ * @returns: The light intensity.
+ */
 float getLightData(
         const float3 &pointOnSurface,
         const float3 &surfaceNormal,
@@ -58,7 +82,6 @@ float getLightData(
     {
         // directional
         directionalLightData(
-            surfaceNormal,
             light,
             maxRayDistance,
             lightDirection,
@@ -70,16 +93,6 @@ float getLightData(
         // point
         pointLightData(
             pointOnSurface,
-            light,
-            lightDirection,
-            distanceToLight
-        );
-    }
-    else if (lightType == 100)
-    {
-        // dome
-        domeLightData(
-            maxRayDistance,
             light,
             lightDirection,
             distanceToLight
