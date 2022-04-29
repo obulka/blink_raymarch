@@ -1036,8 +1036,7 @@ float distanceToMandelbox(
  *     23: mandelbulb
  *     24: mandelbox
  *     25: mandelbox (no trap colour)
- * @arg dimensions: The radius of the 'tube' of the torus, the radius of
- *     the 'ring', and the angle to cap at in range (0-PI).
+ * @arg dimensions: The dimensions of the object.
  * @arg surfaceColour: The colour of the surface will be stored here.
  *     This will only be modified by the fractals (23-25).
  *

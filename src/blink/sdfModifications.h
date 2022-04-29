@@ -66,30 +66,30 @@ inline float hollow(const float distance, const float thickness)
 
 void performShapeModification(
         const int modifications,
-        const float4 &modParameters0,
-        const float4 &modParameters1,
+        const float4 &repetition,
+        const float4 &elongation,
         float3 &position)
 {
     if (modifications & 1)
     {
         position = finiteRepetition(
             position,
-            float3(modParameters0.x, modParameters0.y, modParameters0.z),
-            modParameters0.w
+            float3(repetition.x, repetition.y, repetition.z),
+            repetition.w
         );
     }
     else if (modifications & 2)
     {
         position = infiniteRepetition(
             position,
-            float3(modParameters0.x, modParameters0.y, modParameters0.z)
+            float3(repetition.x, repetition.y, repetition.z)
         );
     }
     if (modifications & 4)
     {
         position = elongate(
             position,
-            float3(modParameters1.x, modParameters1.y, modParameters1.z)
+            float3(elongation.x, elongation.y, elongation.z)
         );
     }
     if (modifications & 8)
