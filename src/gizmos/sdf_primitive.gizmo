@@ -8,11 +8,11 @@ Gizmo {
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
  dimension_x 0.5
- addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN R 0 10}
- dimension_y 0.25
- addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN R 0 10}
- dimension_z 0.25
- addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold." +HIDDEN R 0.01 2}
+ addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the deeper the fractal will have detail." +HIDDEN R 1 30}
+ dimension_y 10
+ addUserKnob {7 dimension_z l "max square radius" t "When the square radius has reached this length, stop iterating." +HIDDEN R 1 9}
+ dimension_z 4
+ addUserKnob {7 dimension_w l "orbital trap blend strength" t "Transition between orbital trap based colouring and the colour provided by the 'colour' knob." +HIDDEN}
  dimension_w 1
  addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
  wall_thickness 0.01
@@ -46,11 +46,12 @@ Gizmo {
  addUserKnob {7 repetition_spacing l spacing t "The spacing between the objects." +HIDDEN R 0 10}
  repetition_spacing 1.1
  addUserKnob {26 ""}
- addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: All children of this object will be subtracted from this object, leaving holes.\n    Intersection: Only the region where this object and its children overlap will remain.\n    Smooth Union: All children will smoothly blend together with this object according to the 'blend strength'.\n    Smooth Subtraction: All children of this object will be subtracted from this object, leaving holes that are smoothed according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object and its children overlap will remain, and the remaining regions will be smoothed according to the 'blend strength'." +DISABLED M {union subtraction intersection "smooth union" "smooth subtraction" "smooth intersection"}}
+ addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: This object will be subtracted from all of its\n        children, leaving holes.\n    Intersection: Only the region where this object and its\n        children overlap will remain.\n    Smooth Union: All children will smoothly blend together\n        with this object according to the 'blend strength'.\n    Smooth Subtraction:This object will be subtracted from all\n        of its children,  leaving holes that are smoothed\n        according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object\n        and its children overlap will remain, and the remaining\n        regions will be smoothed according to the 'blend\n        strength'." +DISABLED M {union subtraction intersection "smooth union" "smooth subtraction" "smooth intersection" "" "" ""}}
+ blend_type "smooth union"
  addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected." +DISABLED}
- blend_strength 0.5
- addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera." +DISABLED +STARTLINE}
- addUserKnob {26 "" +STARTLINE}
+ blend_strength 0.125
+ addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +DISABLED +STARTLINE}
+ addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
  Input {
@@ -241,7 +242,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set Nb6a62b00 [stack 0]
+set N8dfa890 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -263,7 +264,7 @@ set Nb6a62b00 [stack 0]
    xpos 34
    ypos -6
   }
-set Nb6a60f00 [stack 0]
+set N8e0e090 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -274,7 +275,7 @@ set Nb6a60f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nb6a62b00
+push $N8dfa890
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -303,7 +304,7 @@ push $Nb6a62b00
    xpos 158
    ypos 167
   }
-push $Nb6a60f00
+push $N8e0e090
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -396,7 +397,7 @@ push $Nb6a60f00
    xpos 192
    ypos -2
   }
-set Nb6a08800 [stack 0]
+set N8eb9aa0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -418,7 +419,7 @@ set Nb6a08800 [stack 0]
    xpos 34
    ypos -6
   }
-set Nb69eab00 [stack 0]
+set N8ecd2a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -429,7 +430,7 @@ set Nb69eab00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nb6a08800
+push $N8eb9aa0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -458,7 +459,7 @@ push $Nb6a08800
    xpos 158
    ypos 167
   }
-push $Nb69eab00
+push $N8ecd2a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
