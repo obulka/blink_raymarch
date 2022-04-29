@@ -54,7 +54,7 @@ float getLightData(
         float &distanceToLight,
         float3 &lightDirection)
 {
-    if (lightType == 1)
+    if (lightType == 0)
     {
         // directional
         directionalLightData(
@@ -65,7 +65,7 @@ float getLightData(
             distanceToLight
         );
     }
-    else if (lightType == 2)
+    else if (lightType == 1)
     {
         // point
         pointLightData(

@@ -31,7 +31,6 @@ class SDFLight(SDFKnobManager):
     _knob_changed_callbacks = KnobChangedCallbacks(SDFKnobManager._knob_changed_callbacks)
 
     dimensional_knob_defaults = {
-        "ambient": OrderedDict(),
         "directional": OrderedDict([
             (
                 "x direction",
@@ -84,6 +83,7 @@ class SDFLight(SDFKnobManager):
                 },
             ),
         ]),
+        "ambient": OrderedDict(),
         "ambient occlusion": OrderedDict([
             (
                 "iterations",

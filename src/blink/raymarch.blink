@@ -843,7 +843,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             SampleType(lightProperties1) lightProperty1 = lightProperties1(i, 0);
 
             int lightType = (int) lightProperty.w;
-            if (lightType == 0)
+            if (lightType == 2)
             {
                 currentLightIntensity = float2(light.w, 1);
             }
