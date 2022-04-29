@@ -877,12 +877,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         {
             const float4 hdriLightColour = readHDRILightValue(surfaceNormal);
             lightColour += diffuse * hdriLightColour;
-            lightIntensity.x += diffuse * length(
-                float3(
-                    hdriLightColour.x,
-                    hdriLightColour.y,
-                    hdriLightColour.z
-                )
+            lightIntensity += float2(
+                diffuse * length(
+                    float3(
+                        hdriLightColour.x,
+                        hdriLightColour.y,
+                        hdriLightColour.z
+                    )
+                ),
+                1.0f
             );
         }
 
