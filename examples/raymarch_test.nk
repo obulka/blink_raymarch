@@ -19,6 +19,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
+                    <page id="DAG.2"/>
                 </dock>
             </splitter>
             <split size="615"/>
@@ -219,7 +220,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set N688cbe0 [stack 0]
+set N51fe360 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -241,7 +242,7 @@ set N688cbe0 [stack 0]
    xpos 34
    ypos -6
   }
-set N68a03e0 [stack 0]
+set N5211b60 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -252,7 +253,7 @@ set N68a03e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N688cbe0
+push $N51fe360
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -281,7 +282,7 @@ push $N688cbe0
    xpos 158
    ypos 167
   }
-push $N68a03e0
+push $N5211b60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -512,7 +513,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6a0bf10 [stack 0]
+set N74f0b50 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -534,7 +535,7 @@ set N6a0bf10 [stack 0]
    xpos 34
    ypos -6
   }
-set N6a1f710 [stack 0]
+set N7504350 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -545,7 +546,7 @@ set N6a1f710 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6a0bf10
+push $N74f0b50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -574,7 +575,7 @@ push $N6a0bf10
    xpos 158
    ypos 167
   }
-push $N6a1f710
+push $N7504350
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -758,7 +759,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6b22ca0 [stack 0]
+set N760a940 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -780,7 +781,7 @@ set N6b22ca0 [stack 0]
    xpos 34
    ypos -6
   }
-set N6b364a0 [stack 0]
+set N761e140 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -791,7 +792,7 @@ set N6b364a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6b22ca0
+push $N760a940
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -820,7 +821,7 @@ push $N6b22ca0
    xpos 158
    ypos 167
   }
-push $N6b364a0
+push $N761e140
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1144,7 +1145,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N6cc9ec0 [stack 0]
+set N53a13e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1166,7 +1167,7 @@ set N6cc9ec0 [stack 0]
    xpos 34
    ypos -6
   }
-set N6cdd6c0 [stack 0]
+set N53b49d0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1177,7 +1178,7 @@ set N6cdd6c0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6cc9ec0
+push $N53a13e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1206,7 +1207,7 @@ push $N6cc9ec0
    xpos 158
    ypos 167
   }
-push $N6cdd6c0
+push $N53b49d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1299,7 +1300,7 @@ push $N6cdd6c0
    xpos 192
    ypos -2
   }
-set N6d890d0 [stack 0]
+set N545f5c0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1321,7 +1322,7 @@ set N6d890d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N6d9c8d0 [stack 0]
+set N5472dc0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1332,7 +1333,7 @@ set N6d9c8d0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6d890d0
+push $N545f5c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1361,7 +1362,7 @@ push $N6d890d0
    xpos 158
    ypos 167
   }
-push $N6d9c8d0
+push $N5472dc0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1668,7 +1669,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6f29730 [stack 0]
+set N55ff9e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1690,7 +1691,7 @@ set N6f29730 [stack 0]
    xpos 34
    ypos -6
   }
-set N6f3cf30 [stack 0]
+set N56131e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1701,7 +1702,7 @@ set N6f3cf30 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6f29730
+push $N55ff9e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1730,7 +1731,7 @@ push $N6f29730
    xpos 158
    ypos 167
   }
-push $N6f3cf30
+push $N56131e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1823,7 +1824,7 @@ push $N6f3cf30
    xpos 192
    ypos -2
   }
-set N6fe8c50 [stack 0]
+set N56bebf0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1845,7 +1846,7 @@ set N6fe8c50 [stack 0]
    xpos 34
    ypos -6
   }
-set N6ffc450 [stack 0]
+set N56d23f0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1856,7 +1857,7 @@ set N6ffc450 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6fe8c50
+push $N56bebf0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1885,7 +1886,7 @@ push $N6fe8c50
    xpos 158
    ypos 167
   }
-push $N6ffc450
+push $N56d23f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2193,7 +2194,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N718ab50 [stack 0]
+set N585f550 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2215,7 +2216,7 @@ set N718ab50 [stack 0]
    xpos 34
    ypos -6
   }
-set N719e350 [stack 0]
+set N5872d50 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2226,7 +2227,7 @@ set N719e350 [stack 0]
    xpos -98
    ypos 336
   }
-push $N718ab50
+push $N585f550
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2255,7 +2256,7 @@ push $N718ab50
    xpos 158
    ypos 167
   }
-push $N719e350
+push $N5872d50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2348,7 +2349,7 @@ push $N719e350
    xpos 192
    ypos -2
   }
-set N724a070 [stack 0]
+set N591ea70 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2370,7 +2371,7 @@ set N724a070 [stack 0]
    xpos 34
    ypos -6
   }
-set N725d870 [stack 0]
+set N5932270 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2381,7 +2382,7 @@ set N725d870 [stack 0]
    xpos -98
    ypos 336
   }
-push $N724a070
+push $N591ea70
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2410,7 +2411,7 @@ push $N724a070
    xpos 158
    ypos 167
   }
-push $N725d870
+push $N5932270
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2717,7 +2718,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N73eafc0 [stack 0]
+set N5ac09e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2739,7 +2740,7 @@ set N73eafc0 [stack 0]
    xpos 34
    ypos -6
   }
-set N73fe7c0 [stack 0]
+set N5ad41e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2750,7 +2751,7 @@ set N73fe7c0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N73eafc0
+push $N5ac09e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2779,7 +2780,7 @@ push $N73eafc0
    xpos 158
    ypos 167
   }
-push $N73fe7c0
+push $N5ad41e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2872,7 +2873,7 @@ push $N73fe7c0
    xpos 192
    ypos -2
   }
-set N74aa4e0 [stack 0]
+set N5b7ff00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2894,7 +2895,7 @@ set N74aa4e0 [stack 0]
    xpos 34
    ypos -6
   }
-set N74bdce0 [stack 0]
+set N5b93700 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2905,7 +2906,7 @@ set N74bdce0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N74aa4e0
+push $N5b7ff00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2934,7 +2935,7 @@ push $N74aa4e0
    xpos 158
    ypos 167
   }
-push $N74bdce0
+push $N5b93700
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3243,7 +3244,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N764b7d0 [stack 0]
+set N5d27200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3265,7 +3266,7 @@ set N764b7d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N765efd0 [stack 0]
+set N5d3aa00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3276,7 +3277,7 @@ set N765efd0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N764b7d0
+push $N5d27200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3305,7 +3306,7 @@ push $N764b7d0
    xpos 158
    ypos 167
   }
-push $N765efd0
+push $N5d3aa00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3398,7 +3399,7 @@ push $N765efd0
    xpos 192
    ypos -2
   }
-set N770acf0 [stack 0]
+set N5de6720 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3420,7 +3421,7 @@ set N770acf0 [stack 0]
    xpos 34
    ypos -6
   }
-set N771e4f0 [stack 0]
+set N5df9f20 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3431,7 +3432,7 @@ set N771e4f0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N770acf0
+push $N5de6720
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3460,7 +3461,7 @@ push $N770acf0
    xpos 158
    ypos 167
   }
-push $N771e4f0
+push $N5df9f20
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3768,7 +3769,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N78abc30 [stack 0]
+set N5f87660 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3790,7 +3791,7 @@ set N78abc30 [stack 0]
    xpos 34
    ypos -6
   }
-set N78bf430 [stack 0]
+set N5f9ae60 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3801,7 +3802,7 @@ set N78bf430 [stack 0]
    xpos -98
    ypos 336
   }
-push $N78abc30
+push $N5f87660
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3830,7 +3831,7 @@ push $N78abc30
    xpos 158
    ypos 167
   }
-push $N78bf430
+push $N5f9ae60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3923,7 +3924,7 @@ push $N78bf430
    xpos 192
    ypos -2
   }
-set N796b150 [stack 0]
+set N6046b80 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3945,7 +3946,7 @@ set N796b150 [stack 0]
    xpos 34
    ypos -6
   }
-set N797e950 [stack 0]
+set N605a380 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3956,7 +3957,7 @@ set N797e950 [stack 0]
    xpos -98
    ypos 336
   }
-push $N796b150
+push $N6046b80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3985,7 +3986,7 @@ push $N796b150
    xpos 158
    ypos 167
   }
-push $N797e950
+push $N605a380
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4295,7 +4296,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N7b0dc10 [stack 0]
+set N61e7d50 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4317,7 +4318,7 @@ set N7b0dc10 [stack 0]
    xpos 34
    ypos -6
   }
-set N7b21410 [stack 0]
+set N61fb550 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4328,7 +4329,7 @@ set N7b21410 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7b0dc10
+push $N61e7d50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4357,7 +4358,7 @@ push $N7b0dc10
    xpos 158
    ypos 167
   }
-push $N7b21410
+push $N61fb550
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4450,7 +4451,7 @@ push $N7b21410
    xpos 192
    ypos -2
   }
-set N7bcd130 [stack 0]
+set N62a7270 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4472,7 +4473,7 @@ set N7bcd130 [stack 0]
    xpos 34
    ypos -6
   }
-set N7be0930 [stack 0]
+set N62baa70 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4483,7 +4484,7 @@ set N7be0930 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7bcd130
+push $N62a7270
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4512,7 +4513,7 @@ push $N7bcd130
    xpos 158
    ypos 167
   }
-push $N7be0930
+push $N62baa70
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4720,7 +4721,7 @@ Group {
   xpos 669
   ypos 459
  }
-set N7cdb480 [stack 0]
+set N63b6eb0 [stack 0]
  Copy {
   inputs 2
   channels all
@@ -4823,7 +4824,7 @@ set N7cdb480 [stack 0]
    xpos 192
    ypos -2
   }
-set N7d6e3a0 [stack 0]
+set N6449dd0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4845,7 +4846,7 @@ set N7d6e3a0 [stack 0]
    xpos 34
    ypos -6
   }
-set N7d81ba0 [stack 0]
+set N645d5d0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4856,7 +4857,7 @@ set N7d81ba0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7d6e3a0
+push $N6449dd0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4885,7 +4886,7 @@ push $N7d6e3a0
    xpos 158
    ypos 167
   }
-push $N7d81ba0
+push $N645d5d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4978,7 +4979,7 @@ push $N7d81ba0
    xpos 192
    ypos -2
   }
-set N7e2d8c0 [stack 0]
+set N65092f0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5000,7 +5001,7 @@ set N7e2d8c0 [stack 0]
    xpos 34
    ypos -6
   }
-set N7e410c0 [stack 0]
+set N651caf0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5011,7 +5012,7 @@ set N7e410c0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7e2d8c0
+push $N65092f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5040,7 +5041,7 @@ push $N7e2d8c0
    xpos 158
    ypos 167
   }
-push $N7e410c0
+push $N651caf0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5107,7 +5108,7 @@ push $N7e410c0
   xpos 1183
   ypos 1002
  }
-push $N7cdb480
+push $N63b6eb0
  Viewer {
   frame_range 1-63
   gamma 0.058
@@ -5362,7 +5363,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N7ff64d0 [stack 0]
+set N66d1b00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5384,7 +5385,7 @@ set N7ff64d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N8009cd0 [stack 0]
+set N66e5300 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5395,7 +5396,7 @@ set N8009cd0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7ff64d0
+push $N66d1b00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5424,7 +5425,7 @@ push $N7ff64d0
    xpos 158
    ypos 167
   }
-push $N8009cd0
+push $N66e5300
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5517,7 +5518,7 @@ push $N8009cd0
    xpos 192
    ypos -2
   }
-set N80b55c0 [stack 0]
+set N6790bf0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5539,7 +5540,7 @@ set N80b55c0 [stack 0]
    xpos 34
    ypos -6
   }
-set N80c8dc0 [stack 0]
+set N67a43f0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5550,7 +5551,7 @@ set N80c8dc0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N80b55c0
+push $N6790bf0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5579,7 +5580,7 @@ push $N80b55c0
    xpos 158
    ypos 167
   }
-push $N80c8dc0
+push $N67a43f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5889,7 +5890,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N8255e70 [stack 0]
+set N6931520 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5911,7 +5912,7 @@ set N8255e70 [stack 0]
    xpos 34
    ypos -6
   }
-set N8269670 [stack 0]
+set N6944d20 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5922,7 +5923,7 @@ set N8269670 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8255e70
+push $N6931520
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5951,7 +5952,7 @@ push $N8255e70
    xpos 158
    ypos 167
   }
-push $N8269670
+push $N6944d20
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6044,7 +6045,7 @@ push $N8269670
    xpos 192
    ypos -2
   }
-set N8315070 [stack 0]
+set N69f0720 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6066,7 +6067,7 @@ set N8315070 [stack 0]
    xpos 34
    ypos -6
   }
-set N8328870 [stack 0]
+set N6a03f20 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6077,7 +6078,7 @@ set N8328870 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8315070
+push $N69f0720
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6106,7 +6107,7 @@ push $N8315070
    xpos 158
    ypos 167
   }
-push $N8328870
+push $N6a03f20
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6417,7 +6418,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N84b6580 [stack 0]
+set N6b91c30 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6439,7 +6440,7 @@ set N84b6580 [stack 0]
    xpos 34
    ypos -6
   }
-set N84c9d80 [stack 0]
+set N6ba5430 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6450,7 +6451,7 @@ set N84c9d80 [stack 0]
    xpos -98
    ypos 336
   }
-push $N84b6580
+push $N6b91c30
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6479,7 +6480,7 @@ push $N84b6580
    xpos 158
    ypos 167
   }
-push $N84c9d80
+push $N6ba5430
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6572,7 +6573,7 @@ push $N84c9d80
    xpos 192
    ypos -2
   }
-set N8575aa0 [stack 0]
+set N6c51150 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6594,7 +6595,7 @@ set N8575aa0 [stack 0]
    xpos 34
    ypos -6
   }
-set N85892a0 [stack 0]
+set N6c64950 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6605,7 +6606,7 @@ set N85892a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8575aa0
+push $N6c51150
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6634,7 +6635,7 @@ push $N8575aa0
    xpos 158
    ypos 167
   }
-push $N85892a0
+push $N6c64950
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6943,7 +6944,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N87169f0 [stack 0]
+set N6df20a0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6965,7 +6966,7 @@ set N87169f0 [stack 0]
    xpos 34
    ypos -6
   }
-set N872a1f0 [stack 0]
+set N6e058a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6976,7 +6977,7 @@ set N872a1f0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N87169f0
+push $N6df20a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7005,7 +7006,7 @@ push $N87169f0
    xpos 158
    ypos 167
   }
-push $N872a1f0
+push $N6e058a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7098,7 +7099,7 @@ push $N872a1f0
    xpos 192
    ypos -2
   }
-set N87d5f10 [stack 0]
+set N6eb15c0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7120,7 +7121,7 @@ set N87d5f10 [stack 0]
    xpos 34
    ypos -6
   }
-set N87e9710 [stack 0]
+set N6ec4dc0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7131,7 +7132,7 @@ set N87e9710 [stack 0]
    xpos -98
    ypos 336
   }
-push $N87d5f10
+push $N6eb15c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7160,7 +7161,7 @@ push $N87d5f10
    xpos 158
    ypos 167
   }
-push $N87e9710
+push $N6ec4dc0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7231,7 +7232,7 @@ end_group
 push 0
 Group {
  inputs 2
- name sdf_primitive
+ name sdf_primitive100
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
@@ -7470,7 +7471,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N89771d0 [stack 0]
+set N7052890 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7492,7 +7493,7 @@ set N89771d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N898a9d0 [stack 0]
+set N7066090 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7503,7 +7504,7 @@ set N898a9d0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N89771d0
+push $N7052890
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7532,7 +7533,7 @@ push $N89771d0
    xpos 158
    ypos 167
   }
-push $N898a9d0
+push $N7066090
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7625,7 +7626,7 @@ push $N898a9d0
    xpos 192
    ypos -2
   }
-set N8a366f0 [stack 0]
+set N7111db0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7647,7 +7648,7 @@ set N8a366f0 [stack 0]
    xpos 34
    ypos -6
   }
-set N8a49ef0 [stack 0]
+set N71255b0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7658,7 +7659,7 @@ set N8a49ef0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8a366f0
+push $N7111db0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7687,7 +7688,7 @@ push $N8a366f0
    xpos 158
    ypos 167
   }
-push $N8a49ef0
+push $N71255b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7998,7 +7999,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N8bdd880 [stack 0]
+set N72b2f30 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8020,7 +8021,7 @@ set N8bdd880 [stack 0]
    xpos 34
    ypos -6
   }
-set N8bf3090 [stack 0]
+set N72c6730 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8031,7 +8032,7 @@ set N8bf3090 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8bdd880
+push $N72b2f30
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8060,7 +8061,7 @@ push $N8bdd880
    xpos 158
    ypos 167
   }
-push $N8bf3090
+push $N72c6730
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8153,7 +8154,7 @@ push $N8bf3090
    xpos 192
    ypos -2
   }
-set N8c9edb0 [stack 0]
+set N7372450 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8175,7 +8176,7 @@ set N8c9edb0 [stack 0]
    xpos 34
    ypos -6
   }
-set N8cb25b0 [stack 0]
+set N7385c50 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8186,7 +8187,7 @@ set N8cb25b0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8c9edb0
+push $N7372450
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8215,7 +8216,7 @@ push $N8c9edb0
    xpos 158
    ypos 167
   }
-push $N8cb25b0
+push $N7385c50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8354,56 +8355,6 @@ Group {
   bdwidth 1184
   bdheight 855
  }
- Input {
-  inputs 0
-  name camera
-  xpos 1354
-  ypos -1578
-  number 2
- }
- Camera {
-  projection_mode {{"\[expression \[value the_cam]projection_mode(\[value the_frame])]"}}
-  focal {{"\[expression \[value the_cam]focal(\[value the_frame])]"}}
-  haperture {{"\[expression \[value the_cam]haperture(\[value the_frame])]"}}
-  vaperture {{"\[expression \[value the_cam]vaperture(\[value the_frame])]"}}
-  near {{"\[expression \[value the_cam]near(\[value the_frame])]"}}
-  far {{"\[expression \[value the_cam]far(\[value the_frame])]"}}
-  win_translate {{"\[expression \[value the_cam]win_translate.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_translate.v(\[value the_frame])]"}}
-  win_scale {{"\[expression \[value the_cam]win_scale.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_scale.v(\[value the_frame])]"}}
-  winroll {{"\[expression \[value the_cam]winroll(\[value the_frame])]"}}
-  focal_point {{"\[expression \[value the_cam]focal_point(\[value the_frame])]"}}
-  fstop {{"\[expression \[value the_cam]fstop(\[value the_frame])]"}}
-  name DummyCam
-  help "DummyCam by Adrian Pueyo\n\nCamera that apart from the matrices also grabs all the \"Projection\" values from the upstream camera that it's connected to. Turns into a default Camera if no Camera connected. Can also be used inside of groups and gizmos, as many levels deep as you want :D All using live and super fast TCL.\n\nUpdated v1.1: Now grabs the correct frame too (thanks Erwan Leroy for the idea).\n\nUpdated v1.3: Now accepts Nuke13's Camera3\n\nadrianpueyo.com, 2019-2021"
-  onCreate "n = nuke.thisNode()\nfor k in \[\"projection_mode\",\"focal\",\"haperture\",\"vaperture\",\"near\",\"far\",\"win_translate\",\"win_scale\",\"winroll\",\"focal_point\",\"fstop\"]:\n    n\[k].setFlag(0x0000000010000000)"
-  xpos 1364
-  ypos -1473
-  addUserKnob {20 DummyCam l Defaults}
-  addUserKnob {43 the_cam +INVISIBLE}
-  the_cam "\[\n#DummyCam v1.3 - Updated 5 May 2021.\nset starting_point \"this.input0\"\nset default \"this.d_\"\n\n# If cam has no inputs, return the default.\nif \{\[exists \$starting_point]\} \{\n    set x \[node \$starting_point]\n\} \{ \n    return \$default\n\}\n\nset finished 0\nwhile \{\$finished != 1\} \{\n\n    # First look for a Cam or Input or topnode.\n    while \{\[class \$x] != \"Camera3\" && \[class \$x] != \"Camera2\" && \[class \$x] != \"Camera\" && \[class \$x] != \"Input\" && \$x != \[topnode \$x]\} \{\n        set x \[node \$x.input0]\n    \}\n\n    # Then, check if node is a cam (and return), and otherwise, if it's an input, see if the parent exists and move to it.\n    if \{\[class \$x]==\"Camera3\"||\[class \$x]==\"Camera2\"||\[class \$x]==\"Camera\"\} \{\n        set x \[append x \".\"]\n        return \$x\n    \} \{ \n        if \{ \[class \$x]==\"Input\" \} \{ \n            set inp \"\$x.parent.input\"\n            set inputNum \[value \$x.number]\n            set inp \[append inp \$inputNum]\n            if \{ \[exists \$inp] \} \{\n                set x \[node \$inp]\n            \} \{ \n                set finished 1\n            \}\n        \} \{ \n            set finished 1\n        \}\n    \}\n\}\nreturn \$default\n]"
-  addUserKnob {43 the_frame +INVISIBLE}
-  the_frame "\[\nset the_camera \[string trimright \[value the_cam] .]\nif \{\[exists \$the_camera]\} \{\n    return \[value \$the_camera.frame]\n\} \{ \n    return \[frame]\n\}\n]"
-  addUserKnob {4 d_projection_mode l projection M {perspective orthographic uv spherical ""}}
-  addUserKnob {7 d_focal l "focal length" R 0 100}
-  d_focal 50
-  addUserKnob {7 d_haperture l "horiz aperture" R 0 50}
-  d_haperture 24.576
-  addUserKnob {7 d_vaperture l "vert aperture" R 0 50}
-  d_vaperture 18.672
-  addUserKnob {7 d_near l near R 0 10}
-  d_near 0.1
-  addUserKnob {7 d_far l far R 0 10000}
-  d_far 10000
-  addUserKnob {30 d_win_translate l "window translate"}
-  addUserKnob {30 d_win_scale l "window scale"}
-  d_win_scale {1 1}
-  addUserKnob {7 d_winroll l "window roll" R 0 45}
-  addUserKnob {7 d_focal_point l "focal distance" R 0 10}
-  d_focal_point 2
-  addUserKnob {7 d_fstop l fstop R 0 30}
-  d_fstop 16
-  addUserKnob {26 version l " " t "Updated 5 May 2021" T "<span style=\"color:#666\"><br/><b>DummyCam v1.3</b> - <a href=\"http://www.adrianpueyo.com\" style=\"color:#666;text-decoration: none;\">adrianpueyo.com</a>, 2019-2021</span>"}
- }
  Constant {
   inputs 0
   format "2 1 0 0 2 1 1 lights"
@@ -8429,10 +8380,10 @@ Group {
   xpos 1695
   ypos -1474
  }
-set N8da4880 [stack 0]
+set N7715200 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/hdri_irradiance.blink
-  recompileCount 117
+  recompileCount 118
   ProgramGroup 1
   KernelDescription "2 \"HDRIrradiance\" iterate pixelWise 89753a12538853aa2a4faf5d3f883737500a23e349b692f5e91dc6e43a7ce270 2 \"hdri\" Read Random \"dst\" Write Point 3 \"HDRI Lighting Width\" Int 1 AAgAAA== \"HDRI Lighting Height\" Int 1 AAQAAA== \"Samples\" Int 2 ZAAAADIAAAA= 3 \"hdriFormatWidth\" 1 1 \"hdriFormatHeight\" 1 1 \"samples\" 2 1 3 \"hdriPixelSize\" Float 2 1 AAAAAAAAAAA= \"up\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"sampleStep\" Float 2 1 AAAAAAAAAAA="
   kernelSource "#include \"math.h\"\n\n\nkernel HDRIrradiance : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> hdri; // the input image\n    Image<eWrite> dst; // the output image\n\n    param:\n        int hdriFormatWidth;\n        int hdriFormatHeight;\n        int2 samples;\n\n    local:\n        float2 hdriPixelSize;\n        float3 up;\n        float2 sampleStep;\n\n\n    // In define(), parameters can be given labels and default values.\n    void define()\n    \{\n        defineParam(hdriFormatHeight, \"HDRI Lighting Height\", 1024);\n        defineParam(hdriFormatWidth, \"HDRI Lighting Width\", 2048);\n        defineParam(samples, \"Samples\", int2(100, 50));\n    \}\n\n\n    void init()\n    \{\n        hdriPixelSize = float2(hdriFormatWidth / (2.0f * PI), hdriFormatHeight / PI);\n        up = float3(0, 1, 0);\n\n        sampleStep = float2(\n            2.0f * PI / (float) samples.x,\n            PI / (2.0f * (float) samples.y)\n        );\n    \}\n\n\n    /**\n     * Get the value of hdri the ray would hit at infinite distance\n     */\n    float4 readHDRIValue(float3 rayDirection)\n    \{\n        const float2 angles = cartesionUnitVectorToSpherical(rayDirection);\n\n        // Why does bilinear give nans? :(\n        return hdri(\n            round(hdriPixelSize.x * angles.x) - 1,\n            round(hdriFormatHeight - (hdriPixelSize.y * angles.y)) - 1\n        );\n    \}\n\n\n    void process(int2 pos)\n    \{\n        const float2 uvPosition = pixelsToUV(\n            float2(pos.x, pos.y),\n            float2(hdriFormatWidth, hdriFormatHeight)\n        );\n        const float3 direction = sphericalUnitVectorToCartesion(\n            uvPositionToAngles(uvPosition)\n        );\n\n        const float3 tangentRight = normalize(cross(up, direction));\n        const float3 tangentUp = normalize(cross(direction, tangentRight));\n\n        float4 irradiance = float4(0);\n\n        for (float theta = 0.0f; theta < 2.0f * PI; theta += sampleStep.x)\n        \{\n            for (float phi = PI / 2.0f; phi > 0.0f; phi -= sampleStep.y)\n            \{\n                const float3 tangent = sphericalUnitVectorToCartesion(float2(theta, phi));\n                const float3 sampleDirection = (\n                    tangent.x * tangentRight\n                    + tangent.y * tangentUp\n                    + tangent.z * direction\n                );\n\n                irradiance += readHDRIValue(sampleDirection) * cos(phi) * sin(phi);\n            \}\n        \}\n\n        dst() = PI * irradiance / (float) (samples.x * samples.y);\n    \}\n\};\n"
@@ -8461,10 +8412,10 @@ set N8da4880 [stack 0]
  Constant {
   inputs 0
   channels sdf_light
-  format "1 1 0 0 1 1 1 1x1"
+  format "2 1 0 0 2 1 1 lights"
   name Constant4
   xpos -278
-  ypos -1547
+  ypos -1516
  }
  Input {
   inputs 0
@@ -8477,14 +8428,14 @@ set N8da4880 [stack 0]
   inputs 2
   name Merge3
   xpos -82
-  ypos -1518
+  ypos -1487
  }
  Dot {
   name light_dot
   xpos -48
   ypos -1309
  }
-set Na173130 [stack 0]
+set N8ae3880 [stack 0]
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -8498,7 +8449,7 @@ set Na173130 [stack 0]
   xpos -232
   ypos -866
  }
-push $Na173130
+push $N8ae3880
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -8510,7 +8461,7 @@ push $Na173130
   xpos -113
   ypos -864
  }
-push $Na173130
+push $N8ae3880
  Shuffle {
   in sdf_light
   name light
@@ -8525,10 +8476,10 @@ push $Na173130
  Constant {
   inputs 0
   channels sdf_position_scale
-  format "1 1 0 0 1 1 1 1x1"
+  format "2 1 0 0 2 1 1 lights"
   name Constant2
   xpos 411
-  ypos -1545
+  ypos -1502
  }
  Input {
   inputs 0
@@ -8540,14 +8491,15 @@ push $Na173130
   inputs 2
   name Merge2
   xpos 607
-  ypos -1516
+  ypos -1473
  }
+set N8b36590 [stack 0]
  Dot {
   name obj_dot
   xpos 641
   ypos -1318
  }
-set Na1d66d0 [stack 0]
+set N8b46e20 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -8559,7 +8511,7 @@ set Na1d66d0 [stack 0]
   xpos 322
   ypos -863
  }
-push $Na1d66d0
+push $N8b46e20
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -8571,7 +8523,7 @@ push $Na1d66d0
   xpos 780
   ypos -865
  }
-push $Na1d66d0
+push $N8b46e20
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -8583,7 +8535,7 @@ push $Na1d66d0
   xpos 641
   ypos -864
  }
-push $Na1d66d0
+push $N8b46e20
  Shuffle {
   in sdf_shape
   name shape
@@ -8595,7 +8547,7 @@ push $Na1d66d0
   xpos 473
   ypos -863
  }
-push $Na1d66d0
+push $N8b46e20
  Shuffle {
   in sdf_colour
   name colour
@@ -8607,7 +8559,7 @@ push $Na1d66d0
   xpos 165
   ypos -864
  }
-push $Na1d66d0
+push $N8b46e20
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -8619,7 +8571,7 @@ push $Na1d66d0
   xpos 1227
   ypos -857
  }
-push $Na1d66d0
+push $N8b46e20
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -8631,7 +8583,7 @@ push $Na1d66d0
   xpos 1076
   ypos -854
  }
-push $Na1d66d0
+push $N8b46e20
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -8643,7 +8595,7 @@ push $Na1d66d0
   xpos 934
   ypos -859
  }
-push $N8da4880
+push $N7715200
  Constant {
   inputs 0
   name Constant1
@@ -8748,6 +8700,64 @@ push $N8da4880
   xpos 1661
   ypos -122
  }
+push $N8b36590
+ Viewer {
+  frame_range 1-63
+  channels sdf_dimensions
+  name Viewer1
+  xpos 821
+  ypos -1369
+ }
+ Input {
+  inputs 0
+  name camera
+  xpos 1354
+  ypos -1578
+  number 2
+ }
+ Camera {
+  projection_mode {{"\[expression \[value the_cam]projection_mode(\[value the_frame])]"}}
+  focal {{"\[expression \[value the_cam]focal(\[value the_frame])]"}}
+  haperture {{"\[expression \[value the_cam]haperture(\[value the_frame])]"}}
+  vaperture {{"\[expression \[value the_cam]vaperture(\[value the_frame])]"}}
+  near {{"\[expression \[value the_cam]near(\[value the_frame])]"}}
+  far {{"\[expression \[value the_cam]far(\[value the_frame])]"}}
+  win_translate {{"\[expression \[value the_cam]win_translate.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_translate.v(\[value the_frame])]"}}
+  win_scale {{"\[expression \[value the_cam]win_scale.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_scale.v(\[value the_frame])]"}}
+  winroll {{"\[expression \[value the_cam]winroll(\[value the_frame])]"}}
+  focal_point {{"\[expression \[value the_cam]focal_point(\[value the_frame])]"}}
+  fstop {{"\[expression \[value the_cam]fstop(\[value the_frame])]"}}
+  name DummyCam
+  help "DummyCam by Adrian Pueyo\n\nCamera that apart from the matrices also grabs all the \"Projection\" values from the upstream camera that it's connected to. Turns into a default Camera if no Camera connected. Can also be used inside of groups and gizmos, as many levels deep as you want :D All using live and super fast TCL.\n\nUpdated v1.1: Now grabs the correct frame too (thanks Erwan Leroy for the idea).\n\nUpdated v1.3: Now accepts Nuke13's Camera3\n\nadrianpueyo.com, 2019-2021"
+  onCreate "n = nuke.thisNode()\nfor k in \[\"projection_mode\",\"focal\",\"haperture\",\"vaperture\",\"near\",\"far\",\"win_translate\",\"win_scale\",\"winroll\",\"focal_point\",\"fstop\"]:\n    n\[k].setFlag(0x0000000010000000)"
+  xpos 1364
+  ypos -1473
+  addUserKnob {20 DummyCam l Defaults}
+  addUserKnob {43 the_cam +INVISIBLE}
+  the_cam "\[\n#DummyCam v1.3 - Updated 5 May 2021.\nset starting_point \"this.input0\"\nset default \"this.d_\"\n\n# If cam has no inputs, return the default.\nif \{\[exists \$starting_point]\} \{\n    set x \[node \$starting_point]\n\} \{ \n    return \$default\n\}\n\nset finished 0\nwhile \{\$finished != 1\} \{\n\n    # First look for a Cam or Input or topnode.\n    while \{\[class \$x] != \"Camera3\" && \[class \$x] != \"Camera2\" && \[class \$x] != \"Camera\" && \[class \$x] != \"Input\" && \$x != \[topnode \$x]\} \{\n        set x \[node \$x.input0]\n    \}\n\n    # Then, check if node is a cam (and return), and otherwise, if it's an input, see if the parent exists and move to it.\n    if \{\[class \$x]==\"Camera3\"||\[class \$x]==\"Camera2\"||\[class \$x]==\"Camera\"\} \{\n        set x \[append x \".\"]\n        return \$x\n    \} \{ \n        if \{ \[class \$x]==\"Input\" \} \{ \n            set inp \"\$x.parent.input\"\n            set inputNum \[value \$x.number]\n            set inp \[append inp \$inputNum]\n            if \{ \[exists \$inp] \} \{\n                set x \[node \$inp]\n            \} \{ \n                set finished 1\n            \}\n        \} \{ \n            set finished 1\n        \}\n    \}\n\}\nreturn \$default\n]"
+  addUserKnob {43 the_frame +INVISIBLE}
+  the_frame "\[\nset the_camera \[string trimright \[value the_cam] .]\nif \{\[exists \$the_camera]\} \{\n    return \[value \$the_camera.frame]\n\} \{ \n    return \[frame]\n\}\n]"
+  addUserKnob {4 d_projection_mode l projection M {perspective orthographic uv spherical ""}}
+  addUserKnob {7 d_focal l "focal length" R 0 100}
+  d_focal 50
+  addUserKnob {7 d_haperture l "horiz aperture" R 0 50}
+  d_haperture 24.576
+  addUserKnob {7 d_vaperture l "vert aperture" R 0 50}
+  d_vaperture 18.672
+  addUserKnob {7 d_near l near R 0 10}
+  d_near 0.1
+  addUserKnob {7 d_far l far R 0 10000}
+  d_far 10000
+  addUserKnob {30 d_win_translate l "window translate"}
+  addUserKnob {30 d_win_scale l "window scale"}
+  d_win_scale {1 1}
+  addUserKnob {7 d_winroll l "window roll" R 0 45}
+  addUserKnob {7 d_focal_point l "focal distance" R 0 10}
+  d_focal_point 2
+  addUserKnob {7 d_fstop l fstop R 0 30}
+  d_fstop 16
+  addUserKnob {26 version l " " t "Updated 5 May 2021" T "<span style=\"color:#666\"><br/><b>DummyCam v1.3</b> - <a href=\"http://www.adrianpueyo.com\" style=\"color:#666;text-decoration: none;\">adrianpueyo.com</a>, 2019-2021</span>"}
+ }
 end_group
 Viewer {
  frame_range 1-63
@@ -8755,3 +8765,527 @@ Viewer {
  xpos 180
  ypos 544
 }
+Group {
+ inputs 0
+ name sdf_primitive
+ onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
+ knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
+ tile_color 0xffffffff
+ label sphere
+ xpos -281
+ ypos 116
+ addUserKnob {20 User l "SDF Primitive"}
+ addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
+ addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
+ dimension_x 0.5
+ addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the deeper the fractal will have detail." +HIDDEN R 1 30}
+ dimension_y 10
+ addUserKnob {7 dimension_z l "max square radius" t "When the square radius has reached this length, stop iterating." +HIDDEN R 1 9}
+ dimension_z 4
+ addUserKnob {7 dimension_w l "orbital trap blend strength" t "Transition between orbital trap based colouring and the colour provided by the 'colour' knob." +HIDDEN}
+ dimension_w 1
+ addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
+ wall_thickness 0.01
+ addUserKnob {6 hollow t "If enabled, the object will be hollow, with a thickness of 'wall thickness'." -STARTLINE}
+ addUserKnob {7 edge_radius l "edge radius" t "This parameter increases the hit tolerance by the specified amount for this specific object, having the effect of rounding off the edges."}
+ addUserKnob {6 mirror_x l "mirror x" t "Mirror the shape in the yz-plane." +STARTLINE}
+ addUserKnob {6 mirror_y l "mirror y" t "Mirror the shape in the xz-plane." -STARTLINE}
+ addUserKnob {6 mirror_z l "mirror z" t "Mirror the shape in the xy-plane." -STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {18 colour t "The diffuse colour of the shape."}
+ colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
+ addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
+ refractive_index 1.33
+ addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
+ addUserKnob {26 div0 l "" +STARTLINE}
+ addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
+ addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
+ addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
+ elongation {0.1 0 0}
+ addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
+ addUserKnob {7 uniform_scale l "uniform scale" t "The scale of the object in its local coordinate space, along all axes." R 0 10}
+ uniform_scale 1
+ addUserKnob {26 div1 l "" +STARTLINE}
+ addUserKnob {4 repetition t "Repeat objects in the scene with no extra memory consumption. Note that if the repeated objects overlap some strange things can occur." -STARTLINE M {none finite infinite "" ""}}
+ addUserKnob {13 repetition_params l spacing t "The spacing along each positive axis to repeat the objects." +HIDDEN}
+ repetition_params {1.1 1.1 100}
+ addUserKnob {7 repetition_spacing l spacing t "The spacing between the objects." +HIDDEN R 0 10}
+ repetition_spacing 1.1
+ addUserKnob {26 ""}
+ addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: This object will be subtracted from all of its children, leaving holes.\n    Intersection: Only the region where this object and its children overlap will remain.\n    Smooth Union: All children will smoothly blend together with this object according to the 'blend strength'.\n    Smooth Subtraction:This object will be subtracted from all of its children,  leaving holes that are smoothed according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object and its children overlap will remain, and the remaining regions will be smoothed according to the 'blend strength'." +DISABLED M {union subtraction intersection "smooth union" "smooth subtraction" "smooth intersection" "" ""}}
+ blend_type "smooth union"
+ addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected." +DISABLED}
+ blend_strength 0.125
+ addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +DISABLED +STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
+}
+ Input {
+  inputs 0
+  name siblings
+  xpos 1484
+  ypos 476
+ }
+ Dot {
+  name Dot2
+  xpos 1518
+  ypos 904
+ }
+ Input {
+  inputs 0
+  name children
+  xpos 1357
+  ypos 475
+  number 1
+ }
+ Dot {
+  name Dot1
+  xpos 1391
+  ypos 826
+ }
+ Constant {
+  inputs 0
+  channels sdf_position_scale
+  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
+  format "1 1 0 0 1 1 1 1x1"
+  name position_scale
+  xpos 280
+  ypos 455
+ }
+ Dot {
+  name Dot17
+  xpos 314
+  ypos 647
+ }
+ Constant {
+  inputs 0
+  channels sdf_rotation_wall_thickness
+  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name rotation
+  xpos 403
+  ypos 457
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 403
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_dimensions
+  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
+  format "1 1 0 0 1 1 1 1x1"
+  name dimensions
+  xpos 540
+  ypos 460
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy2
+  xpos 540
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_colour
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.refractive_index}}
+  format "1 1 0 0 1 1 1 1x1"
+  name colour
+  xpos 669
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy3
+  xpos 669
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape
+  color {{parent.shape} {"parent.repetition | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0) | (parent.is_bound ? 4096 : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape
+  xpos 806
+  ypos 462
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy4
+  xpos 806
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_surface
+  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name surface
+  xpos 935
+  ypos 460
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy5
+  xpos 936
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape_mods_0
+  color {{parent.repetition_params.x} {parent.repetition_params.y} {parent.repetition_params.z} {parent.repetition_spacing}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape_mods
+  xpos 1056
+  ypos 463
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy6
+  xpos 1056
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape_mods_1
+  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape_mods1
+  xpos 1183
+  ypos 465
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy7
+  xpos 1183
+  ypos 726
+ }
+ Group {
+  inputs 2
+  name sdf_merge
+  xpos 1183
+  ypos 822
+  disable {{"!(\[exists parent.input1] && !input1.parent.input1.disable)"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N8dfa890 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N8e0e090 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N8dfa890
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N8e0e090
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Group {
+  inputs 2
+  name sdf_merge1
+  xpos 1183
+  ypos 900
+  disable {{"!(\[exists parent.input0] && !(parent.input0.disable && !\[exists parent.input0.input0]))"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N8eb9aa0 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N8ecd2a0 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N8eb9aa0
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N8ecd2a0
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Output {
+  name Output1
+  xpos 1183
+  ypos 1002
+ }
+end_group

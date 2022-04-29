@@ -1,6 +1,6 @@
 # BlinkScript Ray Marcher for Nuke
 
-This project contains three gizmos that allow you to ray march a wide variety of shapes, including fractals, utilizing the GPU.
+This project contains three gizmos that allow you to ray march a wide variety of shapes, including fractals, utilizing the GPU. Included are two blink kernels, one that is used to precompute the irradiance of a latlong, hdr image, and the other is the main ray marching engine.
 
 ![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164989275-4eb4791c-df89-4332-981d-aac79b607762.png)
 
@@ -12,7 +12,7 @@ This project contains three gizmos that allow you to ray march a wide variety of
 
 ## Setup
 
-Simply clone/download this repo and add the top level directory to your Nuke path. The gizmos will appear in the nodes menu, and all callbacks and the `FN_BLINK_INCLUDE_PATHS` will be set up automatically.
+Simply clone/download this repo and add the `src/python` directory to your Nuke path. The gizmos will appear in the nodes menu under the "SDF" group, and all callbacks and the `FN_BLINK_INCLUDE_PATHS` will be set up automatically.
 
 ## Gizmos
 
@@ -29,7 +29,11 @@ The surface properties include:
 
 You can select the refractive index of the object as well as the medium the camera, and therefore the ray, starts in.
 
-You can elongate, mirror, repeat finitely and infinitely with no extra memory cost, and hollow the objects.
+There are also controls for:
+- elongating about the x, y, and z axes
+- mirroring the object across the x, y, and z axes
+- repeating the object on a grid both finitely and infinitely with no extra memory cost
+- hollowing out the objects, which can be used in combination with intersections
 
 The current available shapes are:
 - sphere
