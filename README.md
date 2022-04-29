@@ -14,6 +14,10 @@ This project contains three gizmos that allow you to ray march a wide variety of
 
 Simply clone/download this repo and add the `src/python` directory to your Nuke path. The gizmos will appear in the nodes menu under the "SDF" group, and all callbacks and the `FN_BLINK_INCLUDE_PATHS` will be set up automatically.
 
+## Requirements
+
+This project has been tested in Nuke 12.0v8, 12.1v5, and 13.0v2. I recommend using 12.0 if you do not have much GPU memory, because it still uses OpenCL for blinkscript, rather than cuda. The cuda version will continue to increase memory consumption until crashing, so the entire framerange needs to fit in memory. You will want to have a GPU, the above examples were rendered using an NVIDIA GeForce GTX 980 Ti.
+
 ## Gizmos
 
 ### sdf_primitive
