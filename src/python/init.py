@@ -9,7 +9,7 @@ _parent_dir = os.path.dirname(_file_dir)
 # there is only one reference to this in all of google :(
 # Either move the blink files to your path location or let me know
 # how to fix this.
-os.environ["FN_BLINK_INCLUDE_PATHS"] = os.path.join(_parent_dir, "blink")
+os.environ["FN_BLINK_INCLUDE_PATHS"] = os.path.join(_parent_dir, "blink", "include")
 
 nuke.pluginAddPath(_file_dir)
 nuke.pluginAddPath(os.path.join(_parent_dir, "gizmos"))
