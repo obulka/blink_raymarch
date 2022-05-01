@@ -537,6 +537,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             // if we aren't close to, or inside it
             if (
                 modifications & 4096
+                && numChildren > 0
                 && nextDistance > hitTolerance * (pixelFootprint + 1.0f)
             ) {
                 // Update the min distance if this bounding volume is closest.

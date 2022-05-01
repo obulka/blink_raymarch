@@ -8,12 +8,11 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <dock id="" hideTitles="1" activePageId="Toolbar.1">
                 <page id="Toolbar.1"/>
             </dock>
-            <split size="1666" stretch="1"/>
+            <split size="1841" stretch="1"/>
             <splitter orientation="2">
                 <split size="782"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
-                    <page id="Viewer.2"/>
                 </dock>
                 <split size="550"/>
                 <dock id="" activePageId="DAG.1" focus="true">
@@ -22,7 +21,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                     <page id="DopeSheet.1"/>
                 </dock>
             </splitter>
-            <split size="790"/>
+            <split size="615"/>
             <dock id="" activePageId="Properties.1">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
@@ -53,19 +52,6 @@ Read {
  name Read1
  xpos 510
  ypos -19
-}
-Grade {
- whitepoint 1.64
- black 0.005
- name Grade1
- xpos 510
- ypos 114
-}
-Multiply {
- value 0.94
- name Multiply1
- xpos 510
- ypos 191
 }
 Dot {
  name Dot4
@@ -329,8 +315,10 @@ Dot {
 ray_march {
  inputs 4
  name ray_march2
+ selected true
  xpos 180
  ypos 449
- max_bounces 10
+ hit_tolerance 0.0001
+ max_bounces 12
  hdri_lighting_gain 0.5
 }

@@ -787,9 +787,6 @@ class SDFPrimitive(SDFKnobManager):
         """
         super(SDFPrimitive, self)._input_changed()
 
-        if not self.has_children:
-            self._node.knob(self.is_bound_knob_name).setValue(False)
-
         self._knob = self._node.knob(self.blend_type_knob_name)
         if self._knob.enabled():
             self._blend_type_changed()

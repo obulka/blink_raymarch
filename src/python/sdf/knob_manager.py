@@ -91,7 +91,7 @@ class SDFKnobManager(KnobManager):
     def has_children(self):
         """bool: True if a node is connected to the 'children' input."""
         return self._node.input(self.children_input_index) is not None
-    
+
     @_knob_changed_callbacks.register(colour_knob_name)
     def _colour_changed(self):
         """Change the node colour to match the object for easier ID."""
