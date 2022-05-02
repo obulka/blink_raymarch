@@ -29,7 +29,7 @@ The surface properties include:
 - transmission
 - diffuse colour
 - roughness
-- emission
+- emission (placeholder for when 'path marched' global illumination is added)
 
 You can select the refractive index of the object as well as the medium the camera, and therefore the ray, starts in.
 
