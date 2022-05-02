@@ -1013,7 +1013,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             SampleType(lightProperties1) lightProperty1 = lightProperties1(i, 0);
 
             int lightType = (int) lightProperty.w;
-            if (lightType == 2)
+            if (fabs(lightType) == 2)
             {
                 // Ambient light, simply return the intensity.
                 currentLightIntensity = float2(light.w, 1);
