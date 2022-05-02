@@ -1211,8 +1211,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const float rayIntensity = rays[currentRayIndex][6];
 
             // March the ray
-            while (distanceTravelled < rayDistance && iterations <= maxRaySteps)
-            {
+            while (
+                distanceTravelled < rayDistance
+                && iterations <= maxRaySteps
+                && rayIntensity >= hitTolerance
+            ) {
                 // Get the closest distance to an object
                 const float2 result = getMinDistanceToObjectInScene(
                     origin,
