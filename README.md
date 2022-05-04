@@ -12,7 +12,7 @@ This project contains three gizmos that allow you to ray march a wide variety of
 
 ## Setup
 
-Simply clone/download this repo and add the `src/python` directory to your Nuke path. The gizmos will appear in the nodes menu under the "SDF" group, and all callbacks and the `FN_BLINK_INCLUDE_PATHS` will be set up automatically.
+Simply clone/download this repo and add the `src/python` directory to your `NUKE_PATH` (`export NUKE_PATH="$NUKE_PATH:</path/to/repo>/blink_raymarch/src/python"`). The gizmos will appear in the nodes menu under the "SDF" group, and all callbacks and the `FN_BLINK_INCLUDE_PATHS` will be set up automatically.
 
 ## Requirements
 
