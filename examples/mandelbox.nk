@@ -1,20 +1,21 @@
 #! /usr/local/Nuke12.0v8/libnuke-12.0.8.so -nx
+#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/mandelbox_test0/mandelbox_test0_depth.%04d.exr" format:"1024 778 1" chans:":rgba.red:" framerange:"1 400" fps:"0" colorspace:"default (linear)" datatype:"16 bit half" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 12.0 v8
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="1976" y="188" w="2504" h="1376" maximized="1" screen="0">
+    <window x="56" y="27" w="3784" h="2096" maximized="1" screen="0">
         <splitter orientation="1">
             <split size="40"/>
             <dock id="" hideTitles="1" activePageId="Toolbar.1">
                 <page id="Toolbar.1"/>
             </dock>
-            <split size="1841" stretch="1"/>
+            <split size="3121" stretch="1"/>
             <splitter orientation="2">
-                <split size="782"/>
+                <split size="1310"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="550"/>
+                <split size="742"/>
                 <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
@@ -33,7 +34,8 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/examples/mandelbox.nk
- frame 14
+ frame 0
+ last_frame 400
  format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
  proxy_type scale
  proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
@@ -45,6 +47,27 @@ Root {
  logLut Cineon
  floatLut linear
 }
+Read {
+ inputs 0
+ file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/mandelbox_test0/mandelbox_test0.####.exr
+ format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ last 400
+ origlast 400
+ origset true
+ name Read1
+ xpos 21597
+ ypos 989
+}
+set N403fb8f0 [stack 0]
+HueShift {
+ saturation 0.62
+ color_saturation 0.82
+ hue_rotation -30
+ name HueShift1
+ xpos 21522
+ ypos 1181
+}
 Axis2 {
  inputs 0
  name Axis2
@@ -52,7 +75,7 @@ Axis2 {
  ypos 882
 }
 Camera2 {
- translate {0 0 2.5}
+ translate {{curve x1 0 x400 -0.1} 0 2.5}
  focal 17.8
  name Camera2
  xpos 20910
@@ -108,7 +131,7 @@ sdf_primitive {
  dimension_x -1.75
  dimension_y 17
  dimension_z 0.03137584
- dimension_w 0.71666667
+ dimension_w {{curve x1 0.71666667 x400 0.8}}
  rotate {45 15 0}
 }
 ray_march {
@@ -116,14 +139,41 @@ ray_march {
  name ray_march1
  xpos 20724
  ypos 1133
+ pixel_subdivisions 1
+ hit_tolerance 0.0001
  max_rays_per_subpixel 10
  ray_distance 20
+ output_type Depth
 }
-HueShift {
- color_saturation 0.82
- hue_rotation -30
- name HueShift1
- selected true
+Write {
+ channels {rgba.red -rgba.green -rgba.blue -rgba.alpha}
+ file /home/ob1/software/nuke/dev/raymarch/images/mandelbox_test0/mandelbox_test0_depth.####.exr
+ file_type exr
+ write_ACES_compliant_EXR true
+ first_part rgba
+ version 4
+ name Write1
  xpos 20724
- ypos 1195
+ ypos 1202
+}
+push $N403fb8f0
+Read {
+ inputs 0
+ file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/mandelbox_test0/mandelbox_test0_depth.####.exr
+ format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ last 400
+ origlast 400
+ origset true
+ name Read2
+ xpos 21321
+ ypos 993
+}
+Viewer {
+ inputs 2
+ frame 0
+ frame_range 1-400
+ name Viewer1
+ xpos 21510
+ ypos 1310
 }

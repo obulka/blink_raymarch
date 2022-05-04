@@ -341,7 +341,7 @@ float distanceToRhombus(
     const float f = clamp(
         (
             (halfWidth * s.x - halfHeight * s.y)
-            / dot(halfWidthHeight, halfWidthHeight)
+            / dot2(halfWidthHeight)
         ),
         -1.0f,
         1.0f
@@ -505,7 +505,7 @@ float distanceToCone(const float3 &position, const float angle, const float heig
     const float2 coneEdgeToPosition = (
         cylindricalPosition - cylindricalBound * saturate(
             dot(cylindricalPosition, cylindricalBound)
-            / dot(cylindricalBound, cylindricalBound)
+            / dot2(cylindricalBound)
         )
     );
 
@@ -596,7 +596,7 @@ float distanceToCappedCone(
         - upperCorner
         + lowerToUpperCorner * saturate(
             dot(upperCorner - cylindricalPosition, lowerToUpperCorner)
-            / dot(lowerToUpperCorner, lowerToUpperCorner)
+            / dot2(lowerToUpperCorner)
         )
     );
 
@@ -715,7 +715,7 @@ float distanceToCappedTorus(
         capFactor = length(posXY);
     }
     return sqrt(
-        dot(absXPosition, absXPosition)
+        dot2(absXPosition)
         + ringRadius * ringRadius
         - 2.0f * ringRadius * capFactor
     ) - tubeRadius;
@@ -873,7 +873,7 @@ float distanceToMandelbulb(
         float4 &trapColour)
 {
     float3 currentPosition = position;
-    float radiusSquared = dot(currentPosition, currentPosition);
+    float radiusSquared = dot2(currentPosition);
 
     float3 absPosition = fabs(currentPosition);
     trapColour = float4(absPosition.x, absPosition.y, absPosition.z, radiusSquared);
@@ -899,7 +899,7 @@ float distanceToMandelbulb(
             float4(absPosition.x, absPosition.y, absPosition.z, radiusSquared)
         );
 
-        radiusSquared = dot(currentPosition, currentPosition);
+        radiusSquared = dot2(currentPosition);
         if(radiusSquared > maxSquareRadius)
         {
             break;
@@ -972,7 +972,7 @@ float distanceToMandelbox(
         );
         currentPosition3 = boxFold(currentPosition3, foldingLimit3);
 
-        const float radiusSquared = dot(currentPosition3, currentPosition3);
+        const float radiusSquared = dot2(currentPosition3);
         currentPosition = sphereFold(
             float4(
                 currentPosition3.x,

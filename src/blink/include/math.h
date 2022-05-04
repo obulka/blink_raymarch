@@ -377,6 +377,45 @@ inline float negativePart(const float value)
 
 
 /**
+ * Dot product of a vector with itself.
+ *
+ * @args vector: The vector to take the dot product of.
+ *
+ * @returns: The dot product.
+ */
+inline float dot2(const float2 &vector)
+{
+    return dot(vector, vector);
+}
+
+
+/**
+ * Dot product of a vector with itself.
+ *
+ * @args vector: The vector to take the dot product of.
+ *
+ * @returns: The dot product.
+ */
+inline float dot2(const float3 &vector)
+{
+    return dot(vector, vector);
+}
+
+
+/**
+ * Dot product of a vector with itself.
+ *
+ * @args vector: The vector to take the dot product of.
+ *
+ * @returns: The dot product.
+ */
+inline float dot2(const float4 &vector)
+{
+    return dot(vector, vector);
+}
+
+
+/**
  * Get a rotation matrix from radian angle values.
  *
  * @arg angles: The rotation angles in radians.
@@ -563,7 +602,7 @@ inline float sdfLength(const float3 &vector)
  */
 inline float minLength(const float2 &vector0, const float2 &vector1)
 {
-    return sqrt(min(dot(vector0, vector0), dot(vector1, vector1)));
+    return sqrt(min(dot2(vector0), dot2(vector1)));
 }
 
 
@@ -579,7 +618,7 @@ inline float minLength(const float2 &vector0, const float2 &vector1)
  */
 inline float minLength(const float3 &vector0, const float3 &vector1)
 {
-    return sqrt(min(dot(vector0, vector0), dot(vector1, vector1)));
+    return sqrt(min(dot2(vector0), dot2(vector1)));
 }
 
 
