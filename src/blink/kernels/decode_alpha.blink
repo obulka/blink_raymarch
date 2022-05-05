@@ -1,0 +1,16 @@
+#include "conversion.h"
+
+
+kernel DecodeAlpha : ImageComputationKernel<ePixelWise>
+{
+    Image<eRead, eAccessPoint, eEdgeNone> src; // the input image
+    Image<eWrite> dst; // the output image
+
+
+    void process() {
+        SampleType(src) srcPixel = src();
+
+        const float2 decoded = decodeFloatsFromUint(srcPixel.w);
+        dst() = float4(decoded.x, decoded.y, 0, 0);
+    }
+};

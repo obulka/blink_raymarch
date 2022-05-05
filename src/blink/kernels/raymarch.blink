@@ -9,6 +9,7 @@
 //
 
 #include "camera.h"
+#include "conversion.h"
 #include "lights.h"
 #include "math.h"
 #include "objectInteraction.h"
@@ -1185,6 +1186,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float lastStepDistance = 1.0f;
 
         float id = 0.0f;
+        float depth = 0.0f;
 
         int bounces = 0;
         int iterations = 1;
@@ -1245,6 +1247,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     if (bounces == 0)
                     {
                         id = result.y;
+                        depth = distanceTravelled;
                     }
 
                     // The actual position on the surface we hit
@@ -1291,7 +1294,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         if (outputType == 3)
                         {
                             return float4(
-                                distanceTravelled,
+                                depth,
                                 0,
                                 0,
                                 id
@@ -1326,7 +1329,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     // Exit if we have reached the bounce limit
                     if (++bounces >= numBounces)
                     {
-                        rayColour.w = id;
+                        rayColour.w = encodeFloatsInUint(id, depth);
                         return rayColour;
                     }
 
@@ -1448,7 +1451,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             currentRayIndex++;
         }
 
-        rayColour.w = (bounces > 0) * id;
+        rayColour.w = (bounces > 0) * encodeFloatsInUint(id, depth);
         return rayColour;
     }
 
