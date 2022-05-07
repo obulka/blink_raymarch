@@ -19,7 +19,6 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
-                    <page id="DAG.2"/>
                 </dock>
             </splitter>
             <split size="615"/>
@@ -118,12 +117,10 @@ Axis2 {
  ypos 30
 }
 Camera2 {
- translate {0.005 0 1.8}
- rotate {0 0 90}
- focal {{curve x1 6.7 x400 5.45}}
+ translate {0 0 3}
  name Camera1
  xpos 300
- ypos 163
+ ypos 142
 }
 Dot {
  name Dot5
@@ -132,32 +129,30 @@ Dot {
 }
 Group {
  inputs 0
- name sdf_light2
+ name sdf_light
  onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
  knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
  tile_color 0xffffffff
- label "ambient occlusion"
+ label directional
  xpos 70
- ypos 30
+ ypos 209
  addUserKnob {20 User l "SDF LIght"}
  addUserKnob {4 type t "The type of light." M {directional point ambient "ambient occlusion"}}
- type "ambient occlusion"
- addUserKnob {7 dimension_x l iterations t "The number of iterations to compute." R 1 10}
- dimension_x 5
- addUserKnob {7 dimension_y l "y position" t "The y position of the light." +HIDDEN R -10 10}
- addUserKnob {7 dimension_z l "z position" t "The z position of the light." +HIDDEN R -10 10}
- dimension_z 2
+ addUserKnob {7 dimension_x l "x direction" t "The x direction of the light." R -1 1}
+ dimension_x -0.3
+ addUserKnob {7 dimension_y l "y direction" t "The y direction of the light." R -1 1}
+ dimension_y 1
+ addUserKnob {7 dimension_z l "z direction" t "The z direction of the light." R -1 1}
+ dimension_z -1
  addUserKnob {7 intensity t "The intensity of the light." R 0 10}
- intensity 0.1
- addUserKnob {7 falloff t "The power of the light's intensity falloff. Four is physically accurate." +DISABLED R 0 5}
- falloff 4
+ intensity 0.5
+ addUserKnob {7 falloff t "The power of the light's intensity falloff. Four is physically accurate." R 0 5}
  addUserKnob {18 colour t "The colour of the light."}
  colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." +DISABLED R 1 100}
- shadow_hardness 70
- addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE +DISABLED}
- soften_shadows true
+ shadow_hardness 100
+ addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
@@ -252,7 +247,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set N5d961e0 [stack 0]
+set N7076140 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -274,7 +269,7 @@ set N5d961e0 [stack 0]
    xpos 34
    ypos -6
   }
-set N5da99e0 [stack 0]
+set N7089940 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -285,7 +280,7 @@ set N5da99e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5d961e0
+push $N7076140
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -314,499 +309,7 @@ push $N5d961e0
    xpos 158
    ypos 167
   }
-push $N5da99e0
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 642
-  ypos 562
- }
-end_group
-Group {
- name sdf_light1
- onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
- knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
- tile_color 0xffffffff
- label point
- xpos 70
- ypos 120
- addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type t "The type of light." M {directional point ambient "ambient occlusion"}}
- type point
- addUserKnob {7 dimension_x l "x position" t "The x position of the light." R -10 10}
- addUserKnob {7 dimension_y l "y position" t "The y position of the light." R -10 10}
- dimension_y -1
- addUserKnob {7 dimension_z l "z position" t "The z position of the light." R -10 10}
- dimension_z 17
- addUserKnob {7 intensity t "The intensity of the light." R 0 10}
- intensity 0.5
- addUserKnob {7 falloff t "The power of the light's intensity falloff. Four is physically accurate." R 0 5}
- addUserKnob {18 colour t "The colour of the light."}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." +DISABLED R 1 100}
- shadow_hardness 70
- addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
- addUserKnob {26 ""}
- addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
-}
- Input {
-  inputs 0
-  name siblings
-  xpos 803
-  ypos 30
- }
- Dot {
-  name Dot1
-  xpos 837
-  ypos 488
- }
- Constant {
-  inputs 0
-  channels sdf_light
-  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.intensity}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light
-  xpos 363
-  ypos 11
- }
- Dot {
-  name Dot9
-  xpos 397
-  ypos 324
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props
-  xpos 501
-  ypos 11
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 501
-  ypos 380
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties1
-  color {{parent.shadow_hardness} {parent.falloff} 0 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props1
-  xpos 646
-  ypos 12
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 642
-  ypos 380
- }
- Group {
-  inputs 2
-  name sdf_merge
-  xpos 642
-  ypos 484
-  disable {{"!(\[exists parent.input0] && !(parent.input0.disable && !\[exists parent.input0.input0]))"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N5eaf220 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N5ec2a20 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N5eaf220
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N5ec2a20
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 642
-  ypos 562
- }
-end_group
-Group {
- name sdf_light
- onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
- knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
- tile_color 0xffffffff
- label directional
- xpos 70
- ypos 209
- addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type t "The type of light." M {directional point ambient "ambient occlusion"}}
- addUserKnob {7 dimension_x l "x direction" t "The x direction of the light." R -1 1}
- dimension_x -0.3
- addUserKnob {7 dimension_y l "y direction" t "The y direction of the light." R -1 1}
- dimension_y 1
- addUserKnob {7 dimension_z l "z direction" t "The z direction of the light." R -1 1}
- dimension_z -1
- addUserKnob {7 intensity t "The intensity of the light." R 0 10}
- intensity 0.5
- addUserKnob {7 falloff t "The power of the light's intensity falloff. Four is physically accurate." R 0 5}
- addUserKnob {18 colour t "The colour of the light."}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." +DISABLED R 1 100}
- shadow_hardness 100
- addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
- addUserKnob {26 ""}
- addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
-}
- Input {
-  inputs 0
-  name siblings
-  xpos 803
-  ypos 30
- }
- Dot {
-  name Dot1
-  xpos 837
-  ypos 488
- }
- Constant {
-  inputs 0
-  channels sdf_light
-  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.intensity}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light
-  xpos 363
-  ypos 11
- }
- Dot {
-  name Dot9
-  xpos 397
-  ypos 324
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props
-  xpos 501
-  ypos 11
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 501
-  ypos 380
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties1
-  color {{parent.shadow_hardness} {parent.falloff} 0 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props1
-  xpos 646
-  ypos 12
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 642
-  ypos 380
- }
- Group {
-  inputs 2
-  name sdf_merge
-  xpos 642
-  ypos 484
-  disable {{"!(\[exists parent.input0] && !(parent.input0.disable && !\[exists parent.input0.input0]))"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N5fc6320 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N5fd9b20 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N5fc6320
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N5fd9b20
+push $N7089940
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -892,10 +395,10 @@ Group {
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
  dimension_x 0.5
- addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the more detail the fractal will have." +HIDDEN R 1 30}
- dimension_y 12
- addUserKnob {7 dimension_z l "min square radius" t "The minimum square radius to use when spherically folding." +HIDDEN R 0.001 1}
- dimension_z 0.001
+ addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN R 0 10}
+ dimension_y 0.25
+ addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN R 0 10}
+ dimension_z 0.25
  addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold. Higher values will result in a denser fractal." +HIDDEN R 0.01 2}
  dimension_w 0.8
  addUserKnob {6 use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." +HIDDEN +STARTLINE}
@@ -919,9 +422,7 @@ Group {
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
- translate {0.3 0 0}
  addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
- rotate {25 0 90}
  addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
  elongation {0.1 0 0}
  addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
@@ -1130,7 +631,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N616e8e0 [stack 0]
+set N721daf0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1152,7 +653,7 @@ set N616e8e0 [stack 0]
    xpos 34
    ypos -6
   }
-set N61820e0 [stack 0]
+set N72312f0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1163,7 +664,7 @@ set N61820e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N616e8e0
+push $N721daf0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1192,7 +693,7 @@ push $N616e8e0
    xpos 158
    ypos 167
   }
-push $N61820e0
+push $N72312f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1285,7 +786,7 @@ push $N61820e0
    xpos 192
    ypos -2
   }
-set N622dd30 [stack 0]
+set N72dcf40 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1307,7 +808,7 @@ set N622dd30 [stack 0]
    xpos 34
    ypos -6
   }
-set N6241530 [stack 0]
+set N72f0740 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1318,7 +819,7 @@ set N6241530 [stack 0]
    xpos -98
    ypos 336
   }
-push $N622dd30
+push $N72dcf40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1347,7 +848,7 @@ push $N622dd30
    xpos 158
    ypos 167
   }
-push $N6241530
+push $N72f0740
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1425,7 +926,7 @@ Group {
  name ray_march
  knobChanged "__import__('sdf.ray_march', fromlist='RayMarch').RayMarch().handle_knob_changed()"
  xpos 179
- ypos 420
+ ypos 438
  addUserKnob {20 User l "Ray March"}
  addUserKnob {3 pixel_subdivisions l "pixel subdivisions" t "Subdivide the pixel and cast a ray for each subdivision, resulting in 2^subdivisions rays being sent from the camera."}
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
@@ -1470,7 +971,7 @@ Group {
  hdri_shadow_hardness 10
  addUserKnob {6 soften_shadows l "soften shadows" t "Enable soft shadows when computing the hdri image based lighting." -STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {4 output_type l output t "The AOV type to output." M {Scene Position Normal Depth}}
+ addUserKnob {4 output_type l output t "The AOV type to output.\n\nNote: The depth output here is more accurate than the depth that is output in 'Scene' mode. This is because the 'Scene' depth is only 16bits rather than 32." M {Scene Position Normal Depth ""}}
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
@@ -1565,7 +1066,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set N6314b10 [stack 0]
+set N73e1b70 [stack 0]
  Reformat {
   type scale
   scale {{"floor(min(parent.hdri_dot.height, parent.hdri_dot.width) * parent.hdri_lighting_scale) > 0 ? parent.hdri_lighting_scale : 1"}}
@@ -1608,14 +1109,14 @@ set N6314b10 [stack 0]
   xpos -461
   ypos -1543
  }
-set N76d4690 [stack 0]
+set N87a1300 [stack 0]
  Dot {
   name Dot13
   xpos -185
   ypos -1443
  }
-set N76dd4f0 [stack 0]
-push $N76d4690
+set N87a9ee0 [stack 0]
+push $N87a1300
  Input {
   inputs 0
   name lights
@@ -1660,7 +1161,7 @@ push $N76d4690
    xpos 192
    ypos -2
   }
-set N7713a80 [stack 0]
+set N87e0240 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1682,7 +1183,7 @@ set N7713a80 [stack 0]
    xpos 34
    ypos -6
   }
-set N7727280 [stack 0]
+set N87f3a40 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1693,7 +1194,7 @@ set N7727280 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7713a80
+push $N87e0240
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1722,7 +1223,7 @@ push $N7713a80
    xpos 158
    ypos 167
   }
-push $N7727280
+push $N87f3a40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1789,7 +1290,7 @@ push $N7727280
   xpos -48
   ypos -1309
  }
-set N77b65f0 [stack 0]
+set N8882db0 [stack 0]
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -1803,7 +1304,7 @@ set N77b65f0 [stack 0]
   xpos -232
   ypos -866
  }
-push $N77b65f0
+push $N8882db0
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -1815,7 +1316,7 @@ push $N77b65f0
   xpos -113
   ypos -864
  }
-push $N77b65f0
+push $N8882db0
  Shuffle {
   in sdf_light
   name light
@@ -1827,8 +1328,8 @@ push $N77b65f0
   xpos 3
   ypos -862
  }
-push $N76dd4f0
-push $N76d4690
+push $N87a9ee0
+push $N87a1300
  Input {
   inputs 0
   name objects
@@ -1872,7 +1373,7 @@ push $N76d4690
    xpos 192
    ypos -2
   }
-set N782d800 [stack 0]
+set N88f9f40 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1894,7 +1395,7 @@ set N782d800 [stack 0]
    xpos 34
    ypos -6
   }
-set N7841000 [stack 0]
+set N890d740 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1905,7 +1406,7 @@ set N7841000 [stack 0]
    xpos -98
    ypos 336
   }
-push $N782d800
+push $N88f9f40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1934,7 +1435,7 @@ push $N782d800
    xpos 158
    ypos 167
   }
-push $N7841000
+push $N890d740
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2001,7 +1502,7 @@ push $N7841000
   xpos 641
   ypos -1318
  }
-set N78d08c0 [stack 0]
+set N899d000 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -2013,7 +1514,7 @@ set N78d08c0 [stack 0]
   xpos 322
   ypos -863
  }
-push $N78d08c0
+push $N899d000
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -2025,7 +1526,7 @@ push $N78d08c0
   xpos 780
   ypos -865
  }
-push $N78d08c0
+push $N899d000
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -2037,7 +1538,7 @@ push $N78d08c0
   xpos 641
   ypos -864
  }
-push $N78d08c0
+push $N899d000
  Shuffle {
   in sdf_shape
   name shape
@@ -2049,7 +1550,7 @@ push $N78d08c0
   xpos 473
   ypos -863
  }
-push $N78d08c0
+push $N899d000
  Shuffle {
   in sdf_colour
   name colour
@@ -2061,7 +1562,7 @@ push $N78d08c0
   xpos 165
   ypos -864
  }
-push $N78d08c0
+push $N899d000
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -2073,7 +1574,7 @@ push $N78d08c0
   xpos 1227
   ypos -857
  }
-push $N78d08c0
+push $N899d000
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -2085,7 +1586,7 @@ push $N78d08c0
   xpos 1076
   ypos -854
  }
-push $N78d08c0
+push $N899d000
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -2097,7 +1598,7 @@ push $N78d08c0
   xpos 934
   ypos -859
  }
-push $N6314b10
+push $N73e1b70
  Constant {
   inputs 0
   name Constant1
@@ -2202,8 +1703,8 @@ push $N6314b10
   xpos 1695
   ypos -341
  }
-set Ne51c520 [stack 0]
-push $Ne51c520
+set N8a9f610 [stack 0]
+push $N8a9f610
  Dot {
   name Dot14
   xpos 1580
@@ -2246,6 +1747,6 @@ end_group
 Viewer {
  frame_range 1-400
  name Viewer1
- xpos 179
- ypos 575
+ xpos 188
+ ypos 556
 }

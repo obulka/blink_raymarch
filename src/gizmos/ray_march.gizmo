@@ -45,7 +45,7 @@ Gizmo {
  hdri_shadow_hardness 10
  addUserKnob {6 soften_shadows l "soften shadows" t "Enable soft shadows when computing the hdri image based lighting." -STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {4 output_type l output t "The AOV type to output." M {Scene Position Normal Depth}}
+ addUserKnob {4 output_type l output t "The AOV type to output.\n\nNote: The depth output here is more accurate than the depth that is output in 'Scene' mode. This is because the 'Scene' depth is only 16bits rather than 32." M {Scene Position Normal Depth ""}}
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
@@ -140,7 +140,7 @@ Gizmo {
   xpos 1695
   ypos -1474
  }
-set N6314b10 [stack 0]
+set N73e1b70 [stack 0]
  Reformat {
   type scale
   scale {{"floor(min(parent.hdri_dot.height, parent.hdri_dot.width) * parent.hdri_lighting_scale) > 0 ? parent.hdri_lighting_scale : 1"}}
@@ -184,14 +184,14 @@ add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_lig
   xpos -461
   ypos -1543
  }
-set N76d4690 [stack 0]
+set N87a1300 [stack 0]
  Dot {
   name Dot13
   xpos -185
   ypos -1443
  }
-set N76dd4f0 [stack 0]
-push $N76d4690
+set N87a9ee0 [stack 0]
+push $N87a1300
  Input {
   inputs 0
   name lights
@@ -236,7 +236,7 @@ push $N76d4690
    xpos 192
    ypos -2
   }
-set N7713a80 [stack 0]
+set N87e0240 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -258,7 +258,7 @@ set N7713a80 [stack 0]
    xpos 34
    ypos -6
   }
-set N7727280 [stack 0]
+set N87f3a40 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -269,7 +269,7 @@ set N7727280 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7713a80
+push $N87e0240
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -298,7 +298,7 @@ push $N7713a80
    xpos 158
    ypos 167
   }
-push $N7727280
+push $N87f3a40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -365,7 +365,7 @@ push $N7727280
   xpos -48
   ypos -1309
  }
-set N77b65f0 [stack 0]
+set N8882db0 [stack 0]
 add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
  Shuffle {
   in sdf_light_properties1
@@ -380,7 +380,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
   xpos -232
   ypos -866
  }
-push $N77b65f0
+push $N8882db0
 add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
  Shuffle {
   in sdf_light_properties
@@ -393,7 +393,7 @@ add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properti
   xpos -113
   ypos -864
  }
-push $N77b65f0
+push $N8882db0
  Shuffle {
   in sdf_light
   name light
@@ -405,8 +405,8 @@ push $N77b65f0
   xpos 3
   ypos -862
  }
-push $N76dd4f0
-push $N76d4690
+push $N87a9ee0
+push $N87a1300
  Input {
   inputs 0
   name objects
@@ -450,7 +450,7 @@ push $N76d4690
    xpos 192
    ypos -2
   }
-set N782d800 [stack 0]
+set N88f9f40 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -472,7 +472,7 @@ set N782d800 [stack 0]
    xpos 34
    ypos -6
   }
-set N7841000 [stack 0]
+set N890d740 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -483,7 +483,7 @@ set N7841000 [stack 0]
    xpos -98
    ypos 336
   }
-push $N782d800
+push $N88f9f40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -512,7 +512,7 @@ push $N782d800
    xpos 158
    ypos 167
   }
-push $N7841000
+push $N890d740
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -579,7 +579,7 @@ push $N7841000
   xpos 641
   ypos -1318
  }
-set N78d08c0 [stack 0]
+set N899d000 [stack 0]
 add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surface.emission sdf_surface.roughness}
  Shuffle {
   in sdf_surface
@@ -592,7 +592,7 @@ add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surfa
   xpos 322
   ypos -863
  }
-push $N78d08c0
+push $N899d000
 add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elongation_y sdf_shape_mods_1.elongation_z sdf_shape_mods_1.edge_radius}
  Shuffle {
   in sdf_shape_mods_1
@@ -605,7 +605,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
   xpos 780
   ypos -865
  }
-push $N78d08c0
+push $N899d000
 add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetion_y sdf_shape_mods_0.repetion_z sdf_shape_mods_0.repetion_w}
  Shuffle {
   in sdf_shape_mods_0
@@ -618,7 +618,7 @@ add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetio
   xpos 641
   ypos -864
  }
-push $N78d08c0
+push $N899d000
 add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.num_children sdf_shape.blend_strength}
  Shuffle {
   in sdf_shape
@@ -631,7 +631,7 @@ add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.n
   xpos 473
   ypos -863
  }
-push $N78d08c0
+push $N899d000
 add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_b sdf_colour.colour_a}
  Shuffle {
   in sdf_colour
@@ -644,7 +644,7 @@ add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_
   xpos 165
   ypos -864
  }
-push $N78d08c0
+push $N899d000
 add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y sdf_dimensions.dimension_z sdf_dimensions.dimension_w}
  Shuffle {
   in sdf_dimensions
@@ -657,7 +657,7 @@ add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y 
   xpos 1227
   ypos -857
  }
-push $N78d08c0
+push $N899d000
 add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sdf_rotation_wall_thickness.rotation_y sdf_rotation_wall_thickness.rotation_z sdf_rotation_wall_thickness.wall_thickness}
  Shuffle {
   in sdf_rotation_wall_thickness
@@ -670,7 +670,7 @@ add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sd
   xpos 1076
   ypos -854
  }
-push $N78d08c0
+push $N899d000
 add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.position_y sdf_position_scale.position_z sdf_position_scale.uniform_scale}
  Shuffle {
   in sdf_position_scale
@@ -683,7 +683,7 @@ add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.p
   xpos 934
   ypos -859
  }
-push $N6314b10
+push $N73e1b70
  Constant {
   inputs 0
   name Constant1
@@ -788,8 +788,8 @@ push $N6314b10
   xpos 1695
   ypos -341
  }
-set Ne51c520 [stack 0]
-push $Ne51c520
+set N8a9f610 [stack 0]
+push $N8a9f610
  Dot {
   name Dot14
   xpos 1580
