@@ -1279,7 +1279,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 surfacePosition.x,
                                 surfacePosition.y,
                                 surfacePosition.z,
-                                id
+                                encodeFloatsInUint(id, depth)
                             );
                         }
                         if (outputType == 2)
@@ -1288,7 +1288,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 surfaceNormal.x,
                                 surfaceNormal.y,
                                 surfaceNormal.z,
-                                id
+                                encodeFloatsInUint(id, depth)
                             );
                         }
                         if (outputType == 3)
@@ -1297,7 +1297,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 depth,
                                 0,
                                 0,
-                                id
+                                encodeFloatsInUint(id, depth)
                             );
                         }
                     }
