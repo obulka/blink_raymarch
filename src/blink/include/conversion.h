@@ -13,7 +13,7 @@
 
 
 /**
- * Convert a float to a uint.
+ * Convert a float to a uint without changing the bit values.
  */
 inline uint floatToUint(const float x)
 {
@@ -22,7 +22,7 @@ inline uint floatToUint(const float x)
 
 
 /**
- * Convert a uint to a float.
+ * Convert a uint to a float without changing the bit values.
  */
 inline float uintToFloat(const uint x)
 {
@@ -33,6 +33,7 @@ inline float uintToFloat(const uint x)
 /**
  * IEEE-754 16-bit floating-point format (without infinity): 1-5-10,
  * exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
+ * stackoverflow.com/questions/1659440/32-bit-to-16-bit-floating-point-conversion/60047308#60047308
  */
 float halfToFloat(const uint x)
 {
@@ -58,6 +59,7 @@ float halfToFloat(const uint x)
 /**
  * IEEE-754 16-bit floating-point format (without infinity): 1-5-10,
  * exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
+ * stackoverflow.com/questions/1659440/32-bit-to-16-bit-floating-point-conversion/60047308#60047308
  */
 uint floatToHalf(const float x)
 {
