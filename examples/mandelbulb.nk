@@ -15,17 +15,16 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                     <page id="Viewer.1"/>
                 </dock>
                 <split size="550"/>
-                <dock id="" activePageId="DAG.1">
+                <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
                 </dock>
             </splitter>
             <split size="615"/>
-            <dock id="" activePageId="Properties.1" focus="true">
+            <dock id="" activePageId="Properties.1">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
-                <page id="uk.co.thefoundry.scripteditor.1"/>
             </dock>
         </splitter>
     </window>
@@ -112,6 +111,7 @@ ray_march {
  name ray_march2
  xpos 21015
  ypos 1289
+ hit_tolerance 0.001
  ray_distance 20
  max_ray_steps 1000
 }
@@ -119,6 +119,7 @@ HueShift {
  color_saturation 0.82
  hue_rotation -30
  name HueShift3
+ selected true
  xpos 21015
  ypos 1345
 }

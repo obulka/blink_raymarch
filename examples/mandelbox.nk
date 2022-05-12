@@ -33,7 +33,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/examples/mandelbox.nk
- frame 90
+ frame 107
  last_frame 400
  format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
  proxy_type scale
@@ -64,7 +64,7 @@ Dot {
  xpos 20922
  ypos 1048
 }
-set Nb138460 [stack 0]
+set N68111d0 [stack 0]
 sdf_light {
  inputs 0
  name sdf_light4
@@ -110,7 +110,7 @@ Dot {
  xpos 20758
  ypos 1051
 }
-set Nccc3ca0 [stack 0]
+set N6e52dd0 [stack 0]
 sdf_primitive {
  inputs 0
  name sdf_primitive1
@@ -129,13 +129,13 @@ Dot {
  xpos 20621
  ypos 1053
 }
-set Nccb0050 [stack 0]
+set N70ce0b0 [stack 0]
 ray_march {
  inputs 3
  name ray_march2
  xpos 20587
  ypos 1131
- pixel_subdivisions 1
+ hit_tolerance 0.001
  max_rays_per_subpixel 10
  ray_distance 20
  output_type Depth
@@ -145,15 +145,15 @@ Dot {
  xpos 20621
  ypos 1369
 }
-push $Nb138460
-push $Nccc3ca0
-push $Nccb0050
+push $N68111d0
+push $N6e52dd0
+push $N70ce0b0
 ray_march {
  inputs 3
  name ray_march1
  xpos 20724
  ypos 1133
- pixel_subdivisions 1
+ hit_tolerance 0.001
  max_rays_per_subpixel 10
  ray_distance 20
 }

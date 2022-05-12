@@ -33,7 +33,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/examples/snowman.nk
- frame 47
+ frame 29
  last_frame 63
  colorManagement Nuke
  workingSpaceLUT linear
@@ -315,10 +315,10 @@ Dot {
 ray_march {
  inputs 4
  name ray_march2
- selected true
  xpos 180
  ypos 449
- hit_tolerance 0.0001
+ hit_tolerance 0.001
  max_bounces 12
+ max_rays_per_subpixel 24
  hdri_lighting_gain 0.5
 }
