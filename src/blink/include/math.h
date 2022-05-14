@@ -883,7 +883,7 @@ inline float3 refractRayThroughSurface(
  *
  * @returns: The reflection coefficient.
  */
-inline float schlickReflectionCoefficient(
+float schlickReflectionCoefficient(
     const float3 &incidentRayDirection,
     const float3 &surfaceNormalDirection,
     const float incidentRefractiveIndex,
@@ -923,7 +923,7 @@ inline float schlickReflectionCoefficient(
  *
  * @returns: The reflection coefficient.
  */
-inline float reflectionCoefficient(
+float reflectionCoefficient(
     const float3 &incidentRayDirection,
     const float3 &surfaceNormalDirection,
     const float incidentRefractiveIndex,
