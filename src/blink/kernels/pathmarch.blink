@@ -1,0 +1,1509 @@
+// Copyright 2022 by Owen Bulka.
+// All rights reserved.
+// This file is released under the "MIT License Agreement".
+// Please see the LICENSE.md file that should have been included as part
+// of this package.
+
+//
+// BlinkScript Ray Marcher
+//
+
+#include "camera.h"
+#include "conversion.h"
+#include "lights.h"
+#include "math.h"
+#include "objectInteraction.h"
+#include "sdfModifications.h"
+#include "sdfs.h"
+
+
+#define MAX_RAYS_PER_SUBPIXEL 100
+#define MAX_CHILD_DEPTH 100
+
+
+kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
+{
+    // the input which specifies the format, process is called once per pixel
+    // in this image, which also provides random seeds
+    Image<eRead, eAccessPoint, eEdgeNone> noise;
+
+    // the hdribox in latlong format
+    Image<eRead, eAccessRandom, eEdgeClamped> hdri;
+
+
+    // the shape positons.xyz, scale.w
+    Image<eRead, eAccessRandom, eEdgeNone> positions;
+
+    // the shape rotations.xyz, wall thickness.w
+    Image<eRead, eAccessRandom, eEdgeNone> rotations;
+
+    // the shape dimensions.xyzw (some shapes may not use all channels)
+    Image<eRead, eAccessRandom, eEdgeNone> dimensions;
+
+    // the shape colours.xyz, refractive index.w
+    Image<eRead, eAccessRandom, eEdgeNone> colours;
+
+
+    // shape type.x, operation.y, numChildren.z, blend strength.w
+    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;
+
+    // repetition params.xyzw
+    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters0;
+
+    // elongation.xyz edgeRadius.w
+    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters1;
+
+    // reflection.x, transmission.y, emission.z, roughness.w
+    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;
+
+
+    // the input lights direction/position.xyz intensity.w
+    Image<eRead, eAccessRandom, eEdgeNone> lights;
+
+    // colour.xyz, type.w
+    // w in [0, 1) = directional, [1, inf) = point
+    Image<eRead, eAccessRandom, eEdgeNone> lightProperties;
+
+    // shadow hardness.x
+    Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;
+
+    // the hdribox in latlong format
+    Image<eRead, eAccessRandom, eEdgeClamped> hdriLight;
+
+    // the output image
+    Image<eWrite> dst;
+
+
+    param:
+        // These parameters are made available to the user.
+
+        // Camera params
+        float focalLength;
+        float horizontalAperture;
+        float nearPlane;
+        float farPlane;
+        float4x4 cameraWorldMatrix;
+
+        // Image params
+        float formatWidth;
+        float formatHeight;
+
+        float hdriOffsetAngle;
+        int hdriFormatWidth;
+        int hdriFormatHeight;
+        float hdriLightGain;
+        float hdriLightShadowHardness;
+        int softenHDRILightShadows;
+        int hdriLightFormatWidth;
+        int hdriLightFormatHeight;
+
+        // Ray params
+        int subdivisions;
+        int maxRaysPerSubPixel;
+        int maxBounces;
+        float maxRayDistance;
+        int maxRaySteps;
+        float hitTolerance;
+        float shadowBias;
+
+        // Scene params
+        float refractiveIndex;
+
+        // Shape Textures
+        int objectTextureWidth;
+
+        // Light textures
+        int lightTextureWidth;
+
+        float hazeAmount;
+        float hazeStart;
+        float hazeDistance;
+        float4 hazeColour;
+
+        float iterGlowAmount;
+        float4 iterGlowColour;
+
+        int outputType;
+
+    local:
+        // These local variables are not exposed to the user.
+
+        float4x4 inverseCameraProjectionMatrix;
+
+        int bouncesPerRay;
+
+        int numSubPixels;
+        float subdividedPixelSize;
+
+        float2 hdriPixelSize;
+        float2 hdriLightPixelSize;
+        float hdriOffsetRadians;
+
+
+    /**
+     * In define(), parameters can be given labels and default values.
+     */
+    void define()
+    {
+        // Camera params
+        defineParam(focalLength, "Focal Length", 50.0f);
+        defineParam(horizontalAperture, "Horizontal Aperture", 24.576f);
+        defineParam(nearPlane, "Near Plane", 0.1f);
+        defineParam(farPlane, "Far Plane", 10000.0f);
+        defineParam(
+            cameraWorldMatrix,
+            "Camera World Matrix",
+            float4x4(
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            )
+        );
+
+        // Image params
+        defineParam(formatHeight, "Screen Height", 2160.0f);
+        defineParam(formatWidth, "Screen Width", 3840.0f);
+        defineParam(hdriOffsetAngle, "HDRI Offset Angle", 0.0f);
+        defineParam(hdriFormatHeight, "HDRI Height", 1024);
+        defineParam(hdriFormatWidth, "HDRI Width", 2048);
+        defineParam(hdriLightGain, "HDRI Lighting Gain", 0.1f);
+        defineParam(hdriLightShadowHardness, "HDRI Shadow Hardness", 1.0f);
+        defineParam(softenHDRILightShadows, "Soften HDRI Shadows", 1);
+        defineParam(hdriLightFormatHeight, "HDRI Lighting Height", 512);
+        defineParam(hdriLightFormatWidth, "HDRI Lighting Width", 1024);
+
+        // Ray params
+        defineParam(subdivisions, "Pixel Subdivisions", 0);
+        defineParam(maxRaysPerSubPixel, "Max Rays Per Subpixel", 1);
+        defineParam(maxRayDistance, "Max Ray Distance", 1000.0f);
+        defineParam(maxRaySteps, "Max Ray Steps", 128);
+        defineParam(maxBounces, "Max Bounces", 1);
+        defineParam(hitTolerance, "Hit Tolerance", 0.001f);
+        defineParam(shadowBias, "Shadow Bias", 1.0f);
+
+        // Scene params
+        defineParam(refractiveIndex, "Index of Refraction", 1.0f);
+
+        // Shape Counts
+        defineParam(objectTextureWidth, "Object Texture Width", 0);
+
+        // Light Counts
+        defineParam(lightTextureWidth, "Light Texture Width", 0);
+
+        defineParam(hazeAmount, "Haze Amount", 0.0f);
+        defineParam(hazeStart, "Haze Start", 0.0f);
+        defineParam(hazeDistance, "Haze Distance", 1000.0f);
+        defineParam(hazeColour, "Haze Colour", float4(1, 1, 1, 1));
+
+        defineParam(iterGlowAmount, "Iter Glow Amount", 0.0f);
+        defineParam(iterGlowColour, "Iter Glow Colour", float4(1, 1, 1, 1));
+
+        defineParam(outputType, "Output Type", 0);
+    }
+
+
+    /**
+     * The init() function is run before any calls to process().
+     * Local variables can be initialized here.
+     */
+    void init()
+    {
+        bouncesPerRay = maxBounces <= 0 ? 1 : maxBounces;
+
+        // TODO use angles to allow -ve focal length like for latlongs
+        float aspect = aspectRatio(formatHeight, formatWidth);
+        float4x4 cameraProjectionMatrix = projectionMatrix(
+            focalLength,
+            horizontalAperture,
+            aspect,
+            nearPlane,
+            farPlane
+        );
+        inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();
+
+        int subPixelDivisions = pow(2, abs(subdivisions));
+        subdividedPixelSize = 1.0f / (float) subPixelDivisions;
+        numSubPixels = pow(subPixelDivisions, 2);
+
+        hdriPixelSize = float2(hdriFormatWidth / (2 * PI), hdriFormatHeight / PI);
+        hdriLightPixelSize = float2(hdriLightFormatWidth / (2 * PI), hdriLightFormatHeight / PI);
+        hdriOffsetRadians = hdriOffsetAngle * PI / 180.0f;
+    }
+
+
+    // /**
+    //  * Get the value of hdri the ray would hit at infinite distance
+    //  *
+    //  * @arg rayDirection: The direction of the ray.
+    //  *
+    //  * @returns: The colour of the pixel in the direction of the ray.
+    //  */
+    // float4 readHDRIValue(float3 rayDirection)
+    // {
+    //     const float2 angles = cartesionUnitVectorToSpherical(
+    //         rayDirection,
+    //         hdriOffsetRadians
+    //     );
+
+    //     // Why does bilinear give nans? :(
+    //     return hdri(
+    //         round(hdriPixelSize.x * angles.x) - 1,
+    //         round(hdriFormatHeight - (hdriPixelSize.y * angles.y)) - 1
+    //     );
+    // }
+
+
+    /**
+     * Get the value of hdri the ray would hit at infinite distance
+     *
+     * @arg rayDirection: The direction of the ray.
+     *
+     * @returns: The colour of the pixel in the direction of the ray.
+     */
+    float4 readHDRIValue(float3 rayDirection)
+    {
+        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, hdriOffsetRadians);
+
+        // Should be able to say image access is eEdgeClamped and not do this
+        // but I see nan pixels sooo... :(
+        const float2 indices = clamp(
+            float2(
+                hdriPixelSize.x * angles.x,
+                hdriFormatHeight - (hdriPixelSize.y * angles.y)
+            ),
+            float2(0),
+            float2(hdriFormatWidth, hdriFormatHeight) - 1.0f
+        );
+
+        return bilinear(hdri, indices.x, indices.y);
+    }
+
+
+    // /**
+    //  * Get the value of hdri lighting for a given direction.
+    //  *
+    //  * @arg rayDirection: The direction of the ray.
+    //  *
+    //  * @returns: The value of the light in the direction of the ray.
+    //  */
+    // float4 readHDRILightValue(float3 rayDirection)
+    // {
+    //     const float2 angles = cartesionUnitVectorToSpherical(
+    //         rayDirection,
+    //         hdriOffsetRadians
+    //     );
+
+    //     // Why does bilinear give nans? :(
+    //     return hdriLightGain * hdriLight(
+    //         round(hdriLightPixelSize.x * angles.x) - 1,
+    //         round(hdriLightFormatHeight - (hdriLightPixelSize.y * angles.y)) - 1
+    //     );
+    // }
+
+
+    /**
+     * Get the value of hdri lighting for a given direction.
+     *
+     * @arg rayDirection: The direction of the ray.
+     *
+     * @returns: The value of the light in the direction of the ray.
+     */
+    float4 readHDRILightValue(float3 rayDirection)
+    {
+        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, hdriOffsetRadians);
+
+        // Should be able to say image access is eEdgeClamped and not do this
+        // but I see nan pixels sooo... :(
+        const float2 indices = clamp(
+            float2(
+                hdriLightPixelSize.x * angles.x,
+                hdriLightFormatHeight - (hdriLightPixelSize.y * angles.y)
+            ),
+            float2(0),
+            float2(hdriLightFormatWidth, hdriLightFormatHeight) - 1.0f
+        );
+
+        return hdriLightGain * bilinear(hdriLight, indices.x, indices.y);
+    }
+
+
+    //
+    // Render Engine
+    //
+
+
+    /**
+     * Transform a ray's location.
+     *
+     * @arg rayOrigin: The location the ray originates from.
+     * @arg position: The amount to translate the ray.
+     * @arg rotation: The amount to rotate the ray (radians).
+     * @arg modifications: The modifications to perform.
+     *     Each bit will enable a modification:
+     *         bit 0: finite repetition
+     *         bit 1: infinite repetition
+     *         bit 2: elongation
+     *         bit 3: mirror x
+     *         bit 4: mirror y
+     *         bit 5: mirror z
+     * @arg repetition: The values to use when repeating the ray.
+     * @arg elongation: The values to use when elongating the ray.
+     *
+     * @returns: The transformed ray origin.
+     */
+    float3 transformRay(
+        const float3 &rayOrigin,
+        const float3 &translation,
+        const float3 &rotation,
+        const int modifications,
+        const float4 &repetition,
+        const float4 &elongation)
+    {
+        float3x3 rotMatrix;
+        float3 transformedRay;
+        rotationMatrix(rotation, rotMatrix);
+        matmul(
+            rotMatrix.invert(),
+            rayOrigin - translation,
+            transformedRay
+        );
+        performShapeModification(
+            modifications,
+            repetition,
+            elongation,
+            transformedRay
+        );
+
+        return transformedRay;
+    }
+
+
+    /**
+     * Compute the modified distance to an object.
+     *
+     * @arg rayOrigin: The location the ray originates from.
+     * @arg shape: The shape of the object:
+     *     0: sphere
+     *     1: ellipsoid
+     *     2: cut sphere
+     *     3: hollow sphere
+     *     4: death star
+     *     5: solid angle
+     *     6: rectangular prism
+     *     7: rectangular prism frame
+     *     8: rhombus
+     *     9: triangular prism
+     *     10: cylinder
+     *     11: infinite cylinder
+     *     12: plane
+     *     13: capsule
+     *     14: cone
+     *     15: infinite cone
+     *     16: capped cone
+     *     17: rounded cone
+     *     18: torus
+     *     19: capped torus
+     *     20: link
+     *     21: hexagonal prism
+     *     22: octahedron
+     *     23: mandelbulb
+     *     24: mandelbox
+     *     25: mandelbox (no trap colour)
+     * @arg dimensions: The dimensions of the object.
+     * @arg uniformScale: The factor to scale the object by.
+     * @arg modifications: The modifications to perform.
+     *     Each bit will enable a modification:
+     *         bit 6: hollowing
+     * @arg edgeRadius: The radius to round the edges by.
+     * @arg wallThickness: The thickness of the walls if hollowing the
+     *     object.
+     * @arg colour: The colour of the surface will be stored here.
+     *     This will only be modified by the fractals (23-25).
+     *
+     * @returns: The distance to the modified object.
+     */
+    inline float getModifiedDistance(
+        const float3 &rayOrigin,
+        const int shape,
+        const float4 &dimensions,
+        const float uniformScale,
+        const int modifications,
+        const float edgeRadius,
+        const float wallThickness,
+        float4 &colour)
+    {
+        float nextDistance = distanceToObject(
+            rayOrigin / uniformScale,
+            shape,
+            dimensions,
+            colour
+        ) * uniformScale;
+
+        return performDistanceModification(
+            modifications,
+            edgeRadius,
+            wallThickness,
+            nextDistance
+        );
+    }
+
+
+    /**
+     * Compute the minimum distance to an object in the scene
+     *
+     * @arg rayOrigin: The origin position of the ray.
+     * @arg pixelFootprint: A value proportional to the amount of world
+     *     space that fills a pixel, like the distance from camera.
+     * @arg colour: Location to store the colour of the hit object.
+     * @arg surface: Location to store the surface properties of the hit
+     *     object.
+     *
+     * @returns: The minimum distance to an object in the scene, and the
+     *     unique identifier of the object.
+     */
+    float2 getMinDistanceToObjectInScene(
+            const float3 &rayOrigin,
+            const float pixelFootprint,
+            float4 &colour,
+            float4 &surface)
+    {
+        float distance = maxRayDistance;
+        float id = 0.0f;
+
+        // numChildren, transformedRay, scale, mods, nextDistance, colour, refractive
+        // index, surface, objectId, blendStrength
+        float parentStack[MAX_CHILD_DEPTH][1 + 3 + 1 + 1 + 1 + 3 + 1 +  4 + 1 + 1];
+        int parentStackLength = 0;
+
+        for (int j=0; j < objectTextureWidth; j++)
+        {
+            // Read in the shape properties
+            SampleType(positions) position = positions(j, 0);
+            SampleType(rotations) rotation = rotations(j, 0);
+            SampleType(dimensions) dimension = dimensions(j, 0);
+            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
+            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
+            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
+            SampleType(colours) surfaceColour = colours(j, 0);
+            SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);
+
+            const int modifications = (int) shapeProperty.y;
+            float scale = position.w;
+
+            const float blendStrength = shapeProperty.w;
+            float numChildren = shapeProperty.z;
+
+            int stackLastIndex = parentStackLength - 1;
+
+            float4 blendedColour = surfaceColour;
+            float4 blendedSurface = surfaceProperty;
+
+            // Position relative to the parent if we have any
+            float3 parentTransformedRay = rayOrigin;
+            if (parentStackLength > 0)
+            {
+                parentTransformedRay.x = parentStack[stackLastIndex][1];
+                parentTransformedRay.y = parentStack[stackLastIndex][2];
+                parentTransformedRay.z = parentStack[stackLastIndex][3];
+                scale *= parentStack[stackLastIndex][4];
+            }
+
+            // Use parent transform to position child
+            const float3 transformedRay = transformRay(
+                parentTransformedRay,
+                float3(position.x, position.y, position.z),
+                float3(rotation.x, rotation.y, rotation.z),
+                modifications,
+                modParameters0,
+                modParameters1
+            );
+
+            // Get distance to this child
+            float nextDistance = getModifiedDistance(
+                transformedRay,
+                (int) shapeProperty.x,
+                dimension,
+                scale,
+                modifications,
+                modParameters1.w,
+                rotation.w,
+                blendedColour
+            );
+
+            // Track which object was hit for the alpha channel
+            float objectId = (float) j + 1.0f;
+
+            // If this is a bounding volume, we can skip its children
+            // if we aren't close to, or inside it
+            if (
+                modifications & 4096
+                && numChildren > 0
+                && nextDistance > hitTolerance * (pixelFootprint + 1.0f)
+            ) {
+                // Update the min distance if this bounding volume is closest.
+                // Otherwise we could step through it, or if every object in
+                // the scene is inside it, we would not step forward at all
+                if (fabs(nextDistance) < fabs(distance))
+                {
+                    distance = nextDistance;
+
+                    colour = blendedColour;
+                    surface = blendedSurface;
+
+                    id = objectId;
+                }
+
+                // This was tagged as a boundary object, skip its children
+                // since we arent close to hitting it
+                j += numChildren;
+
+                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
+                {
+                    parentStack[parentIndex][0] -= numChildren + 1.0f;
+                }
+
+                // If there are no parents, or still children of the parent
+                // we do not need to compute anything further for this loop
+                if (parentStackLength <= 0 || parentStack[stackLastIndex][0] > 0.0f)
+                {
+                    continue;
+                }
+
+                // pop stack
+                // we know that there will be no more children if we did not continue
+                numChildren = 0.0f;
+                nextDistance = parentStack[stackLastIndex][6];
+                blendedColour = float4(
+                    parentStack[stackLastIndex][7],
+                    parentStack[stackLastIndex][8],
+                    parentStack[stackLastIndex][9],
+                    parentStack[stackLastIndex][10]
+                );
+                blendedSurface = float4(
+                    parentStack[stackLastIndex][11],
+                    parentStack[stackLastIndex][12],
+                    parentStack[stackLastIndex][13],
+                    parentStack[stackLastIndex][14]
+                );
+                objectId = parentStack[stackLastIndex][15];
+                stackLastIndex--;
+                parentStackLength--;
+            }
+
+            if (numChildren <= 0.0f)
+            {
+                // No Children left, compute interactions with parent
+                if (parentStackLength > 0)
+                {
+                    // Process this object, along with all parents that do not
+                    // have any more children, removing them from the stack,
+                    // but descend all the way down the stack, without removing
+                    // the objects that still have children
+                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)
+                    {
+                        const int parentModifications = (int) parentStack[stackIndex][5];
+
+                        // Do not need to interact with bounding volumes.
+                        // They are in the stack for relative positioning
+                        // if they weren't then we would have to manually move
+                        // the bounding box to follow the children
+                        if (!(parentModifications & 4096))
+                        {
+                            const float parentNextDistance = parentStack[stackIndex][6];
+                            const float4 parentSurfaceColour = float4(
+                                parentStack[stackIndex][7],
+                                parentStack[stackIndex][8],
+                                parentStack[stackIndex][9],
+                                parentStack[stackIndex][10]
+                            );
+                            const float4 parentSurfaceProperty = float4(
+                                parentStack[stackIndex][11],
+                                parentStack[stackIndex][12],
+                                parentStack[stackIndex][13],
+                                parentStack[stackIndex][14]
+                            );
+                            if (fabs(nextDistance) > fabs(parentNextDistance))
+                            {
+                                objectId = parentStack[stackIndex][15];
+                            }
+                            const float parentBlendStrength = parentStack[stackIndex][16];
+
+                            // Compute interaction between parent and this child
+                            nextDistance = performChildInteraction(
+                                parentModifications,
+                                parentNextDistance,
+                                nextDistance,
+                                parentSurfaceColour,
+                                blendedColour,
+                                parentSurfaceProperty,
+                                blendedSurface,
+                                parentBlendStrength
+                            );
+                        }
+
+                        // Update the global min distance (and surface/colour)
+                        if (fabs(nextDistance) < fabs(distance))
+                        {
+                            distance = nextDistance;
+
+                            colour = blendedColour;
+                            surface = blendedSurface;
+
+                            id = objectId;
+                        }
+                    }
+
+                    do
+                    {
+                        // Decrement the number of children each parent has
+                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
+                        {
+                            parentStack[parentIndex][0] -= 1.0f;
+                        }
+
+                        // Get the number of children still remaining for the parent
+                        // If there are still children, we can break out of this loop
+                        // to process the rest of them before the parent itself
+                        numChildren = parentStack[stackLastIndex][0];
+                    }
+                    while (numChildren <= 0.0f && --stackLastIndex >= 0);
+
+                    parentStackLength = stackLastIndex + 1;
+                }
+                // No parents to interact with, simply check the distance
+                else if (fabs(nextDistance) < fabs(distance))
+                {
+                    distance = nextDistance;
+
+                    colour = blendedColour;
+                    surface = blendedSurface;
+
+                    id = objectId;
+                }
+            }
+            else
+            {
+                // Node has Children, push it to the stack for later
+                // processing when we have all its children
+                // parentStack.push()
+                parentStack[parentStackLength][0] = numChildren;
+                parentStack[parentStackLength][1] = transformedRay.x;
+                parentStack[parentStackLength][2] = transformedRay.y;
+                parentStack[parentStackLength][3] = transformedRay.z;
+                parentStack[parentStackLength][4] = scale;
+                parentStack[parentStackLength][5] = (float) modifications;
+                parentStack[parentStackLength][6] = nextDistance;
+                parentStack[parentStackLength][7] = blendedColour.x;
+                parentStack[parentStackLength][8] = blendedColour.y;
+                parentStack[parentStackLength][9] = blendedColour.z;
+                parentStack[parentStackLength][10] = blendedColour.w;
+                parentStack[parentStackLength][11] = blendedSurface.x;
+                parentStack[parentStackLength][12] = blendedSurface.y;
+                parentStack[parentStackLength][13] = blendedSurface.z;
+                parentStack[parentStackLength][14] = blendedSurface.w;
+                parentStack[parentStackLength][15] = objectId;
+                parentStack[parentStackLength][16] = blendStrength;
+                parentStackLength++;
+            }
+        }
+
+        return float2(distance, id);
+    }
+
+
+    /**
+     * Compute a soft shadow value.
+     *
+     * @arg rayDirection: The direction of the shadow ray.
+     * @arg distanceToShadePoint: The maximum distance to check for
+     *     a shadow casting object.
+     * @arg softness: The softness of the shadow.
+     * @arg rayOrigin: The origin of the ray.
+     * @arg colour: Will store the colour of the object which casts the
+     *     shadow.
+     * @arg surface: Will store the surface properties of the object
+     *     which casts the shadow.
+     *
+     * @returns: The intenstity of shadow.
+     */
+    float computeSoftShadow(
+            const float3 &rayDirection,
+            const float distanceToShadePoint,
+            const float softness,
+            float3 &rayOrigin,
+            float4 &colour,
+            float4 &surface)
+    {
+        float distanceTravelled = 0;
+        float shadowIntensity = 1.0f;
+        float lastStepDistance = 1000000000000000000000000.0f;
+
+        int iterations = 0;
+        while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
+        {
+            const float stepDistance = fabs(
+                getMinDistanceToObjectInScene(
+                    rayOrigin,
+                    distanceTravelled,
+                    colour,
+                    surface
+                ).x
+            );
+            const float stepDistanceSquared = stepDistance * stepDistance;
+            float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);
+            shadowIntensity = min(
+                shadowIntensity,
+                softness * sqrt(stepDistanceSquared - softOffset * softOffset)
+                / max(0.0f, distanceTravelled - softOffset)
+            );
+
+            if (stepDistance < hitTolerance * distanceTravelled)
+            {
+                surface.z /= pow(1.0f + distanceTravelled, 4);
+                shadowIntensity = saturate(shadowIntensity);
+                return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
+            }
+
+            lastStepDistance = stepDistance;
+            rayOrigin += rayDirection * stepDistance;
+            distanceTravelled += stepDistance;
+            iterations++;
+        }
+        colour = float4(0);
+        surface = float4(0);
+
+        shadowIntensity = saturate(shadowIntensity);
+        return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
+    }
+
+
+    /**
+     * Compute a shadow value.
+     *
+     * @arg rayDirection: The direction of the shadow ray.
+     * @arg distanceToShadePoint: The maximum distance to check for
+     *     a shadow casting object.
+     * @arg rayOrigin: The origin of the ray.
+     * @arg colour: Will store the colour of the object which casts the
+     *     shadow.
+     * @arg surface: Will store the surface properties of the object
+     *     which casts the shadow.
+     *
+     * @returns: The intenstity of shadow.
+     */
+    float computeShadow(
+            const float3 &rayDirection,
+            const float distanceToShadePoint,
+            float3 &rayOrigin,
+            float4 &colour,
+            float4 &surface)
+    {
+        float distanceTravelled = 0;
+        int iterations = 0;
+        while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
+        {
+            float stepDistance = fabs(
+                getMinDistanceToObjectInScene(
+                    rayOrigin,
+                    distanceTravelled,
+                    colour,
+                    surface
+                ).x
+            );
+
+            if (stepDistance < hitTolerance * distanceTravelled)
+            {
+                surface.z /= pow(1.0f + distanceTravelled, 4);
+                return 0;
+            }
+
+            rayOrigin += rayDirection * stepDistance;
+            distanceTravelled += stepDistance;
+            iterations++;
+        }
+        colour = float4(0);
+        surface = float4(0);
+
+        return 1;
+    }
+
+
+    /**
+     * Compute the ambient occlusion.
+     *
+     * @arg rayDirection: The direction of the shadow ray.
+     * @arg rayOrigin: The origin of the ray.
+     * @arg amount: The amount to scale the occlusion value by.
+     * @arg iterations: The number of iterations to refine the
+     *     occlusion.
+     * @arg colour: Will store the colour of the final occluding object.
+     * @arg surface: Will store the surface properties of the final
+     *     occluding object.
+     *
+     * @returns: The occlusion.
+     */
+    float computeAmbientOcclusion(
+            const float3 &rayDirection,
+            const float3 &rayOrigin,
+            const float amount,
+            const int iterations,
+            float4 &colour,
+            float4 &surface)
+    {
+        float occlusion = 0.0f;
+        float occlusionScaleFactor = 1.0f;
+        for(int iteration=0; iteration < iterations; iteration++)
+        {
+            float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;
+            float distanceToClosestObject = fabs(getMinDistanceToObjectInScene(
+                rayOrigin + stepDistance * rayDirection,
+                1.0f,
+                colour,
+                surface
+            ).x);
+            occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;
+            occlusionScaleFactor *= 0.95;
+        }
+
+        return (
+            amount
+            * saturate(0.5f + 0.5f * rayDirection.y)  // ambient
+            * saturate(1.0f - 1.5f * occlusion)       // occlusion
+        );
+    }
+
+
+    /**
+     * Compute the intensity of a light on a surface.
+     *
+     * @arg pointOnSurface: The point on the surface to compute the
+     *     light intensity at.
+     * @arg surfaceNormal: The normal direction to the surface.
+     * @arg light: The light properties which depend on the light type.
+     * @arg lightType: The type of light to compute the intensity for.
+     *     0: directional
+     *     1: point
+     *     2: ambient
+     *     3: ambient occlusion
+     * @arg intensity: The light intensity.
+     * @arg falloff: The power of the falloff of the light.
+     * @arg softness: The softness of the shadow.
+     * @arg hitColour: Will store the colour of the object.
+     * @arg hitSurface: Will store the surface properties of the object.
+     *
+     * @returns: The light intensity.
+     */
+    float2 intensityOfLightOnSurface(
+            const float3 &pointOnSurface,
+            const float3 &surfaceNormal,
+            const float3 &light,
+            const int lightType,
+            const float intensity,
+            const float falloff,
+            const float softness,
+            float4 &hitColour,
+            float4 &hitSurface)
+    {
+        int absLightType = abs(lightType);
+        if (absLightType == 3)
+        {
+            float2 result = float2(
+                1.0f,
+                computeAmbientOcclusion(
+                    surfaceNormal,
+                    pointOnSurface,
+                    intensity,
+                    (int) light.x,
+                    hitColour,
+                    hitSurface
+                )
+            );
+            hitSurface = float4(0);
+            hitColour = float4(0);
+            return result;
+        }
+
+        float distanceToLight;
+        float3 lightDirection;
+        float intensityAtPosition = getLightData(
+            pointOnSurface,
+            surfaceNormal,
+            light,
+            absLightType,
+            intensity,
+            falloff,
+            maxRayDistance,
+            distanceToLight,
+            lightDirection
+        );
+        float3 surfaceOffset = surfaceOffsetPoint(
+            pointOnSurface,
+            lightDirection,
+            surfaceNormal,
+            shadowBias,
+            hitTolerance 
+        );
+        lightDirection = normalize(lightDirection);
+
+        float normalFactor = dot(surfaceNormal, lightDirection);
+
+        float shadowIntensityAtPosition;
+        if (lightType < 0)
+        {
+            shadowIntensityAtPosition = computeSoftShadow(
+                lightDirection,
+                distanceToLight,
+                softness,
+                surfaceOffset,
+                hitColour,
+                hitSurface
+            );
+        }
+        else
+        {
+            shadowIntensityAtPosition = computeShadow(
+                lightDirection,
+                distanceToLight,
+                surfaceOffset,
+                hitColour,
+                hitSurface
+            );
+        }
+
+        return saturate(
+            normalFactor * float2(intensityAtPosition, shadowIntensityAtPosition)
+        );
+    }
+
+
+    /**
+     * Compute the combined intensity of all lights on the surface of an
+     * object.
+     *
+     * @arg pointOnSurface: The point on the surface to compute the
+     *     light intensity at.
+     * @arg surfaceNormal: The normal direction to the surface.
+     * @arg surfaceColour: The colour of the object.
+     * @arg surface: The surface properties of the object.
+     * @arg lightColour: Will store the light colour.
+     *
+     * @returns: The light intensity.
+     */
+    float lightIntensityOnSurface(
+            const float3 &pointOnSurface,
+            const float3 &surfaceNormal,
+            const float4 &surfaceColour,
+            const float4 &surface,
+            float4 &lightColour)
+    {
+        float2 lightIntensity = float2(surface.z, 0);
+        lightColour = surface.z * surfaceColour;
+
+        float2 currentLightIntensity;
+
+        // for each light in the scene
+        for (int i=0; i < lightTextureWidth; i++)
+        {
+            float4 hitSurface = float4(0);
+            float4 hitColour = float4(0);
+
+            // Read the light properties
+            SampleType(lights) light = lights(i, 0);
+            SampleType(lightProperties) lightProperty = lightProperties(i, 0);
+            SampleType(lightProperties1) lightProperty1 = lightProperties1(i, 0);
+
+            int lightType = (int) lightProperty.w;
+            if (fabs(lightType) == 2)
+            {
+                // Ambient light, simply return the intensity.
+                currentLightIntensity = float2(light.w, 1);
+            }
+            else
+            {
+                // Compute the intensity
+                currentLightIntensity = intensityOfLightOnSurface(
+                    pointOnSurface,
+                    surfaceNormal,
+                    float3(light.x, light.y, light.z),
+                    lightType,
+                    light.w,
+                    lightProperty1.y,
+                    lightProperty1.x,
+                    hitColour,
+                    hitSurface
+                );
+                lightColour += hitSurface.z * hitColour;
+                lightIntensity += float2(hitSurface.z, 1.0f);
+            }
+
+            // Merge the intensity values
+            lightColour += currentLightIntensity.x * currentLightIntensity.y * float4(
+                lightProperty.x,
+                lightProperty.y,
+                lightProperty.z,
+                0.0f
+            );
+            lightIntensity += currentLightIntensity;
+        }
+
+        // Read the hdri diffuse light contribution
+        const float diffuse = saturate(1.0f - surface.x - surface.y);
+        if (diffuse > hitTolerance)
+        {
+            const float4 hdriLightColour = readHDRILightValue(surfaceNormal);
+            lightColour += diffuse * hdriLightColour;
+            lightIntensity += float2(
+                diffuse * length(
+                    float3(
+                        hdriLightColour.x,
+                        hdriLightColour.y,
+                        hdriLightColour.z
+                    )
+                ),
+                1.0f
+            );
+        }
+
+        lightColour = saturate(lightColour);
+        return saturate(lightIntensity.x * lightIntensity.y);
+    }
+
+
+    /**
+     * Compute the amount of haze at the given distance.
+     *
+     * @arg distance: The distance the ray has travelled through the
+     *     haze.
+     *
+     * @returns: The amount of haze.
+     */
+    inline float computeHazeAmount(const float distance)
+    {
+        return hazeAmount * saturate((distance - hazeStart) / hazeDistance);
+    }
+
+
+    /**
+     * Estimate the surface normal at the closest point on the closest
+     * object to a point
+     *
+     * @arg point: The point near which to get the surface normal
+     * @arg pixelFootprint: A value proportional to the amount of world
+     *     space that fills a pixel, like the distance from camera.
+     *
+     * @returns: The normalized surface normal.
+     */
+    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint)
+    {
+        float4 colour;
+        float4 surface;
+
+        const float epsilon = hitTolerance;
+
+        const float3 offset0 = 0.5773f * float3(1, -1, -1);
+        const float3 offset1 = 0.5773f * float3(-1, -1, 1);
+        const float3 offset2 = 0.5773f * float3(-1, 1, -1);
+        const float3 offset3 = 0.5773f * float3(1, 1, 1);
+
+        return normalize(
+            offset0
+            * getMinDistanceToObjectInScene(
+                point + offset0 * epsilon,
+                pixelFootprint,
+                colour,
+                surface
+            ).x
+            + offset1
+            * getMinDistanceToObjectInScene(
+                point + offset1 * epsilon,
+                pixelFootprint,
+                colour,
+                surface
+            ).x
+            + offset2
+            * getMinDistanceToObjectInScene(
+                point + offset2 * epsilon,
+                pixelFootprint,
+                colour,
+                surface
+            ).x
+            + offset3
+            * getMinDistanceToObjectInScene(
+                point + offset3 * epsilon,
+                pixelFootprint,
+                colour,
+                surface
+            ).x
+        );
+    }
+
+
+    /**
+     * March a ray through the scene.
+     *
+     * @arg rayOrigin: The origin of the ray.
+     * @arg rayDirection: The direction of the ray.
+     * @arg numBounces: The number of times a ray can be reflected and
+     *     transmitted.
+     * @arg rayDistance: The maximum distance a ray can travel.
+     * @arg seed: A random value to use as the seed for roughness.
+     *
+     * @returns: The ray colour.
+     */
+    float4 marchRay(
+            const float3 &rayOrigin,
+            const float3 &rayDirection,
+            const int numBounces,
+            const float rayDistance,
+            const float3 &seed)
+    {
+        const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, maxRaysPerSubPixel);
+
+        // rayOrigin, rayDirection, rayIntensity, index of refraction
+        float rays[MAX_RAYS_PER_SUBPIXEL][3 + 3 + 1 + 1];
+        rays[0][0] = rayOrigin.x;
+        rays[0][1] = rayOrigin.y;
+        rays[0][2] = rayOrigin.z;
+
+        rays[0][3] = rayDirection.x;
+        rays[0][4] = rayDirection.y;
+        rays[0][5] = rayDirection.z;
+
+        rays[0][6] = 1.0f;
+
+        rays[0][7] = refractiveIndex;
+
+        int numRays = 1;
+        int currentRayIndex = 0;
+
+        float4 colour;
+        float4 surface;
+
+        float4 rayColour = float4(0);
+        float4 lightColour = float4(0);
+
+        float lastStepDistance = 1.0f;
+
+        float id = 0.0f;
+        float depth = 0.0f;
+
+        int bounces = 0;
+        int iterations = 1;
+
+        // While we have not reached the ray limit
+        while (currentRayIndex < numRays)
+        {
+            // Reset these values
+            float lightIntensity = 1;
+            float distanceTravelled = 0;
+            bool madeContact = false;
+
+            // Get the next ray
+            float3 origin = float3(
+                rays[currentRayIndex][0],
+                rays[currentRayIndex][1],
+                rays[currentRayIndex][2]
+            );
+            const float3 direction = float3(
+                rays[currentRayIndex][3],
+                rays[currentRayIndex][4],
+                rays[currentRayIndex][5]
+            );
+            const float rayIntensity = rays[currentRayIndex][6];
+
+            // March the ray
+            while (
+                distanceTravelled < rayDistance
+                && iterations <= maxRaySteps
+                && rayIntensity >= hitTolerance
+            ) {
+                // Get the closest distance to an object
+                const float2 result = getMinDistanceToObjectInScene(
+                    origin,
+                    distanceTravelled,
+                    colour,
+                    surface
+                );
+                // Keep the signed distance so we know whether or not we are
+                // inside the object
+                const float signedStepDistance = result.x;
+
+                // Get the absolute value, the true shortest distance to a
+                // surface
+                const float stepDistance = fabs(signedStepDistance);
+
+                // Keep track of the distance the ray has travelled
+                distanceTravelled += stepDistance;
+
+                // Step the ray forwards
+                origin += direction * stepDistance;
+
+                // Have we hit the nearest object?
+                if (stepDistance < hitTolerance * distanceTravelled)
+                {
+                    // Keep the ID of the first object hit, so we can
+                    // store it in the alpha channel
+                    if (bounces == 0)
+                    {
+                        id = result.y;
+                        depth = distanceTravelled;
+                    }
+
+                    // The actual position on the surface we hit
+                    const float3 surfacePosition = origin - direction * hitTolerance;
+
+                    // The normal to the surface at that position
+                    float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
+                        surfacePosition,
+                        distanceTravelled
+                    );
+
+                    // Roughen the surface
+                    if (surface.w > 0.0f)
+                    {
+                        surfaceNormal = roughen(
+                            surfaceNormal,
+                            surface.w,
+                            (iterations * distanceTravelled + stepDistance)
+                            * fabs(surfaceNormal) * seed
+                        );
+                    }
+
+                    // Early exit for the various AOVs that are not 'scene'
+                    if (outputType > 0)
+                    {
+                        if (outputType == 1)
+                        {
+                            return float4(
+                                surfacePosition.x,
+                                surfacePosition.y,
+                                surfacePosition.z,
+                                encodeFloatsInUint(id, depth)
+                            );
+                        }
+                        if (outputType == 2)
+                        {
+                            return float4(
+                                surfaceNormal.x,
+                                surfaceNormal.y,
+                                surfaceNormal.z,
+                                encodeFloatsInUint(id, depth)
+                            );
+                        }
+                        if (outputType == 3)
+                        {
+                            return float4(
+                                depth,
+                                0,
+                                0,
+                                encodeFloatsInUint(id, depth)
+                            );
+                        }
+                    }
+
+                    // Get the light intensity
+                    lightIntensity = lightIntensityOnSurface(
+                        origin,
+                        surfaceNormal,
+                        colour,
+                        surface,
+                        lightColour
+                    );
+
+                    // Update the colour of the ray
+                    rayColour = blend(
+                        iterGlowColour,
+                        blend(
+                            hazeColour,
+                            blend(
+                                lightColour * colour,
+                                rayColour,
+                                rayIntensity * (1 - surface.x - surface.y) * lightIntensity
+                            ),
+                            computeHazeAmount(distanceTravelled)
+                        ),
+                        saturate(iterGlowAmount * iterations)
+                    );
+
+                    // Exit if we have reached the bounce limit
+                    if (++bounces >= numBounces)
+                    {
+                        rayColour.w = encodeFloatsInUint(id, depth);
+                        return rayColour;
+                    }
+
+                    // Otherwise compute the refraction values
+                    const float incidentRefractiveIndex = rays[currentRayIndex][7];
+                    const float refractedRefractiveIndex = colour.w;
+                    const float reflectivity = schlickReflectionCoefficient(
+                        direction,
+                        surfaceNormal,
+                        incidentRefractiveIndex,
+                        refractedRefractiveIndex
+                    );
+                    const float refraction = saturate(surface.y * (1 - reflectivity));
+                    float intensity = rayIntensity * refraction;
+                    float reflection = surface.x;
+
+                    // And spawn a refracted ray using them
+                    if (surface.y > 0.0f && numRays < lastRay && intensity > hitTolerance)
+                    {
+                        reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
+
+                        const float3 refractedDirection = refractRayThroughSurface(
+                            direction,
+                            surfaceNormal,
+                            incidentRefractiveIndex,
+                            refractedRefractiveIndex
+                        );
+
+                        // Offset the point so that it doesn't get trapped on
+                        // surface.
+                        const float3 refractedOrigin = offsetPoint(
+                            surfacePosition,
+                            refractedDirection - surfaceNormal,
+                            2.0f * hitTolerance + stepDistance
+                        );
+
+                        rays[numRays][0] = refractedOrigin.x;
+                        rays[numRays][1] = refractedOrigin.y;
+                        rays[numRays][2] = refractedOrigin.z;
+
+                        rays[numRays][3] = refractedDirection.x;
+                        rays[numRays][4] = refractedDirection.y;
+                        rays[numRays][5] = refractedDirection.z;
+
+                        rays[numRays][6] = intensity;
+
+                        rays[numRays][7] = refractedRefractiveIndex;
+
+                        numRays++;
+                    }
+
+                    // Also spawn a reflected ray
+                    intensity = rayIntensity * reflection;
+                    if (reflection > 0.0f && numRays < lastRay && intensity > hitTolerance)
+                    {
+                        const float3 reflectedDirection = reflectRayOffSurface(
+                            direction,
+                            surfaceNormal
+                        );
+
+                        // Offset the point so that it doesn't get trapped on
+                        // surface.
+                        const float3 reflectedOrigin = offsetPoint(
+                            origin,
+                            reflectedDirection + surfaceNormal,
+                            hitTolerance
+                        );
+
+                        rays[numRays][0] = reflectedOrigin.x;
+                        rays[numRays][1] = reflectedOrigin.y;
+                        rays[numRays][2] = reflectedOrigin.z;
+
+                        rays[numRays][3] = reflectedDirection.x;
+                        rays[numRays][4] = reflectedDirection.y;
+                        rays[numRays][5] = reflectedDirection.z;
+
+                        rays[numRays][6] = intensity;
+
+                        rays[numRays][7] = incidentRefractiveIndex;
+
+                        numRays++;
+                    }
+
+                    // Flag that we have collided with at least one object.
+                    madeContact = true;
+                    break;
+                }
+
+                lastStepDistance = signedStepDistance;
+                iterations++;
+            }
+
+            // If we are not computing the scene value and we have missed all
+            // objects, return black.
+            if (outputType > 0)
+            {
+                return float4(0);
+            }
+
+            // Otherwise, if we missed all objects, read the hdri value
+            // in the direction the ray was last travelling
+            if (!madeContact)
+            {
+                rayColour = blend(
+                    blend(
+                        iterGlowColour,
+                        blend(
+                            hazeColour,
+                            saturate(readHDRIValue(direction)),
+                            computeHazeAmount(distanceTravelled)
+                        ),
+                        saturate(iterGlowAmount * iterations)
+                    ),
+                    rayColour,
+                    rayIntensity
+                );
+            }
+
+            currentRayIndex++;
+        }
+
+        rayColour.w = (bounces > 0) * encodeFloatsInUint(id, depth);
+        return rayColour;
+    }
+
+
+    /**
+     * Compute a raymarched pixel value.
+     * 
+     * @arg pos: The x, and y location we are currently processing.
+     */
+    void process(int2 pos)
+    {
+        SampleType(noise) seed = noise();
+
+        float4 resultPixel = float4(0);
+
+        float2 pixelLocation = float2(pos.x, pos.y);
+
+        float2 pixelOffset;
+        for (
+            pixelOffset.x = 0.0f;
+            pixelOffset.x < 1.0f;
+            pixelOffset.x += subdividedPixelSize
+        ) {
+            for (
+                pixelOffset.y = 0.0f;
+                pixelOffset.y < 1.0f;
+                pixelOffset.y += subdividedPixelSize
+            ) {
+                // Generate a ray from the camera
+                float3 rayOrigin;
+                float3 rayDirection;
+                createCameraRay(
+                    cameraWorldMatrix,
+                    inverseCameraProjectionMatrix,
+                    pixelsToUV(
+                        pixelLocation + pixelOffset,
+                        float2(formatWidth, formatHeight)
+                    ),
+                    rayOrigin,
+                    rayDirection
+                );
+
+                resultPixel += marchRay(
+                    rayOrigin,
+                    rayDirection,
+                    bouncesPerRay,
+                    maxRayDistance,
+                    float3(seed.x, seed.y, seed.z)
+                );
+            }
+        }
+
+        dst() = resultPixel / numSubPixels;
+    }
+};
