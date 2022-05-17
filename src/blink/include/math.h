@@ -94,9 +94,20 @@ inline float3 radiansToDegrees(const float3 &angle)
  *
  * @returns: The fractional portion of the value.
  */
-inline float fract(float value)
+inline float fract(const float value)
 {
     return value - floor(value);
+}
+
+
+inline uint wangHash(uint seed)
+{
+    seed = uint(seed ^ uint(61)) ^ uint(seed >> uint(16));
+    seed *= uint(9);
+    seed = seed ^ (seed >> 4);
+    seed *= uint(0x27d4eb2d);
+    seed = seed ^ (seed >> 15);
+    return seed;
 }
 
 
@@ -107,9 +118,27 @@ inline float fract(float value)
  *
  * @returns: A random value on the interval [0, 1].
  */
-inline float random(float seed)
+inline float random(const float seed)
 {
     return fract(sin(seed * 91.3458f) * 47453.5453f);
+}
+
+
+
+inline float random(uint seed)
+{
+    return float(wangHash(seed)) / 4294967296.0f;
+}
+
+
+float3 randomUnitVector(uint seed)
+{
+    const float z = random(seed) * 2.0f - 1.0f;
+    const float a = random(seed) * 2.0f * PI;
+    const float r = sqrt(1.0f - z * z);
+    const float x = r * cos(a);
+    const float y = r * sin(a);
+    return float3(x, y, z);
 }
 
 

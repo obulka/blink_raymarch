@@ -99,6 +99,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Ray params
         int subdivisions;
+        int pathsPerSubpixel;
         int maxRaysPerSubPixel;
         int maxBounces;
         float maxRayDistance;
@@ -175,6 +176,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Ray params
         defineParam(subdivisions, "Pixel Subdivisions", 0);
+        defineParam(pathsPerSubpixel, "Paths Per Subpixel", 1);
         defineParam(maxRaysPerSubPixel, "Max Rays Per Subpixel", 1);
         defineParam(maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(maxRaySteps, "Max Ray Steps", 128);
@@ -1181,7 +1183,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float4 surface;
 
         float4 rayColour = float4(0);
-        float4 lightColour = float4(0);
+        float4 surfaceColour = float4(1);
 
         float lastStepDistance = 1.0f;
 
@@ -1242,14 +1244,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Have we hit the nearest object?
                 if (stepDistance < hitTolerance * distanceTravelled)
                 {
-                    // Keep the ID of the first object hit, so we can
-                    // store it in the alpha channel
-                    if (bounces == 0)
-                    {
-                        id = result.y;
-                        depth = distanceTravelled;
-                    }
-
                     // The actual position on the surface we hit
                     const float3 surfacePosition = origin - direction * hitTolerance;
 
@@ -1259,72 +1253,49 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         distanceTravelled
                     );
 
-                    // Roughen the surface
-                    if (surface.w > 0.0f)
+                    // Keep the ID of the first object hit, so we can
+                    // store it in the alpha channel
+                    if (bounces == 0)
                     {
-                        surfaceNormal = roughen(
-                            surfaceNormal,
-                            surface.w,
-                            (iterations * distanceTravelled + stepDistance)
-                            * fabs(surfaceNormal) * seed
-                        );
-                    }
+                        id = result.y;
+                        depth = distanceTravelled;
 
-                    // Early exit for the various AOVs that are not 'scene'
-                    if (outputType > 0)
-                    {
-                        if (outputType == 1)
+                        // Early exit for the various AOVs that are not 'scene'
+                        if (outputType > 0)
                         {
-                            return float4(
-                                surfacePosition.x,
-                                surfacePosition.y,
-                                surfacePosition.z,
-                                encodeFloatsInUint(id, depth)
-                            );
-                        }
-                        if (outputType == 2)
-                        {
-                            return float4(
-                                surfaceNormal.x,
-                                surfaceNormal.y,
-                                surfaceNormal.z,
-                                encodeFloatsInUint(id, depth)
-                            );
-                        }
-                        if (outputType == 3)
-                        {
-                            return float4(
-                                depth,
-                                0,
-                                0,
-                                encodeFloatsInUint(id, depth)
-                            );
+                            if (outputType == 1)
+                            {
+                                return float4(
+                                    surfacePosition.x,
+                                    surfacePosition.y,
+                                    surfacePosition.z,
+                                    encodeFloatsInUint(id, depth)
+                                );
+                            }
+                            if (outputType == 2)
+                            {
+                                return float4(
+                                    surfaceNormal.x,
+                                    surfaceNormal.y,
+                                    surfaceNormal.z,
+                                    encodeFloatsInUint(id, depth)
+                                );
+                            }
+                            if (outputType == 3)
+                            {
+                                return float4(
+                                    depth,
+                                    0,
+                                    0,
+                                    encodeFloatsInUint(id, depth)
+                                );
+                            }
                         }
                     }
-
-                    // Get the light intensity
-                    lightIntensity = lightIntensityOnSurface(
-                        origin,
-                        surfaceNormal,
-                        colour,
-                        surface,
-                        lightColour
-                    );
 
                     // Update the colour of the ray
-                    rayColour = blend(
-                        iterGlowColour,
-                        blend(
-                            hazeColour,
-                            blend(
-                                lightColour * colour,
-                                rayColour,
-                                rayIntensity * (1 - surface.x - surface.y) * lightIntensity
-                            ),
-                            computeHazeAmount(distanceTravelled)
-                        ),
-                        saturate(iterGlowAmount * iterations)
-                    );
+                    rayColour += colour * rayIntensity * surface.z * surfaceColour;
+                    surfaceColour *= colour;
 
                     // Exit if we have reached the bounce limit
                     if (++bounces >= numBounces)
@@ -1347,7 +1318,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     float reflection = surface.x;
 
                     // And spawn a refracted ray using them
-                    if (surface.y > 0.0f && numRays < lastRay && intensity > hitTolerance)
+                    if (numRays < lastRay && intensity > hitTolerance)
                     {
                         reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
 
@@ -1383,7 +1354,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                     // Also spawn a reflected ray
                     intensity = rayIntensity * reflection;
-                    if (reflection > 0.0f && numRays < lastRay && intensity > hitTolerance)
+                    if (numRays < lastRay && intensity > hitTolerance)
                     {
                         const float3 reflectedDirection = reflectRayOffSurface(
                             direction,
@@ -1413,6 +1384,42 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         numRays++;
                     }
 
+                    // Also spawn a diffuse ray
+                    intensity = rayIntensity * (1.0f - reflection - refraction);
+                    if (numRays < lastRay && intensity > hitTolerance)
+                    {
+                        const float3 diffuseDirection = normalize(
+                            surfaceNormal
+                            + randomUnitVector(
+                                floatToUint(
+                                    seed.x + distanceTravelled * seed.y + intensity * seed.z
+                                )
+                            )
+                        );
+
+                        // Offset the point so that it doesn't get trapped on
+                        // surface.
+                        const float3 diffuseOrigin = offsetPoint(
+                            origin,
+                            diffuseDirection + surfaceNormal,
+                            hitTolerance
+                        );
+
+                        rays[numRays][0] = diffuseOrigin.x;
+                        rays[numRays][1] = diffuseOrigin.y;
+                        rays[numRays][2] = diffuseOrigin.z;
+
+                        rays[numRays][3] = diffuseDirection.x;
+                        rays[numRays][4] = diffuseDirection.y;
+                        rays[numRays][5] = diffuseDirection.z;
+
+                        rays[numRays][6] = intensity;
+
+                        rays[numRays][7] = incidentRefractiveIndex;
+
+                        numRays++;
+                    }
+
                     // Flag that we have collided with at least one object.
                     madeContact = true;
                     break;
@@ -1431,22 +1438,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // Otherwise, if we missed all objects, read the hdri value
             // in the direction the ray was last travelling
-            if (!madeContact)
-            {
-                rayColour = blend(
-                    blend(
-                        iterGlowColour,
-                        blend(
-                            hazeColour,
-                            saturate(readHDRIValue(direction)),
-                            computeHazeAmount(distanceTravelled)
-                        ),
-                        saturate(iterGlowAmount * iterations)
-                    ),
-                    rayColour,
-                    rayIntensity
-                );
-            }
+            // if (!madeContact)
+            // {
+            //     const float4 hdriColour = readHDRIValue(direction);
+            //     rayColour += hdriColour * rayIntensity * surfaceColour;
+            //     surfaceColour *= saturate(hdriColour);
+            // }
 
             currentRayIndex++;
         }
@@ -1480,30 +1477,42 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 pixelOffset.y < 1.0f;
                 pixelOffset.y += subdividedPixelSize
             ) {
-                // Generate a ray from the camera
-                float3 rayOrigin;
-                float3 rayDirection;
-                createCameraRay(
-                    cameraWorldMatrix,
-                    inverseCameraProjectionMatrix,
-                    pixelsToUV(
-                        pixelLocation + pixelOffset,
-                        float2(formatWidth, formatHeight)
-                    ),
-                    rayOrigin,
-                    rayDirection
-                );
+                for (int path=1; path <= pathsPerSubpixel; path++)
+                {
+                    // Generate a ray from the camera
+                    float3 rayOrigin;
+                    float3 rayDirection;
+                    createCameraRay(
+                        cameraWorldMatrix,
+                        inverseCameraProjectionMatrix,
+                        pixelsToUV(
+                            pixelLocation
+                            + pixelOffset
+                            + subdividedPixelSize * float2(
+                                random(seed.x + path),
+                                random(seed.y + path)
+                            ),
+                            float2(formatWidth, formatHeight)
+                        ),
+                        rayOrigin,
+                        rayDirection
+                    );
 
-                resultPixel += marchRay(
-                    rayOrigin,
-                    rayDirection,
-                    bouncesPerRay,
-                    maxRayDistance,
-                    float3(seed.x, seed.y, seed.z)
-                );
+                    resultPixel += marchRay(
+                        rayOrigin,
+                        rayDirection,
+                        bouncesPerRay,
+                        maxRayDistance,
+                        float3(
+                            seed.x + pixelOffset.x,
+                            seed.y + pixelOffset.y,
+                            seed.z + pixelOffset.x
+                        )
+                    );
+                }
             }
         }
 
-        dst() = resultPixel / numSubPixels;
+        dst() = resultPixel / numSubPixels / pathsPerSubpixel;
     }
 };

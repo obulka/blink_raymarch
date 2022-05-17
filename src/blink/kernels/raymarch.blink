@@ -1242,14 +1242,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 // Have we hit the nearest object?
                 if (stepDistance < hitTolerance * distanceTravelled)
                 {
-                    // Keep the ID of the first object hit, so we can
-                    // store it in the alpha channel
-                    if (bounces == 0)
-                    {
-                        id = result.y;
-                        depth = distanceTravelled;
-                    }
-
                     // The actual position on the surface we hit
                     const float3 surfacePosition = origin - direction * hitTolerance;
 
@@ -1270,35 +1262,43 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         );
                     }
 
-                    // Early exit for the various AOVs that are not 'scene'
-                    if (outputType > 0)
+                    // Keep the ID of the first object hit, so we can
+                    // store it in the alpha channel
+                    if (bounces == 0)
                     {
-                        if (outputType == 1)
+                        id = result.y;
+                        depth = distanceTravelled;
+
+                        // Early exit for the various AOVs that are not 'scene'
+                        if (outputType > 0)
                         {
-                            return float4(
-                                surfacePosition.x,
-                                surfacePosition.y,
-                                surfacePosition.z,
-                                encodeFloatsInUint(id, depth)
-                            );
-                        }
-                        if (outputType == 2)
-                        {
-                            return float4(
-                                surfaceNormal.x,
-                                surfaceNormal.y,
-                                surfaceNormal.z,
-                                encodeFloatsInUint(id, depth)
-                            );
-                        }
-                        if (outputType == 3)
-                        {
-                            return float4(
-                                depth,
-                                0,
-                                0,
-                                encodeFloatsInUint(id, depth)
-                            );
+                            if (outputType == 1)
+                            {
+                                return float4(
+                                    surfacePosition.x,
+                                    surfacePosition.y,
+                                    surfacePosition.z,
+                                    encodeFloatsInUint(id, depth)
+                                );
+                            }
+                            if (outputType == 2)
+                            {
+                                return float4(
+                                    surfaceNormal.x,
+                                    surfaceNormal.y,
+                                    surfaceNormal.z,
+                                    encodeFloatsInUint(id, depth)
+                                );
+                            }
+                            if (outputType == 3)
+                            {
+                                return float4(
+                                    depth,
+                                    0,
+                                    0,
+                                    encodeFloatsInUint(id, depth)
+                                );
+                            }
                         }
                     }
 
@@ -1347,7 +1347,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     float reflection = surface.x;
 
                     // And spawn a refracted ray using them
-                    if (surface.y > 0.0f && numRays < lastRay && intensity > hitTolerance)
+                    if (numRays < lastRay && intensity > hitTolerance)
                     {
                         reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
 
@@ -1383,7 +1383,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     // Also spawn a reflected ray
                     intensity = rayIntensity * reflection;
-                    if (reflection > 0.0f && numRays < lastRay && intensity > hitTolerance)
+                    if (numRays < lastRay && intensity > hitTolerance)
                     {
                         const float3 reflectedDirection = reflectRayOffSurface(
                             direction,
