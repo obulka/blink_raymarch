@@ -1438,12 +1438,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // Otherwise, if we missed all objects, read the hdri value
             // in the direction the ray was last travelling
-            // if (!madeContact)
-            // {
-            //     const float4 hdriColour = readHDRIValue(direction);
-            //     rayColour += hdriColour * rayIntensity * surfaceColour;
-            //     surfaceColour *= saturate(hdriColour);
-            // }
+            if (!madeContact)
+            {
+                const float4 hdriColour = readHDRIValue(direction);
+                rayColour += hdriColour * rayIntensity * surfaceColour;
+            }
 
             currentRayIndex++;
         }
@@ -1489,8 +1488,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             pixelLocation
                             + pixelOffset
                             + subdividedPixelSize * float2(
-                                random(seed.x + path),
-                                random(seed.y + path)
+                                random(seed.x * path),
+                                random(seed.y * path)
                             ),
                             float2(formatWidth, formatHeight)
                         ),
