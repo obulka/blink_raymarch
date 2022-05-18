@@ -701,6 +701,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Node has Children, push it to the stack for later
                 // processing when we have all its children
                 // parentStack.push()
+                // TODO not all this needs to be in the stack (maybe)
                 parentStack[parentStackLength][0] = numChildren;
                 parentStack[parentStackLength][1] = transformedRay.x;
                 parentStack[parentStackLength][2] = transformedRay.y;

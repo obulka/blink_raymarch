@@ -203,6 +203,7 @@ Group {
  addUserKnob {6 mirror_y l "mirror y" t "Mirror the shape in the xz-plane." -STARTLINE}
  addUserKnob {6 mirror_z l "mirror z" t "Mirror the shape in the xy-plane." -STARTLINE}
  addUserKnob {26 ""}
+ addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
  addUserKnob {18 diffuse_colour l "diffuse colour" t "The diffuse colour of the shape."}
  diffuse_colour {1 1 1}
  addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
@@ -217,7 +218,6 @@ Group {
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
  emission_colour {1 1 1}
- addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
  translate {0 -2 -2}
