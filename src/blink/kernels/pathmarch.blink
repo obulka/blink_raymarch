@@ -128,6 +128,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         int outputType;
         bool useToneMap;
+        float exposure;
 
     local:
         // These local variables are not exposed to the user.
@@ -206,6 +207,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         defineParam(outputType, "Output Type", 0);
         defineParam(useToneMap, "Use Tone Map", true);
+        defineParam(exposure, "Exposure", 1.0f);
     }
 
 
@@ -1516,13 +1518,18 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         if (useToneMap)
         {
             const float3 toneMapped = ACESToneMap(
-                float3(resultColour.x, resultColour.y, resultColour.z)
+                exposure * float3(resultColour.x, resultColour.y, resultColour.z)
             );
             dst() = float4(toneMapped.x, toneMapped.y, toneMapped.z, resultColour.w);
         }
         else
         {
-            dst() = resultColour;
+            dst() = float4(
+                exposure * resultColour.x,
+                exposure * resultColour.y,
+                exposure * resultColour.z,
+                resultColour.w
+            );
         }
     }
 };
