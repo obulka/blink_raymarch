@@ -42,8 +42,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     // the shape dimensions.xyzw (some shapes may not use all channels)
     Image<eRead, eAccessRandom, eEdgeNone> dimensions;
 
-    // the shape colours.xyz, refractive index.w
-    Image<eRead, eAccessRandom, eEdgeNone> colours;
+    // the shape diffuseColours.xyz, refractive index.w
+    Image<eRead, eAccessRandom, eEdgeNone> diffuseColours;
+
+    Image<eRead, eAccessRandom, eEdgeNone> specularColours;
+
+    Image<eRead, eAccessRandom, eEdgeNone> transmissiveColours;
+
+    Image<eRead, eAccessRandom, eEdgeNone> emmissiveColours;
 
 
     // shape type.x, operation.y, numChildren.z, blend strength.w
@@ -493,7 +499,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
             SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
             SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
-            SampleType(colours) surfaceColour = colours(j, 0);
+            SampleType(diffuseColours) surfaceColour = diffuseColours(j, 0);
             SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);
 
             const int modifications = (int) shapeProperty.y;
