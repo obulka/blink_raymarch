@@ -49,7 +49,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
     Image<eRead, eAccessRandom, eEdgeNone> transmissiveColours;
 
-    Image<eRead, eAccessRandom, eEdgeNone> emmissiveColours;
+    Image<eRead, eAccessRandom, eEdgeNone> emissiveColours;
 
 
     // shape type.x, operation.y, numChildren.z, blend strength.w
@@ -64,17 +64,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     // reflection.x, transmission.y, emission.z, roughness.w
     Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;
 
-
-    // the input lights direction/position.xyz intensity.w
-    Image<eRead, eAccessRandom, eEdgeNone> lights;
-
-    // colour.xyz, type.w
-    // w in [0, 1) = directional, [1, inf) = point
-    Image<eRead, eAccessRandom, eEdgeNone> lightProperties;
-
-    // shadow hardness.x
-    Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;
-
     // the hdribox in latlong format
     Image<eRead, eAccessRandom, eEdgeClamped> hdriLight;
 
@@ -86,69 +75,60 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // These parameters are made available to the user.
 
         // Camera params
-        float focalLength;
-        float horizontalAperture;
-        float nearPlane;
-        float farPlane;
-        float4x4 cameraWorldMatrix;
+        float _focalLength;
+        float _horizontalAperture;
+        float _nearPlane;
+        float _farPlane;
+        float4x4 _cameraWorldMatrix;
 
         // Image params
-        float formatWidth;
-        float formatHeight;
+        float _formatWidth;
+        float _formatHeight;
 
-        float hdriOffsetAngle;
-        int hdriFormatWidth;
-        int hdriFormatHeight;
-        float hdriLightGain;
-        float hdriLightShadowHardness;
-        int softenHDRILightShadows;
-        int hdriLightFormatWidth;
-        int hdriLightFormatHeight;
+        float _hdriOffsetAngle;
+        float _hdriLightGain;
+        float _hdriLightShadowHardness;
+        int _softenHDRILightShadows;
 
         // Ray params
-        int subdivisions;
-        int pathsPerSubpixel;
-        int maxRaysPerSubPixel;
-        int maxBounces;
-        float maxRayDistance;
-        int maxRaySteps;
-        float hitTolerance;
-        float shadowBias;
+        int _subdivisions;
+        int _pathsPerSubpixel;
+        int _maxRaysPerSubPixel;
+        int _maxBounces;
+        float _maxRayDistance;
+        int _maxRaySteps;
+        float _hitTolerance;
+        float _shadowBias;
 
         // Scene params
-        float refractiveIndex;
+        float _refractiveIndex;
 
         // Shape Textures
-        int objectTextureWidth;
+        int _objectTextureWidth;
 
-        // Light textures
-        int lightTextureWidth;
+        int _outputType;
+        bool _useToneMap;
+        float _exposure;
 
-        float hazeAmount;
-        float hazeStart;
-        float hazeDistance;
-        float4 hazeColour;
-
-        float iterGlowAmount;
-        float4 iterGlowColour;
-
-        int outputType;
-        bool useToneMap;
-        float exposure;
 
     local:
         // These local variables are not exposed to the user.
 
-        float4x4 inverseCameraProjectionMatrix;
+        float4x4 __inverseCameraProjectionMatrix;
 
-        int bouncesPerRay;
+        int __bouncesPerRay;
 
-        int numSubPixels;
-        float subdividedPixelSize;
+        int __numSubPixels;
+        float __subdividedPixelSize;
 
-        float2 hdriPixelSize;
-        float2 hdriLightPixelSize;
-        float hdriOffsetRadians;
+        float2 __hdriPixelSize;
+        float2 __hdriLightPixelSize;
+        float __hdriOffsetRadians;
+
+        float3 __offset0;
+        float3 __offset1;
+        float3 __offset2;
+        float3 __offset3;
 
 
     /**
@@ -157,12 +137,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     void define()
     {
         // Camera params
-        defineParam(focalLength, "Focal Length", 50.0f);
-        defineParam(horizontalAperture, "Horizontal Aperture", 24.576f);
-        defineParam(nearPlane, "Near Plane", 0.1f);
-        defineParam(farPlane, "Far Plane", 10000.0f);
+        defineParam(_focalLength, "Focal Length", 50.0f);
+        defineParam(_horizontalAperture, "Horizontal Aperture", 24.576f);
+        defineParam(_nearPlane, "Near Plane", 0.1f);
+        defineParam(_farPlane, "Far Plane", 10000.0f);
         defineParam(
-            cameraWorldMatrix,
+            _cameraWorldMatrix,
             "Camera World Matrix",
             float4x4(
                 1, 0, 0, 0,
@@ -173,47 +153,32 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         );
 
         // Image params
-        defineParam(formatHeight, "Screen Height", 2160.0f);
-        defineParam(formatWidth, "Screen Width", 3840.0f);
-        defineParam(hdriOffsetAngle, "HDRI Offset Angle", 0.0f);
-        defineParam(hdriFormatHeight, "HDRI Height", 1024);
-        defineParam(hdriFormatWidth, "HDRI Width", 2048);
-        defineParam(hdriLightGain, "HDRI Lighting Gain", 0.1f);
-        defineParam(hdriLightShadowHardness, "HDRI Shadow Hardness", 1.0f);
-        defineParam(softenHDRILightShadows, "Soften HDRI Shadows", 1);
-        defineParam(hdriLightFormatHeight, "HDRI Lighting Height", 512);
-        defineParam(hdriLightFormatWidth, "HDRI Lighting Width", 1024);
+        defineParam(_formatHeight, "Screen Height", 2160.0f);
+        defineParam(_formatWidth, "Screen Width", 3840.0f);
+        defineParam(_hdriOffsetAngle, "HDRI Offset Angle", 0.0f);
+        defineParam(_hdriLightGain, "HDRI Lighting Gain", 0.1f);
+        defineParam(_hdriLightShadowHardness, "HDRI Shadow Hardness", 1.0f);
+        defineParam(_softenHDRILightShadows, "Soften HDRI Shadows", 1);
 
         // Ray params
-        defineParam(subdivisions, "Pixel Subdivisions", 0);
-        defineParam(pathsPerSubpixel, "Paths Per Subpixel", 1);
-        defineParam(maxRaysPerSubPixel, "Max Rays Per Subpixel", 1);
-        defineParam(maxRayDistance, "Max Ray Distance", 1000.0f);
-        defineParam(maxRaySteps, "Max Ray Steps", 128);
-        defineParam(maxBounces, "Max Bounces", 1);
-        defineParam(hitTolerance, "Hit Tolerance", 0.001f);
-        defineParam(shadowBias, "Shadow Bias", 1.0f);
+        defineParam(_subdivisions, "Pixel Subdivisions", 0);
+        defineParam(_pathsPerSubpixel, "Paths Per Subpixel", 1);
+        defineParam(_maxRaysPerSubPixel, "Max Rays Per Subpixel", 1);
+        defineParam(_maxRayDistance, "Max Ray Distance", 1000.0f);
+        defineParam(_maxRaySteps, "Max Ray Steps", 128);
+        defineParam(_maxBounces, "Max Bounces", 1);
+        defineParam(_hitTolerance, "Hit Tolerance", 0.001f);
+        defineParam(_shadowBias, "Shadow Bias", 1.0f);
 
         // Scene params
-        defineParam(refractiveIndex, "Index of Refraction", 1.0f);
+        defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
 
         // Shape Counts
-        defineParam(objectTextureWidth, "Object Texture Width", 0);
+        defineParam(_objectTextureWidth, "Object Texture Width", 0);
 
-        // Light Counts
-        defineParam(lightTextureWidth, "Light Texture Width", 0);
-
-        defineParam(hazeAmount, "Haze Amount", 0.0f);
-        defineParam(hazeStart, "Haze Start", 0.0f);
-        defineParam(hazeDistance, "Haze Distance", 1000.0f);
-        defineParam(hazeColour, "Haze Colour", float4(1, 1, 1, 1));
-
-        defineParam(iterGlowAmount, "Iter Glow Amount", 0.0f);
-        defineParam(iterGlowColour, "Iter Glow Colour", float4(1, 1, 1, 1));
-
-        defineParam(outputType, "Output Type", 0);
-        defineParam(useToneMap, "Use Tone Map", true);
-        defineParam(exposure, "Exposure", 1.0f);
+        defineParam(_outputType, "Output Type", 0);
+        defineParam(_useToneMap, "Use Tone Map", true);
+        defineParam(_exposure, "Exposure", 1.0f);
     }
 
 
@@ -223,49 +188,38 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     void init()
     {
-        bouncesPerRay = maxBounces <= 0 ? 1 : maxBounces;
+        __bouncesPerRay = _maxBounces <= 0 ? 1 : _maxBounces;
 
         // TODO use angles to allow -ve focal length like for latlongs
-        float aspect = aspectRatio(formatHeight, formatWidth);
+        float aspect = aspectRatio(_formatHeight, _formatWidth);
         float4x4 cameraProjectionMatrix = projectionMatrix(
-            focalLength,
-            horizontalAperture,
+            _focalLength,
+            _horizontalAperture,
             aspect,
-            nearPlane,
-            farPlane
+            _nearPlane,
+            _farPlane
         );
-        inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();
+        __inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();
 
-        int subPixelDivisions = pow(2, abs(subdivisions));
-        subdividedPixelSize = 1.0f / (float) subPixelDivisions;
-        numSubPixels = pow(subPixelDivisions, 2);
+        int subPixelDivisions = pow(2, abs(_subdivisions));
+        __subdividedPixelSize = 1.0f / (float) subPixelDivisions;
+        __numSubPixels = pow(subPixelDivisions, 2);
 
-        hdriPixelSize = float2(hdriFormatWidth / (2 * PI), hdriFormatHeight / PI);
-        hdriLightPixelSize = float2(hdriLightFormatWidth / (2 * PI), hdriLightFormatHeight / PI);
-        hdriOffsetRadians = hdriOffsetAngle * PI / 180.0f;
+        __hdriPixelSize = float2(
+            hdri.bounds.width() / (2 * PI),
+            hdri.bounds.height() / PI
+        );
+        __hdriLightPixelSize = float2(
+            hdriLight.bounds.width() / (2 * PI),
+            hdriLight.bounds.height() / PI
+        );
+        __hdriOffsetRadians = _hdriOffsetAngle * PI / 180.0f;
+
+        __offset0 = 0.5773f * float3(1, -1, -1);
+        __offset1 = 0.5773f * float3(-1, -1, 1);
+        __offset2 = 0.5773f * float3(-1, 1, -1);
+        __offset3 = 0.5773f * float3(1, 1, 1);
     }
-
-
-    // /**
-    //  * Get the value of hdri the ray would hit at infinite distance
-    //  *
-    //  * @arg rayDirection: The direction of the ray.
-    //  *
-    //  * @returns: The colour of the pixel in the direction of the ray.
-    //  */
-    // float4 readHDRIValue(float3 rayDirection)
-    // {
-    //     const float2 angles = cartesionUnitVectorToSpherical(
-    //         rayDirection,
-    //         hdriOffsetRadians
-    //     );
-
-    //     // Why does bilinear give nans? :(
-    //     return hdri(
-    //         round(hdriPixelSize.x * angles.x) - 1,
-    //         round(hdriFormatHeight - (hdriPixelSize.y * angles.y)) - 1
-    //     );
-    // }
 
 
     /**
@@ -277,43 +231,21 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float4 readHDRIValue(float3 rayDirection)
     {
-        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, hdriOffsetRadians);
+        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);
 
         // Should be able to say image access is eEdgeClamped and not do this
         // but I see nan pixels sooo... :(
         const float2 indices = clamp(
             float2(
-                hdriPixelSize.x * angles.x,
-                hdriFormatHeight - (hdriPixelSize.y * angles.y)
+                __hdriPixelSize.x * angles.x,
+                hdri.bounds.height() - (__hdriPixelSize.y * angles.y)
             ),
             float2(0),
-            float2(hdriFormatWidth, hdriFormatHeight) - 1.0f
+            float2(hdri.bounds.width(), hdri.bounds.height()) - 1.0f
         );
 
         return bilinear(hdri, indices.x, indices.y);
     }
-
-
-    // /**
-    //  * Get the value of hdri lighting for a given direction.
-    //  *
-    //  * @arg rayDirection: The direction of the ray.
-    //  *
-    //  * @returns: The value of the light in the direction of the ray.
-    //  */
-    // float4 readHDRILightValue(float3 rayDirection)
-    // {
-    //     const float2 angles = cartesionUnitVectorToSpherical(
-    //         rayDirection,
-    //         hdriOffsetRadians
-    //     );
-
-    //     // Why does bilinear give nans? :(
-    //     return hdriLightGain * hdriLight(
-    //         round(hdriLightPixelSize.x * angles.x) - 1,
-    //         round(hdriLightFormatHeight - (hdriLightPixelSize.y * angles.y)) - 1
-    //     );
-    // }
 
 
     /**
@@ -325,20 +257,20 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float4 readHDRILightValue(float3 rayDirection)
     {
-        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, hdriOffsetRadians);
+        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);
 
         // Should be able to say image access is eEdgeClamped and not do this
         // but I see nan pixels sooo... :(
         const float2 indices = clamp(
             float2(
-                hdriLightPixelSize.x * angles.x,
-                hdriLightFormatHeight - (hdriLightPixelSize.y * angles.y)
+                __hdriLightPixelSize.x * angles.x,
+                hdriLight.bounds.height() - (__hdriLightPixelSize.y * angles.y)
             ),
             float2(0),
-            float2(hdriLightFormatWidth, hdriLightFormatHeight) - 1.0f
+            float2(hdriLight.bounds.width(), hdriLight.bounds.height()) - 1.0f
         );
 
-        return hdriLightGain * bilinear(hdriLight, indices.x, indices.y);
+        return _hdriLightGain * bilinear(hdriLight, indices.x, indices.y);
     }
 
 
@@ -479,18 +411,40 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     float2 getMinDistanceToObjectInScene(
             const float3 &rayOrigin,
             const float pixelFootprint,
-            float4 &colour,
+            float4 &diffuseColour,
+            float4 &specularColour,
+            float4 &transmissiveColour,
+            float4 &emissiveColour,
             float4 &surface)
     {
-        float distance = maxRayDistance;
+        float distance = _maxRayDistance;
         float id = 0.0f;
 
-        // numChildren, transformedRay, scale, mods, nextDistance, colour, refractive
-        // index, surface, objectId, blendStrength
-        float parentStack[MAX_CHILD_DEPTH][1 + 3 + 1 + 1 + 1 + 3 + 1 +  4 + 1 + 1];
+        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour
+        // roughness, specular colour, specular, transmissive colour, transmission,
+        // emissive colour, emission, refractive index, objectId, blendStrength
+        float parentStack[MAX_CHILD_DEPTH][
+            1   // numChildren
+            + 3 // transformedRay
+            + 1 // scale
+            + 1 // mods
+            + 1 // nextDistance
+            + 3 // diffuse colour
+            + 1 // roughness
+            + 3 // specular colour
+            + 1 // specular
+            + 3 // transmissive colour
+            + 1 // transmission
+            + 3 // emissive colour
+            + 1 // emission
+            + 3 // unused for now
+            + 1 // refractive index
+            + 1 // objectId
+            + 1 // blendStrength
+        ];
         int parentStackLength = 0;
 
-        for (int j=0; j < objectTextureWidth; j++)
+        for (int j=0; j < _objectTextureWidth; j++)
         {
             // Read in the shape properties
             SampleType(positions) position = positions(j, 0);
@@ -499,7 +453,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
             SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
             SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
-            SampleType(diffuseColours) surfaceColour = diffuseColours(j, 0);
+            SampleType(diffuseColours) diffuseColour = diffuseColours(j, 0);
+            SampleType(specularColours) specularColour = specularColours(j, 0);
+            SampleType(transmissiveColours) transmissiveColour = transmissiveColours(j, 0);
+            SampleType(emissiveColours) emissiveColour = emissiveColours(j, 0);
             SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);
 
             const int modifications = (int) shapeProperty.y;
@@ -510,7 +467,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             int stackLastIndex = parentStackLength - 1;
 
-            float4 blendedColour = surfaceColour;
+            float4 blendedDiffuseColour = diffuseColour;
+            float4 blendedSpecularColour = specularColour;
+            float4 blendedTransmissiveColour = transmissiveColour;
+            float4 blendedEmissiveColour = emissiveColour;
             float4 blendedSurface = surfaceProperty;
 
             // Position relative to the parent if we have any
@@ -542,7 +502,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 modifications,
                 modParameters1.w,
                 rotation.w,
-                blendedColour
+                blendedDiffuseColour
             );
 
             // Track which object was hit for the alpha channel
@@ -553,7 +513,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             if (
                 modifications & 4096
                 && numChildren > 0
-                && nextDistance > hitTolerance * (pixelFootprint + 1.0f)
+                && nextDistance > _hitTolerance * (pixelFootprint + 1.0f)
             ) {
                 // Update the min distance if this bounding volume is closest.
                 // Otherwise we could step through it, or if every object in
@@ -562,7 +522,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 {
                     distance = nextDistance;
 
-                    colour = blendedColour;
+                    diffuseColour = blendedDiffuseColour;
                     surface = blendedSurface;
 
                     id = objectId;
@@ -588,7 +548,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // we know that there will be no more children if we did not continue
                 numChildren = 0.0f;
                 nextDistance = parentStack[stackLastIndex][6];
-                blendedColour = float4(
+                blendedDiffuseColour = float4(
                     parentStack[stackLastIndex][7],
                     parentStack[stackLastIndex][8],
                     parentStack[stackLastIndex][9],
@@ -625,7 +585,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         if (!(parentModifications & 4096))
                         {
                             const float parentNextDistance = parentStack[stackIndex][6];
-                            const float4 parentSurfaceColour = float4(
+                            const float4 parentDiffuseColour = float4(
                                 parentStack[stackIndex][7],
                                 parentStack[stackIndex][8],
                                 parentStack[stackIndex][9],
@@ -648,8 +608,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                 parentModifications,
                                 parentNextDistance,
                                 nextDistance,
-                                parentSurfaceColour,
-                                blendedColour,
+                                parentDiffuseColour,
+                                blendedDiffuseColour,
                                 parentSurfaceProperty,
                                 blendedSurface,
                                 parentBlendStrength
@@ -661,7 +621,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         {
                             distance = nextDistance;
 
-                            colour = blendedColour;
+                            diffuseColour = blendedDiffuseColour;
                             surface = blendedSurface;
 
                             id = objectId;
@@ -690,7 +650,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 {
                     distance = nextDistance;
 
-                    colour = blendedColour;
+                    diffuseColour = blendedDiffuseColour;
                     surface = blendedSurface;
 
                     id = objectId;
@@ -709,16 +669,28 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 parentStack[parentStackLength][4] = scale;
                 parentStack[parentStackLength][5] = (float) modifications;
                 parentStack[parentStackLength][6] = nextDistance;
-                parentStack[parentStackLength][7] = blendedColour.x;
-                parentStack[parentStackLength][8] = blendedColour.y;
-                parentStack[parentStackLength][9] = blendedColour.z;
-                parentStack[parentStackLength][10] = blendedColour.w;
-                parentStack[parentStackLength][11] = blendedSurface.x;
-                parentStack[parentStackLength][12] = blendedSurface.y;
-                parentStack[parentStackLength][13] = blendedSurface.z;
-                parentStack[parentStackLength][14] = blendedSurface.w;
-                parentStack[parentStackLength][15] = objectId;
-                parentStack[parentStackLength][16] = blendStrength;
+                parentStack[parentStackLength][7] = blendedDiffuseColour.x;
+                parentStack[parentStackLength][8] = blendedDiffuseColour.y;
+                parentStack[parentStackLength][9] = blendedDiffuseColour.z;
+                parentStack[parentStackLength][10] = blendedDiffuseColour.w;
+                parentStack[parentStackLength][11] = blendedSpecularColour.x;
+                parentStack[parentStackLength][12] = blendedSpecularColour.y;
+                parentStack[parentStackLength][13] = blendedSpecularColour.z;
+                parentStack[parentStackLength][14] = blendedSpecularColour.w;
+                parentStack[parentStackLength][15] = blendedTransmissiveColour.x;
+                parentStack[parentStackLength][16] = blendedTransmissiveColour.y;
+                parentStack[parentStackLength][17] = blendedTransmissiveColour.z;
+                parentStack[parentStackLength][18] = blendedTransmissiveColour.w;
+                parentStack[parentStackLength][19] = blendedEmissiveColour.x;
+                parentStack[parentStackLength][20] = blendedEmissiveColour.y;
+                parentStack[parentStackLength][21] = blendedEmissiveColour.z;
+                parentStack[parentStackLength][22] = blendedEmissiveColour.w;
+                parentStack[parentStackLength][23] = blendedSurface.x;
+                parentStack[parentStackLength][24] = blendedSurface.y;
+                parentStack[parentStackLength][25] = blendedSurface.z;
+                parentStack[parentStackLength][26] = blendedSurface.w;
+                parentStack[parentStackLength][27] = objectId;
+                parentStack[parentStackLength][28] = blendStrength;
                 parentStackLength++;
             }
         }
@@ -728,374 +700,207 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * Compute a soft shadow value.
+     * Compute the minimum distance to an object in the scene
      *
-     * @arg rayDirection: The direction of the shadow ray.
-     * @arg distanceToShadePoint: The maximum distance to check for
-     *     a shadow casting object.
-     * @arg softness: The softness of the shadow.
-     * @arg rayOrigin: The origin of the ray.
-     * @arg colour: Will store the colour of the object which casts the
-     *     shadow.
-     * @arg surface: Will store the surface properties of the object
-     *     which casts the shadow.
+     * @arg rayOrigin: The origin position of the ray.
+     * @arg pixelFootprint: A value proportional to the amount of world
+     *     space that fills a pixel, like the distance from camera.
      *
-     * @returns: The intenstity of shadow.
+     * @returns: The minimum distance to an object in the scene.
      */
-    float computeSoftShadow(
-            const float3 &rayDirection,
-            const float distanceToShadePoint,
-            const float softness,
-            float3 &rayOrigin,
-            float4 &colour,
-            float4 &surface)
+    float getMinDistanceToObjectInScene(const float3 &rayOrigin, const float pixelFootprint)
     {
-        float distanceTravelled = 0;
-        float shadowIntensity = 1.0f;
-        float lastStepDistance = 1000000000000000000000000.0f;
+        float distance = _maxRayDistance;
 
-        int iterations = 0;
-        while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
+        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour
+        // roughness, specular colour, specular, transmissive colour, transmission,
+        // emissive colour, emission, refractive index, objectId, blendStrength
+        float parentStack[MAX_CHILD_DEPTH][
+            1   // numChildren
+            + 3 // transformedRay
+            + 1 // scale
+            + 1 // mods
+            + 1 // nextDistance
+            + 1 // blendStrength
+        ];
+        int parentStackLength = 0;
+
+        for (int j=0; j < _objectTextureWidth; j++)
         {
-            const float stepDistance = fabs(
-                getMinDistanceToObjectInScene(
-                    rayOrigin,
-                    distanceTravelled,
-                    colour,
-                    surface
-                ).x
-            );
-            const float stepDistanceSquared = stepDistance * stepDistance;
-            float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);
-            shadowIntensity = min(
-                shadowIntensity,
-                softness * sqrt(stepDistanceSquared - softOffset * softOffset)
-                / max(0.0f, distanceTravelled - softOffset)
-            );
+            // Read in the shape properties
+            SampleType(positions) position = positions(j, 0);
+            SampleType(rotations) rotation = rotations(j, 0);
+            SampleType(dimensions) dimension = dimensions(j, 0);
+            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
+            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
+            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
 
-            if (stepDistance < hitTolerance * distanceTravelled)
+            float scale = position.w;
+
+            const int modifications = (int) shapeProperty.y;
+            float numChildren = shapeProperty.z;
+            const float blendStrength = shapeProperty.w;
+
+            int stackLastIndex = parentStackLength - 1;
+
+            // Position relative to the parent if we have any
+            float3 parentTransformedRay = rayOrigin;
+            if (parentStackLength > 0)
             {
-                surface.z /= pow(1.0f + distanceTravelled, 4);
-                shadowIntensity = saturate(shadowIntensity);
-                return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
+                parentTransformedRay.x = parentStack[stackLastIndex][1];
+                parentTransformedRay.y = parentStack[stackLastIndex][2];
+                parentTransformedRay.z = parentStack[stackLastIndex][3];
+                scale *= parentStack[stackLastIndex][4];
             }
 
-            lastStepDistance = stepDistance;
-            rayOrigin += rayDirection * stepDistance;
-            distanceTravelled += stepDistance;
-            iterations++;
-        }
-        colour = float4(0);
-        surface = float4(0);
-
-        shadowIntensity = saturate(shadowIntensity);
-        return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
-    }
-
-
-    /**
-     * Compute a shadow value.
-     *
-     * @arg rayDirection: The direction of the shadow ray.
-     * @arg distanceToShadePoint: The maximum distance to check for
-     *     a shadow casting object.
-     * @arg rayOrigin: The origin of the ray.
-     * @arg colour: Will store the colour of the object which casts the
-     *     shadow.
-     * @arg surface: Will store the surface properties of the object
-     *     which casts the shadow.
-     *
-     * @returns: The intenstity of shadow.
-     */
-    float computeShadow(
-            const float3 &rayDirection,
-            const float distanceToShadePoint,
-            float3 &rayOrigin,
-            float4 &colour,
-            float4 &surface)
-    {
-        float distanceTravelled = 0;
-        int iterations = 0;
-        while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
-        {
-            float stepDistance = fabs(
-                getMinDistanceToObjectInScene(
-                    rayOrigin,
-                    distanceTravelled,
-                    colour,
-                    surface
-                ).x
+            // Use parent transform to position child
+            const float3 transformedRay = transformRay(
+                parentTransformedRay,
+                float3(position.x, position.y, position.z),
+                float3(rotation.x, rotation.y, rotation.z),
+                modifications,
+                modParameters0,
+                modParameters1
             );
 
-            if (stepDistance < hitTolerance * distanceTravelled)
-            {
-                surface.z /= pow(1.0f + distanceTravelled, 4);
-                return 0;
+            // Get distance to this child
+            float nextDistance = getModifiedDistance(
+                transformedRay,
+                (int) shapeProperty.x,
+                dimension,
+                scale,
+                modifications,
+                modParameters1.w,
+                rotation.w,
+                float4(0);
+            );
+
+            // Track which object was hit for the alpha channel
+            float objectId = (float) j + 1.0f;
+
+            // If this is a bounding volume, we can skip its children
+            // if we aren't close to, or inside it
+            if (
+                modifications & 4096
+                && numChildren > 0
+                && nextDistance > _hitTolerance * (pixelFootprint + 1.0f)
+            ) {
+                // Update the min distance if this bounding volume is closest.
+                // Otherwise we could step through it, or if every object in
+                // the scene is inside it, we would not step forward at all
+                if (fabs(nextDistance) < fabs(distance))
+                {
+                    distance = nextDistance;
+                }
+
+                // This was tagged as a boundary object, skip its children
+                // since we arent close to hitting it
+                j += numChildren;
+
+                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
+                {
+                    parentStack[parentIndex][0] -= numChildren + 1.0f;
+                }
+
+                // If there are no parents, or still children of the parent
+                // we do not need to compute anything further for this loop
+                if (parentStackLength <= 0 || parentStack[stackLastIndex][0] > 0.0f)
+                {
+                    continue;
+                }
+
+                // pop stack
+                // we know that there will be no more children if we did not continue
+                numChildren = 0.0f;
+                nextDistance = parentStack[stackLastIndex][6];
+                stackLastIndex--;
+                parentStackLength--;
             }
 
-            rayOrigin += rayDirection * stepDistance;
-            distanceTravelled += stepDistance;
-            iterations++;
-        }
-        colour = float4(0);
-        surface = float4(0);
-
-        return 1;
-    }
-
-
-    /**
-     * Compute the ambient occlusion.
-     *
-     * @arg rayDirection: The direction of the shadow ray.
-     * @arg rayOrigin: The origin of the ray.
-     * @arg amount: The amount to scale the occlusion value by.
-     * @arg iterations: The number of iterations to refine the
-     *     occlusion.
-     * @arg colour: Will store the colour of the final occluding object.
-     * @arg surface: Will store the surface properties of the final
-     *     occluding object.
-     *
-     * @returns: The occlusion.
-     */
-    float computeAmbientOcclusion(
-            const float3 &rayDirection,
-            const float3 &rayOrigin,
-            const float amount,
-            const int iterations,
-            float4 &colour,
-            float4 &surface)
-    {
-        float occlusion = 0.0f;
-        float occlusionScaleFactor = 1.0f;
-        for(int iteration=0; iteration < iterations; iteration++)
-        {
-            float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;
-            float distanceToClosestObject = fabs(getMinDistanceToObjectInScene(
-                rayOrigin + stepDistance * rayDirection,
-                1.0f,
-                colour,
-                surface
-            ).x);
-            occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;
-            occlusionScaleFactor *= 0.95;
-        }
-
-        return (
-            amount
-            * saturate(0.5f + 0.5f * rayDirection.y)  // ambient
-            * saturate(1.0f - 1.5f * occlusion)       // occlusion
-        );
-    }
-
-
-    /**
-     * Compute the intensity of a light on a surface.
-     *
-     * @arg pointOnSurface: The point on the surface to compute the
-     *     light intensity at.
-     * @arg surfaceNormal: The normal direction to the surface.
-     * @arg light: The light properties which depend on the light type.
-     * @arg lightType: The type of light to compute the intensity for.
-     *     0: directional
-     *     1: point
-     *     2: ambient
-     *     3: ambient occlusion
-     * @arg intensity: The light intensity.
-     * @arg falloff: The power of the falloff of the light.
-     * @arg softness: The softness of the shadow.
-     * @arg hitColour: Will store the colour of the object.
-     * @arg hitSurface: Will store the surface properties of the object.
-     *
-     * @returns: The light intensity.
-     */
-    float2 intensityOfLightOnSurface(
-            const float3 &pointOnSurface,
-            const float3 &surfaceNormal,
-            const float3 &light,
-            const int lightType,
-            const float intensity,
-            const float falloff,
-            const float softness,
-            float4 &hitColour,
-            float4 &hitSurface)
-    {
-        int absLightType = abs(lightType);
-        if (absLightType == 3)
-        {
-            float2 result = float2(
-                1.0f,
-                computeAmbientOcclusion(
-                    surfaceNormal,
-                    pointOnSurface,
-                    intensity,
-                    (int) light.x,
-                    hitColour,
-                    hitSurface
-                )
-            );
-            hitSurface = float4(0);
-            hitColour = float4(0);
-            return result;
-        }
-
-        float distanceToLight;
-        float3 lightDirection;
-        float intensityAtPosition = getLightData(
-            pointOnSurface,
-            surfaceNormal,
-            light,
-            absLightType,
-            intensity,
-            falloff,
-            maxRayDistance,
-            distanceToLight,
-            lightDirection
-        );
-        float3 surfaceOffset = surfaceOffsetPoint(
-            pointOnSurface,
-            lightDirection,
-            surfaceNormal,
-            shadowBias,
-            hitTolerance 
-        );
-        lightDirection = normalize(lightDirection);
-
-        float normalFactor = dot(surfaceNormal, lightDirection);
-
-        float shadowIntensityAtPosition;
-        if (lightType < 0)
-        {
-            shadowIntensityAtPosition = computeSoftShadow(
-                lightDirection,
-                distanceToLight,
-                softness,
-                surfaceOffset,
-                hitColour,
-                hitSurface
-            );
-        }
-        else
-        {
-            shadowIntensityAtPosition = computeShadow(
-                lightDirection,
-                distanceToLight,
-                surfaceOffset,
-                hitColour,
-                hitSurface
-            );
-        }
-
-        return saturate(
-            normalFactor * float2(intensityAtPosition, shadowIntensityAtPosition)
-        );
-    }
-
-
-    /**
-     * Compute the combined intensity of all lights on the surface of an
-     * object.
-     *
-     * @arg pointOnSurface: The point on the surface to compute the
-     *     light intensity at.
-     * @arg surfaceNormal: The normal direction to the surface.
-     * @arg surfaceColour: The colour of the object.
-     * @arg surface: The surface properties of the object.
-     * @arg lightColour: Will store the light colour.
-     *
-     * @returns: The light intensity.
-     */
-    float lightIntensityOnSurface(
-            const float3 &pointOnSurface,
-            const float3 &surfaceNormal,
-            const float4 &surfaceColour,
-            const float4 &surface,
-            float4 &lightColour)
-    {
-        float2 lightIntensity = float2(surface.z, 0);
-        lightColour = surface.z * surfaceColour;
-
-        float2 currentLightIntensity;
-
-        // for each light in the scene
-        for (int i=0; i < lightTextureWidth; i++)
-        {
-            float4 hitSurface = float4(0);
-            float4 hitColour = float4(0);
-
-            // Read the light properties
-            SampleType(lights) light = lights(i, 0);
-            SampleType(lightProperties) lightProperty = lightProperties(i, 0);
-            SampleType(lightProperties1) lightProperty1 = lightProperties1(i, 0);
-
-            int lightType = (int) lightProperty.w;
-            if (fabs(lightType) == 2)
+            if (numChildren <= 0.0f)
             {
-                // Ambient light, simply return the intensity.
-                currentLightIntensity = float2(light.w, 1);
+                // No Children left, compute interactions with parent
+                if (parentStackLength > 0)
+                {
+                    // Process this object, along with all parents that do not
+                    // have any more children, removing them from the stack,
+                    // but descend all the way down the stack, without removing
+                    // the objects that still have children
+                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)
+                    {
+                        const int parentModifications = (int) parentStack[stackIndex][5];
+
+                        // Do not need to interact with bounding volumes.
+                        // They are in the stack for relative positioning
+                        // if they weren't then we would have to manually move
+                        // the bounding box to follow the children
+                        if (!(parentModifications & 4096))
+                        {
+                            const float parentNextDistance = parentStack[stackIndex][6];
+                            const float parentBlendStrength = parentStack[stackIndex][7];
+
+                            // Compute interaction between parent and this child
+                            nextDistance = performChildInteraction(
+                                parentModifications,
+                                parentNextDistance,
+                                nextDistance,
+                                float4(0),
+                                float4(0),
+                                float4(0),
+                                float4(0),
+                                parentBlendStrength
+                            );
+                        }
+
+                        // Update the global min distance (and surface/colour)
+                        if (fabs(nextDistance) < fabs(distance))
+                        {
+                            distance = nextDistance;
+                        }
+                    }
+
+                    do
+                    {
+                        // Decrement the number of children each parent has
+                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
+                        {
+                            parentStack[parentIndex][0] -= 1.0f;
+                        }
+
+                        // Get the number of children still remaining for the parent
+                        // If there are still children, we can break out of this loop
+                        // to process the rest of them before the parent itself
+                        numChildren = parentStack[stackLastIndex][0];
+                    }
+                    while (numChildren <= 0.0f && --stackLastIndex >= 0);
+
+                    parentStackLength = stackLastIndex + 1;
+                }
+                // No parents to interact with, simply check the distance
+                else if (fabs(nextDistance) < fabs(distance))
+                {
+                    distance = nextDistance;
+                }
             }
             else
             {
-                // Compute the intensity
-                currentLightIntensity = intensityOfLightOnSurface(
-                    pointOnSurface,
-                    surfaceNormal,
-                    float3(light.x, light.y, light.z),
-                    lightType,
-                    light.w,
-                    lightProperty1.y,
-                    lightProperty1.x,
-                    hitColour,
-                    hitSurface
-                );
-                lightColour += hitSurface.z * hitColour;
-                lightIntensity += float2(hitSurface.z, 1.0f);
+                // Node has Children, push it to the stack for later
+                // processing when we have all its children
+                // parentStack.push()
+                // TODO not all this needs to be in the stack (maybe)
+                parentStack[parentStackLength][0] = numChildren;
+                parentStack[parentStackLength][1] = transformedRay.x;
+                parentStack[parentStackLength][2] = transformedRay.y;
+                parentStack[parentStackLength][3] = transformedRay.z;
+                parentStack[parentStackLength][4] = scale;
+                parentStack[parentStackLength][5] = (float) modifications;
+                parentStack[parentStackLength][6] = nextDistance;
+                parentStack[parentStackLength][7] = blendStrength;
+                parentStackLength++;
             }
-
-            // Merge the intensity values
-            lightColour += currentLightIntensity.x * currentLightIntensity.y * float4(
-                lightProperty.x,
-                lightProperty.y,
-                lightProperty.z,
-                0.0f
-            );
-            lightIntensity += currentLightIntensity;
         }
 
-        // Read the hdri diffuse light contribution
-        const float diffuse = saturate(1.0f - surface.x - surface.y);
-        if (diffuse > hitTolerance)
-        {
-            const float4 hdriLightColour = readHDRILightValue(surfaceNormal);
-            lightColour += diffuse * hdriLightColour;
-            lightIntensity += float2(
-                diffuse * length(
-                    float3(
-                        hdriLightColour.x,
-                        hdriLightColour.y,
-                        hdriLightColour.z
-                    )
-                ),
-                1.0f
-            );
-        }
-
-        lightColour = saturate(lightColour);
-        return saturate(lightIntensity.x * lightIntensity.y);
-    }
-
-
-    /**
-     * Compute the amount of haze at the given distance.
-     *
-     * @arg distance: The distance the ray has travelled through the
-     *     haze.
-     *
-     * @returns: The amount of haze.
-     */
-    inline float computeHazeAmount(const float distance)
-    {
-        return hazeAmount * saturate((distance - hazeStart) / hazeDistance);
+        return distance;
     }
 
 
@@ -1114,38 +919,31 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float4 colour;
         float4 surface;
 
-        const float epsilon = hitTolerance;
-
-        const float3 offset0 = 0.5773f * float3(1, -1, -1);
-        const float3 offset1 = 0.5773f * float3(-1, -1, 1);
-        const float3 offset2 = 0.5773f * float3(-1, 1, -1);
-        const float3 offset3 = 0.5773f * float3(1, 1, 1);
-
         return normalize(
-            offset0
+            __offset0
             * getMinDistanceToObjectInScene(
-                point + offset0 * epsilon,
+                point + __offset0 * _hitTolerance,
                 pixelFootprint,
                 colour,
                 surface
             ).x
-            + offset1
+            + __offset1
             * getMinDistanceToObjectInScene(
-                point + offset1 * epsilon,
+                point + __offset1 * _hitTolerance,
                 pixelFootprint,
                 colour,
                 surface
             ).x
-            + offset2
+            + __offset2
             * getMinDistanceToObjectInScene(
-                point + offset2 * epsilon,
+                point + __offset2 * _hitTolerance,
                 pixelFootprint,
                 colour,
                 surface
             ).x
-            + offset3
+            + __offset3
             * getMinDistanceToObjectInScene(
-                point + offset3 * epsilon,
+                point + __offset3 * _hitTolerance,
                 pixelFootprint,
                 colour,
                 surface
@@ -1173,7 +971,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float rayDistance,
             float3 &seed)
     {
-        const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, maxRaysPerSubPixel);
+        const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, _maxRaysPerSubPixel);
 
         // rayOrigin, rayDirection, rayIntensity, index of refraction
         float rays[MAX_RAYS_PER_SUBPIXEL][3 + 3 + 1 + 1];
@@ -1187,7 +985,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         rays[0][6] = 1.0f;
 
-        rays[0][7] = refractiveIndex;
+        rays[0][7] = _refractiveIndex;
 
         int numRays = 1;
         int currentRayIndex = 0;
@@ -1196,7 +994,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float4 surface;
 
         float4 rayColour = float4(0);
-        float4 surfaceColour = float4(1);
+        float4 diffuseColour = float4(1);
 
         float lastStepDistance = 1.0f;
 
@@ -1230,8 +1028,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // March the ray
             while (
                 distanceTravelled < rayDistance
-                && iterations <= maxRaySteps
-                && rayIntensity >= hitTolerance
+                && iterations <= _maxRaySteps
+                && rayIntensity >= _hitTolerance
             ) {
                 // Get the closest distance to an object
                 const float2 result = getMinDistanceToObjectInScene(
@@ -1258,10 +1056,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 seed += fabs(origin + direction);
 
                 // Have we hit the nearest object?
-                if (stepDistance < hitTolerance * distanceTravelled)
+                if (stepDistance < _hitTolerance * distanceTravelled)
                 {
                     // The actual position on the surface we hit
-                    const float3 surfacePosition = origin - direction * hitTolerance;
+                    const float3 surfacePosition = origin - direction * _hitTolerance;
 
                     // The normal to the surface at that position
                     float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
@@ -1277,9 +1075,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         depth = distanceTravelled;
 
                         // Early exit for the various AOVs that are not 'scene'
-                        if (outputType > 0)
+                        if (_outputType > 0)
                         {
-                            if (outputType == 1)
+                            if (_outputType == 1)
                             {
                                 return float4(
                                     surfacePosition.x,
@@ -1288,7 +1086,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                     encodeFloatsInUint(id, depth)
                                 );
                             }
-                            if (outputType == 2)
+                            if (_outputType == 2)
                             {
                                 return float4(
                                     surfaceNormal.x,
@@ -1297,7 +1095,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                     encodeFloatsInUint(id, depth)
                                 );
                             }
-                            if (outputType == 3)
+                            if (_outputType == 3)
                             {
                                 return float4(
                                     depth,
@@ -1310,8 +1108,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
 
                     // Update the colour of the ray
-                    rayColour += colour * rayIntensity * surface.z * surfaceColour;
-                    surfaceColour *= colour;
+                    rayColour += colour * rayIntensity * surface.z * diffuseColour;
+                    diffuseColour *= colour;
 
                     // Exit if we have reached the bounce limit
                     if (++bounces >= numBounces)
@@ -1322,7 +1120,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                     // Otherwise compute the refraction values
                     const float incidentRefractiveIndex = rays[currentRayIndex][7];
-                    const float refractedRefractiveIndex = colour.w;
+                    const float refractedRefractiveIndex = surface.w;
                     const float reflectivity = schlickReflectionCoefficient(
                         direction,
                         surfaceNormal,
@@ -1334,7 +1132,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     float reflection = surface.x;
 
                     // And spawn a refracted ray using them
-                    if (numRays < lastRay && intensity > hitTolerance)
+                    if (numRays < lastRay && intensity > _hitTolerance)
                     {
                         reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
 
@@ -1350,7 +1148,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         const float3 refractedOrigin = offsetPoint(
                             surfacePosition,
                             refractedDirection - surfaceNormal,
-                            2.0f * hitTolerance + stepDistance
+                            2.0f * _hitTolerance + stepDistance
                         );
 
                         rays[numRays][0] = refractedOrigin.x;
@@ -1370,7 +1168,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                     // Also spawn a reflected ray
                     intensity = rayIntensity * reflection;
-                    if (numRays < lastRay && intensity > hitTolerance)
+                    if (numRays < lastRay && intensity > _hitTolerance)
                     {
                         const float3 reflectedDirection = reflectRayOffSurface(
                             direction,
@@ -1382,7 +1180,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         const float3 reflectedOrigin = offsetPoint(
                             origin,
                             reflectedDirection + surfaceNormal,
-                            hitTolerance
+                            _hitTolerance
                         );
 
                         rays[numRays][0] = reflectedOrigin.x;
@@ -1402,7 +1200,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                     // Also spawn a diffuse ray
                     intensity = rayIntensity * (1.0f - reflection - refraction);
-                    if (numRays < lastRay && intensity > hitTolerance)
+                    if (numRays < lastRay && intensity > _hitTolerance)
                     {
                         const float3 diffuseDirection = roughen(
                             surfaceNormal,
@@ -1415,7 +1213,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         const float3 diffuseOrigin = offsetPoint(
                             origin,
                             diffuseDirection + surfaceNormal,
-                            hitTolerance
+                            _hitTolerance
                         );
 
                         rays[numRays][0] = diffuseOrigin.x;
@@ -1444,7 +1242,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // If we are not computing the scene value and we have missed all
             // objects, return black.
-            if (outputType > 0)
+            if (_outputType > 0)
             {
                 return float4(0);
             }
@@ -1454,7 +1252,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             if (!madeContact)
             {
                 const float4 hdriColour = readHDRIValue(direction);
-                rayColour += hdriColour * rayIntensity * surfaceColour;
+                rayColour += hdriColour * rayIntensity * diffuseColour;
             }
 
             currentRayIndex++;
@@ -1483,14 +1281,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         for (
             pixelOffset.x = 0.0f;
             pixelOffset.x < 1.0f;
-            pixelOffset.x += subdividedPixelSize
+            pixelOffset.x += __subdividedPixelSize
         ) {
             for (
                 pixelOffset.y = 0.0f;
                 pixelOffset.y < 1.0f;
-                pixelOffset.y += subdividedPixelSize
+                pixelOffset.y += __subdividedPixelSize
             ) {
-                for (int path=1; path <= pathsPerSubpixel; path++)
+                for (int path=1; path <= _pathsPerSubpixel; path++)
                 {
                     seed *= path;
 
@@ -1498,13 +1296,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     float3 rayOrigin;
                     float3 rayDirection;
                     createCameraRay(
-                        cameraWorldMatrix,
-                        inverseCameraProjectionMatrix,
+                        _cameraWorldMatrix,
+                        __inverseCameraProjectionMatrix,
                         pixelsToUV(
                             pixelLocation
                             + pixelOffset
-                            + subdividedPixelSize * random(float2(seed.x, seed.y)),
-                            float2(formatWidth, formatHeight)
+                            + __subdividedPixelSize * random(float2(seed.x, seed.y)),
+                            float2(_formatWidth, _formatHeight)
                         ),
                         rayOrigin,
                         rayDirection
@@ -1513,28 +1311,28 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     resultPixel += marchRay(
                         rayOrigin,
                         rayDirection,
-                        bouncesPerRay,
-                        maxRayDistance,
+                        __bouncesPerRay,
+                        _maxRayDistance,
                         seed
                     );
                 }
             }
         }
 
-        const float4 resultColour = resultPixel / numSubPixels / pathsPerSubpixel;
-        if (useToneMap)
+        const float4 resultColour = resultPixel / __numSubPixels / _pathsPerSubpixel;
+        if (_useToneMap)
         {
             const float3 toneMapped = ACESToneMap(
-                exposure * float3(resultColour.x, resultColour.y, resultColour.z)
+                _exposure * float3(resultColour.x, resultColour.y, resultColour.z)
             );
             dst() = float4(toneMapped.x, toneMapped.y, toneMapped.z, resultColour.w);
         }
         else
         {
             dst() = float4(
-                exposure * resultColour.x,
-                exposure * resultColour.y,
-                exposure * resultColour.z,
+                _exposure * resultColour.x,
+                _exposure * resultColour.y,
+                _exposure * resultColour.z,
                 resultColour.w
             );
         }

@@ -20,7 +20,6 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
                     <page id="DAG.2"/>
-                    <page id="DAG.3"/>
                 </dock>
             </splitter>
             <split size="615"/>
@@ -206,18 +205,22 @@ Group {
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
  addUserKnob {18 diffuse_colour l "diffuse colour" t "The diffuse colour of the shape."}
  diffuse_colour {1 1 1}
+ addUserKnob {6 diffuse_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
  specular 1
  addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
  specular_colour {1 1 1}
+ addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {18 transmission_colour l "transmission colour" t "The transmissive colour."}
  transmission_colour {1 1 1}
+ addUserKnob {6 transmission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
  emission_colour {1 1 1}
+ addUserKnob {6 emission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
  translate {0 -2 -2}
@@ -318,7 +321,7 @@ add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_
  Constant {
   inputs 0
   channels sdf_colour
-  color {{parent.diffuse_colour.r} {parent.diffuse_colour.g} {parent.diffuse_colour.b} {parent.refractive_index}}
+  color {{parent.diffuse_colour.r} {parent.diffuse_colour.g} {parent.diffuse_colour.b} {parent.roughness}}
   format "1 1 0 0 1 1 1 1x1"
   name diffuse_colour
   xpos 313
@@ -403,11 +406,12 @@ add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surfa
  Constant {
   inputs 0
   channels sdf_surface
-  color {{parent.specular} {parent.transmission} {parent.emission} {parent.roughness}}
+  color {{parent.specular} {parent.transmission} {parent.emission} {parent.refractive_index}}
   format "1 1 0 0 1 1 1 1x1"
   name surface
-  xpos 935
-  ypos 460
+  selected true
+  xpos 936
+  ypos 461
  }
  Copy {
   inputs 2
@@ -481,7 +485,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N760e120 [stack 0]
+set N7e948c0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -503,7 +507,7 @@ set N760e120 [stack 0]
    xpos 34
    ypos -6
   }
-set N7621920 [stack 0]
+set N7ea80c0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -514,7 +518,7 @@ set N7621920 [stack 0]
    xpos -98
    ypos 336
   }
-push $N760e120
+push $N7e948c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -543,7 +547,7 @@ push $N760e120
    xpos 158
    ypos 167
   }
-push $N7621920
+push $N7ea80c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -636,7 +640,7 @@ push $N7621920
    xpos 192
    ypos -2
   }
-set N76cd880 [stack 0]
+set N7f53ce0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -658,7 +662,7 @@ set N76cd880 [stack 0]
    xpos 34
    ypos -6
   }
-set N76e1080 [stack 0]
+set N7f674e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -669,7 +673,7 @@ set N76e1080 [stack 0]
    xpos -98
    ypos 336
   }
-push $N76cd880
+push $N7f53ce0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -698,7 +702,7 @@ push $N76cd880
    xpos 158
    ypos 167
   }
-push $N76e1080
+push $N7f674e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -924,7 +928,7 @@ Group {
   xpos 1695
   ypos -1474
  }
-set N7a3bd60 [stack 0]
+set N805a340 [stack 0]
  Reformat {
   type scale
   scale {{"floor(min(parent.hdri_dot.height, parent.hdri_dot.width) * parent.hdri_lighting_scale) > 0 ? parent.hdri_lighting_scale : 1"}}
@@ -973,14 +977,14 @@ add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_lig
   xpos -412
   ypos -1552
  }
-set Nee4d0e0 [stack 0]
+set N9422fd0 [stack 0]
  Dot {
   name Dot13
   xpos -412
   ypos -1484
  }
-set N8e03700 [stack 0]
-push $Nee4d0e0
+set N9427ec0 [stack 0]
+push $N9422fd0
  Input {
   inputs 0
   name lights
@@ -1025,7 +1029,7 @@ push $Nee4d0e0
    xpos 192
    ypos -2
   }
-set N8e39a60 [stack 0]
+set N945fa40 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1047,7 +1051,7 @@ set N8e39a60 [stack 0]
    xpos 34
    ypos -6
   }
-set N8e4d260 [stack 0]
+set N9473240 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1058,7 +1062,7 @@ set N8e4d260 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8e39a60
+push $N945fa40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1087,7 +1091,7 @@ push $N8e39a60
    xpos 158
    ypos 167
   }
-push $N8e4d260
+push $N9473240
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1154,7 +1158,7 @@ push $N8e4d260
   xpos -277
   ypos -1309
  }
-set N8edc5d0 [stack 0]
+set N9502130 [stack 0]
 add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
  Shuffle {
   in sdf_light_properties1
@@ -1169,7 +1173,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
   xpos -461
   ypos -866
  }
-push $N8edc5d0
+push $N9502130
 add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
  Shuffle {
   in sdf_light_properties
@@ -1182,7 +1186,7 @@ add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properti
   xpos -342
   ypos -864
  }
-push $N8edc5d0
+push $N9502130
  Shuffle {
   in sdf_light
   name light
@@ -1194,13 +1198,13 @@ push $N8edc5d0
   xpos -226
   ypos -862
  }
-push $N8e03700
+push $N9427ec0
  Dot {
   name Dot14
   xpos 529
   ypos -1484
  }
-push $Nee4d0e0
+push $N9422fd0
  Dot {
   name Dot16
   xpos 529
@@ -1249,7 +1253,7 @@ push $Nee4d0e0
    xpos 192
    ypos -2
   }
-set N8f53b60 [stack 0]
+set N9583300 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1271,7 +1275,7 @@ set N8f53b60 [stack 0]
    xpos 34
    ypos -6
   }
-set N8f67360 [stack 0]
+set N9596b00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1282,7 +1286,7 @@ set N8f67360 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8f53b60
+push $N9583300
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1311,7 +1315,7 @@ push $N8f53b60
    xpos 158
    ypos 167
   }
-push $N8f67360
+push $N9596b00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1378,7 +1382,7 @@ push $N8f67360
   xpos 641
   ypos -1318
  }
-set N8ff6c20 [stack 0]
+set N96263c0 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -1390,7 +1394,7 @@ set N8ff6c20 [stack 0]
   xpos 348
   ypos -865
  }
-push $N8ff6c20
+push $N96263c0
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -1402,7 +1406,7 @@ push $N8ff6c20
   xpos 780
   ypos -865
  }
-push $N8ff6c20
+push $N96263c0
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -1414,7 +1418,7 @@ push $N8ff6c20
   xpos 641
   ypos -864
  }
-push $N8ff6c20
+push $N96263c0
  Shuffle {
   in sdf_shape
   name shape
@@ -1426,7 +1430,7 @@ push $N8ff6c20
   xpos 473
   ypos -863
  }
-push $N8ff6c20
+push $N96263c0
  Shuffle {
   in sdf_emm_colour
   name emm_colour
@@ -1438,7 +1442,7 @@ push $N8ff6c20
   xpos 241
   ypos -867
  }
-push $N8ff6c20
+push $N96263c0
  Shuffle {
   in sdf_trans_colour
   name trans_colour
@@ -1450,7 +1454,7 @@ push $N8ff6c20
   xpos 144
   ypos -866
  }
-push $N8ff6c20
+push $N96263c0
  Shuffle {
   in sdf_spec_colour
   name spec_colour
@@ -1462,7 +1466,7 @@ push $N8ff6c20
   xpos 44
   ypos -865
  }
-push $N8ff6c20
+push $N96263c0
  Shuffle {
   in sdf_colour
   name diff_colour
@@ -1474,7 +1478,7 @@ push $N8ff6c20
   xpos -72
   ypos -866
  }
-push $N8ff6c20
+push $N96263c0
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -1486,7 +1490,7 @@ push $N8ff6c20
   xpos 1227
   ypos -857
  }
-push $N8ff6c20
+push $N96263c0
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -1498,7 +1502,7 @@ push $N8ff6c20
   xpos 1076
   ypos -854
  }
-push $N8ff6c20
+push $N96263c0
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -1510,7 +1514,7 @@ push $N8ff6c20
   xpos 934
   ypos -859
  }
-push $N7a3bd60
+push $N805a340
  Constant {
   inputs 0
   channels {rgba.red rgba.green rgba.blue -rgba.alpha}
@@ -1619,8 +1623,8 @@ push $N7a3bd60
   xpos 1695
   ypos -341
  }
-set N90f94b0 [stack 0]
-push $N90f94b0
+set N9768c20 [stack 0]
+push $N9768c20
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/decode_alpha.blink
   recompileCount 1
