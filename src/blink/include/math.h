@@ -100,48 +100,6 @@ inline float fract(const float value)
 }
 
 
-inline uint wangHash(uint seed)
-{
-    seed = uint(seed ^ uint(61)) ^ uint(seed >> uint(16));
-    seed *= uint(9);
-    seed = seed ^ (seed >> 4);
-    seed *= uint(0x27d4eb2d);
-    seed = seed ^ (seed >> 15);
-    return seed;
-}
-
-
-/**
- * Get a random value on the interval [0, 1].
- *
- * @arg seed: The random seed.
- *
- * @returns: A random value on the interval [0, 1].
- */
-inline float random(const float seed)
-{
-    return fract(sin(seed * 91.3458f) * 47453.5453f);
-}
-
-
-
-inline float random(uint seed)
-{
-    return float(wangHash(seed)) / 4294967296.0f;
-}
-
-
-float3 randomUnitVector(uint seed)
-{
-    const float z = random(seed) * 2.0f - 1.0f;
-    const float a = random(seed) * 2.0f * PI;
-    const float r = sqrt(1.0f - z * z);
-    const float x = r * cos(a);
-    const float y = r * sin(a);
-    return float3(x, y, z);
-}
-
-
 /**
  * The minimum of three values.
  *
@@ -540,35 +498,6 @@ inline float3 surfaceOffsetPoint(
         const float tolerance)
 {
     return tolerance * bias * (direction + normal) + surfacePoint;
-}
-
-
-/**
- * Randomly redirect the surface normal to give it roughness.
- *
- * @arg normal: The normal to redirect.
- * @arg roughness: The maximum amount to roughen by.
- * @arg seed: The random seed.
- */
-float3 roughen(
-    const float3 &normal,
-    const float roughness,
-    const float3 &seed)
-{
-    const float xAngle = random(seed.x);
-    const float yAngle = random(seed.y);
-    const float zAngle = random(seed.z);
-
-    float3x3 rotation;
-    rotationMatrix(
-        PI * roughness * (float3(xAngle, yAngle, zAngle) - 0.5f) / 2.0f,
-        rotation
-    );
-
-    float3 roughened;
-    matmul(rotation, normal, roughened);
-
-    return normalize(roughened);
 }
 
 

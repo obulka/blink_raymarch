@@ -13,6 +13,7 @@
 #include "lights.h"
 #include "math.h"
 #include "objectInteraction.h"
+#include "random.h"
 #include "sdfModifications.h"
 #include "sdfs.h"
 

@@ -13,6 +13,7 @@
 #include "lights.h"
 #include "math.h"
 #include "objectInteraction.h"
+#include "random.h"
 #include "sdfModifications.h"
 #include "sdfs.h"
 
@@ -1158,7 +1159,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &rayDirection,
             const int numBounces,
             const float rayDistance,
-            const float3 &seed)
+            float3 &seed)
     {
         const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, maxRaysPerSubPixel);
 
@@ -1240,6 +1241,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 // Step the ray forwards
                 origin += direction * stepDistance;
+
+                // Update the random seed
+                seed += fabs(origin + direction);
 
                 // Have we hit the nearest object?
                 if (stepDistance < hitTolerance * distanceTravelled)
@@ -1388,13 +1392,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     intensity = rayIntensity * (1.0f - reflection - refraction);
                     if (numRays < lastRay && intensity > hitTolerance)
                     {
-                        const float3 diffuseDirection = normalize(
-                            surfaceNormal
-                            + randomUnitVector(
-                                floatToUint(
-                                    seed.x + distanceTravelled * seed.y + intensity * seed.z
-                                )
-                            )
+                        const float3 diffuseDirection = roughen(
+                            surfaceNormal,
+                            1.0f,
+                            seed
                         );
 
                         // Offset the point so that it doesn't get trapped on
@@ -1459,7 +1460,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     void process(int2 pos)
     {
-        SampleType(noise) seed = noise();
+        SampleType(noise) noisePixel = noise();
+        float3 seed = float3(noisePixel.x, noisePixel.y, noisePixel.z);
 
         float4 resultPixel = float4(0);
 
@@ -1478,6 +1480,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             ) {
                 for (int path=1; path <= pathsPerSubpixel; path++)
                 {
+                    seed *= path;
+
                     // Generate a ray from the camera
                     float3 rayOrigin;
                     float3 rayDirection;
@@ -1487,10 +1491,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         pixelsToUV(
                             pixelLocation
                             + pixelOffset
-                            + subdividedPixelSize * float2(
-                                random(seed.x * path),
-                                random(seed.y * path)
-                            ),
+                            + subdividedPixelSize * random(float2(seed.x, seed.y)),
                             float2(formatWidth, formatHeight)
                         ),
                         rayOrigin,
@@ -1502,11 +1503,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         rayDirection,
                         bouncesPerRay,
                         maxRayDistance,
-                        float3(
-                            seed.x + pixelOffset.x,
-                            seed.y + pixelOffset.y,
-                            seed.z + pixelOffset.x
-                        )
+                        seed
                     );
                 }
             }
