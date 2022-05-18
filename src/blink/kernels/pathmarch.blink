@@ -12,6 +12,7 @@
 #include "conversion.h"
 #include "lights.h"
 #include "math.h"
+#include "colour.h"
 #include "objectInteraction.h"
 #include "random.h"
 #include "sdfModifications.h"
@@ -126,6 +127,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float4 iterGlowColour;
 
         int outputType;
+        bool useToneMap;
 
     local:
         // These local variables are not exposed to the user.
@@ -203,6 +205,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(iterGlowColour, "Iter Glow Colour", float4(1, 1, 1, 1));
 
         defineParam(outputType, "Output Type", 0);
+        defineParam(useToneMap, "Use Tone Map", true);
     }
 
 
@@ -1509,6 +1512,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             }
         }
 
-        dst() = resultPixel / numSubPixels / pathsPerSubpixel;
+        const float4 resultColour = resultPixel / numSubPixels / pathsPerSubpixel;
+        if (useToneMap)
+        {
+            const float3 toneMapped = ACESToneMap(
+                float3(resultColour.x, resultColour.y, resultColour.z)
+            );
+            dst() = float4(toneMapped.x, toneMapped.y, toneMapped.z, resultColour.w);
+        }
+        else
+        {
+            dst() = resultColour;
+        }
     }
 };
