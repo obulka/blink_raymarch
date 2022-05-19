@@ -401,310 +401,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      * @arg rayOrigin: The origin position of the ray.
      * @arg pixelFootprint: A value proportional to the amount of world
      *     space that fills a pixel, like the distance from camera.
-     * @arg colour: Location to store the colour of the hit object.
-     * @arg surface: Location to store the surface properties of the hit
-     *     object.
-     *
-     * @returns: The minimum distance to an object in the scene, and the
-     *     unique identifier of the object.
-     */
-    float2 getMinDistanceToObjectInScene(
-            const float3 &rayOrigin,
-            const float pixelFootprint,
-            float4 &diffuseColour,
-            float4 &specularColour,
-            float4 &transmissiveColour,
-            float4 &emissiveColour,
-            float4 &surface)
-    {
-        float distance = _maxRayDistance;
-        float id = 0.0f;
-
-        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour
-        // roughness, specular colour, specular, transmissive colour, transmission,
-        // emissive colour, emission, refractive index, objectId, blendStrength
-        float parentStack[MAX_CHILD_DEPTH][
-            1   // numChildren
-            + 3 // transformedRay
-            + 1 // scale
-            + 1 // mods
-            + 1 // nextDistance
-            + 3 // diffuse colour
-            + 1 // roughness
-            + 3 // specular colour
-            + 1 // specular
-            + 3 // transmissive colour
-            + 1 // transmission
-            + 3 // emissive colour
-            + 1 // emission
-            + 3 // unused for now
-            + 1 // refractive index
-            + 1 // objectId
-            + 1 // blendStrength
-        ];
-        int parentStackLength = 0;
-
-        for (int j=0; j < _objectTextureWidth; j++)
-        {
-            // Read in the shape properties
-            SampleType(positions) position = positions(j, 0);
-            SampleType(rotations) rotation = rotations(j, 0);
-            SampleType(dimensions) dimension = dimensions(j, 0);
-            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
-            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
-            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
-            SampleType(diffuseColours) diffuseColour = diffuseColours(j, 0);
-            SampleType(specularColours) specularColour = specularColours(j, 0);
-            SampleType(transmissiveColours) transmissiveColour = transmissiveColours(j, 0);
-            SampleType(emissiveColours) emissiveColour = emissiveColours(j, 0);
-            SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);
-
-            const int modifications = (int) shapeProperty.y;
-            float scale = position.w;
-
-            const float blendStrength = shapeProperty.w;
-            float numChildren = shapeProperty.z;
-
-            int stackLastIndex = parentStackLength - 1;
-
-            float4 blendedDiffuseColour = diffuseColour;
-            float4 blendedSpecularColour = specularColour;
-            float4 blendedTransmissiveColour = transmissiveColour;
-            float4 blendedEmissiveColour = emissiveColour;
-            float4 blendedSurface = surfaceProperty;
-
-            // Position relative to the parent if we have any
-            float3 parentTransformedRay = rayOrigin;
-            if (parentStackLength > 0)
-            {
-                parentTransformedRay.x = parentStack[stackLastIndex][1];
-                parentTransformedRay.y = parentStack[stackLastIndex][2];
-                parentTransformedRay.z = parentStack[stackLastIndex][3];
-                scale *= parentStack[stackLastIndex][4];
-            }
-
-            // Use parent transform to position child
-            const float3 transformedRay = transformRay(
-                parentTransformedRay,
-                float3(position.x, position.y, position.z),
-                float3(rotation.x, rotation.y, rotation.z),
-                modifications,
-                modParameters0,
-                modParameters1
-            );
-
-            // Get distance to this child
-            float nextDistance = getModifiedDistance(
-                transformedRay,
-                (int) shapeProperty.x,
-                dimension,
-                scale,
-                modifications,
-                modParameters1.w,
-                rotation.w,
-                blendedDiffuseColour
-            );
-
-            // Track which object was hit for the alpha channel
-            float objectId = (float) j + 1.0f;
-
-            // If this is a bounding volume, we can skip its children
-            // if we aren't close to, or inside it
-            if (
-                modifications & 4096
-                && numChildren > 0
-                && nextDistance > _hitTolerance * (pixelFootprint + 1.0f)
-            ) {
-                // Update the min distance if this bounding volume is closest.
-                // Otherwise we could step through it, or if every object in
-                // the scene is inside it, we would not step forward at all
-                if (fabs(nextDistance) < fabs(distance))
-                {
-                    distance = nextDistance;
-
-                    diffuseColour = blendedDiffuseColour;
-                    surface = blendedSurface;
-
-                    id = objectId;
-                }
-
-                // This was tagged as a boundary object, skip its children
-                // since we arent close to hitting it
-                j += numChildren;
-
-                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
-                {
-                    parentStack[parentIndex][0] -= numChildren + 1.0f;
-                }
-
-                // If there are no parents, or still children of the parent
-                // we do not need to compute anything further for this loop
-                if (parentStackLength <= 0 || parentStack[stackLastIndex][0] > 0.0f)
-                {
-                    continue;
-                }
-
-                // pop stack
-                // we know that there will be no more children if we did not continue
-                numChildren = 0.0f;
-                nextDistance = parentStack[stackLastIndex][6];
-                blendedDiffuseColour = float4(
-                    parentStack[stackLastIndex][7],
-                    parentStack[stackLastIndex][8],
-                    parentStack[stackLastIndex][9],
-                    parentStack[stackLastIndex][10]
-                );
-                blendedSurface = float4(
-                    parentStack[stackLastIndex][11],
-                    parentStack[stackLastIndex][12],
-                    parentStack[stackLastIndex][13],
-                    parentStack[stackLastIndex][14]
-                );
-                objectId = parentStack[stackLastIndex][15];
-                stackLastIndex--;
-                parentStackLength--;
-            }
-
-            if (numChildren <= 0.0f)
-            {
-                // No Children left, compute interactions with parent
-                if (parentStackLength > 0)
-                {
-                    // Process this object, along with all parents that do not
-                    // have any more children, removing them from the stack,
-                    // but descend all the way down the stack, without removing
-                    // the objects that still have children
-                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)
-                    {
-                        const int parentModifications = (int) parentStack[stackIndex][5];
-
-                        // Do not need to interact with bounding volumes.
-                        // They are in the stack for relative positioning
-                        // if they weren't then we would have to manually move
-                        // the bounding box to follow the children
-                        if (!(parentModifications & 4096))
-                        {
-                            const float parentNextDistance = parentStack[stackIndex][6];
-                            const float4 parentDiffuseColour = float4(
-                                parentStack[stackIndex][7],
-                                parentStack[stackIndex][8],
-                                parentStack[stackIndex][9],
-                                parentStack[stackIndex][10]
-                            );
-                            const float4 parentSurfaceProperty = float4(
-                                parentStack[stackIndex][11],
-                                parentStack[stackIndex][12],
-                                parentStack[stackIndex][13],
-                                parentStack[stackIndex][14]
-                            );
-                            if (fabs(nextDistance) > fabs(parentNextDistance))
-                            {
-                                objectId = parentStack[stackIndex][15];
-                            }
-                            const float parentBlendStrength = parentStack[stackIndex][16];
-
-                            // Compute interaction between parent and this child
-                            nextDistance = performChildInteraction(
-                                parentModifications,
-                                parentNextDistance,
-                                nextDistance,
-                                parentDiffuseColour,
-                                blendedDiffuseColour,
-                                parentSurfaceProperty,
-                                blendedSurface,
-                                parentBlendStrength
-                            );
-                        }
-
-                        // Update the global min distance (and surface/colour)
-                        if (fabs(nextDistance) < fabs(distance))
-                        {
-                            distance = nextDistance;
-
-                            diffuseColour = blendedDiffuseColour;
-                            surface = blendedSurface;
-
-                            id = objectId;
-                        }
-                    }
-
-                    do
-                    {
-                        // Decrement the number of children each parent has
-                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
-                        {
-                            parentStack[parentIndex][0] -= 1.0f;
-                        }
-
-                        // Get the number of children still remaining for the parent
-                        // If there are still children, we can break out of this loop
-                        // to process the rest of them before the parent itself
-                        numChildren = parentStack[stackLastIndex][0];
-                    }
-                    while (numChildren <= 0.0f && --stackLastIndex >= 0);
-
-                    parentStackLength = stackLastIndex + 1;
-                }
-                // No parents to interact with, simply check the distance
-                else if (fabs(nextDistance) < fabs(distance))
-                {
-                    distance = nextDistance;
-
-                    diffuseColour = blendedDiffuseColour;
-                    surface = blendedSurface;
-
-                    id = objectId;
-                }
-            }
-            else
-            {
-                // Node has Children, push it to the stack for later
-                // processing when we have all its children
-                // parentStack.push()
-                // TODO not all this needs to be in the stack (maybe)
-                parentStack[parentStackLength][0] = numChildren;
-                parentStack[parentStackLength][1] = transformedRay.x;
-                parentStack[parentStackLength][2] = transformedRay.y;
-                parentStack[parentStackLength][3] = transformedRay.z;
-                parentStack[parentStackLength][4] = scale;
-                parentStack[parentStackLength][5] = (float) modifications;
-                parentStack[parentStackLength][6] = nextDistance;
-                parentStack[parentStackLength][7] = blendedDiffuseColour.x;
-                parentStack[parentStackLength][8] = blendedDiffuseColour.y;
-                parentStack[parentStackLength][9] = blendedDiffuseColour.z;
-                parentStack[parentStackLength][10] = blendedDiffuseColour.w;
-                parentStack[parentStackLength][11] = blendedSpecularColour.x;
-                parentStack[parentStackLength][12] = blendedSpecularColour.y;
-                parentStack[parentStackLength][13] = blendedSpecularColour.z;
-                parentStack[parentStackLength][14] = blendedSpecularColour.w;
-                parentStack[parentStackLength][15] = blendedTransmissiveColour.x;
-                parentStack[parentStackLength][16] = blendedTransmissiveColour.y;
-                parentStack[parentStackLength][17] = blendedTransmissiveColour.z;
-                parentStack[parentStackLength][18] = blendedTransmissiveColour.w;
-                parentStack[parentStackLength][19] = blendedEmissiveColour.x;
-                parentStack[parentStackLength][20] = blendedEmissiveColour.y;
-                parentStack[parentStackLength][21] = blendedEmissiveColour.z;
-                parentStack[parentStackLength][22] = blendedEmissiveColour.w;
-                parentStack[parentStackLength][23] = blendedSurface.x;
-                parentStack[parentStackLength][24] = blendedSurface.y;
-                parentStack[parentStackLength][25] = blendedSurface.z;
-                parentStack[parentStackLength][26] = blendedSurface.w;
-                parentStack[parentStackLength][27] = objectId;
-                parentStack[parentStackLength][28] = blendStrength;
-                parentStackLength++;
-            }
-        }
-
-        return float2(distance, id);
-    }
-
-
-    /**
-     * Compute the minimum distance to an object in the scene
-     *
-     * @arg rayOrigin: The origin position of the ray.
-     * @arg pixelFootprint: A value proportional to the amount of world
-     *     space that fills a pixel, like the distance from camera.
      *
      * @returns: The minimum distance to an object in the scene.
      */
@@ -763,6 +459,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 modParameters1
             );
 
+            float4 tmp;
             // Get distance to this child
             float nextDistance = getModifiedDistance(
                 transformedRay,
@@ -772,7 +469,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 modifications,
                 modParameters1.w,
                 rotation.w,
-                float4(0);
+                tmp
             );
 
             // Track which object was hit for the alpha channel
@@ -844,10 +541,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                 parentModifications,
                                 parentNextDistance,
                                 nextDistance,
-                                float4(0),
-                                float4(0),
-                                float4(0),
-                                float4(0),
                                 parentBlendStrength
                             );
                         }
@@ -905,6 +598,346 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     * Compute the minimum distance to an object in the scene
+     *
+     * @arg rayOrigin: The origin position of the ray.
+     * @arg pixelFootprint: A value proportional to the amount of world
+     *     space that fills a pixel, like the distance from camera.
+     * @arg colour: Location to store the colour of the hit object.
+     * @arg surface: Location to store the surface properties of the hit
+     *     object.
+     *
+     * @returns: The minimum distance to an object in the scene, and the
+     *     unique identifier of the object.
+     */
+    float2 getMinDistanceToObjectInScene(
+            const float3 &rayOrigin,
+            const float pixelFootprint,
+            float4 &diffuseColour,
+            float4 &specularColour,
+            float4 &transmissiveColour,
+            float4 &emissiveColour,
+            float4 &surface)
+    {
+        float distance = _maxRayDistance;
+        float id = 0.0f;
+
+        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour
+        // roughness, specular colour, specular, transmissive colour, transmission,
+        // emissive colour, emission, refractive index, objectId, blendStrength
+        float parentStack[MAX_CHILD_DEPTH][
+            1   // numChildren
+            + 3 // transformedRay
+            + 1 // scale
+            + 1 // mods
+            + 1 // nextDistance
+            + 3 // diffuse colour
+            + 1 // roughness
+            + 3 // specular colour
+            + 1 // specular
+            + 3 // transmissive colour
+            + 1 // transmission
+            + 3 // emissive colour
+            + 1 // emission
+            + 3 // unused for now
+            + 1 // refractive index
+            + 1 // objectId
+            + 1 // blendStrength
+        ];
+        int parentStackLength = 0;
+
+        for (int j=0; j < _objectTextureWidth; j++)
+        {
+            // Read in the shape properties
+            SampleType(positions) position = positions(j, 0);
+            SampleType(rotations) rotation = rotations(j, 0);
+            SampleType(dimensions) dimension = dimensions(j, 0);
+            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
+            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
+            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
+            SampleType(diffuseColours) objDiffuseColour = diffuseColours(j, 0);
+            SampleType(specularColours) objSpecularColour = specularColours(j, 0);
+            SampleType(transmissiveColours) objTransmissiveColour = transmissiveColours(j, 0);
+            SampleType(emissiveColours) objEmissiveColour = emissiveColours(j, 0);
+            SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);
+
+            const int modifications = (int) shapeProperty.y;
+            float scale = position.w;
+
+            const float blendStrength = shapeProperty.w;
+            float numChildren = shapeProperty.z;
+
+            int stackLastIndex = parentStackLength - 1;
+
+            float4 blendedDiffuseColour = objDiffuseColour;
+            float4 blendedSpecularColour = objSpecularColour;
+            float4 blendedTransmissiveColour = objTransmissiveColour;
+            float4 blendedEmissiveColour = objEmissiveColour;
+            float4 blendedSurface = surfaceProperty;
+
+            // Position relative to the parent if we have any
+            float3 parentTransformedRay = rayOrigin;
+            if (parentStackLength > 0)
+            {
+                parentTransformedRay.x = parentStack[stackLastIndex][1];
+                parentTransformedRay.y = parentStack[stackLastIndex][2];
+                parentTransformedRay.z = parentStack[stackLastIndex][3];
+                scale *= parentStack[stackLastIndex][4];
+            }
+
+            // Use parent transform to position child
+            const float3 transformedRay = transformRay(
+                parentTransformedRay,
+                float3(position.x, position.y, position.z),
+                float3(rotation.x, rotation.y, rotation.z),
+                modifications,
+                modParameters0,
+                modParameters1
+            );
+
+            // Get distance to this child
+            float nextDistance = getModifiedDistance(
+                transformedRay,
+                (int) shapeProperty.x,
+                dimension,
+                scale,
+                modifications,
+                modParameters1.w,
+                rotation.w,
+                blendedDiffuseColour
+            );
+
+            // Track which object was hit for the alpha channel
+            float objectId = (float) j + 1.0f;
+
+            // If this is a bounding volume, we can skip its children
+            // if we aren't close to, or inside it
+            if (
+                modifications & 4096
+                && numChildren > 0
+                && nextDistance > _hitTolerance * (pixelFootprint + 1.0f)
+            ) {
+                // Update the min distance if this bounding volume is closest.
+                // Otherwise we could step through it, or if every object in
+                // the scene is inside it, we would not step forward at all
+                if (fabs(nextDistance) < fabs(distance))
+                {
+                    distance = nextDistance;
+
+                    diffuseColour = blendedDiffuseColour;
+                    specularColour = blendedSpecularColour;
+                    transmissiveColour = blendedTransmissiveColour;
+                    emissiveColour = blendedEmissiveColour;
+
+                    surface = blendedSurface;
+
+                    id = objectId;
+                }
+
+                // This was tagged as a boundary object, skip its children
+                // since we arent close to hitting it
+                j += numChildren;
+
+                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
+                {
+                    parentStack[parentIndex][0] -= numChildren + 1.0f;
+                }
+
+                // If there are no parents, or still children of the parent
+                // we do not need to compute anything further for this loop
+                if (parentStackLength <= 0 || parentStack[stackLastIndex][0] > 0.0f)
+                {
+                    continue;
+                }
+
+                // pop stack
+                // we know that there will be no more children if we did not continue
+                numChildren = 0.0f;
+                nextDistance = parentStack[stackLastIndex][6];
+                blendedDiffuseColour = float4(
+                    parentStack[stackLastIndex][7],
+                    parentStack[stackLastIndex][8],
+                    parentStack[stackLastIndex][9],
+                    parentStack[stackLastIndex][10]
+                );
+                blendedSurface = float4(
+                    parentStack[stackLastIndex][11],
+                    parentStack[stackLastIndex][12],
+                    parentStack[stackLastIndex][13],
+                    parentStack[stackLastIndex][14]
+                );
+                objectId = parentStack[stackLastIndex][15];
+                stackLastIndex--;
+                parentStackLength--;
+            }
+
+            if (numChildren <= 0.0f)
+            {
+                // No Children left, compute interactions with parent
+                if (parentStackLength > 0)
+                {
+                    // Process this object, along with all parents that do not
+                    // have any more children, removing them from the stack,
+                    // but descend all the way down the stack, without removing
+                    // the objects that still have children
+                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)
+                    {
+                        const int parentModifications = (int) parentStack[stackIndex][5];
+
+                        // Do not need to interact with bounding volumes.
+                        // They are in the stack for relative positioning
+                        // if they weren't then we would have to manually move
+                        // the bounding box to follow the children
+                        if (!(parentModifications & 4096))
+                        {
+                            const float parentNextDistance = parentStack[stackIndex][6];
+                            const float4 parentDiffuseColour = float4(
+                                parentStack[stackIndex][7],
+                                parentStack[stackIndex][8],
+                                parentStack[stackIndex][9],
+                                parentStack[stackIndex][10]
+                            );
+                            const float4 parentSpecularColour = float4(
+                                parentStack[stackIndex][11],
+                                parentStack[stackIndex][12],
+                                parentStack[stackIndex][13],
+                                parentStack[stackIndex][14]
+                            );
+                            const float4 parentTransmissiveColour = float4(
+                                parentStack[stackIndex][15],
+                                parentStack[stackIndex][16],
+                                parentStack[stackIndex][17],
+                                parentStack[stackIndex][18]
+                            );
+                            const float4 parentEmissiveColour = float4(
+                                parentStack[stackIndex][19],
+                                parentStack[stackIndex][20],
+                                parentStack[stackIndex][21],
+                                parentStack[stackIndex][22]
+                            );
+                            const float4 parentSurfaceProperty = float4(
+                                parentStack[stackIndex][23],
+                                parentStack[stackIndex][24],
+                                parentStack[stackIndex][25],
+                                parentStack[stackIndex][26]
+                            );
+                            if (fabs(nextDistance) > fabs(parentNextDistance))
+                            {
+                                objectId = parentStack[stackIndex][27];
+                            }
+                            const float parentBlendStrength = parentStack[stackIndex][28];
+
+                            // Compute interaction between parent and this child
+                            nextDistance = performChildInteraction(
+                                parentModifications,
+                                parentNextDistance,
+                                nextDistance,
+                                parentDiffuseColour,
+                                blendedDiffuseColour,
+                                parentSpecularColour,
+                                blendedSpecularColour,
+                                parentTransmissiveColour,
+                                blendedTransmissiveColour,
+                                parentEmissiveColour,
+                                blendedEmissiveColour,
+                                parentSurfaceProperty,
+                                blendedSurface,
+                                parentBlendStrength
+                            );
+                        }
+
+                        // Update the global min distance (and surface/colour)
+                        if (fabs(nextDistance) < fabs(distance))
+                        {
+                            distance = nextDistance;
+
+                            diffuseColour = blendedDiffuseColour;
+                            specularColour = blendedSpecularColour;
+                            transmissiveColour = blendedTransmissiveColour;
+                            emissiveColour = blendedEmissiveColour;
+
+                            surface = blendedSurface;
+
+                            id = objectId;
+                        }
+                    }
+
+                    do
+                    {
+                        // Decrement the number of children each parent has
+                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
+                        {
+                            parentStack[parentIndex][0] -= 1.0f;
+                        }
+
+                        // Get the number of children still remaining for the parent
+                        // If there are still children, we can break out of this loop
+                        // to process the rest of them before the parent itself
+                        numChildren = parentStack[stackLastIndex][0];
+                    }
+                    while (numChildren <= 0.0f && --stackLastIndex >= 0);
+
+                    parentStackLength = stackLastIndex + 1;
+                }
+                // No parents to interact with, simply check the distance
+                else if (fabs(nextDistance) < fabs(distance))
+                {
+                    distance = nextDistance;
+
+                    diffuseColour = blendedDiffuseColour;
+                    specularColour = blendedSpecularColour;
+                    transmissiveColour = blendedTransmissiveColour;
+                    emissiveColour = blendedEmissiveColour;
+
+                    surface = blendedSurface;
+
+                    id = objectId;
+                }
+            }
+            else
+            {
+                // Node has Children, push it to the stack for later
+                // processing when we have all its children
+                // parentStack.push()
+                // TODO not all this needs to be in the stack (maybe)
+                parentStack[parentStackLength][0] = numChildren;
+                parentStack[parentStackLength][1] = transformedRay.x;
+                parentStack[parentStackLength][2] = transformedRay.y;
+                parentStack[parentStackLength][3] = transformedRay.z;
+                parentStack[parentStackLength][4] = scale;
+                parentStack[parentStackLength][5] = (float) modifications;
+                parentStack[parentStackLength][6] = nextDistance;
+                parentStack[parentStackLength][7] = blendedDiffuseColour.x;
+                parentStack[parentStackLength][8] = blendedDiffuseColour.y;
+                parentStack[parentStackLength][9] = blendedDiffuseColour.z;
+                parentStack[parentStackLength][10] = blendedDiffuseColour.w;
+                parentStack[parentStackLength][11] = blendedSpecularColour.x;
+                parentStack[parentStackLength][12] = blendedSpecularColour.y;
+                parentStack[parentStackLength][13] = blendedSpecularColour.z;
+                parentStack[parentStackLength][14] = blendedSpecularColour.w;
+                parentStack[parentStackLength][15] = blendedTransmissiveColour.x;
+                parentStack[parentStackLength][16] = blendedTransmissiveColour.y;
+                parentStack[parentStackLength][17] = blendedTransmissiveColour.z;
+                parentStack[parentStackLength][18] = blendedTransmissiveColour.w;
+                parentStack[parentStackLength][19] = blendedEmissiveColour.x;
+                parentStack[parentStackLength][20] = blendedEmissiveColour.y;
+                parentStack[parentStackLength][21] = blendedEmissiveColour.z;
+                parentStack[parentStackLength][22] = blendedEmissiveColour.w;
+                parentStack[parentStackLength][23] = blendedSurface.x;
+                parentStack[parentStackLength][24] = blendedSurface.y;
+                parentStack[parentStackLength][25] = blendedSurface.z;
+                parentStack[parentStackLength][26] = blendedSurface.w;
+                parentStack[parentStackLength][27] = objectId;
+                parentStack[parentStackLength][28] = blendStrength;
+                parentStackLength++;
+            }
+        }
+
+        return float2(distance, id);
+    }
+
+
+    /**
      * Estimate the surface normal at the closest point on the closest
      * object to a point
      *
@@ -916,38 +949,23 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint)
     {
-        float4 colour;
-        float4 surface;
-
         return normalize(
-            __offset0
-            * getMinDistanceToObjectInScene(
+            __offset0 * getMinDistanceToObjectInScene(
                 point + __offset0 * _hitTolerance,
-                pixelFootprint,
-                colour,
-                surface
-            ).x
-            + __offset1
-            * getMinDistanceToObjectInScene(
+                pixelFootprint
+            )
+            + __offset1 * getMinDistanceToObjectInScene(
                 point + __offset1 * _hitTolerance,
-                pixelFootprint,
-                colour,
-                surface
-            ).x
-            + __offset2
-            * getMinDistanceToObjectInScene(
+                pixelFootprint
+            )
+            + __offset2 * getMinDistanceToObjectInScene(
                 point + __offset2 * _hitTolerance,
-                pixelFootprint,
-                colour,
-                surface
-            ).x
-            + __offset3
-            * getMinDistanceToObjectInScene(
+                pixelFootprint
+            )
+            + __offset3 * getMinDistanceToObjectInScene(
                 point + __offset3 * _hitTolerance,
-                pixelFootprint,
-                colour,
-                surface
-            ).x
+                pixelFootprint
+            )
         );
     }
 
@@ -990,9 +1008,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int numRays = 1;
         int currentRayIndex = 0;
 
-        float4 colour;
-        float4 surface;
-
         float4 rayColour = float4(0);
         float4 diffuseColour = float4(1);
 
@@ -1031,11 +1046,21 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 && iterations <= _maxRaySteps
                 && rayIntensity >= _hitTolerance
             ) {
+                float4 nextDiffuseColour;
+                float4 nextSpecularColour;
+                float4 nextTransmissiveColour;
+                float4 nextEmissiveColour;
+                float4 surface;
+
+                // TODO see if its faster to use colourless until hit
                 // Get the closest distance to an object
                 const float2 result = getMinDistanceToObjectInScene(
                     origin,
                     distanceTravelled,
-                    colour,
+                    nextDiffuseColour,
+                    nextSpecularColour,
+                    nextTransmissiveColour,
+                    nextEmissiveColour,
                     surface
                 );
                 // Keep the signed distance so we know whether or not we are
@@ -1067,10 +1092,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         distanceTravelled
                     );
 
-                    // Keep the ID of the first object hit, so we can
-                    // store it in the alpha channel
                     if (bounces == 0)
                     {
+                        // Keep the ID of the first object hit, so we can
+                        // store it in the alpha channel
                         id = result.y;
                         depth = distanceTravelled;
 
@@ -1108,8 +1133,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
 
                     // Update the colour of the ray
-                    rayColour += colour * rayIntensity * surface.z * diffuseColour;
-                    diffuseColour *= colour;
+                    rayColour += (
+                        nextEmissiveColour
+                        * nextEmissiveColour.w
+                        * rayIntensity
+                        * diffuseColour
+                    );
+                    diffuseColour *= nextDiffuseColour;
 
                     // Exit if we have reached the bounce limit
                     if (++bounces >= numBounces)

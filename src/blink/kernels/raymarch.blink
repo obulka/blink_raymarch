@@ -1253,11 +1253,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     );
 
                     // Roughen the surface
-                    if (surface.w > 0.0f)
+                    if (colour.w > 0.0f)
                     {
                         surfaceNormal = roughen(
                             surfaceNormal,
-                            surface.w,
+                            colour.w,
                             (iterations * distanceTravelled + stepDistance)
                             * fabs(surfaceNormal) * seed
                         );
@@ -1336,7 +1336,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     // Otherwise compute the refraction values
                     const float incidentRefractiveIndex = rays[currentRayIndex][7];
-                    const float refractedRefractiveIndex = colour.w;
+                    const float refractedRefractiveIndex = surface.w;
                     const float reflectivity = schlickReflectionCoefficient(
                         direction,
                         surfaceNormal,

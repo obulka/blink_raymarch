@@ -30,12 +30,21 @@ inline float union_(
         const float distance1,
         const float4 &colour0,
         float4 &colour1,
+        const float4 &colour2,
+        float4 &colour3,
+        const float4 &colour4,
+        float4 &colour5,
+        const float4 &colour6,
+        float4 &colour7,
         const float4 &surface0,
         float4 &surface1)
 {
     if (fabs(distance0) < fabs(distance1))
     {
         colour1 = colour0;
+        colour3 = colour2;
+        colour5 = colour4;
+        colour7 = colour6;
         surface1 = surface0;
         return distance0;
     }
@@ -78,12 +87,21 @@ inline float subtraction(
         const float distance1,
         const float4 &colour0,
         float4 &colour1,
+        const float4 &colour2,
+        float4 &colour3,
+        const float4 &colour4,
+        float4 &colour5,
+        const float4 &colour6,
+        float4 &colour7,
         const float4 &surface0,
         float4 &surface1)
 {
     if (-distance0 > distance1)
     {
         colour1 = colour0;
+        colour3 = colour2;
+        colour5 = colour4;
+        colour7 = colour6;
         surface1 = surface0;
         return -distance0;
     }
@@ -126,12 +144,21 @@ inline float intersection(
         const float distance1,
         const float4 &colour0,
         float4 &colour1,
+        const float4 &colour2,
+        float4 &colour3,
+        const float4 &colour4,
+        float4 &colour5,
+        const float4 &colour6,
+        float4 &colour7,
         const float4 &surface0,
         float4 &surface1)
 {
     if (distance0 > distance1)
     {
         colour1 = colour0;
+        colour3 = colour2;
+        colour5 = colour4;
+        colour7 = colour6;
         surface1 = surface0;
         return distance0;
     }
@@ -175,6 +202,12 @@ inline float smoothUnion(
         const float distance1,
         const float4 &colour0,
         float4 &colour1,
+        const float4 &colour2,
+        float4 &colour3,
+        const float4 &colour4,
+        float4 &colour5,
+        const float4 &colour6,
+        float4 &colour7,
         const float4 &surface0,
         float4 &surface1,
         const float blendSize)
@@ -182,6 +215,9 @@ inline float smoothUnion(
     float amount = saturate(0.5f + 0.5f * (fabs(distance1) - fabs(distance0)) / blendSize);
 
     colour1 = blend(colour0, colour1, amount);
+    colour3 = blend(colour2, colour3, amount);
+    colour5 = blend(colour4, colour5, amount);
+    colour7 = blend(colour6, colour7, amount);
     surface1 = blend(surface0, surface1, amount);
 
     return blend(distance0, distance1, amount) - blendSize * amount * (1.0f - amount);
@@ -202,7 +238,6 @@ inline float smoothUnion(
 inline float smoothUnion(const float distance0, const float distance1, const float blendSize)
 {
     float amount = saturate(0.5f + 0.5f * (fabs(distance1) - fabs(distance0)) / blendSize);
-
     return blend(distance0, distance1, amount) - blendSize * amount * (1.0f - amount);
 }
 
@@ -227,6 +262,12 @@ inline float smoothSubtraction(
         const float distance1,
         const float4 &colour0,
         float4 &colour1,
+        const float4 &colour2,
+        float4 &colour3,
+        const float4 &colour4,
+        float4 &colour5,
+        const float4 &colour6,
+        float4 &colour7,
         const float4 &surface0,
         float4 &surface1,
         const float blendSize)
@@ -247,10 +288,6 @@ inline float smoothSubtraction(
  *
  * @arg distance0: The first distance.
  * @arg distance1: The second distance.
- * @arg colour0: The first colour.
- * @arg colour1: The second colour.
- * @arg surface0: The first surface.
- * @arg surface1: The second surface.
  * @arg blendSize: The amount to blend between the objects.
  *
  * @returns: The nearest, modified distance.
@@ -258,17 +295,9 @@ inline float smoothSubtraction(
 inline float smoothSubtraction(
         const float distance0,
         const float distance1,
-        const float4 &colour0,
-        float4 &colour1,
-        const float4 &surface0,
-        float4 &surface1,
         const float blendSize)
 {
     float amount = saturate(0.5f - 0.5f * (distance1 + distance0) / blendSize);
-
-    colour1 = blend(colour0, colour1, amount);
-    surface1 = blend(surface0, surface1, amount);
-
     return blend(-distance0, distance1, amount) + blendSize * amount * (1.0f - amount);
 }
 
@@ -293,6 +322,12 @@ inline float smoothIntersection(
         const float distance1,
         const float4 &colour0,
         float4 &colour1,
+        const float4 &colour2,
+        float4 &colour3,
+        const float4 &colour4,
+        float4 &colour5,
+        const float4 &colour6,
+        float4 &colour7,
         const float4 &surface0,
         float4 &surface1,
         const float blendSize)
@@ -302,6 +337,27 @@ inline float smoothIntersection(
     colour1 = blend(colour0, colour1, amount);
     surface1 = blend(surface0, surface1, amount);
 
+    return blend(distance0, distance1, amount) + blendSize * amount * (1.0f - amount);
+}
+
+
+/**
+ * Smoothly blend the overlapping region of two objects. The
+ * corresponding colour will be placed in colour1, and the corresponding
+ * surface will be placed in surface1.
+ *
+ * @arg distance0: The first distance.
+ * @arg distance1: The second distance.
+ * @arg blendSize: The amount to blend between the objects.
+ *
+ * @returns: The nearest, modified distance.
+ */
+inline float smoothIntersection(
+        const float distance0,
+        const float distance1,
+        const float blendSize)
+{
+    float amount = saturate(0.5f - 0.5f * (distance1 - distance0) / blendSize);
     return blend(distance0, distance1, amount) + blendSize * amount * (1.0f - amount);
 }
 
@@ -335,6 +391,12 @@ float performChildInteraction(
         const float distance1,
         const float4 &colour0,
         float4 &colour1,
+        const float4 &colour2,
+        float4 &colour3,
+        const float4 &colour4,
+        float4 &colour5,
+        const float4 &colour6,
+        float4 &colour7,
         const float4 &surface0,
         float4 &surface1,
         const float blendSize)
@@ -346,6 +408,12 @@ float performChildInteraction(
             distance1,
             colour0,
             colour1,
+            colour2,
+            colour3,
+            colour4,
+            colour5,
+            colour6,
+            colour7,
             surface0,
             surface1
         );
@@ -357,6 +425,12 @@ float performChildInteraction(
             distance1,
             colour0,
             colour1,
+            colour2,
+            colour3,
+            colour4,
+            colour5,
+            colour6,
+            colour7,
             surface0,
             surface1
         );
@@ -368,6 +442,12 @@ float performChildInteraction(
             distance1,
             colour0,
             colour1,
+            colour2,
+            colour3,
+            colour4,
+            colour5,
+            colour6,
+            colour7,
             surface0,
             surface1,
             blendSize
@@ -380,6 +460,12 @@ float performChildInteraction(
             distance1,
             colour0,
             colour1,
+            colour2,
+            colour3,
+            colour4,
+            colour5,
+            colour6,
+            colour7,
             surface0,
             surface1,
             blendSize
@@ -392,6 +478,12 @@ float performChildInteraction(
             distance1,
             colour0,
             colour1,
+            colour2,
+            colour3,
+            colour4,
+            colour5,
+            colour6,
+            colour7,
             surface0,
             surface1,
             blendSize
@@ -402,6 +494,12 @@ float performChildInteraction(
         distance1,
         colour0,
         colour1,
+        colour2,
+        colour3,
+        colour4,
+        colour5,
+        colour6,
+        colour7,
         surface0,
         surface1
     );
