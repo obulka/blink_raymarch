@@ -7,13 +7,13 @@ Gizmo {
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
- dimension_x 0.5
- addUserKnob {7 dimension_y l height t "The height (y-axis) of the cylinder." +HIDDEN R 0 10}
- dimension_y 0.75
- addUserKnob {7 dimension_z l depth t "The depth (z) of the rhombus, this the extruded dimension, or thickness." +HIDDEN R 0 10}
+ dimension_x 1
+ addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN R 0 10}
+ dimension_y 0.25
+ addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN R 0 10}
  dimension_z 0.25
- addUserKnob {7 dimension_w l "corner radius" t "The radius of the corners of the rhombus' xy-plane parallel  face." +HIDDEN}
- dimension_w 0.05
+ addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold. Higher values will result in a denser fractal." +HIDDEN R 0.01 2}
+ dimension_w 0.8
  addUserKnob {6 use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." +HIDDEN +STARTLINE}
  use_trap_colour true
  addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
@@ -24,16 +24,27 @@ Gizmo {
  addUserKnob {6 mirror_y l "mirror y" t "Mirror the shape in the xz-plane." -STARTLINE}
  addUserKnob {6 mirror_z l "mirror z" t "Mirror the shape in the xy-plane." -STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {18 colour t "The diffuse colour of the shape."}
- colour {1 1 1}
- addUserKnob {7 reflection t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ addUserKnob {18 diffuse_colour l "diffuse colour" t "The diffuse colour of the shape."}
+ diffuse_colour {1 1 1}
+ addUserKnob {6 diffuse_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
+ specular_colour {1 1 1}
+ addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
+ addUserKnob {18 transmission_colour l "transmission colour" t "The transmissive colour."}
+ transmission_colour {1 1 1}
+ addUserKnob {6 transmission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
- addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
+ addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
+ emission_colour {1 1 1}
+ addUserKnob {6 emission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
+ translate {0 -2 -2}
  addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
  addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
  elongation {0.1 0 0}
@@ -85,12 +96,12 @@ add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.p
   color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
   format "1 1 0 0 1 1 1 1x1"
   name position_scale
-  xpos 280
+  xpos -76
   ypos 455
  }
  Dot {
   name Dot17
-  xpos 314
+  xpos -42
   ypos 647
  }
 add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sdf_rotation_wall_thickness.rotation_y sdf_rotation_wall_thickness.rotation_z sdf_rotation_wall_thickness.wall_thickness}
@@ -100,14 +111,14 @@ add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sd
   color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
   format "1 1 0 0 1 1 1 1x1"
   name rotation
-  xpos 403
+  xpos 47
   ypos 457
  }
  Copy {
   inputs 2
   channels all
   name Copy1
-  xpos 403
+  xpos 47
   ypos 726
  }
 add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y sdf_dimensions.dimension_z sdf_dimensions.dimension_w}
@@ -117,31 +128,82 @@ add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y 
   color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
   format "1 1 0 0 1 1 1 1x1"
   name dimensions
-  xpos 540
+  xpos 184
   ypos 460
  }
  Copy {
   inputs 2
   channels all
   name Copy2
-  xpos 540
+  xpos 184
   ypos 726
  }
 add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_b sdf_colour.colour_a}
  Constant {
   inputs 0
   channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.refractive_index}}
+  color {{parent.diffuse_colour.r} {parent.diffuse_colour.g} {parent.diffuse_colour.b} {parent.roughness}}
   format "1 1 0 0 1 1 1 1x1"
-  name colour
-  xpos 669
+  name diffuse_colour
+  xpos 313
   ypos 459
  }
  Copy {
   inputs 2
   channels all
   name Copy3
-  xpos 669
+  xpos 313
+  ypos 726
+ }
+add_layer {sdf_spec_colour sdf_spec_colour.r sdf_spec_colour.g sdf_spec_colour.b sdf_spec_colour.x}
+ Constant {
+  inputs 0
+  channels sdf_spec_colour
+  color {{parent.specular_colour.r} {parent.specular_colour.g} {parent.specular_colour.b} {parent.specular}}
+  format "1 1 0 0 1 1 1 1x1"
+  name spec_colour
+  xpos 438
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy8
+  xpos 438
+  ypos 726
+ }
+add_layer {sdf_trans_colour sdf_trans_colour.r sdf_trans_colour.g sdf_trans_colour.b sdf_trans_colour.x}
+ Constant {
+  inputs 0
+  channels sdf_trans_colour
+  color {{parent.transmission_colour.r} {parent.transmission_colour.g} {parent.transmission_colour.b} {parent.transmission}}
+  format "1 1 0 0 1 1 1 1x1"
+  name trans_colour
+  xpos 561
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy9
+  xpos 561
+  ypos 726
+ }
+add_layer {sdf_emm_colour sdf_emm_colour.r sdf_emm_colour.g sdf_emm_colour.b sdf_emm_colour.x}
+ Constant {
+  inputs 0
+  channels sdf_emm_colour
+  color {{parent.emission_colour.r} {parent.emission_colour.g} {parent.emission_colour.b} {parent.emission}}
+  format "1 1 0 0 1 1 1 1x1"
+  name emm_colour
+  xpos 685
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy10
+  xpos 685
   ypos 726
  }
 add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.num_children sdf_shape.blend_strength}
@@ -165,11 +227,12 @@ add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surfa
  Constant {
   inputs 0
   channels sdf_surface
-  color {{parent.reflection} {parent.transmission} {parent.emission} {parent.roughness}}
+  color {{parent.specular} {parent.transmission} {parent.emission} {parent.refractive_index}}
   format "1 1 0 0 1 1 1 1x1"
   name surface
-  xpos 935
-  ypos 460
+  selected true
+  xpos 936
+  ypos 461
  }
  Copy {
   inputs 2
@@ -243,7 +306,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N6e87f10 [stack 0]
+set N7e948c0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -265,7 +328,7 @@ set N6e87f10 [stack 0]
    xpos 34
    ypos -6
   }
-set N6e9b710 [stack 0]
+set N7ea80c0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -276,7 +339,7 @@ set N6e9b710 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6e87f10
+push $N7e948c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -305,7 +368,7 @@ push $N6e87f10
    xpos 158
    ypos 167
   }
-push $N6e9b710
+push $N7ea80c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -398,7 +461,7 @@ push $N6e9b710
    xpos 192
    ypos -2
   }
-set N6f47360 [stack 0]
+set N7f53ce0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -420,7 +483,7 @@ set N6f47360 [stack 0]
    xpos 34
    ypos -6
   }
-set N6f5ab60 [stack 0]
+set N7f674e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -431,7 +494,7 @@ set N6f5ab60 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6f47360
+push $N7f53ce0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -460,7 +523,7 @@ push $N6f47360
    xpos 158
    ypos 167
   }
-push $N6f5ab60
+push $N7f674e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true

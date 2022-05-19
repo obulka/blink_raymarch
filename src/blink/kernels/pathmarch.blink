@@ -19,7 +19,6 @@
 #include "sdfs.h"
 
 
-#define MAX_RAYS_PER_SUBPIXEL 100
 #define MAX_CHILD_DEPTH 100
 
 
@@ -480,7 +479,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             if (
                 modifications & 4096
                 && numChildren > 0
-                && nextDistance > _hitTolerance * (pixelFootprint + 1.0f)
+                && nextDistance > _hitTolerance + pixelFootprint
             ) {
                 // Update the min distance if this bounding volume is closest.
                 // Otherwise we could step through it, or if every object in
@@ -715,7 +714,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             if (
                 modifications & 4096
                 && numChildren > 0
-                && nextDistance > _hitTolerance * (pixelFootprint + 1.0f)
+                && nextDistance > _hitTolerance + pixelFootprint
             ) {
                 // Update the min distance if this bounding volume is closest.
                 // Otherwise we could step through it, or if every object in
@@ -989,27 +988,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float rayDistance,
             float3 &seed)
     {
-        const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, _maxRaysPerSubPixel);
-
-        // rayOrigin, rayDirection, rayIntensity, index of refraction
-        float rays[MAX_RAYS_PER_SUBPIXEL][3 + 3 + 1 + 1];
-        rays[0][0] = rayOrigin.x;
-        rays[0][1] = rayOrigin.y;
-        rays[0][2] = rayOrigin.z;
-
-        rays[0][3] = rayDirection.x;
-        rays[0][4] = rayDirection.y;
-        rays[0][5] = rayDirection.z;
-
-        rays[0][6] = 1.0f;
-
-        rays[0][7] = _refractiveIndex;
-
-        int numRays = 1;
-        int currentRayIndex = 0;
-
         float4 rayColour = float4(0);
-        float4 diffuseColour = float4(1);
+        float4 absorption = float4(1);
 
         float lastStepDistance = 1.0f;
 
@@ -1017,276 +997,201 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float depth = 0.0f;
 
         int bounces = 0;
-        int iterations = 1;
+        int iterations = 0;
 
-        // While we have not reached the ray limit
-        while (currentRayIndex < numRays)
+        float distanceTravelled = 0;
+
+        // Get the next ray
+        float3 origin = rayOrigin;
+        float3 direction = rayDirection;
+        float refractiveIndex = _refractiveIndex;
+
+        float4 diffuseColour;
+        float4 specularColour;
+        float4 transmissiveColour;
+        float4 emissiveColour;
+        float4 surface;
+
+        // March the ray
+        while (distanceTravelled < rayDistance && iterations < _maxRaySteps)
         {
-            // Reset these values
-            float lightIntensity = 1;
-            float distanceTravelled = 0;
-            bool madeContact = false;
-
-            // Get the next ray
-            float3 origin = float3(
-                rays[currentRayIndex][0],
-                rays[currentRayIndex][1],
-                rays[currentRayIndex][2]
+            // TODO see if its faster to use colourless until hit
+            // Get the closest distance to an object
+            const float2 result = getMinDistanceToObjectInScene(
+                origin,
+                distanceTravelled,
+                diffuseColour,
+                specularColour,
+                transmissiveColour,
+                emissiveColour,
+                surface
             );
-            const float3 direction = float3(
-                rays[currentRayIndex][3],
-                rays[currentRayIndex][4],
-                rays[currentRayIndex][5]
-            );
-            const float rayIntensity = rays[currentRayIndex][6];
 
-            // March the ray
-            while (
-                distanceTravelled < rayDistance
-                && iterations <= _maxRaySteps
-                && rayIntensity >= _hitTolerance
-            ) {
-                float4 nextDiffuseColour;
-                float4 nextSpecularColour;
-                float4 nextTransmissiveColour;
-                float4 nextEmissiveColour;
-                float4 surface;
+            // Keep the signed distance so we know whether or not we are
+            // inside the object
+            const float signedStepDistance = result.x;
 
-                // TODO see if its faster to use colourless until hit
-                // Get the closest distance to an object
-                const float2 result = getMinDistanceToObjectInScene(
-                    origin,
-                    distanceTravelled,
-                    nextDiffuseColour,
-                    nextSpecularColour,
-                    nextTransmissiveColour,
-                    nextEmissiveColour,
-                    surface
+            // Get the absolute value, the true shortest distance to a
+            // surface
+            const float stepDistance = fabs(signedStepDistance);
+
+            // Keep track of the distance the ray has travelled
+            distanceTravelled += stepDistance;
+            const float pixelFootprint = _hitTolerance * distanceTravelled;
+
+            // Step the ray forwards
+            origin += direction * stepDistance;
+
+            // Update the random seed
+            seed += fabs(origin + direction);
+
+            // Have we hit the nearest object?
+            if (stepDistance < pixelFootprint)
+            {
+                // The actual position on the surface we hit
+                const float3 surfacePosition = origin - direction * _hitTolerance;
+
+                // The normal to the surface at that position
+                float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
+                    surfacePosition,
+                    pixelFootprint
                 );
-                // Keep the signed distance so we know whether or not we are
-                // inside the object
-                const float signedStepDistance = result.x;
 
-                // Get the absolute value, the true shortest distance to a
-                // surface
-                const float stepDistance = fabs(signedStepDistance);
-
-                // Keep track of the distance the ray has travelled
-                distanceTravelled += stepDistance;
-
-                // Step the ray forwards
-                origin += direction * stepDistance;
-
-                // Update the random seed
-                seed += fabs(origin + direction);
-
-                // Have we hit the nearest object?
-                if (stepDistance < _hitTolerance * distanceTravelled)
+                if (bounces == 0)
                 {
-                    // The actual position on the surface we hit
-                    const float3 surfacePosition = origin - direction * _hitTolerance;
+                    // Keep the ID of the first object hit, so we can
+                    // store it in the alpha channel
+                    id = result.y;
+                    depth = distanceTravelled;
 
-                    // The normal to the surface at that position
-                    float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
-                        surfacePosition,
-                        distanceTravelled
-                    );
-
-                    if (bounces == 0)
+                    // Early exit for the various AOVs that are not 'scene'
+                    if (_outputType > 0)
                     {
-                        // Keep the ID of the first object hit, so we can
-                        // store it in the alpha channel
-                        id = result.y;
-                        depth = distanceTravelled;
-
-                        // Early exit for the various AOVs that are not 'scene'
-                        if (_outputType > 0)
+                        if (_outputType == 1)
                         {
-                            if (_outputType == 1)
-                            {
-                                return float4(
-                                    surfacePosition.x,
-                                    surfacePosition.y,
-                                    surfacePosition.z,
-                                    encodeFloatsInUint(id, depth)
-                                );
-                            }
-                            if (_outputType == 2)
-                            {
-                                return float4(
-                                    surfaceNormal.x,
-                                    surfaceNormal.y,
-                                    surfaceNormal.z,
-                                    encodeFloatsInUint(id, depth)
-                                );
-                            }
-                            if (_outputType == 3)
-                            {
-                                return float4(
-                                    depth,
-                                    0,
-                                    0,
-                                    encodeFloatsInUint(id, depth)
-                                );
-                            }
+                            return float4(
+                                surfacePosition.x,
+                                surfacePosition.y,
+                                surfacePosition.z,
+                                encodeFloatsInUint(id, depth)
+                            );
+                        }
+                        if (_outputType == 2)
+                        {
+                            return float4(
+                                surfaceNormal.x,
+                                surfaceNormal.y,
+                                surfaceNormal.z,
+                                encodeFloatsInUint(id, depth)
+                            );
+                        }
+                        if (_outputType == 3)
+                        {
+                            return float4(
+                                depth,
+                                0,
+                                0,
+                                encodeFloatsInUint(id, depth)
+                            );
                         }
                     }
-
-                    // Update the colour of the ray
-                    rayColour += (
-                        nextEmissiveColour
-                        * nextEmissiveColour.w
-                        * rayIntensity
-                        * diffuseColour
-                    );
-                    diffuseColour *= nextDiffuseColour;
-
-                    // Exit if we have reached the bounce limit
-                    if (++bounces >= numBounces)
-                    {
-                        rayColour.w = encodeFloatsInUint(id, depth);
-                        return rayColour;
-                    }
-
-                    // Otherwise compute the refraction values
-                    const float incidentRefractiveIndex = rays[currentRayIndex][7];
-                    const float refractedRefractiveIndex = surface.w;
-                    const float reflectivity = schlickReflectionCoefficient(
-                        direction,
-                        surfaceNormal,
-                        incidentRefractiveIndex,
-                        refractedRefractiveIndex
-                    );
-                    const float refraction = saturate(surface.y * (1 - reflectivity));
-                    float intensity = rayIntensity * refraction;
-                    float reflection = surface.x;
-
-                    // And spawn a refracted ray using them
-                    if (numRays < lastRay && intensity > _hitTolerance)
-                    {
-                        reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
-
-                        const float3 refractedDirection = refractRayThroughSurface(
-                            direction,
-                            surfaceNormal,
-                            incidentRefractiveIndex,
-                            refractedRefractiveIndex
-                        );
-
-                        // Offset the point so that it doesn't get trapped on
-                        // surface.
-                        const float3 refractedOrigin = offsetPoint(
-                            surfacePosition,
-                            refractedDirection - surfaceNormal,
-                            2.0f * _hitTolerance + stepDistance
-                        );
-
-                        rays[numRays][0] = refractedOrigin.x;
-                        rays[numRays][1] = refractedOrigin.y;
-                        rays[numRays][2] = refractedOrigin.z;
-
-                        rays[numRays][3] = refractedDirection.x;
-                        rays[numRays][4] = refractedDirection.y;
-                        rays[numRays][5] = refractedDirection.z;
-
-                        rays[numRays][6] = intensity;
-
-                        rays[numRays][7] = refractedRefractiveIndex;
-
-                        numRays++;
-                    }
-
-                    // Also spawn a reflected ray
-                    intensity = rayIntensity * reflection;
-                    if (numRays < lastRay && intensity > _hitTolerance)
-                    {
-                        const float3 reflectedDirection = reflectRayOffSurface(
-                            direction,
-                            surfaceNormal
-                        );
-
-                        // Offset the point so that it doesn't get trapped on
-                        // surface.
-                        const float3 reflectedOrigin = offsetPoint(
-                            origin,
-                            reflectedDirection + surfaceNormal,
-                            _hitTolerance
-                        );
-
-                        rays[numRays][0] = reflectedOrigin.x;
-                        rays[numRays][1] = reflectedOrigin.y;
-                        rays[numRays][2] = reflectedOrigin.z;
-
-                        rays[numRays][3] = reflectedDirection.x;
-                        rays[numRays][4] = reflectedDirection.y;
-                        rays[numRays][5] = reflectedDirection.z;
-
-                        rays[numRays][6] = intensity;
-
-                        rays[numRays][7] = incidentRefractiveIndex;
-
-                        numRays++;
-                    }
-
-                    // Also spawn a diffuse ray
-                    intensity = rayIntensity * (1.0f - reflection - refraction);
-                    if (numRays < lastRay && intensity > _hitTolerance)
-                    {
-                        const float3 diffuseDirection = roughen(
-                            surfaceNormal,
-                            1.0f,
-                            seed
-                        );
-
-                        // Offset the point so that it doesn't get trapped on
-                        // surface.
-                        const float3 diffuseOrigin = offsetPoint(
-                            origin,
-                            diffuseDirection + surfaceNormal,
-                            _hitTolerance
-                        );
-
-                        rays[numRays][0] = diffuseOrigin.x;
-                        rays[numRays][1] = diffuseOrigin.y;
-                        rays[numRays][2] = diffuseOrigin.z;
-
-                        rays[numRays][3] = diffuseDirection.x;
-                        rays[numRays][4] = diffuseDirection.y;
-                        rays[numRays][5] = diffuseDirection.z;
-
-                        rays[numRays][6] = intensity;
-
-                        rays[numRays][7] = incidentRefractiveIndex;
-
-                        numRays++;
-                    }
-
-                    // Flag that we have collided with at least one object.
-                    madeContact = true;
-                    break;
                 }
 
-                lastStepDistance = signedStepDistance;
-                iterations++;
+                // Update the colour of the ray
+                rayColour += emissiveColour * emissiveColour.w * absorption;
+
+                // Get the diffuse direction for the next ray
+                const float3 diffuseDirection = roughen(
+                    surfaceNormal,
+                    1.0f,
+                    seed
+                );
+
+                // Use a specular ray instead with a given probability
+                if (random(seed.x + seed.y + seed.z) <= specularColour.w)
+                {
+                    const float3 specularDirection = reflectRayOffSurface(
+                        direction,
+                        surfaceNormal
+                    );
+
+                    direction = blend(
+                        diffuseDirection,
+                        specularDirection,
+                        diffuseColour.w * diffuseColour.w
+                    );
+                    absorption *= specularColour;
+                }
+                else
+                {
+                    direction = diffuseDirection;
+                    absorption *= diffuseColour;
+                }
+
+                // Offset the point so that it doesn't get trapped on
+                // surface.
+                origin = offsetPoint(
+                    origin,
+                    direction + surfaceNormal,
+                    pixelFootprint
+                );
+
+                // Otherwise compute the refraction values
+                // const float incidentRefractiveIndex = refractiveIndex;
+                // refractiveIndex = surface.w;
+                // const float reflectivity = schlickReflectionCoefficient(
+                //     direction,
+                //     surfaceNormal,
+                //     incidentRefractiveIndex,
+                //     refractedRefractiveIndex
+                // );
+                // const float refraction = saturate(surface.y * (1 - reflectivity));
+                // float intensity = rayIntensity * refraction;
+                // float reflection = surface.x;
+
+                // // And spawn a refracted ray using them
+                // if (numRays < lastRay && intensity > _hitTolerance)
+                // {
+                //     reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
+
+                //     const float3 refractedDirection = refractRayThroughSurface(
+                //         direction,
+                //         surfaceNormal,
+                //         incidentRefractiveIndex,
+                //         refractedRefractiveIndex
+                //     );
+
+                //     // Offset the point so that it doesn't get trapped on
+                //     // surface.
+                //     const float3 refractedOrigin = offsetPoint(
+                //         surfacePosition,
+                //         refractedDirection - surfaceNormal,
+                //         2.0f * _hitTolerance + stepDistance
+                //     );
+                // }
+
+                // Exit if we have reached the bounce limit
+                if (++bounces >= numBounces)
+                {
+                    rayColour.w = encodeFloatsInUint(id, depth);
+                    return rayColour;
+                }
             }
 
-            // If we are not computing the scene value and we have missed all
-            // objects, return black.
-            if (_outputType > 0)
-            {
-                return float4(0);
-            }
-
-            // Otherwise, if we missed all objects, read the hdri value
-            // in the direction the ray was last travelling
-            if (!madeContact)
-            {
-                const float4 hdriColour = readHDRIValue(direction);
-                rayColour += hdriColour * rayIntensity * diffuseColour;
-            }
-
-            currentRayIndex++;
+            lastStepDistance = signedStepDistance;
+            iterations++;
         }
+
+        // If we are not computing the scene value and we have missed all
+        // objects, return black.
+        if (_outputType > 0)
+        {
+            return float4(0);
+        }
+
+        // Otherwise, read the hdri value
+        // in the direction the ray was last travelling
+        rayColour += absorption * readHDRIValue(direction);
 
         rayColour.w = (bounces > 0) * encodeFloatsInUint(id, depth);
         return rayColour;
@@ -1350,7 +1255,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         const float4 resultColour = resultPixel / __numSubPixels / _pathsPerSubpixel;
-        if (_useToneMap)
+        if (_useToneMap && _outputType == 0)
         {
             const float3 toneMapped = ACESToneMap(
                 _exposure * float3(resultColour.x, resultColour.y, resultColour.z)
