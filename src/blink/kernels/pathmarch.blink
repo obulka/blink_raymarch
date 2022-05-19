@@ -63,8 +63,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     // reflection.x, transmission.y, emission.z, roughness.w
     Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;
 
-    // the hdribox in latlong format
-    Image<eRead, eAccessRandom, eEdgeClamped> hdriLight;
 
     // the output image
     Image<eWrite> dst;
@@ -85,19 +83,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _formatHeight;
 
         float _hdriOffsetAngle;
-        float _hdriLightGain;
-        float _hdriLightShadowHardness;
-        int _softenHDRILightShadows;
 
         // Ray params
         int _subdivisions;
         int _pathsPerSubpixel;
-        int _maxRaysPerSubPixel;
         int _maxBounces;
         float _maxRayDistance;
         int _maxRaySteps;
         float _hitTolerance;
-        float _shadowBias;
 
         // Scene params
         float _refractiveIndex;
@@ -155,19 +148,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_formatHeight, "Screen Height", 2160.0f);
         defineParam(_formatWidth, "Screen Width", 3840.0f);
         defineParam(_hdriOffsetAngle, "HDRI Offset Angle", 0.0f);
-        defineParam(_hdriLightGain, "HDRI Lighting Gain", 0.1f);
-        defineParam(_hdriLightShadowHardness, "HDRI Shadow Hardness", 1.0f);
-        defineParam(_softenHDRILightShadows, "Soften HDRI Shadows", 1);
 
         // Ray params
         defineParam(_subdivisions, "Pixel Subdivisions", 0);
         defineParam(_pathsPerSubpixel, "Paths Per Subpixel", 1);
-        defineParam(_maxRaysPerSubPixel, "Max Rays Per Subpixel", 1);
         defineParam(_maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(_maxRaySteps, "Max Ray Steps", 128);
         defineParam(_maxBounces, "Max Bounces", 1);
         defineParam(_hitTolerance, "Hit Tolerance", 0.001f);
-        defineParam(_shadowBias, "Shadow Bias", 1.0f);
 
         // Scene params
         defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
@@ -208,10 +196,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             hdri.bounds.width() / (2 * PI),
             hdri.bounds.height() / PI
         );
-        __hdriLightPixelSize = float2(
-            hdriLight.bounds.width() / (2 * PI),
-            hdriLight.bounds.height() / PI
-        );
         __hdriOffsetRadians = _hdriOffsetAngle * PI / 180.0f;
 
         __offset0 = 0.5773f * float3(1, -1, -1);
@@ -244,32 +228,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         );
 
         return bilinear(hdri, indices.x, indices.y);
-    }
-
-
-    /**
-     * Get the value of hdri lighting for a given direction.
-     *
-     * @arg rayDirection: The direction of the ray.
-     *
-     * @returns: The value of the light in the direction of the ray.
-     */
-    float4 readHDRILightValue(float3 rayDirection)
-    {
-        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);
-
-        // Should be able to say image access is eEdgeClamped and not do this
-        // but I see nan pixels sooo... :(
-        const float2 indices = clamp(
-            float2(
-                __hdriLightPixelSize.x * angles.x,
-                hdriLight.bounds.height() - (__hdriLightPixelSize.y * angles.y)
-            ),
-            float2(0),
-            float2(hdriLight.bounds.width(), hdriLight.bounds.height()) - 1.0f
-        );
-
-        return _hdriLightGain * bilinear(hdriLight, indices.x, indices.y);
     }
 
 
@@ -1108,8 +1066,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 // Use a specular ray instead with a given probability
-                if (random(seed.x + seed.y + seed.z) <= specularColour.w)
-                {
+                if (
+                    specularColour.w > 0.0f
+                    && random(seed.x + seed.y + seed.z) <= specularColour.w
+                ) {
                     const float3 specularDirection = reflectRayOffSurface(
                         direction,
                         surfaceNormal
