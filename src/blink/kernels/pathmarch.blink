@@ -1085,14 +1085,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
 
                 // Compute the refraction values
-                // const float reflectivity = schlickReflectionCoefficient(
-                //     direction,
-                //     surfaceNormal,
-                //     refractiveIndex,
-                //     refractedRefractiveIndex
-                // );
+                const float reflectivity = schlickReflectionCoefficient(
+                    direction,
+                    surfaceNormal,
+                    refractiveIndex,
+                    refractedRefractiveIndex
+                );
 
-                // specularProbability += reflectivity * (transmittance.w > 0.0f);
+                specularProbability += reflectivity * (transmittance.w > 0.0f);
 
                 // Maybe reflect the ray
                 if (specularProbability > 0.0f && rng <= specularProbability)
@@ -1118,8 +1118,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
                 }
                 // Maybe spawn a refracted ray
-                else if (transmittance.w > 0.0f && rng - specularProbability <= transmittance.w)// + (1 - reflectivity))
-                {
+                else if (
+                    transmittance.w > 0.0f
+                    && rng - specularProbability <= transmittance.w
+                ) {
                     const float3 refractedDirection = refractRayThroughSurface(
                         direction,
                         surfaceNormal,
@@ -1128,9 +1130,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
 
                     direction = blend(
-                        diffuseDirection,
+                        -diffuseDirection,
                         refractedDirection,
-                        diffusivity.w * diffusivity.w / 2.0f
+                        diffusivity.w * diffusivity.w
                     );
                     absorption *= transmittance;
 
@@ -1218,7 +1220,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             ) {
                 for (int path=1; path <= _pathsPerSubpixel; path++)
                 {
-                    seed *= path;
+                    seed += seed / path;
 
                     // Generate a ray from the camera
                     float3 rayOrigin;
