@@ -1006,8 +1006,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Step the ray forwards
             origin += direction * stepDistance;
 
-            // Update the random seed
-            seed += fabs(origin + direction);
 
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
@@ -1171,6 +1169,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     rayColour.w = encodeFloatsInUint(id, depth);
                     return rayColour;
                 }
+
+                // Update the random seed
+                seed += rng * fabs(origin + direction);
             }
 
             lastStepDistance = signedStepDistance;
