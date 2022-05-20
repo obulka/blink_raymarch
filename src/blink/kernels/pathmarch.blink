@@ -1118,7 +1118,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
                 }
                 // Maybe spawn a refracted ray
-                else if (transmittance.w > 0.0f && rng <= transmittance.w)// + (1 - reflectivity))
+                else if (transmittance.w > 0.0f && rng - specularProbability <= transmittance.w)// + (1 - reflectivity))
                 {
                     const float3 refractedDirection = refractRayThroughSurface(
                         direction,
