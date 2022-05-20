@@ -15,6 +15,7 @@
 #include "colour.h"
 #include "objectInteraction.h"
 #include "random.h"
+#include "rays.h"
 #include "sdfModifications.h"
 #include "sdfs.h"
 
@@ -41,14 +42,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     // the shape dimensions.xyzw (some shapes may not use all channels)
     Image<eRead, eAccessRandom, eEdgeNone> dimensions;
 
-    // the shape diffuseColours.xyz, refractive index.w
-    Image<eRead, eAccessRandom, eEdgeNone> diffuseColours;
+    // the shape diffusivities.xyz, refractive index.w
+    Image<eRead, eAccessRandom, eEdgeNone> diffusivities;
 
-    Image<eRead, eAccessRandom, eEdgeNone> specularColours;
+    Image<eRead, eAccessRandom, eEdgeNone> specularities;
 
-    Image<eRead, eAccessRandom, eEdgeNone> transmissiveColours;
+    Image<eRead, eAccessRandom, eEdgeNone> transmittances;
 
-    Image<eRead, eAccessRandom, eEdgeNone> emissiveColours;
+    Image<eRead, eAccessRandom, eEdgeNone> emittances;
 
 
     // shape type.x, operation.y, numChildren.z, blend strength.w
@@ -91,6 +92,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _maxRayDistance;
         int _maxRaySteps;
         float _hitTolerance;
+        float _shadowBias;
 
         // Scene params
         float _refractiveIndex;
@@ -156,6 +158,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_maxRaySteps, "Max Ray Steps", 128);
         defineParam(_maxBounces, "Max Bounces", 1);
         defineParam(_hitTolerance, "Hit Tolerance", 0.001f);
+        defineParam(_shadowBias, "Shadow Bias", 1.0f);
 
         // Scene params
         defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
@@ -570,10 +573,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     float2 getMinDistanceToObjectInScene(
             const float3 &rayOrigin,
             const float pixelFootprint,
-            float4 &diffuseColour,
-            float4 &specularColour,
-            float4 &transmissiveColour,
-            float4 &emissiveColour,
+            float4 &diffusivity,
+            float4 &specularity,
+            float4 &transmittance,
+            float4 &emittance,
             float4 &surface)
     {
         float distance = _maxRayDistance;
@@ -612,10 +615,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
             SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
             SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
-            SampleType(diffuseColours) objDiffuseColour = diffuseColours(j, 0);
-            SampleType(specularColours) objSpecularColour = specularColours(j, 0);
-            SampleType(transmissiveColours) objTransmissiveColour = transmissiveColours(j, 0);
-            SampleType(emissiveColours) objEmissiveColour = emissiveColours(j, 0);
+            SampleType(diffusivities) diffuseColour = diffusivities(j, 0);
+            SampleType(specularities) specularColour = specularities(j, 0);
+            SampleType(transmittances) transmissiveColour = transmittances(j, 0);
+            SampleType(emittances) emissiveColour = emittances(j, 0);
             SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);
 
             const int modifications = (int) shapeProperty.y;
@@ -626,10 +629,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             int stackLastIndex = parentStackLength - 1;
 
-            float4 blendedDiffuseColour = objDiffuseColour;
-            float4 blendedSpecularColour = objSpecularColour;
-            float4 blendedTransmissiveColour = objTransmissiveColour;
-            float4 blendedEmissiveColour = objEmissiveColour;
+            float4 blendedDiffuseColour = diffuseColour;
+            float4 blendedSpecularColour = specularColour;
+            float4 blendedTransmissiveColour = transmissiveColour;
+            float4 blendedEmissiveColour = emissiveColour;
             float4 blendedSurface = surfaceProperty;
 
             // Position relative to the parent if we have any
@@ -681,10 +684,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 {
                     distance = nextDistance;
 
-                    diffuseColour = blendedDiffuseColour;
-                    specularColour = blendedSpecularColour;
-                    transmissiveColour = blendedTransmissiveColour;
-                    emissiveColour = blendedEmissiveColour;
+                    diffusivity = blendedDiffuseColour;
+                    specularity = blendedSpecularColour;
+                    transmittance = blendedTransmissiveColour;
+                    emittance = blendedEmissiveColour;
 
                     surface = blendedSurface;
 
@@ -808,10 +811,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         {
                             distance = nextDistance;
 
-                            diffuseColour = blendedDiffuseColour;
-                            specularColour = blendedSpecularColour;
-                            transmissiveColour = blendedTransmissiveColour;
-                            emissiveColour = blendedEmissiveColour;
+                            diffusivity = blendedDiffuseColour;
+                            specularity = blendedSpecularColour;
+                            transmittance = blendedTransmissiveColour;
+                            emittance = blendedEmissiveColour;
 
                             surface = blendedSurface;
 
@@ -841,10 +844,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 {
                     distance = nextDistance;
 
-                    diffuseColour = blendedDiffuseColour;
-                    specularColour = blendedSpecularColour;
-                    transmissiveColour = blendedTransmissiveColour;
-                    emissiveColour = blendedEmissiveColour;
+                    diffusivity = blendedDiffuseColour;
+                    specularity = blendedSpecularColour;
+                    transmittance = blendedTransmissiveColour;
+                    emittance = blendedEmissiveColour;
 
                     surface = blendedSurface;
 
@@ -952,6 +955,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float lastStepDistance = 1.0f;
 
         float id = 0.0f;
+        float lastRefractedId = -1.0f;
+
         float depth = 0.0f;
 
         int bounces = 0;
@@ -963,11 +968,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float3 origin = rayOrigin;
         float3 direction = rayDirection;
         float refractiveIndex = _refractiveIndex;
+        float lastRefractiveIndex = refractiveIndex;
 
-        float4 diffuseColour;
-        float4 specularColour;
-        float4 transmissiveColour;
-        float4 emissiveColour;
+        float4 diffusivity;
+        float4 specularity;
+        float4 transmittance;
+        float4 emittance;
         float4 surface;
 
         // March the ray
@@ -978,10 +984,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float2 result = getMinDistanceToObjectInScene(
                 origin,
                 distanceTravelled,
-                diffuseColour,
-                specularColour,
-                transmissiveColour,
-                emissiveColour,
+                diffusivity,
+                specularity,
+                transmittance,
+                emittance,
                 surface
             );
 
@@ -1056,7 +1062,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
 
                 // Update the colour of the ray
-                rayColour += emissiveColour * emissiveColour.w * absorption;
+                rayColour += emittance * emittance.w * absorption;
 
                 // Get the diffuse direction for the next ray
                 const float3 diffuseDirection = roughen(
@@ -1065,11 +1071,32 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     seed
                 );
 
-                // Use a specular ray instead with a given probability
-                if (
-                    specularColour.w > 0.0f
-                    && random(seed.x + seed.y + seed.z) <= specularColour.w
-                ) {
+                const float rng = random(seed.x + seed.y + seed.z);
+                float specularProbability = specularity.w;
+
+                float refractedRefractiveIndex;
+                if (lastRefractedId == id)
+                {
+                    refractedRefractiveIndex = lastRefractiveIndex;
+                }
+                else
+                {
+                    refractedRefractiveIndex = surface.w;
+                }
+
+                // Compute the refraction values
+                // const float reflectivity = schlickReflectionCoefficient(
+                //     direction,
+                //     surfaceNormal,
+                //     refractiveIndex,
+                //     refractedRefractiveIndex
+                // );
+
+                // specularProbability += reflectivity * (transmittance.w > 0.0f);
+
+                // Maybe reflect the ray
+                if (specularProbability > 0.0f && rng <= specularProbability)
+                {
                     const float3 specularDirection = reflectRayOffSurface(
                         direction,
                         surfaceNormal
@@ -1078,57 +1105,63 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     direction = blend(
                         diffuseDirection,
                         specularDirection,
-                        diffuseColour.w * diffuseColour.w
+                        diffusivity.w * diffusivity.w
                     );
-                    absorption *= specularColour;
+                    absorption *= specularity;
+
+                    // Offset the point so that it doesn't get trapped on
+                    // surface.
+                    origin = offsetPoint(
+                        origin,
+                        direction + surfaceNormal,
+                        pixelFootprint * _shadowBias
+                    );
                 }
+                // Maybe spawn a refracted ray
+                else if (transmittance.w > 0.0f && rng <= transmittance.w)// + (1 - reflectivity))
+                {
+                    const float3 refractedDirection = refractRayThroughSurface(
+                        direction,
+                        surfaceNormal,
+                        refractiveIndex,
+                        refractedRefractiveIndex
+                    );
+
+                    direction = blend(
+                        diffuseDirection,
+                        refractedDirection,
+                        diffusivity.w * diffusivity.w / 2.0f
+                    );
+                    absorption *= transmittance;
+
+                    // Offset the point so that it doesn't get trapped on
+                    // surface.
+                    origin = offsetPoint(
+                        surfacePosition,
+                        refractedDirection - surfaceNormal,
+                        (2.0f * pixelFootprint + stepDistance) * _shadowBias
+                    );
+
+                    // We are passing through the surface, so update the refractive index
+                    lastRefractiveIndex = refractiveIndex;
+                    refractiveIndex = refractedRefractiveIndex;
+                    lastRefractedId = id;
+                }
+                // Otherwise diffuse the light
                 else
                 {
+                    // fallback is diffuse
                     direction = diffuseDirection;
-                    absorption *= diffuseColour;
+                    absorption *= diffusivity;
+
+                    // Offset the point so that it doesn't get trapped on
+                    // surface.
+                    origin = offsetPoint(
+                        origin,
+                        direction + surfaceNormal,
+                        pixelFootprint * _shadowBias
+                    );
                 }
-
-                // Offset the point so that it doesn't get trapped on
-                // surface.
-                origin = offsetPoint(
-                    origin,
-                    direction + surfaceNormal,
-                    pixelFootprint
-                );
-
-                // Otherwise compute the refraction values
-                // const float incidentRefractiveIndex = refractiveIndex;
-                // refractiveIndex = surface.w;
-                // const float reflectivity = schlickReflectionCoefficient(
-                //     direction,
-                //     surfaceNormal,
-                //     incidentRefractiveIndex,
-                //     refractedRefractiveIndex
-                // );
-                // const float refraction = saturate(surface.y * (1 - reflectivity));
-                // float intensity = rayIntensity * refraction;
-                // float reflection = surface.x;
-
-                // // And spawn a refracted ray using them
-                // if (numRays < lastRay && intensity > _hitTolerance)
-                // {
-                //     reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
-
-                //     const float3 refractedDirection = refractRayThroughSurface(
-                //         direction,
-                //         surfaceNormal,
-                //         incidentRefractiveIndex,
-                //         refractedRefractiveIndex
-                //     );
-
-                //     // Offset the point so that it doesn't get trapped on
-                //     // surface.
-                //     const float3 refractedOrigin = offsetPoint(
-                //         surfacePosition,
-                //         refractedDirection - surfaceNormal,
-                //         2.0f * _hitTolerance + stepDistance
-                //     );
-                // }
 
                 // Exit if we have reached the bounce limit
                 if (++bounces >= numBounces)
