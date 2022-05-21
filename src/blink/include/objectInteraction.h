@@ -64,7 +64,11 @@ inline float union_(
  */
 inline float union_(const float distance0, const float distance1)
 {
-    return min(fabs(distance0), fabs(distance1));
+    if (fabs(distance0) < fabs(distance1))
+    {
+        return distance0;
+    }
+    return distance1;
 }
 
 
