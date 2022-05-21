@@ -27,12 +27,12 @@ Gizmo {
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
  addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
  colour {1 1 1}
- addUserKnob {6 diffuse_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
  addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
  specular_colour {1 1 1}
  addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
+ transmission 0
  addUserKnob {18 transmission_colour l "transmission colour" t "The transmissive colour."}
  transmission_colour {1 1 1}
  addUserKnob {6 transmission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
@@ -304,7 +304,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N5d75bd0 [stack 0]
+set Nafe5cf0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -326,7 +326,7 @@ set N5d75bd0 [stack 0]
    xpos 34
    ypos -6
   }
-set N5d895e0 [stack 0]
+set Nd367c60 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -337,7 +337,7 @@ set N5d895e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5d75bd0
+push $Nafe5cf0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -366,7 +366,7 @@ push $N5d75bd0
    xpos 158
    ypos 167
   }
-push $N5d895e0
+push $Nd367c60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -459,7 +459,7 @@ push $N5d895e0
    xpos 192
    ypos -2
   }
-set N5e35ff0 [stack 0]
+set Na8fc140 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -481,7 +481,7 @@ set N5e35ff0 [stack 0]
    xpos 34
    ypos -6
   }
-set N5e497f0 [stack 0]
+set Nb27c620 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -492,7 +492,7 @@ set N5e497f0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5e35ff0
+push $Na8fc140
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -521,7 +521,7 @@ push $N5e35ff0
    xpos 158
    ypos 167
   }
-push $N5e497f0
+push $Nb27c620
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true

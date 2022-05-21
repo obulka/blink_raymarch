@@ -964,12 +964,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float rayDistance,
             float3 &seed)
     {
+        float refractiveIndex = _refractiveIndex;
+
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][
             1   // Id of the dielectric we are currently in
             + 1 // Refractive index of that object
         ];
         nestedDielectrics[0][0] = -1;
-        nestedDielectrics[0][1] = _refractiveIndex;
+        nestedDielectrics[0][1] = refractiveIndex;
         int numNestedDielectrics = 0;
 
         float4 rayColour = float4(0);
@@ -977,7 +979,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float lastStepDistance = 1.0f;
 
-        float id = 0.0f;
+        float firstObjectId = 0.0f;
         float lastRefractedId = -1.0f;
 
         float depth = 0.0f;
@@ -990,7 +992,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // Get the next ray
         float3 origin = rayOrigin;
         float3 direction = rayDirection;
-        float refractiveIndex = _refractiveIndex;
 
         float4 diffusivity;
         float4 specularity;
@@ -1046,7 +1047,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 {
                     // Keep the ID of the first object hit, so we can
                     // store it in the alpha channel
-                    id = result.y;
+                    firstObjectId = result.y;
                     depth = distanceTravelled;
 
                     // Early exit for the various AOVs that are not 'scene'
@@ -1058,7 +1059,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                 surfacePosition.x,
                                 surfacePosition.y,
                                 surfacePosition.z,
-                                encodeFloatsInUint(id, depth)
+                                encodeFloatsInUint(firstObjectId, depth)
                             );
                         }
                         if (_outputType == 2)
@@ -1067,7 +1068,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                 surfaceNormal.x,
                                 surfaceNormal.y,
                                 surfaceNormal.z,
-                                encodeFloatsInUint(id, depth)
+                                encodeFloatsInUint(firstObjectId, depth)
                             );
                         }
                         if (_outputType == 3)
@@ -1076,7 +1077,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                 depth,
                                 0,
                                 0,
-                                encodeFloatsInUint(id, depth)
+                                encodeFloatsInUint(firstObjectId, depth)
                             );
                         }
                     }
@@ -1096,7 +1097,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 float specularProbability = specularity.w;
 
                 float refractedRefractiveIndex;
-                if (nestedDielectrics[numNestedDielectrics][0] == id)
+                if (nestedDielectrics[numNestedDielectrics][0] == result.y)
                 {
                     // We are exiting the material we are in, get the
                     // last refractive index from the top of the stack
@@ -1169,7 +1170,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                     // We are passing through the surface, so update the refractive index
                     refractiveIndex = refractedRefractiveIndex;
-                    if (nestedDielectrics[numNestedDielectrics][0] == id)
+                    if (nestedDielectrics[numNestedDielectrics][0] == result.y)
                     {
                         // We are exiting the material we are in, get the
                         // last refractive index, by popping the stack
@@ -1180,7 +1181,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         // We are not exiting the material we are in, so push
                         // the next refractive index to the stack
                         numNestedDielectrics++;
-                        nestedDielectrics[numNestedDielectrics][0] = id;
+                        nestedDielectrics[numNestedDielectrics][0] = result.y;
                         nestedDielectrics[numNestedDielectrics][1] = refractedRefractiveIndex;
                     }
                 }
@@ -1203,7 +1204,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Exit if we have reached the bounce limit
                 if (++bounces >= numBounces)
                 {
-                    rayColour.w = encodeFloatsInUint(id, depth);
+                    rayColour.w = encodeFloatsInUint(firstObjectId, depth);
                     return rayColour;
                 }
 
@@ -1227,7 +1228,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // in the direction the ray was last travelling
         rayColour += absorption * readHDRIValue(direction);
 
-        rayColour.w = (bounces > 0) * encodeFloatsInUint(id, depth);
+        rayColour.w = (bounces > 0) * encodeFloatsInUint(firstObjectId, depth);
         return rayColour;
     }
 
