@@ -20,7 +20,12 @@
 #include "sdfs.h"
 
 
+// Increase this if you want more than MAX_CHILD_DEPTH direct children
 #define MAX_CHILD_DEPTH 100
+
+// Increase this if you want more than MAX_NESTED_DIELECTRICS nested
+// transmissive objects
+#define MAX_NESTED_DIELECTRICS 5
 
 
 kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
@@ -86,7 +91,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _hdriOffsetAngle;
 
         // Ray params
-        int _subdivisions;
         int _pathsPerSubpixel;
         int _maxBounces;
         float _maxRayDistance;
@@ -111,9 +115,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float4x4 __inverseCameraProjectionMatrix;
 
         int __bouncesPerRay;
-
-        int __numSubPixels;
-        float __subdividedPixelSize;
 
         float2 __hdriPixelSize;
         float2 __hdriLightPixelSize;
@@ -152,7 +153,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_hdriOffsetAngle, "HDRI Offset Angle", 0.0f);
 
         // Ray params
-        defineParam(_subdivisions, "Pixel Subdivisions", 0);
         defineParam(_pathsPerSubpixel, "Paths Per Subpixel", 1);
         defineParam(_maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(_maxRaySteps, "Max Ray Steps", 128);
@@ -190,10 +190,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             _farPlane
         );
         __inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();
-
-        int subPixelDivisions = pow(2, abs(_subdivisions));
-        __subdividedPixelSize = 1.0f / (float) subPixelDivisions;
-        __numSubPixels = pow(subPixelDivisions, 2);
 
         __hdriPixelSize = float2(
             hdri.bounds.width() / (2 * PI),
@@ -720,13 +716,32 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     parentStack[stackLastIndex][9],
                     parentStack[stackLastIndex][10]
                 );
-                blendedSurface = float4(
+                blendedSpecularColour = float4(
                     parentStack[stackLastIndex][11],
                     parentStack[stackLastIndex][12],
                     parentStack[stackLastIndex][13],
                     parentStack[stackLastIndex][14]
                 );
-                objectId = parentStack[stackLastIndex][15];
+                blendedTransmissiveColour = float4(
+                    parentStack[stackLastIndex][15],
+                    parentStack[stackLastIndex][16],
+                    parentStack[stackLastIndex][17],
+                    parentStack[stackLastIndex][18]
+                );
+                blendedEmissiveColour = float4(
+                    parentStack[stackLastIndex][19],
+                    parentStack[stackLastIndex][20],
+                    parentStack[stackLastIndex][21],
+                    parentStack[stackLastIndex][22]
+                );
+                blendedSurface = surfaceProperty;
+                blendedSurface = float4(
+                    parentStack[stackLastIndex][23],
+                    parentStack[stackLastIndex][24],
+                    parentStack[stackLastIndex][25],
+                    parentStack[stackLastIndex][26]
+                );
+                objectId = parentStack[stackLastIndex][27];
                 stackLastIndex--;
                 parentStackLength--;
             }
@@ -949,6 +964,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float rayDistance,
             float3 &seed)
     {
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][
+            1   // Id of the dielectric we are currently in
+            + 1 // Refractive index of that object
+        ];
+        nestedDielectrics[0][0] = -1;
+        nestedDielectrics[0][1] = _refractiveIndex;
+        int numNestedDielectrics = 0;
+
         float4 rayColour = float4(0);
         float4 absorption = float4(1);
 
@@ -968,13 +991,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float3 origin = rayOrigin;
         float3 direction = rayDirection;
         float refractiveIndex = _refractiveIndex;
-        float lastRefractiveIndex = refractiveIndex;
 
         float4 diffusivity;
         float4 specularity;
         float4 transmittance;
         float4 emittance;
         float4 surface;
+
+        float pixelFootprint = _hitTolerance;
 
         // March the ray
         while (distanceTravelled < rayDistance && iterations < _maxRaySteps)
@@ -1001,11 +1025,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // Keep track of the distance the ray has travelled
             distanceTravelled += stepDistance;
-            const float pixelFootprint = _hitTolerance * distanceTravelled;
+            pixelFootprint += _hitTolerance * stepDistance;
 
             // Step the ray forwards
             origin += direction * stepDistance;
-
 
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
@@ -1073,9 +1096,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 float specularProbability = specularity.w;
 
                 float refractedRefractiveIndex;
-                if (lastRefractedId == id)
+                if (nestedDielectrics[numNestedDielectrics][0] == id)
                 {
-                    refractedRefractiveIndex = lastRefractiveIndex;
+                    // We are exiting the material we are in, get the
+                    // last refractive index from the top of the stack
+                    refractedRefractiveIndex = nestedDielectrics[numNestedDielectrics - 1][1];
                 }
                 else
                 {
@@ -1143,9 +1168,21 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
 
                     // We are passing through the surface, so update the refractive index
-                    lastRefractiveIndex = refractiveIndex;
                     refractiveIndex = refractedRefractiveIndex;
-                    lastRefractedId = id;
+                    if (nestedDielectrics[numNestedDielectrics][0] == id)
+                    {
+                        // We are exiting the material we are in, get the
+                        // last refractive index, by popping the stack
+                        numNestedDielectrics--;
+                    }
+                    else
+                    {
+                        // We are not exiting the material we are in, so push
+                        // the next refractive index to the stack
+                        numNestedDielectrics++;
+                        nestedDielectrics[numNestedDielectrics][0] = id;
+                        nestedDielectrics[numNestedDielectrics][1] = refractedRefractiveIndex;
+                    }
                 }
                 // Otherwise diffuse the light
                 else
@@ -1172,6 +1209,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 // Update the random seed
                 seed += rng * fabs(origin + direction);
+                pixelFootprint = _hitTolerance;
             }
 
             lastStepDistance = signedStepDistance;
@@ -1208,49 +1246,35 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float2 pixelLocation = float2(pos.x, pos.y);
 
-        float2 pixelOffset;
-        for (
-            pixelOffset.x = 0.0f;
-            pixelOffset.x < 1.0f;
-            pixelOffset.x += __subdividedPixelSize
-        ) {
-            for (
-                pixelOffset.y = 0.0f;
-                pixelOffset.y < 1.0f;
-                pixelOffset.y += __subdividedPixelSize
-            ) {
-                for (int path=1; path <= _pathsPerSubpixel; path++)
-                {
-                    seed += seed / path;
+        for (int path=1; path <= _pathsPerSubpixel; path++)
+        {
+            seed += seed / path;
 
-                    // Generate a ray from the camera
-                    float3 rayOrigin;
-                    float3 rayDirection;
-                    createCameraRay(
-                        _cameraWorldMatrix,
-                        __inverseCameraProjectionMatrix,
-                        pixelsToUV(
-                            pixelLocation
-                            + pixelOffset
-                            + __subdividedPixelSize * random(float2(seed.x, seed.y)),
-                            float2(_formatWidth, _formatHeight)
-                        ),
-                        rayOrigin,
-                        rayDirection
-                    );
+            // Generate a ray from the camera
+            float3 rayOrigin;
+            float3 rayDirection;
+            createCameraRay(
+                _cameraWorldMatrix,
+                __inverseCameraProjectionMatrix,
+                pixelsToUV(
+                    pixelLocation
+                    + random(float2(seed.x, seed.y)),
+                    float2(_formatWidth, _formatHeight)
+                ),
+                rayOrigin,
+                rayDirection
+            );
 
-                    resultPixel += marchRay(
-                        rayOrigin,
-                        rayDirection,
-                        __bouncesPerRay,
-                        _maxRayDistance,
-                        seed
-                    );
-                }
-            }
+            resultPixel += marchRay(
+                rayOrigin,
+                rayDirection,
+                __bouncesPerRay,
+                _maxRayDistance,
+                seed
+            );
         }
 
-        const float4 resultColour = resultPixel / __numSubPixels / _pathsPerSubpixel;
+        const float4 resultColour = resultPixel / _pathsPerSubpixel;
         if (_useToneMap && _outputType == 0)
         {
             const float3 toneMapped = ACESToneMap(

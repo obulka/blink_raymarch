@@ -275,6 +275,9 @@ inline float smoothSubtraction(
     float amount = saturate(0.5f - 0.5f * (distance1 + distance0) / blendSize);
 
     colour1 = blend(colour0, colour1, amount);
+    colour3 = blend(colour2, colour3, amount);
+    colour5 = blend(colour4, colour5, amount);
+    colour7 = blend(colour6, colour7, amount);
     surface1 = blend(surface0, surface1, amount);
 
     return blend(-distance0, distance1, amount) + blendSize * amount * (1.0f - amount);
@@ -335,6 +338,9 @@ inline float smoothIntersection(
     float amount = saturate(0.5f - 0.5f * (distance1 - distance0) / blendSize);
 
     colour1 = blend(colour0, colour1, amount);
+    colour3 = blend(colour2, colour3, amount);
+    colour5 = blend(colour4, colour5, amount);
+    colour7 = blend(colour6, colour7, amount);
     surface1 = blend(surface0, surface1, amount);
 
     return blend(distance0, distance1, amount) + blendSize * amount * (1.0f - amount);
