@@ -218,6 +218,45 @@ inline int3 round_(const float3 value)
 
 
 /**
+ * Sum the components of a vector.
+ *
+ * @arg vector: The vector to sum the components of.
+ *
+ * @returns: The sum of the components.
+ */
+inline float sumComponent(const float2 &vector)
+{
+    return vector.x + vector.y;
+}
+
+
+/**
+ * Sum the components of a vector.
+ *
+ * @arg vector: The vector to sum the components of.
+ *
+ * @returns: The sum of the components.
+ */
+inline float sumComponent(const float3 &vector)
+{
+    return vector.x + vector.y + vector.z;
+}
+
+
+/**
+ * Sum the components of a vector.
+ *
+ * @arg vector: The vector to sum the components of.
+ *
+ * @returns: The sum of the components.
+ */
+inline float sumComponent(const float4 &vector)
+{
+    return vector.x + vector.y + vector.z + vector.w;
+}
+
+
+/**
  * The maximum component of a vector.
  *
  * @arg vector: The vector.
