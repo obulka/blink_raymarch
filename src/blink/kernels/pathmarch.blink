@@ -950,19 +950,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @arg rayOrigin: The origin of the ray.
      * @arg rayDirection: The direction of the ray.
-     * @arg numBounces: The number of times a ray can be reflected and
-     *     transmitted.
-     * @arg rayDistance: The maximum distance a ray can travel.
      * @arg seed: A random value to use as the seed for roughness.
      *
      * @returns: The ray colour.
      */
-    float4 marchRay(
-            const float3 &rayOrigin,
-            const float3 &rayDirection,
-            const int numBounces,
-            const float rayDistance,
-            float3 &seed)
+    float4 marchRay(const float3 &rayOrigin, const float3 &rayDirection, float3 &seed)
     {
         float refractiveIndex = _refractiveIndex;
 
@@ -1003,7 +995,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // March the ray
         while (
-            distanceTravelled < rayDistance
+            distanceTravelled < _maxRayDistance
             && iterations < _maxRaySteps
             && sumComponent(absorption) > _hitTolerance
         ) {
@@ -1205,7 +1197,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
 
                 // Exit if we have reached the bounce limit
-                if (++bounces >= numBounces)
+                if (++bounces >= __bouncesPerRay)
                 {
                     rayColour.w = encodeFloatsInUint(firstObjectId, depth);
                     return rayColour;
@@ -1269,13 +1261,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 rayDirection
             );
 
-            resultPixel += marchRay(
-                rayOrigin,
-                rayDirection,
-                __bouncesPerRay,
-                _maxRayDistance,
-                seed
-            );
+            resultPixel += marchRay(rayOrigin, rayDirection, seed);
         }
 
         const float4 resultColour = resultPixel / _pathsPerSubpixel;
