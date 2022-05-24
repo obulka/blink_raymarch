@@ -100,6 +100,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Scene params
         float _refractiveIndex;
+        float4 _absorptionColour;
 
         // Shape Textures
         int _objectTextureWidth;
@@ -162,6 +163,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Scene params
         defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
+        defineParam(_absorptionColour, "Absorption Colour", float4(1));
 
         // Shape Counts
         defineParam(_objectTextureWidth, "Object Texture Width", 0);
@@ -961,9 +963,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][
             1   // Id of the dielectric we are currently in
             + 1 // Refractive index of that object
+            + 4 // Absorption colour of object
         ];
-        nestedDielectrics[0][0] = -1;
-        nestedDielectrics[0][1] = refractiveIndex;
+        nestedDielectrics[0][0] = _absorptionColour.x;
+        nestedDielectrics[0][1] = _absorptionColour.y;
+        nestedDielectrics[0][2] = _absorptionColour.z;
+        nestedDielectrics[0][3] = _absorptionColour.w;
+        nestedDielectrics[0][4] = -1;
+        nestedDielectrics[0][5] = refractiveIndex;
         int numNestedDielectrics = 0;
 
         float4 rayColour = float4(0);
@@ -980,6 +987,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int iterations = 0;
 
         float distanceTravelled = 0;
+        float distanceTravelledThroughMaterial = distanceTravelled;
 
         // Get the next ray
         float3 origin = rayOrigin;
@@ -1021,6 +1029,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // Keep track of the distance the ray has travelled
             distanceTravelled += stepDistance;
+            distanceTravelledThroughMaterial += stepDistance;
+
             pixelFootprint += _hitTolerance * stepDistance;
 
             // Step the ray forwards
@@ -1078,8 +1088,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
                 }
 
-                // Update the colour of the ray
-                rayColour += emittance * emittance.w * absorption;
 
                 // Get the diffuse direction for the next ray
                 const float3 diffuseDirection = roughen(
@@ -1089,14 +1097,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 const float rng = random(seed.x + seed.y + seed.z);
-                float specularProbability = specularity.w;
 
                 float refractedRefractiveIndex;
-                if (nestedDielectrics[numNestedDielectrics][0] == result.y)
+                if (nestedDielectrics[numNestedDielectrics][4] == result.y)
                 {
                     // We are exiting the material we are in, get the
                     // last refractive index from the top of the stack
-                    refractedRefractiveIndex = nestedDielectrics[numNestedDielectrics - 1][1];
+                    refractedRefractiveIndex = nestedDielectrics[numNestedDielectrics - 1][5];
                 }
                 else
                 {
@@ -1111,11 +1118,19 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     refractedRefractiveIndex
                 );
 
-                specularProbability = blend(1.0f, specularProbability, reflectivity);
+                float specularProbability = blend(1.0f, specularity.w, reflectivity);
+
+                const float refractionProbability = (
+                    transmittance.w * (1.0f - specularProbability)
+                    / (1.0f - specularity.w)
+                );
 
                 // Maybe reflect the ray
                 if (specularity.w > 0.0f && rng <= specularProbability)
                 {
+                    // Update the colour of the ray
+                    rayColour += emittance * emittance.w * absorption;
+
                     const float3 specularDirection = reflectRayOffSurface(
                         direction,
                         surfaceNormal
@@ -1126,7 +1141,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         specularDirection,
                         diffusivity.w * diffusivity.w
                     );
-                    absorption *= specularity;
+                    absorption *= specularity / max(specularProbability, _hitTolerance);
 
                     // Offset the point so that it doesn't get trapped on
                     // surface.
@@ -1139,7 +1154,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Maybe spawn a refracted ray
                 else if (
                     transmittance.w > 0.0f
-                    && rng - specularProbability <= transmittance.w
+                    && rng <= specularProbability + refractionProbability
                 ) {
                     const float3 refractedDirection = refractRayThroughSurface(
                         direction,
@@ -1153,7 +1168,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         refractedDirection,
                         diffusivity.w * diffusivity.w
                     );
-                    absorption *= transmittance;
 
                     // Offset the point so that it doesn't get trapped on
                     // surface.
@@ -1163,9 +1177,24 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         (2.0f * pixelFootprint + stepDistance) * _shadowBias
                     );
 
+                    const float4 absorptionColour = float4(
+                        nestedDielectrics[numNestedDielectrics][0],
+                        nestedDielectrics[numNestedDielectrics][1],
+                        nestedDielectrics[numNestedDielectrics][2],
+                        nestedDielectrics[numNestedDielectrics][3]
+                    );
+
+                    absorption *= (
+                        exp(-absorptionColour * distanceTravelledThroughMaterial)
+                        / max(refractionProbability, _hitTolerance)
+                    );
+
+                    // We are entering a new material so reset the distance
+                    distanceTravelledThroughMaterial = 0.0f;
+
                     // We are passing through the surface, so update the refractive index
                     refractiveIndex = refractedRefractiveIndex;
-                    if (nestedDielectrics[numNestedDielectrics][0] == result.y)
+                    if (nestedDielectrics[numNestedDielectrics][4] == result.y)
                     {
                         // We are exiting the material we are in, get the
                         // last refractive index, by popping the stack
@@ -1176,16 +1205,29 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         // We are not exiting the material we are in, so push
                         // the next refractive index to the stack
                         numNestedDielectrics++;
-                        nestedDielectrics[numNestedDielectrics][0] = result.y;
-                        nestedDielectrics[numNestedDielectrics][1] = refractedRefractiveIndex;
+                        nestedDielectrics[numNestedDielectrics][0] = transmittance.x;
+                        nestedDielectrics[numNestedDielectrics][1] = transmittance.y;
+                        nestedDielectrics[numNestedDielectrics][2] = transmittance.z;
+                        nestedDielectrics[numNestedDielectrics][3] = transmittance.w;
+                        nestedDielectrics[numNestedDielectrics][4] = result.y;
+                        nestedDielectrics[numNestedDielectrics][5] = refractedRefractiveIndex;
                     }
+
+                    // Update the colour of the ray
+                    rayColour += emittance * emittance.w * absorption;
                 }
                 // Otherwise diffuse the light
                 else
                 {
+                    // Update the colour of the ray
+                    rayColour += emittance * emittance.w * absorption;
+
                     // fallback is diffuse
                     direction = diffuseDirection;
-                    absorption *= diffusivity;
+                    absorption *= diffusivity / max(
+                        1.0f - specularProbability - refractionProbability,
+                        _hitTolerance
+                    );
 
                     // Offset the point so that it doesn't get trapped on
                     // surface.
@@ -1202,6 +1244,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     rayColour.w = encodeFloatsInUint(firstObjectId, depth);
                     return rayColour;
                 }
+
 
                 // Update the random seed
                 seed = random(seed + rng * fabs(origin + direction));
@@ -1222,9 +1265,18 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             return float4(0);
         }
 
+        const float4 absorptionColour = float4(
+            nestedDielectrics[numNestedDielectrics][0],
+            nestedDielectrics[numNestedDielectrics][1],
+            nestedDielectrics[numNestedDielectrics][2],
+            nestedDielectrics[numNestedDielectrics][3]
+        );
+
         // Otherwise, read the hdri value
         // in the direction the ray was last travelling
-        rayColour += absorption * readHDRIValue(direction);
+        rayColour += absorption * readHDRIValue(direction) * exp(
+            -absorptionColour * distanceTravelledThroughMaterial
+        );
 
         rayColour.w = (bounces > 0) * encodeFloatsInUint(firstObjectId, depth);
         return rayColour;
