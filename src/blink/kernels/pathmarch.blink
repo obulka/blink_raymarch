@@ -91,7 +91,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _hdriOffsetAngle;
 
         // Ray params
-        int _pathsPerSubpixel;
+        int _pathsPerPixel;
         int _maxBounces;
         float _maxRayDistance;
         int _maxRaySteps;
@@ -153,7 +153,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_hdriOffsetAngle, "HDRI Offset Angle", 0.0f);
 
         // Ray params
-        defineParam(_pathsPerSubpixel, "Paths Per Subpixel", 1);
+        defineParam(_pathsPerPixel, "Paths Per Pixel", 1);
         defineParam(_maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(_maxRaySteps, "Max Ray Steps", 128);
         defineParam(_maxBounces, "Max Bounces", 1);
@@ -997,7 +997,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         while (
             distanceTravelled < _maxRayDistance
             && iterations < _maxRaySteps
-            && sumComponent(absorption) > _hitTolerance
+            // && sumComponent(absorption) > _hitTolerance
         ) {
             // TODO see if its faster to use colourless until hit
             // Get the closest distance to an object
@@ -1111,10 +1111,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     refractedRefractiveIndex
                 );
 
-                specularProbability += reflectivity * (transmittance.w > 0.0f);
+                specularProbability = blend(1.0f, specularProbability, reflectivity);
 
                 // Maybe reflect the ray
-                if (specularProbability > 0.0f && rng <= specularProbability)
+                if (specularity.w > 0.0f && rng <= specularProbability)
                 {
                     const float3 specularDirection = reflectRayOffSurface(
                         direction,
@@ -1204,7 +1204,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
 
                 // Update the random seed
-                seed += rng * fabs(origin + direction);
+                seed = random(seed + rng * fabs(origin + direction));
+
+                // Reset the pixel footprint so multiple reflections don't
+                // reduce precision
                 pixelFootprint = _hitTolerance;
             }
 
@@ -1242,9 +1245,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float2 pixelLocation = float2(pos.x, pos.y);
 
-        for (int path=1; path <= _pathsPerSubpixel; path++)
+        for (int path=1; path <= _pathsPerPixel; path++)
         {
-            seed += seed / path;
+            seed = random(seed * path);
 
             // Generate a ray from the camera
             float3 rayOrigin;
@@ -1264,7 +1267,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             resultPixel += marchRay(rayOrigin, rayDirection, seed);
         }
 
-        const float4 resultColour = resultPixel / _pathsPerSubpixel;
+        const float4 resultColour = resultPixel / _pathsPerPixel;
         if (_useToneMap && _outputType == 0)
         {
             const float3 toneMapped = ACESToneMap(

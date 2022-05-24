@@ -34,7 +34,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/examples/pathmarch_test.nk
- frame 152
+ frame 187
  last_frame 400
  format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
  colorManagement Nuke
@@ -63,6 +63,7 @@ Read {
  xpos 339
  ypos 260
 }
+set N6442450 [stack 0]
 Reformat {
  format "2048 1024 0 0 2048 1024 1 2K_LatLong"
  name Reformat1
@@ -74,118 +75,23 @@ Dot {
  xpos 373
  ypos 459
 }
-Axis2 {
- inputs 0
- name Axis1
- xpos 198
- ypos 134
-}
-Camera2 {
- translate {0 0 2.1}
- focal 15.4
- name Camera1
- xpos 198
- ypos 232
-}
-Dot {
- name Dot5
- xpos 222
- ypos 361
-}
-sdf_primitive {
- inputs 0
- name sdf_primitive6
- tile_color 0xb3b3b3ff
- label plane
- xpos -339
- ypos 198
- shape plane
- dimension_x 0
- dimension_y 1
- dimension_z 0
- colour {0.7 0.7 0.7}
- translate {0 -3 0}
- blend_type intersection
-}
-sdf_primitive {
- name sdf_primitive5
- tile_color 0xb3b3b3ff
- label plane
- xpos -339
- ypos 238
- shape plane
- dimension_x 0
- dimension_y -1
- dimension_z 0
- colour {0.7 0.7 0.7}
- emission 0.5
- translate {0 3 0}
- blend_type intersection
-}
-sdf_primitive {
- name sdf_primitive4
- tile_color 0xb3b3b3ff
- label plane
- xpos -339
- ypos 278
- shape plane
- dimension_x 0
- dimension_y 0
- dimension_z 1
- colour {0.7 0.7 0.7}
- translate {0 0 -6}
- blend_type intersection
-}
-sdf_primitive {
- name sdf_primitive3
- tile_color 0x1ab31aff
- label plane
- xpos -339
- ypos 318
- shape plane
- dimension_x -1
- dimension_y 0
- dimension_z 0
- colour {0.1 0.7 0.1}
- specular_colour {0.1 0.7 0.1}
- transmission_colour {0.1 0.7 0.1}
- emission_colour {0.1 0.7 0.1}
- translate {3 0 0}
-}
-sdf_primitive {
- name sdf_primitive1
- tile_color 0xb31a1aff
- label plane
- xpos -339
- ypos 358
- shape plane
- dimension_x 1
- dimension_y 0
- dimension_z 0
- colour {0.7 0.1 0.1}
- specular_colour {0.7 0.1 0.1}
- transmission_colour {0.7 0.1 0.1}
- emission_colour {0.7 0.1 0.1}
- translate {-3 0 0}
-}
 Group {
  inputs 0
- name sdf_primitive11
+ name sdf_primitive10
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
- tile_color 0x801affff
- label "rectangular prism"
- xpos -207
+ tile_color 0xffffffff
+ label sphere
+ xpos -353
  ypos -236
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
- shape "rectangular prism"
- addUserKnob {7 dimension_x l width t "The width (x) of the prism." R 0 10}
- dimension_x 0.75
- addUserKnob {7 dimension_y l height t "The height (y) of the prism." R 0 10}
- dimension_y 1
- addUserKnob {7 dimension_z l depth t "The depth (z) of the prism." R 0 10}
- dimension_z 1.5
+ addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
+ dimension_x 0.3
+ addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN R 0 10}
+ dimension_y 0.25
+ addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN R 0 10}
+ dimension_z 0.25
  addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold. Higher values will result in a denser fractal." +HIDDEN R 0.01 2}
  dimension_w 0.8
  addUserKnob {6 use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." +HIDDEN +STARTLINE}
@@ -194,36 +100,33 @@ Group {
  wall_thickness 0.01
  addUserKnob {6 hollow t "If enabled, the object will be hollow, with a thickness of 'wall thickness'." -STARTLINE}
  addUserKnob {7 edge_radius l "edge radius" t "This parameter increases the hit tolerance by the specified amount for this specific object, having the effect of rounding off the edges."}
- edge_radius 0.3
  addUserKnob {6 mirror_x l "mirror x" t "Mirror the shape in the yz-plane." +STARTLINE}
  addUserKnob {6 mirror_y l "mirror y" t "Mirror the shape in the xz-plane." -STARTLINE}
  addUserKnob {6 mirror_z l "mirror z" t "Mirror the shape in the xy-plane." -STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
  addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
- colour {0.5 0.1 1}
+ colour {1 1 1}
  addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 diffuse_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
  addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
- specular_colour {0.5 0.1 1}
+ specular_colour {1 1 1}
  addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
- transmission 1
  addUserKnob {18 transmission_colour l "transmission colour" t "The transmissive colour."}
- transmission_colour {0.8 0.1 1}
+ transmission_colour {1 1 1}
  addUserKnob {6 transmission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
+ emission 1
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
  emission_colour {1 1 1}
  addUserKnob {6 emission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
- translate {-1 {"-3 + dimension_y / 2 + 0.1"} -3.9}
  addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
- rotate {90 35 0}
  addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
  elongation {0.1 0 0}
  addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
@@ -483,7 +386,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N6502590 [stack 0]
+set N68bcd60 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -505,7 +408,7 @@ set N6502590 [stack 0]
    xpos 34
    ypos -6
   }
-set N6515d90 [stack 0]
+set N68d0560 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -516,7 +419,7 @@ set N6515d90 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6502590
+push $N68bcd60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -545,7 +448,7 @@ push $N6502590
    xpos 158
    ypos 167
   }
-push $N6515d90
+push $N68d0560
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -638,7 +541,7 @@ push $N6515d90
    xpos 192
    ypos -2
   }
-set N65c1ca0 [stack 0]
+set N697d660 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -660,7 +563,7 @@ set N65c1ca0 [stack 0]
    xpos 34
    ypos -6
   }
-set N65d54a0 [stack 0]
+set N6990e60 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -671,7 +574,7 @@ set N65d54a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N65c1ca0
+push $N697d660
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -700,7 +603,596 @@ push $N65c1ca0
    xpos 158
    ypos 167
   }
-push $N65d54a0
+push $N6990e60
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Output {
+  name Output1
+  xpos 1183
+  ypos 1002
+ }
+end_group
+push 0
+Group {
+ inputs 2
+ name sdf_primitive11
+ onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
+ knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
+ tile_color 0x801affff
+ label "rectangular prism"
+ xpos -207
+ ypos -236
+ addUserKnob {20 User l "SDF Primitive"}
+ addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
+ shape "rectangular prism"
+ addUserKnob {7 dimension_x l width t "The width (x) of the prism." R 0 10}
+ dimension_x 0.7
+ addUserKnob {7 dimension_y l height t "The height (y) of the prism." R 0 10}
+ dimension_y 2
+ addUserKnob {7 dimension_z l depth t "The depth (z) of the prism." R 0 10}
+ dimension_z 0.7
+ addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold. Higher values will result in a denser fractal." +HIDDEN R 0.01 2}
+ dimension_w 0.8
+ addUserKnob {6 use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." +HIDDEN +STARTLINE}
+ use_trap_colour true
+ addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
+ wall_thickness 0.01
+ addUserKnob {6 hollow t "If enabled, the object will be hollow, with a thickness of 'wall thickness'." -STARTLINE}
+ addUserKnob {7 edge_radius l "edge radius" t "This parameter increases the hit tolerance by the specified amount for this specific object, having the effect of rounding off the edges."}
+ edge_radius 0.15
+ addUserKnob {6 mirror_x l "mirror x" t "Mirror the shape in the yz-plane." +STARTLINE}
+ addUserKnob {6 mirror_y l "mirror y" t "Mirror the shape in the xz-plane." -STARTLINE}
+ addUserKnob {6 mirror_z l "mirror z" t "Mirror the shape in the xy-plane." -STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
+ addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
+ colour {0.5 0.1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {6 diffuse_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
+ specular_colour {0.5 0.1 1}
+ addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
+ transmission 1
+ addUserKnob {18 transmission_colour l "transmission colour" t "The transmissive colour."}
+ transmission_colour {0.8 0.1 1}
+ addUserKnob {6 transmission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
+ refractive_index 1.33
+ addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
+ addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
+ emission_colour {1 1 1}
+ addUserKnob {6 emission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {26 div0 l "" +STARTLINE}
+ addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
+ translate {-1 {"-3 + dimension_y / 2 + edge_radius"} -4}
+ addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
+ rotate {0 45 0}
+ addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
+ elongation {0.1 0 0}
+ addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
+ addUserKnob {7 uniform_scale l "uniform scale" t "The scale of the object in its local coordinate space, along all axes." R 0 10}
+ uniform_scale 1
+ addUserKnob {26 div1 l "" +STARTLINE}
+ addUserKnob {4 repetition t "Repeat objects in the scene with no extra memory consumption. Note that if the repeated objects overlap some strange things can occur." -STARTLINE M {none finite infinite "" ""}}
+ addUserKnob {13 repetition_params l spacing t "The spacing along each positive axis to repeat the objects." +HIDDEN}
+ repetition_params {1.1 1.1 100}
+ addUserKnob {7 repetition_spacing l spacing t "The spacing between the objects." +HIDDEN R 0 10}
+ repetition_spacing 1.1
+ addUserKnob {26 ""}
+ addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: This object will be subtracted from all of its\n        children, leaving holes.\n    Intersection: Only the region where this object and its\n        children overlap will remain.\n    Smooth Union: All children will smoothly blend together\n        with this object according to the 'blend strength'.\n    Smooth Subtraction:This object will be subtracted from all\n        of its children,  leaving holes that are smoothed\n        according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object\n        and its children overlap will remain, and the remaining\n        regions will be smoothed according to the 'blend\n        strength'." M {union subtraction intersection "smooth union" "smooth subtraction" "smooth intersection" "" "" ""}}
+ addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected." +DISABLED}
+ blend_strength 0.125
+ addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
+}
+ Input {
+  inputs 0
+  name siblings
+  xpos 1484
+  ypos 476
+ }
+ Dot {
+  name Dot2
+  xpos 1518
+  ypos 904
+ }
+ Input {
+  inputs 0
+  name children
+  xpos 1357
+  ypos 475
+  number 1
+ }
+ Dot {
+  name Dot1
+  xpos 1391
+  ypos 826
+ }
+ Constant {
+  inputs 0
+  channels sdf_position_scale
+  color {{parent.translate.x} {parent.translate.y} {parent.translate.z} {parent.uniform_scale}}
+  format "1 1 0 0 1 1 1 1x1"
+  name position_scale
+  xpos -76
+  ypos 455
+ }
+ Dot {
+  name Dot17
+  xpos -42
+  ypos 647
+ }
+ Constant {
+  inputs 0
+  channels sdf_rotation_wall_thickness
+  color {{"parent.rotate.x * pi / 180"} {"parent.rotate.y * pi / 180"} {"parent.rotate.z * pi / 180"} {parent.wall_thickness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name rotation
+  xpos 47
+  ypos 457
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 47
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_dimensions
+  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.dimension_w}}
+  format "1 1 0 0 1 1 1 1x1"
+  name dimensions
+  xpos 184
+  ypos 460
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy2
+  xpos 184
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_colour
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.roughness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name diffuse_colour
+  xpos 313
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy3
+  xpos 313
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_spec_colour
+  color {{parent.specular_colour.r} {parent.specular_colour.g} {parent.specular_colour.b} {parent.specular}}
+  format "1 1 0 0 1 1 1 1x1"
+  name spec_colour
+  xpos 438
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy8
+  xpos 438
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_trans_colour
+  color {{parent.transmission_colour.r} {parent.transmission_colour.g} {parent.transmission_colour.b} {parent.transmission}}
+  format "1 1 0 0 1 1 1 1x1"
+  name trans_colour
+  xpos 561
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy9
+  xpos 561
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_emm_colour
+  color {{parent.emission_colour.r} {parent.emission_colour.g} {parent.emission_colour.b} {parent.emission}}
+  format "1 1 0 0 1 1 1 1x1"
+  name emm_colour
+  xpos 685
+  ypos 459
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy10
+  xpos 685
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape
+  color {{"parent.shape + (parent.shape == 24 && !parent.use_trap_colour)"} {"parent.repetition | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0) | (parent.is_bound ? 4096 : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape
+  xpos 806
+  ypos 462
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy4
+  xpos 806
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_surface
+  color {{parent.specular} {parent.transmission} {parent.emission} {parent.refractive_index}}
+  format "1 1 0 0 1 1 1 1x1"
+  name surface
+  xpos 936
+  ypos 461
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy5
+  xpos 936
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape_mods_0
+  color {{parent.repetition_params.x} {parent.repetition_params.y} {parent.repetition_params.z} {parent.repetition_spacing}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape_mods
+  xpos 1056
+  ypos 463
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy6
+  xpos 1056
+  ypos 726
+ }
+ Constant {
+  inputs 0
+  channels sdf_shape_mods_1
+  color {{parent.elongation.x} {parent.elongation.y} {parent.elongation.z} {parent.edge_radius}}
+  format "1 1 0 0 1 1 1 1x1"
+  name shape_mods1
+  xpos 1183
+  ypos 465
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy7
+  xpos 1183
+  ypos 726
+ }
+ Group {
+  inputs 2
+  name sdf_merge
+  xpos 1183
+  ypos 822
+  disable {{"!(\[exists parent.input1] && !input1.parent.input1.disable)"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N6b65bf0 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N6b793f0 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N6b65bf0
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N6b793f0
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Group {
+  inputs 2
+  name sdf_merge1
+  xpos 1183
+  ypos 900
+  disable {{"!(\[exists parent.input0] && !(parent.input0.disable && !\[exists parent.input0.input0]))"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N6c25470 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set N6c38c70 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N6c25470
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $N6c38c70
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -774,8 +1266,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffe6b3ff
  label torus
- xpos -207
- ypos -121
+ xpos -379
+ ypos -140
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape torus
@@ -814,14 +1306,15 @@ Group {
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
- emission 2
+ emission 2.5
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
  emission_colour {1 0.9 0.7}
  addUserKnob {6 emission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
- translate {2 1.2 -3.5}
+ translate {1.75 1.2 -4}
  addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
+ rotate {-15 15 0}
  addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
  elongation {0.1 0 0}
  addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
@@ -1070,7 +1563,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N67ac000 [stack 0]
+set N6e0eff0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1092,7 +1585,7 @@ set N67ac000 [stack 0]
    xpos 34
    ypos -6
   }
-set N67bf800 [stack 0]
+set N6e227f0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1103,7 +1596,7 @@ set N67bf800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N67ac000
+push $N6e0eff0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1132,7 +1625,7 @@ push $N67ac000
    xpos 158
    ypos 167
   }
-push $N67bf800
+push $N6e227f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1225,7 +1718,7 @@ push $N67bf800
    xpos 192
    ypos -2
   }
-set N686c000 [stack 0]
+set N6ece3f0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1247,7 +1740,7 @@ set N686c000 [stack 0]
    xpos 34
    ypos -6
   }
-set N687f800 [stack 0]
+set N6ee1bf0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1258,7 +1751,7 @@ set N687f800 [stack 0]
    xpos -98
    ypos 336
   }
-push $N686c000
+push $N6ece3f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1287,7 +1780,7 @@ push $N686c000
    xpos 158
    ypos 167
   }
-push $N687f800
+push $N6ee1bf0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1355,14 +1848,15 @@ push $N687f800
   ypos 1002
  }
 end_group
+set N6ccd350 [stack 0]
 Group {
  name sdf_primitive8
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xccccccff
  label sphere
- xpos -207
- ypos -27
+ xpos -379
+ ypos -46
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
@@ -1654,7 +2148,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6a57340 [stack 0]
+set N70b92e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1676,7 +2170,7 @@ set N6a57340 [stack 0]
    xpos 34
    ypos -6
   }
-set N6a6ab40 [stack 0]
+set N70ccae0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1687,7 +2181,7 @@ set N6a6ab40 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6a57340
+push $N70b92e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1716,7 +2210,7 @@ push $N6a57340
    xpos 158
    ypos 167
   }
-push $N6a6ab40
+push $N70ccae0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1809,7 +2303,7 @@ push $N6a6ab40
    xpos 192
    ypos -2
   }
-set N6b16a50 [stack 0]
+set N71786e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1831,7 +2325,7 @@ set N6b16a50 [stack 0]
    xpos 34
    ypos -6
   }
-set N6b2a250 [stack 0]
+set N718bee0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1842,7 +2336,7 @@ set N6b2a250 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6b16a50
+push $N71786e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1871,7 +2365,7 @@ push $N6b16a50
    xpos 158
    ypos 167
   }
-push $N6b2a250
+push $N718bee0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1945,8 +2439,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label sphere
- xpos -207
- ypos 13
+ xpos -379
+ ypos -6
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
@@ -2239,7 +2733,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6d00d80 [stack 0]
+set N7368a60 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2261,7 +2755,7 @@ set N6d00d80 [stack 0]
    xpos 34
    ypos -6
   }
-set N6d14580 [stack 0]
+set N737c260 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2272,7 +2766,7 @@ set N6d14580 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6d00d80
+push $N7368a60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2301,7 +2795,7 @@ push $N6d00d80
    xpos 158
    ypos 167
   }
-push $N6d14580
+push $N737c260
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2394,7 +2888,7 @@ push $N6d14580
    xpos 192
    ypos -2
   }
-set N6dc0490 [stack 0]
+set N7428170 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2416,7 +2910,7 @@ set N6dc0490 [stack 0]
    xpos 34
    ypos -6
   }
-set N6dd3c90 [stack 0]
+set N743b970 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2427,7 +2921,7 @@ set N6dd3c90 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6dc0490
+push $N7428170
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2456,7 +2950,7 @@ push $N6dc0490
    xpos 158
    ypos 167
   }
-push $N6dd3c90
+push $N743b970
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2530,8 +3024,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label sphere
- xpos -207
- ypos 53
+ xpos -379
+ ypos 34
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
@@ -2825,7 +3319,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6fb0850 [stack 0]
+set N76124a0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2847,7 +3341,7 @@ set N6fb0850 [stack 0]
    xpos 34
    ypos -6
   }
-set N6fc4050 [stack 0]
+set N7625ca0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2858,7 +3352,7 @@ set N6fc4050 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6fb0850
+push $N76124a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2887,7 +3381,7 @@ push $N6fb0850
    xpos 158
    ypos 167
   }
-push $N6fc4050
+push $N7625ca0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2980,7 +3474,7 @@ push $N6fc4050
    xpos 192
    ypos -2
   }
-set N706ff60 [stack 0]
+set N76d1bb0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3002,7 +3496,7 @@ set N706ff60 [stack 0]
    xpos 34
    ypos -6
   }
-set N7083760 [stack 0]
+set N76e53b0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3013,7 +3507,7 @@ set N7083760 [stack 0]
    xpos -98
    ypos 336
   }
-push $N706ff60
+push $N76d1bb0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3042,7 +3536,7 @@ push $N706ff60
    xpos 158
    ypos 167
   }
-push $N7083760
+push $N76e53b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3110,6 +3604,108 @@ push $N7083760
   ypos 1002
  }
 end_group
+push $N6442450
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "2 \"SaturationKernel\" iterate pixelWise 47dc750551125aa6dbd20a201c94544a633b9c8532ccbe10cac0891609260a99 2 \"src\" Read Point \"dst\" Write Point 1 \"Saturation\" Float 1 mpmZPw== 1 \"saturation\" 1 1 1 \"coefficients\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA=="
+ kernelSource "kernel SaturationKernel : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint, eEdgeClamped> src; // the input image\n  Image<eWrite> dst; // the output image\n\n  param:\n    float saturation; // This parameter is made available to the user.\n\n  local:\n    float3 coefficients;  // This local variable is not exposed to the user.\n\n  // In define(), parameters can be given labels and default values.\n  void define() \{\n    defineParam(saturation, \"Saturation\", 1.2f);\n  \}\n\n  // The init() function is run before any calls to process().\n  // Local variables can be initialized here.\n  void init() \{\n    // Initialise coefficients according to rec. 709 standard.\n    coefficients.x = 0.2126f;\n    coefficients.y = 0.7152f;\n    coefficients.z = 0.0722f;\n  \}\n\n  void process() \{\n    // Read the input image\n    SampleType(src) input = src();\n\n    // Isolate the RGB components\n    float3 srcPixel(input.x, input.y, input.z);\n\n    // Calculate luma\n    float luma = srcPixel.x * coefficients.x\n               + srcPixel.y * coefficients.y\n               + srcPixel.z * coefficients.z;\n    // Apply saturation\n    float3 saturatedPixel = (srcPixel - luma) * saturation + luma;\n\n    // Write the result to the output image\n    dst() = float4(1.0f) * 1.0f / (0.0f+0.00001f);\n  \}\n\};\n"
+ rebuild ""
+ rebuild_finalise ""
+ name BlinkScript1
+ xpos 621
+ ypos 375
+}
+Axis2 {
+ inputs 0
+ name Axis1
+ xpos 198
+ ypos 134
+}
+Camera2 {
+ translate {0 0 2.1}
+ focal 15.4
+ name Camera1
+ xpos 198
+ ypos 232
+}
+Dot {
+ name Dot5
+ xpos 222
+ ypos 361
+}
+sdf_primitive {
+ inputs 0
+ name sdf_primitive6
+ tile_color 0xb3b3b3ff
+ label plane
+ xpos -339
+ ypos 198
+ shape plane
+ dimension_x 0
+ dimension_y 1
+ dimension_z 0
+ colour {0.7 0.7 0.7}
+ translate {0 -3 0}
+ blend_type intersection
+}
+sdf_primitive {
+ name sdf_primitive5
+ tile_color 0xb3b3b3ff
+ label plane
+ xpos -339
+ ypos 238
+ shape plane
+ dimension_x 0
+ dimension_y -1
+ dimension_z 0
+ colour {0.7 0.7 0.7}
+ translate {0 3 0}
+ blend_type intersection
+}
+sdf_primitive {
+ name sdf_primitive4
+ tile_color 0xb3b3b3ff
+ label plane
+ xpos -339
+ ypos 278
+ shape plane
+ dimension_x 0
+ dimension_y 0
+ dimension_z 1
+ colour {0.7 0.7 0.7}
+ translate {0 0 -6}
+ blend_type intersection
+}
+sdf_primitive {
+ name sdf_primitive3
+ label plane
+ xpos -339
+ ypos 318
+ shape plane
+ dimension_x -1
+ dimension_y 0
+ dimension_z 0
+ specular_colour {0.1 0.7 0.1}
+ transmission_colour {0.1 0.7 0.1}
+ emission_colour {0.1 0.7 0.1}
+ translate {3 0 0}
+}
+sdf_primitive {
+ name sdf_primitive1
+ label plane
+ xpos -339
+ ypos 358
+ shape plane
+ dimension_x 1
+ dimension_y 0
+ dimension_z 0
+ specular_colour {0.7 0.7 0.7}
+ transmission_colour {0.7 0.7 0.7}
+ emission_colour {0.7 0.7 0.7}
+ translate {-3 0 0}
+}
+push $N6ccd350
 sdf_primitive {
  inputs 2
  name sdf_primitive2
@@ -3130,14 +3726,14 @@ Dot {
  ypos 459
 }
 Group {
- inputs 3
+ inputs 2
  name path_march
  knobChanged "__import__('sdf.path_march', fromlist='PathMarch').PathMarch().handle_knob_changed()"
  xpos 188
  ypos 455
  addUserKnob {20 User l "Ray March"}
- addUserKnob {3 paths_per_subpixel l "paths per subpixel"}
- paths_per_subpixel 1
+ addUserKnob {3 paths_per_pixel l "paths per pixel"}
+ paths_per_pixel 5
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
  hit_tolerance 0.001
  addUserKnob {3 max_bounces l "max bounces" t "Limits the number of times the rays can intersect an object per subpixel."}
@@ -3149,7 +3745,7 @@ Group {
  addUserKnob {7 shadow_bias l "shadow bias" R 1 5}
  shadow_bias 1
  addUserKnob {13 seeds t "The seeds used to generate per-pixel noise."}
- seeds {11 22 33}
+ seeds {{frame} 22 33}
  addUserKnob {26 ""}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the medium that the camera is currently in." R 1 4}
  refractive_index 1
@@ -3186,13 +3782,13 @@ add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_lig
   xpos 589
   ypos -1549
  }
-set N73e38b0 [stack 0]
+set N87dce40 [stack 0]
  Dot {
   name Dot1
   xpos 589
   ypos -1473
  }
-push $N73e38b0
+push $N87dce40
  Input {
   inputs 0
   name scene
@@ -3236,7 +3832,7 @@ push $N73e38b0
    xpos 192
    ypos -2
   }
-set N741f920 [stack 0]
+set N8818eb0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3258,7 +3854,7 @@ set N741f920 [stack 0]
    xpos 34
    ypos -6
   }
-set N7433120 [stack 0]
+set N882c6b0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3269,7 +3865,7 @@ set N7433120 [stack 0]
    xpos -98
    ypos 336
   }
-push $N741f920
+push $N8818eb0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3298,7 +3894,7 @@ push $N741f920
    xpos 158
    ypos 167
   }
-push $N7433120
+push $N882c6b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3365,7 +3961,7 @@ push $N7433120
   xpos 701
   ypos -1315
  }
-set N74c2830 [stack 0]
+set N88bbdc0 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -3377,7 +3973,7 @@ set N74c2830 [stack 0]
   xpos 408
   ypos -862
  }
-push $N74c2830
+push $N88bbdc0
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -3389,7 +3985,7 @@ push $N74c2830
   xpos 783
   ypos -862
  }
-push $N74c2830
+push $N88bbdc0
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -3401,7 +3997,7 @@ push $N74c2830
   xpos 644
   ypos -861
  }
-push $N74c2830
+push $N88bbdc0
  Shuffle {
   in sdf_shape
   name shape
@@ -3413,7 +4009,7 @@ push $N74c2830
   xpos 533
   ypos -860
  }
-push $N74c2830
+push $N88bbdc0
  Shuffle {
   in sdf_emm_colour
   name emm_colour
@@ -3425,7 +4021,7 @@ push $N74c2830
   xpos 301
   ypos -864
  }
-push $N74c2830
+push $N88bbdc0
  Shuffle {
   in sdf_trans_colour
   name trans_colour
@@ -3437,7 +4033,7 @@ push $N74c2830
   xpos 204
   ypos -863
  }
-push $N74c2830
+push $N88bbdc0
  Shuffle {
   in sdf_spec_colour
   name spec_colour
@@ -3449,7 +4045,7 @@ push $N74c2830
   xpos 104
   ypos -862
  }
-push $N74c2830
+push $N88bbdc0
  Shuffle {
   in sdf_colour
   name diff_colour
@@ -3461,7 +4057,7 @@ push $N74c2830
   xpos -12
   ypos -863
  }
-push $N74c2830
+push $N88bbdc0
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -3473,7 +4069,7 @@ push $N74c2830
   xpos 1230
   ypos -854
  }
-push $N74c2830
+push $N88bbdc0
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -3485,7 +4081,7 @@ push $N74c2830
   xpos 1079
   ypos -851
  }
-push $N74c2830
+push $N88bbdc0
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -3569,9 +4165,9 @@ push $N74c2830
  BlinkScript {
   inputs 13
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/pathmarch.blink
-  recompileCount 1992
-  KernelDescription "2 \"PathMarchKernel\" iterate pixelWise 67d2e121d3ba2f1c4e6b4c6c8f42d8af423eb80d27df4d0feade340bf99830c8 14 \"noise\" Read Point \"hdri\" Read Random \"positions\" Read Random \"rotations\" Read Random \"dimensions\" Read Random \"diffusivities\" Read Random \"specularities\" Read Random \"transmittances\" Read Random \"emittances\" Read Random \"shapeProperties\" Read Random \"shapeModParameters0\" Read Random \"shapeModParameters1\" Read Random \"surfaceProperties\" Read Random \"dst\" Write Point 19 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"HDRI Offset Angle\" Float 1 AAAAAA== \"Paths Per Subpixel\" Int 1 AQAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AAB6RA== \"Max Ray Steps\" Int 1 gAAAAA== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 AACAPw== \"Index of Refraction\" Float 1 AACAPw== \"Object Texture Width\" Int 1 AAAAAA== \"Output Type\" Int 1 AAAAAA== \"Use Tone Map\" Bool 1 AQ== \"Exposure\" Float 1 AACAPw== 19 \"_focalLength\" 1 1 \"_horizontalAperture\" 1 1 \"_nearPlane\" 1 1 \"_farPlane\" 1 1 \"_cameraWorldMatrix\" 16 1 \"_formatWidth\" 1 1 \"_formatHeight\" 1 1 \"_hdriOffsetAngle\" 1 1 \"_pathsPerSubpixel\" 1 1 \"_maxBounces\" 1 1 \"_maxRayDistance\" 1 1 \"_maxRaySteps\" 1 1 \"_hitTolerance\" 1 1 \"_shadowBias\" 1 1 \"_refractiveIndex\" 1 1 \"_objectTextureWidth\" 1 1 \"_outputType\" 1 1 \"_useToneMap\" 1 1 \"_exposure\" 1 1 9 \"__inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"__bouncesPerRay\" Int 1 1 AAAAAA== \"__hdriPixelSize\" Float 2 1 AAAAAAAAAAA= \"__hdriLightPixelSize\" Float 2 1 AAAAAAAAAAA= \"__hdriOffsetRadians\" Float 1 1 AAAAAA== \"__offset0\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset1\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset2\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset3\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA=="
-  kernelSource "// Copyright 2022 by Owen Bulka.\n// All rights reserved.\n// This file is released under the \"MIT License Agreement\".\n// Please see the LICENSE.md file that should have been included as part\n// of this package.\n\n//\n// BlinkScript Ray Marcher\n//\n\n#include \"camera.h\"\n#include \"conversion.h\"\n#include \"lights.h\"\n#include \"math.h\"\n#include \"colour.h\"\n#include \"objectInteraction.h\"\n#include \"random.h\"\n#include \"rays.h\"\n#include \"sdfModifications.h\"\n#include \"sdfs.h\"\n\n\n// Increase this if you want more than MAX_CHILD_DEPTH direct children\n#define MAX_CHILD_DEPTH 100\n\n// Increase this if you want more than MAX_NESTED_DIELECTRICS nested\n// transmissive objects\n#define MAX_NESTED_DIELECTRICS 5\n\n\nkernel PathMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    // the input which specifies the format, process is called once per pixel\n    // in this image, which also provides random seeds\n    Image<eRead, eAccessPoint, eEdgeNone> noise;\n\n    // the hdribox in latlong format\n    Image<eRead, eAccessRandom, eEdgeClamped> hdri;\n\n\n    // the shape positons.xyz, scale.w\n    Image<eRead, eAccessRandom, eEdgeNone> positions;\n\n    // the shape rotations.xyz, wall thickness.w\n    Image<eRead, eAccessRandom, eEdgeNone> rotations;\n\n    // the shape dimensions.xyzw (some shapes may not use all channels)\n    Image<eRead, eAccessRandom, eEdgeNone> dimensions;\n\n    // the shape diffusivities.xyz, refractive index.w\n    Image<eRead, eAccessRandom, eEdgeNone> diffusivities;\n\n    Image<eRead, eAccessRandom, eEdgeNone> specularities;\n\n    Image<eRead, eAccessRandom, eEdgeNone> transmittances;\n\n    Image<eRead, eAccessRandom, eEdgeNone> emittances;\n\n\n    // shape type.x, operation.y, numChildren.z, blend strength.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;\n\n    // repetition params.xyzw\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters0;\n\n    // elongation.xyz edgeRadius.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters1;\n\n    // reflection.x, transmission.y, emission.z, roughness.w\n    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;\n\n\n    // the output image\n    Image<eWrite> dst;\n\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float _focalLength;\n        float _horizontalAperture;\n        float _nearPlane;\n        float _farPlane;\n        float4x4 _cameraWorldMatrix;\n\n        // Image params\n        float _formatWidth;\n        float _formatHeight;\n\n        float _hdriOffsetAngle;\n\n        // Ray params\n        int _pathsPerSubpixel;\n        int _maxBounces;\n        float _maxRayDistance;\n        int _maxRaySteps;\n        float _hitTolerance;\n        float _shadowBias;\n\n        // Scene params\n        float _refractiveIndex;\n\n        // Shape Textures\n        int _objectTextureWidth;\n\n        int _outputType;\n        bool _useToneMap;\n        float _exposure;\n\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float4x4 __inverseCameraProjectionMatrix;\n\n        int __bouncesPerRay;\n\n        float2 __hdriPixelSize;\n        float2 __hdriLightPixelSize;\n        float __hdriOffsetRadians;\n\n        float3 __offset0;\n        float3 __offset1;\n        float3 __offset2;\n        float3 __offset3;\n\n\n    /**\n     * In define(), parameters can be given labels and default values.\n     */\n    void define()\n    \{\n        // Camera params\n        defineParam(_focalLength, \"Focal Length\", 50.0f);\n        defineParam(_horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(_nearPlane, \"Near Plane\", 0.1f);\n        defineParam(_farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            _cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n\n        // Image params\n        defineParam(_formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(_formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(_hdriOffsetAngle, \"HDRI Offset Angle\", 0.0f);\n\n        // Ray params\n        defineParam(_pathsPerSubpixel, \"Paths Per Subpixel\", 1);\n        defineParam(_maxRayDistance, \"Max Ray Distance\", 1000.0f);\n        defineParam(_maxRaySteps, \"Max Ray Steps\", 128);\n        defineParam(_maxBounces, \"Max Bounces\", 1);\n        defineParam(_hitTolerance, \"Hit Tolerance\", 0.001f);\n        defineParam(_shadowBias, \"Shadow Bias\", 1.0f);\n\n        // Scene params\n        defineParam(_refractiveIndex, \"Index of Refraction\", 1.0f);\n\n        // Shape Counts\n        defineParam(_objectTextureWidth, \"Object Texture Width\", 0);\n\n        defineParam(_outputType, \"Output Type\", 0);\n        defineParam(_useToneMap, \"Use Tone Map\", true);\n        defineParam(_exposure, \"Exposure\", 1.0f);\n    \}\n\n\n    /**\n     * The init() function is run before any calls to process().\n     * Local variables can be initialized here.\n     */\n    void init()\n    \{\n        __bouncesPerRay = _maxBounces <= 0 ? 1 : _maxBounces;\n\n        // TODO use angles to allow -ve focal length like for latlongs\n        float aspect = aspectRatio(_formatHeight, _formatWidth);\n        float4x4 cameraProjectionMatrix = projectionMatrix(\n            _focalLength,\n            _horizontalAperture,\n            aspect,\n            _nearPlane,\n            _farPlane\n        );\n        __inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();\n\n        __hdriPixelSize = float2(\n            hdri.bounds.width() / (2 * PI),\n            hdri.bounds.height() / PI\n        );\n        __hdriOffsetRadians = _hdriOffsetAngle * PI / 180.0f;\n\n        __offset0 = 0.5773f * float3(1, -1, -1);\n        __offset1 = 0.5773f * float3(-1, -1, 1);\n        __offset2 = 0.5773f * float3(-1, 1, -1);\n        __offset3 = 0.5773f * float3(1, 1, 1);\n    \}\n\n\n    /**\n     * Get the value of hdri the ray would hit at infinite distance\n     *\n     * @arg rayDirection: The direction of the ray.\n     *\n     * @returns: The colour of the pixel in the direction of the ray.\n     */\n    float4 readHDRIValue(float3 rayDirection)\n    \{\n        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);\n\n        // Should be able to say image access is eEdgeClamped and not do this\n        // but I see nan pixels sooo... :(\n        const float2 indices = clamp(\n            float2(\n                __hdriPixelSize.x * angles.x,\n                hdri.bounds.height() - (__hdriPixelSize.y * angles.y)\n            ),\n            float2(0),\n            float2(hdri.bounds.width(), hdri.bounds.height()) - 1.0f\n        );\n\n        return bilinear(hdri, indices.x, indices.y);\n    \}\n\n\n    //\n    // Render Engine\n    //\n\n\n    /**\n     * Transform a ray's location.\n     *\n     * @arg rayOrigin: The location the ray originates from.\n     * @arg position: The amount to translate the ray.\n     * @arg rotation: The amount to rotate the ray (radians).\n     * @arg modifications: The modifications to perform.\n     *     Each bit will enable a modification:\n     *         bit 0: finite repetition\n     *         bit 1: infinite repetition\n     *         bit 2: elongation\n     *         bit 3: mirror x\n     *         bit 4: mirror y\n     *         bit 5: mirror z\n     * @arg repetition: The values to use when repeating the ray.\n     * @arg elongation: The values to use when elongating the ray.\n     *\n     * @returns: The transformed ray origin.\n     */\n    float3 transformRay(\n        const float3 &rayOrigin,\n        const float3 &translation,\n        const float3 &rotation,\n        const int modifications,\n        const float4 &repetition,\n        const float4 &elongation)\n    \{\n        float3x3 rotMatrix;\n        float3 transformedRay;\n        rotationMatrix(rotation, rotMatrix);\n        matmul(\n            rotMatrix.invert(),\n            rayOrigin - translation,\n            transformedRay\n        );\n        performShapeModification(\n            modifications,\n            repetition,\n            elongation,\n            transformedRay\n        );\n\n        return transformedRay;\n    \}\n\n\n    /**\n     * Compute the modified distance to an object.\n     *\n     * @arg rayOrigin: The location the ray originates from.\n     * @arg shape: The shape of the object:\n     *     0: sphere\n     *     1: ellipsoid\n     *     2: cut sphere\n     *     3: hollow sphere\n     *     4: death star\n     *     5: solid angle\n     *     6: rectangular prism\n     *     7: rectangular prism frame\n     *     8: rhombus\n     *     9: triangular prism\n     *     10: cylinder\n     *     11: infinite cylinder\n     *     12: plane\n     *     13: capsule\n     *     14: cone\n     *     15: infinite cone\n     *     16: capped cone\n     *     17: rounded cone\n     *     18: torus\n     *     19: capped torus\n     *     20: link\n     *     21: hexagonal prism\n     *     22: octahedron\n     *     23: mandelbulb\n     *     24: mandelbox\n     *     25: mandelbox (no trap colour)\n     * @arg dimensions: The dimensions of the object.\n     * @arg uniformScale: The factor to scale the object by.\n     * @arg modifications: The modifications to perform.\n     *     Each bit will enable a modification:\n     *         bit 6: hollowing\n     * @arg edgeRadius: The radius to round the edges by.\n     * @arg wallThickness: The thickness of the walls if hollowing the\n     *     object.\n     * @arg colour: The colour of the surface will be stored here.\n     *     This will only be modified by the fractals (23-25).\n     *\n     * @returns: The distance to the modified object.\n     */\n    inline float getModifiedDistance(\n        const float3 &rayOrigin,\n        const int shape,\n        const float4 &dimensions,\n        const float uniformScale,\n        const int modifications,\n        const float edgeRadius,\n        const float wallThickness,\n        float4 &colour)\n    \{\n        float nextDistance = distanceToObject(\n            rayOrigin / uniformScale,\n            shape,\n            dimensions,\n            colour\n        ) * uniformScale;\n\n        return performDistanceModification(\n            modifications,\n            edgeRadius,\n            wallThickness,\n            nextDistance\n        );\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     *\n     * @arg rayOrigin: The origin position of the ray.\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     *\n     * @returns: The minimum distance to an object in the scene.\n     */\n    float getMinDistanceToObjectInScene(const float3 &rayOrigin, const float pixelFootprint)\n    \{\n        float distance = _maxRayDistance;\n\n        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour\n        // roughness, specular colour, specular, transmissive colour, transmission,\n        // emissive colour, emission, refractive index, objectId, blendStrength\n        float parentStack\[MAX_CHILD_DEPTH]\[\n            1   // numChildren\n            + 3 // transformedRay\n            + 1 // scale\n            + 1 // mods\n            + 1 // nextDistance\n            + 1 // blendStrength\n        ];\n        int parentStackLength = 0;\n\n        for (int j=0; j < _objectTextureWidth; j++)\n        \{\n            // Read in the shape properties\n            SampleType(positions) position = positions(j, 0);\n            SampleType(rotations) rotation = rotations(j, 0);\n            SampleType(dimensions) dimension = dimensions(j, 0);\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n\n            float scale = position.w;\n\n            const int modifications = (int) shapeProperty.y;\n            float numChildren = shapeProperty.z;\n            const float blendStrength = shapeProperty.w;\n\n            int stackLastIndex = parentStackLength - 1;\n\n            // Position relative to the parent if we have any\n            float3 parentTransformedRay = rayOrigin;\n            if (parentStackLength > 0)\n            \{\n                parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                scale *= parentStack\[stackLastIndex]\[4];\n            \}\n\n            // Use parent transform to position child\n            const float3 transformedRay = transformRay(\n                parentTransformedRay,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n\n            float4 tmp;\n            // Get distance to this child\n            float nextDistance = getModifiedDistance(\n                transformedRay,\n                (int) shapeProperty.x,\n                dimension,\n                scale,\n                modifications,\n                modParameters1.w,\n                rotation.w,\n                tmp\n            );\n\n            // Track which object was hit for the alpha channel\n            float objectId = (float) j + 1.0f;\n\n            // If this is a bounding volume, we can skip its children\n            // if we aren't close to, or inside it\n            if (\n                modifications & 4096\n                && numChildren > 0\n                && nextDistance > _hitTolerance + pixelFootprint\n            ) \{\n                // Update the min distance if this bounding volume is closest.\n                // Otherwise we could step through it, or if every object in\n                // the scene is inside it, we would not step forward at all\n                if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n                \}\n\n                // This was tagged as a boundary object, skip its children\n                // since we arent close to hitting it\n                j += numChildren;\n\n                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                \{\n                    parentStack\[parentIndex]\[0] -= numChildren + 1.0f;\n                \}\n\n                // If there are no parents, or still children of the parent\n                // we do not need to compute anything further for this loop\n                if (parentStackLength <= 0 || parentStack\[stackLastIndex]\[0] > 0.0f)\n                \{\n                    continue;\n                \}\n\n                // pop stack\n                // we know that there will be no more children if we did not continue\n                numChildren = 0.0f;\n                nextDistance = parentStack\[stackLastIndex]\[6];\n                stackLastIndex--;\n                parentStackLength--;\n            \}\n\n            if (numChildren <= 0.0f)\n            \{\n                // No Children left, compute interactions with parent\n                if (parentStackLength > 0)\n                \{\n                    // Process this object, along with all parents that do not\n                    // have any more children, removing them from the stack,\n                    // but descend all the way down the stack, without removing\n                    // the objects that still have children\n                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)\n                    \{\n                        const int parentModifications = (int) parentStack\[stackIndex]\[5];\n\n                        // Do not need to interact with bounding volumes.\n                        // They are in the stack for relative positioning\n                        // if they weren't then we would have to manually move\n                        // the bounding box to follow the children\n                        if (!(parentModifications & 4096))\n                        \{\n                            const float parentNextDistance = parentStack\[stackIndex]\[6];\n                            const float parentBlendStrength = parentStack\[stackIndex]\[7];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentBlendStrength\n                            );\n                        \}\n\n                        // Update the global min distance (and surface/colour)\n                        if (fabs(nextDistance) < fabs(distance))\n                        \{\n                            distance = nextDistance;\n                        \}\n                    \}\n\n                    do\n                    \{\n                        // Decrement the number of children each parent has\n                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                        \{\n                            parentStack\[parentIndex]\[0] -= 1.0f;\n                        \}\n\n                        // Get the number of children still remaining for the parent\n                        // If there are still children, we can break out of this loop\n                        // to process the rest of them before the parent itself\n                        numChildren = parentStack\[stackLastIndex]\[0];\n                    \}\n                    while (numChildren <= 0.0f && --stackLastIndex >= 0);\n\n                    parentStackLength = stackLastIndex + 1;\n                \}\n                // No parents to interact with, simply check the distance\n                else if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n                \}\n            \}\n            else\n            \{\n                // Node has Children, push it to the stack for later\n                // processing when we have all its children\n                // parentStack.push()\n                // TODO not all this needs to be in the stack (maybe)\n                parentStack\[parentStackLength]\[0] = numChildren;\n                parentStack\[parentStackLength]\[1] = transformedRay.x;\n                parentStack\[parentStackLength]\[2] = transformedRay.y;\n                parentStack\[parentStackLength]\[3] = transformedRay.z;\n                parentStack\[parentStackLength]\[4] = scale;\n                parentStack\[parentStackLength]\[5] = (float) modifications;\n                parentStack\[parentStackLength]\[6] = nextDistance;\n                parentStack\[parentStackLength]\[7] = blendStrength;\n                parentStackLength++;\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     *\n     * @arg rayOrigin: The origin position of the ray.\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     * @arg colour: Location to store the colour of the hit object.\n     * @arg surface: Location to store the surface properties of the hit\n     *     object.\n     *\n     * @returns: The minimum distance to an object in the scene, and the\n     *     unique identifier of the object.\n     */\n    float2 getMinDistanceToObjectInScene(\n            const float3 &rayOrigin,\n            const float pixelFootprint,\n            float4 &diffusivity,\n            float4 &specularity,\n            float4 &transmittance,\n            float4 &emittance,\n            float4 &surface)\n    \{\n        float distance = _maxRayDistance;\n        float id = 0.0f;\n\n        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour\n        // roughness, specular colour, specular, transmissive colour, transmission,\n        // emissive colour, emission, refractive index, objectId, blendStrength\n        float parentStack\[MAX_CHILD_DEPTH]\[\n            1   // numChildren\n            + 3 // transformedRay\n            + 1 // scale\n            + 1 // mods\n            + 1 // nextDistance\n            + 3 // diffuse colour\n            + 1 // roughness\n            + 3 // specular colour\n            + 1 // specular\n            + 3 // transmissive colour\n            + 1 // transmission\n            + 3 // emissive colour\n            + 1 // emission\n            + 3 // unused for now\n            + 1 // refractive index\n            + 1 // objectId\n            + 1 // blendStrength\n        ];\n        int parentStackLength = 0;\n\n        for (int j=0; j < _objectTextureWidth; j++)\n        \{\n            // Read in the shape properties\n            SampleType(positions) position = positions(j, 0);\n            SampleType(rotations) rotation = rotations(j, 0);\n            SampleType(dimensions) dimension = dimensions(j, 0);\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n            SampleType(diffusivities) diffuseColour = diffusivities(j, 0);\n            SampleType(specularities) specularColour = specularities(j, 0);\n            SampleType(transmittances) transmissiveColour = transmittances(j, 0);\n            SampleType(emittances) emissiveColour = emittances(j, 0);\n            SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);\n\n            const int modifications = (int) shapeProperty.y;\n            float scale = position.w;\n\n            const float blendStrength = shapeProperty.w;\n            float numChildren = shapeProperty.z;\n\n            int stackLastIndex = parentStackLength - 1;\n\n            float4 blendedDiffuseColour = diffuseColour;\n            float4 blendedSpecularColour = specularColour;\n            float4 blendedTransmissiveColour = transmissiveColour;\n            float4 blendedEmissiveColour = emissiveColour;\n            float4 blendedSurface = surfaceProperty;\n\n            // Position relative to the parent if we have any\n            float3 parentTransformedRay = rayOrigin;\n            if (parentStackLength > 0)\n            \{\n                parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                scale *= parentStack\[stackLastIndex]\[4];\n            \}\n\n            // Use parent transform to position child\n            const float3 transformedRay = transformRay(\n                parentTransformedRay,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n\n            // Get distance to this child\n            float nextDistance = getModifiedDistance(\n                transformedRay,\n                (int) shapeProperty.x,\n                dimension,\n                scale,\n                modifications,\n                modParameters1.w,\n                rotation.w,\n                blendedDiffuseColour\n            );\n\n            // Track which object was hit for the alpha channel\n            float objectId = (float) j + 1.0f;\n\n            // If this is a bounding volume, we can skip its children\n            // if we aren't close to, or inside it\n            if (\n                modifications & 4096\n                && numChildren > 0\n                && nextDistance > _hitTolerance + pixelFootprint\n            ) \{\n                // Update the min distance if this bounding volume is closest.\n                // Otherwise we could step through it, or if every object in\n                // the scene is inside it, we would not step forward at all\n                if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n\n                    diffusivity = blendedDiffuseColour;\n                    specularity = blendedSpecularColour;\n                    transmittance = blendedTransmissiveColour;\n                    emittance = blendedEmissiveColour;\n\n                    surface = blendedSurface;\n\n                    id = objectId;\n                \}\n\n                // This was tagged as a boundary object, skip its children\n                // since we arent close to hitting it\n                j += numChildren;\n\n                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                \{\n                    parentStack\[parentIndex]\[0] -= numChildren + 1.0f;\n                \}\n\n                // If there are no parents, or still children of the parent\n                // we do not need to compute anything further for this loop\n                if (parentStackLength <= 0 || parentStack\[stackLastIndex]\[0] > 0.0f)\n                \{\n                    continue;\n                \}\n\n                // pop stack\n                // we know that there will be no more children if we did not continue\n                numChildren = 0.0f;\n                nextDistance = parentStack\[stackLastIndex]\[6];\n                blendedDiffuseColour = float4(\n                    parentStack\[stackLastIndex]\[7],\n                    parentStack\[stackLastIndex]\[8],\n                    parentStack\[stackLastIndex]\[9],\n                    parentStack\[stackLastIndex]\[10]\n                );\n                blendedSpecularColour = float4(\n                    parentStack\[stackLastIndex]\[11],\n                    parentStack\[stackLastIndex]\[12],\n                    parentStack\[stackLastIndex]\[13],\n                    parentStack\[stackLastIndex]\[14]\n                );\n                blendedTransmissiveColour = float4(\n                    parentStack\[stackLastIndex]\[15],\n                    parentStack\[stackLastIndex]\[16],\n                    parentStack\[stackLastIndex]\[17],\n                    parentStack\[stackLastIndex]\[18]\n                );\n                blendedEmissiveColour = float4(\n                    parentStack\[stackLastIndex]\[19],\n                    parentStack\[stackLastIndex]\[20],\n                    parentStack\[stackLastIndex]\[21],\n                    parentStack\[stackLastIndex]\[22]\n                );\n                blendedSurface = surfaceProperty;\n                blendedSurface = float4(\n                    parentStack\[stackLastIndex]\[23],\n                    parentStack\[stackLastIndex]\[24],\n                    parentStack\[stackLastIndex]\[25],\n                    parentStack\[stackLastIndex]\[26]\n                );\n                objectId = parentStack\[stackLastIndex]\[27];\n                stackLastIndex--;\n                parentStackLength--;\n            \}\n\n            if (numChildren <= 0.0f)\n            \{\n                // No Children left, compute interactions with parent\n                if (parentStackLength > 0)\n                \{\n                    // Process this object, along with all parents that do not\n                    // have any more children, removing them from the stack,\n                    // but descend all the way down the stack, without removing\n                    // the objects that still have children\n                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)\n                    \{\n                        const int parentModifications = (int) parentStack\[stackIndex]\[5];\n\n                        // Do not need to interact with bounding volumes.\n                        // They are in the stack for relative positioning\n                        // if they weren't then we would have to manually move\n                        // the bounding box to follow the children\n                        if (!(parentModifications & 4096))\n                        \{\n                            const float parentNextDistance = parentStack\[stackIndex]\[6];\n                            const float4 parentDiffuseColour = float4(\n                                parentStack\[stackIndex]\[7],\n                                parentStack\[stackIndex]\[8],\n                                parentStack\[stackIndex]\[9],\n                                parentStack\[stackIndex]\[10]\n                            );\n                            const float4 parentSpecularColour = float4(\n                                parentStack\[stackIndex]\[11],\n                                parentStack\[stackIndex]\[12],\n                                parentStack\[stackIndex]\[13],\n                                parentStack\[stackIndex]\[14]\n                            );\n                            const float4 parentTransmissiveColour = float4(\n                                parentStack\[stackIndex]\[15],\n                                parentStack\[stackIndex]\[16],\n                                parentStack\[stackIndex]\[17],\n                                parentStack\[stackIndex]\[18]\n                            );\n                            const float4 parentEmissiveColour = float4(\n                                parentStack\[stackIndex]\[19],\n                                parentStack\[stackIndex]\[20],\n                                parentStack\[stackIndex]\[21],\n                                parentStack\[stackIndex]\[22]\n                            );\n                            const float4 parentSurfaceProperty = float4(\n                                parentStack\[stackIndex]\[23],\n                                parentStack\[stackIndex]\[24],\n                                parentStack\[stackIndex]\[25],\n                                parentStack\[stackIndex]\[26]\n                            );\n                            if (fabs(nextDistance) > fabs(parentNextDistance))\n                            \{\n                                objectId = parentStack\[stackIndex]\[27];\n                            \}\n                            const float parentBlendStrength = parentStack\[stackIndex]\[28];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentDiffuseColour,\n                                blendedDiffuseColour,\n                                parentSpecularColour,\n                                blendedSpecularColour,\n                                parentTransmissiveColour,\n                                blendedTransmissiveColour,\n                                parentEmissiveColour,\n                                blendedEmissiveColour,\n                                parentSurfaceProperty,\n                                blendedSurface,\n                                parentBlendStrength\n                            );\n                        \}\n\n                        // Update the global min distance (and surface/colour)\n                        if (fabs(nextDistance) < fabs(distance))\n                        \{\n                            distance = nextDistance;\n\n                            diffusivity = blendedDiffuseColour;\n                            specularity = blendedSpecularColour;\n                            transmittance = blendedTransmissiveColour;\n                            emittance = blendedEmissiveColour;\n\n                            surface = blendedSurface;\n\n                            id = objectId;\n                        \}\n                    \}\n\n                    do\n                    \{\n                        // Decrement the number of children each parent has\n                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                        \{\n                            parentStack\[parentIndex]\[0] -= 1.0f;\n                        \}\n\n                        // Get the number of children still remaining for the parent\n                        // If there are still children, we can break out of this loop\n                        // to process the rest of them before the parent itself\n                        numChildren = parentStack\[stackLastIndex]\[0];\n                    \}\n                    while (numChildren <= 0.0f && --stackLastIndex >= 0);\n\n                    parentStackLength = stackLastIndex + 1;\n                \}\n                // No parents to interact with, simply check the distance\n                else if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n\n                    diffusivity = blendedDiffuseColour;\n                    specularity = blendedSpecularColour;\n                    transmittance = blendedTransmissiveColour;\n                    emittance = blendedEmissiveColour;\n\n                    surface = blendedSurface;\n\n                    id = objectId;\n                \}\n            \}\n            else\n            \{\n                // Node has Children, push it to the stack for later\n                // processing when we have all its children\n                // parentStack.push()\n                // TODO not all this needs to be in the stack (maybe)\n                parentStack\[parentStackLength]\[0] = numChildren;\n                parentStack\[parentStackLength]\[1] = transformedRay.x;\n                parentStack\[parentStackLength]\[2] = transformedRay.y;\n                parentStack\[parentStackLength]\[3] = transformedRay.z;\n                parentStack\[parentStackLength]\[4] = scale;\n                parentStack\[parentStackLength]\[5] = (float) modifications;\n                parentStack\[parentStackLength]\[6] = nextDistance;\n                parentStack\[parentStackLength]\[7] = blendedDiffuseColour.x;\n                parentStack\[parentStackLength]\[8] = blendedDiffuseColour.y;\n                parentStack\[parentStackLength]\[9] = blendedDiffuseColour.z;\n                parentStack\[parentStackLength]\[10] = blendedDiffuseColour.w;\n                parentStack\[parentStackLength]\[11] = blendedSpecularColour.x;\n                parentStack\[parentStackLength]\[12] = blendedSpecularColour.y;\n                parentStack\[parentStackLength]\[13] = blendedSpecularColour.z;\n                parentStack\[parentStackLength]\[14] = blendedSpecularColour.w;\n                parentStack\[parentStackLength]\[15] = blendedTransmissiveColour.x;\n                parentStack\[parentStackLength]\[16] = blendedTransmissiveColour.y;\n                parentStack\[parentStackLength]\[17] = blendedTransmissiveColour.z;\n                parentStack\[parentStackLength]\[18] = blendedTransmissiveColour.w;\n                parentStack\[parentStackLength]\[19] = blendedEmissiveColour.x;\n                parentStack\[parentStackLength]\[20] = blendedEmissiveColour.y;\n                parentStack\[parentStackLength]\[21] = blendedEmissiveColour.z;\n                parentStack\[parentStackLength]\[22] = blendedEmissiveColour.w;\n                parentStack\[parentStackLength]\[23] = blendedSurface.x;\n                parentStack\[parentStackLength]\[24] = blendedSurface.y;\n                parentStack\[parentStackLength]\[25] = blendedSurface.z;\n                parentStack\[parentStackLength]\[26] = blendedSurface.w;\n                parentStack\[parentStackLength]\[27] = objectId;\n                parentStack\[parentStackLength]\[28] = blendStrength;\n                parentStackLength++;\n            \}\n        \}\n\n        return float2(distance, id);\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     *\n     * @returns: The normalized surface normal.\n     */\n    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint)\n    \{\n        return normalize(\n            __offset0 * getMinDistanceToObjectInScene(\n                point + __offset0 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset1 * getMinDistanceToObjectInScene(\n                point + __offset1 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset2 * getMinDistanceToObjectInScene(\n                point + __offset2 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset3 * getMinDistanceToObjectInScene(\n                point + __offset3 * _hitTolerance,\n                pixelFootprint\n            )\n        );\n    \}\n\n\n    /**\n     * March a ray through the scene.\n     *\n     * @arg rayOrigin: The origin of the ray.\n     * @arg rayDirection: The direction of the ray.\n     * @arg seed: A random value to use as the seed for roughness.\n     *\n     * @returns: The ray colour.\n     */\n    float4 marchRay(const float3 &rayOrigin, const float3 &rayDirection, float3 &seed)\n    \{\n        float refractiveIndex = _refractiveIndex;\n\n        float nestedDielectrics\[MAX_NESTED_DIELECTRICS]\[\n            1   // Id of the dielectric we are currently in\n            + 1 // Refractive index of that object\n        ];\n        nestedDielectrics\[0]\[0] = -1;\n        nestedDielectrics\[0]\[1] = refractiveIndex;\n        int numNestedDielectrics = 0;\n\n        float4 rayColour = float4(0);\n        float4 absorption = float4(1);\n\n        float lastStepDistance = 1.0f;\n\n        float firstObjectId = 0.0f;\n        float lastRefractedId = -1.0f;\n\n        float depth = 0.0f;\n\n        int bounces = 0;\n        int iterations = 0;\n\n        float distanceTravelled = 0;\n\n        // Get the next ray\n        float3 origin = rayOrigin;\n        float3 direction = rayDirection;\n\n        float4 diffusivity;\n        float4 specularity;\n        float4 transmittance;\n        float4 emittance;\n        float4 surface;\n\n        float pixelFootprint = _hitTolerance;\n\n        // March the ray\n        while (\n            distanceTravelled < _maxRayDistance\n            && iterations < _maxRaySteps\n            && sumComponent(absorption) > _hitTolerance\n        ) \{\n            // TODO see if its faster to use colourless until hit\n            // Get the closest distance to an object\n            const float2 result = getMinDistanceToObjectInScene(\n                origin,\n                distanceTravelled,\n                diffusivity,\n                specularity,\n                transmittance,\n                emittance,\n                surface\n            );\n\n            // Keep the signed distance so we know whether or not we are\n            // inside the object\n            const float signedStepDistance = result.x;\n\n            // Get the absolute value, the true shortest distance to a\n            // surface\n            const float stepDistance = fabs(signedStepDistance);\n\n            // Keep track of the distance the ray has travelled\n            distanceTravelled += stepDistance;\n            pixelFootprint += _hitTolerance * stepDistance;\n\n            // Step the ray forwards\n            origin += direction * stepDistance;\n\n            // Have we hit the nearest object?\n            if (stepDistance < pixelFootprint)\n            \{\n                // The actual position on the surface we hit\n                const float3 surfacePosition = origin - direction * _hitTolerance;\n\n                // The normal to the surface at that position\n                float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(\n                    surfacePosition,\n                    pixelFootprint\n                );\n\n                if (bounces == 0)\n                \{\n                    // Keep the ID of the first object hit, so we can\n                    // store it in the alpha channel\n                    firstObjectId = result.y;\n                    depth = distanceTravelled;\n\n                    // Early exit for the various AOVs that are not 'scene'\n                    if (_outputType > 0)\n                    \{\n                        if (_outputType == 1)\n                        \{\n                            return float4(\n                                surfacePosition.x,\n                                surfacePosition.y,\n                                surfacePosition.z,\n                                encodeFloatsInUint(firstObjectId, depth)\n                            );\n                        \}\n                        if (_outputType == 2)\n                        \{\n                            return float4(\n                                surfaceNormal.x,\n                                surfaceNormal.y,\n                                surfaceNormal.z,\n                                encodeFloatsInUint(firstObjectId, depth)\n                            );\n                        \}\n                        if (_outputType == 3)\n                        \{\n                            return float4(\n                                depth,\n                                0,\n                                0,\n                                encodeFloatsInUint(firstObjectId, depth)\n                            );\n                        \}\n                    \}\n                \}\n\n                // Update the colour of the ray\n                rayColour += emittance * emittance.w * absorption;\n\n                // Get the diffuse direction for the next ray\n                const float3 diffuseDirection = roughen(\n                    surfaceNormal,\n                    1.0f,\n                    seed\n                );\n\n                const float rng = random(seed.x + seed.y + seed.z);\n                float specularProbability = specularity.w;\n\n                float refractedRefractiveIndex;\n                if (nestedDielectrics\[numNestedDielectrics]\[0] == result.y)\n                \{\n                    // We are exiting the material we are in, get the\n                    // last refractive index from the top of the stack\n                    refractedRefractiveIndex = nestedDielectrics\[numNestedDielectrics - 1]\[1];\n                \}\n                else\n                \{\n                    refractedRefractiveIndex = surface.w;\n                \}\n\n                // Compute the refraction values\n                const float reflectivity = schlickReflectionCoefficient(\n                    direction,\n                    surfaceNormal,\n                    refractiveIndex,\n                    refractedRefractiveIndex\n                );\n\n                specularProbability += reflectivity * (transmittance.w > 0.0f);\n\n                // Maybe reflect the ray\n                if (specularProbability > 0.0f && rng <= specularProbability)\n                \{\n                    const float3 specularDirection = reflectRayOffSurface(\n                        direction,\n                        surfaceNormal\n                    );\n\n                    direction = blend(\n                        diffuseDirection,\n                        specularDirection,\n                        diffusivity.w * diffusivity.w\n                    );\n                    absorption *= specularity;\n\n                    // Offset the point so that it doesn't get trapped on\n                    // surface.\n                    origin = offsetPoint(\n                        origin,\n                        direction + surfaceNormal,\n                        pixelFootprint * _shadowBias\n                    );\n                \}\n                // Maybe spawn a refracted ray\n                else if (\n                    transmittance.w > 0.0f\n                    && rng - specularProbability <= transmittance.w\n                ) \{\n                    const float3 refractedDirection = refractRayThroughSurface(\n                        direction,\n                        surfaceNormal,\n                        refractiveIndex,\n                        refractedRefractiveIndex\n                    );\n\n                    direction = blend(\n                        -diffuseDirection,\n                        refractedDirection,\n                        diffusivity.w * diffusivity.w\n                    );\n                    absorption *= transmittance;\n\n                    // Offset the point so that it doesn't get trapped on\n                    // surface.\n                    origin = offsetPoint(\n                        surfacePosition,\n                        refractedDirection - surfaceNormal,\n                        (2.0f * pixelFootprint + stepDistance) * _shadowBias\n                    );\n\n                    // We are passing through the surface, so update the refractive index\n                    refractiveIndex = refractedRefractiveIndex;\n                    if (nestedDielectrics\[numNestedDielectrics]\[0] == result.y)\n                    \{\n                        // We are exiting the material we are in, get the\n                        // last refractive index, by popping the stack\n                        numNestedDielectrics--;\n                    \}\n                    else\n                    \{\n                        // We are not exiting the material we are in, so push\n                        // the next refractive index to the stack\n                        numNestedDielectrics++;\n                        nestedDielectrics\[numNestedDielectrics]\[0] = result.y;\n                        nestedDielectrics\[numNestedDielectrics]\[1] = refractedRefractiveIndex;\n                    \}\n                \}\n                // Otherwise diffuse the light\n                else\n                \{\n                    // fallback is diffuse\n                    direction = diffuseDirection;\n                    absorption *= diffusivity;\n\n                    // Offset the point so that it doesn't get trapped on\n                    // surface.\n                    origin = offsetPoint(\n                        origin,\n                        direction + surfaceNormal,\n                        pixelFootprint * _shadowBias\n                    );\n                \}\n\n                // Exit if we have reached the bounce limit\n                if (++bounces >= __bouncesPerRay)\n                \{\n                    rayColour.w = encodeFloatsInUint(firstObjectId, depth);\n                    return rayColour;\n                \}\n\n                // Update the random seed\n                seed += rng * fabs(origin + direction);\n                pixelFootprint = _hitTolerance;\n            \}\n\n            lastStepDistance = signedStepDistance;\n            iterations++;\n        \}\n\n        // If we are not computing the scene value and we have missed all\n        // objects, return black.\n        if (_outputType > 0)\n        \{\n            return float4(0);\n        \}\n\n        // Otherwise, read the hdri value\n        // in the direction the ray was last travelling\n        rayColour += absorption * readHDRIValue(direction);\n\n        rayColour.w = (bounces > 0) * encodeFloatsInUint(firstObjectId, depth);\n        return rayColour;\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value.\n     * \n     * @arg pos: The x, and y location we are currently processing.\n     */\n    void process(int2 pos)\n    \{\n        SampleType(noise) noisePixel = noise();\n        float3 seed = float3(noisePixel.x, noisePixel.y, noisePixel.z);\n\n        float4 resultPixel = float4(0);\n\n        float2 pixelLocation = float2(pos.x, pos.y);\n\n        for (int path=1; path <= _pathsPerSubpixel; path++)\n        \{\n            seed += seed / path;\n\n            // Generate a ray from the camera\n            float3 rayOrigin;\n            float3 rayDirection;\n            createCameraRay(\n                _cameraWorldMatrix,\n                __inverseCameraProjectionMatrix,\n                pixelsToUV(\n                    pixelLocation\n                    + random(float2(seed.x, seed.y)),\n                    float2(_formatWidth, _formatHeight)\n                ),\n                rayOrigin,\n                rayDirection\n            );\n\n            resultPixel += marchRay(rayOrigin, rayDirection, seed);\n        \}\n\n        const float4 resultColour = resultPixel / _pathsPerSubpixel;\n        if (_useToneMap && _outputType == 0)\n        \{\n            const float3 toneMapped = ACESToneMap(\n                _exposure * float3(resultColour.x, resultColour.y, resultColour.z)\n            );\n            dst() = float4(toneMapped.x, toneMapped.y, toneMapped.z, resultColour.w);\n        \}\n        else\n        \{\n            dst() = float4(\n                _exposure * resultColour.x,\n                _exposure * resultColour.y,\n                _exposure * resultColour.z,\n                resultColour.w\n            );\n        \}\n    \}\n\};\n"
+  recompileCount 2021
+  KernelDescription "2 \"PathMarchKernel\" iterate pixelWise c36dbd125de8a4758d9a8bb3c20a9eeaabb576b7099da3c04df06b4af2dce2b4 14 \"noise\" Read Point \"hdri\" Read Random \"positions\" Read Random \"rotations\" Read Random \"dimensions\" Read Random \"diffusivities\" Read Random \"specularities\" Read Random \"transmittances\" Read Random \"emittances\" Read Random \"shapeProperties\" Read Random \"shapeModParameters0\" Read Random \"shapeModParameters1\" Read Random \"surfaceProperties\" Read Random \"dst\" Write Point 19 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"HDRI Offset Angle\" Float 1 AAAAAA== \"Paths Per Pixel\" Int 1 AQAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AAB6RA== \"Max Ray Steps\" Int 1 gAAAAA== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 AACAPw== \"Index of Refraction\" Float 1 AACAPw== \"Object Texture Width\" Int 1 AAAAAA== \"Output Type\" Int 1 AAAAAA== \"Use Tone Map\" Bool 1 AQ== \"Exposure\" Float 1 AACAPw== 19 \"_focalLength\" 1 1 \"_horizontalAperture\" 1 1 \"_nearPlane\" 1 1 \"_farPlane\" 1 1 \"_cameraWorldMatrix\" 16 1 \"_formatWidth\" 1 1 \"_formatHeight\" 1 1 \"_hdriOffsetAngle\" 1 1 \"_pathsPerPixel\" 1 1 \"_maxBounces\" 1 1 \"_maxRayDistance\" 1 1 \"_maxRaySteps\" 1 1 \"_hitTolerance\" 1 1 \"_shadowBias\" 1 1 \"_refractiveIndex\" 1 1 \"_objectTextureWidth\" 1 1 \"_outputType\" 1 1 \"_useToneMap\" 1 1 \"_exposure\" 1 1 9 \"__inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"__bouncesPerRay\" Int 1 1 AAAAAA== \"__hdriPixelSize\" Float 2 1 AAAAAAAAAAA= \"__hdriLightPixelSize\" Float 2 1 AAAAAAAAAAA= \"__hdriOffsetRadians\" Float 1 1 AAAAAA== \"__offset0\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset1\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset2\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset3\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA=="
+  kernelSource "// Copyright 2022 by Owen Bulka.\n// All rights reserved.\n// This file is released under the \"MIT License Agreement\".\n// Please see the LICENSE.md file that should have been included as part\n// of this package.\n\n//\n// BlinkScript Ray Marcher\n//\n\n#include \"camera.h\"\n#include \"conversion.h\"\n#include \"lights.h\"\n#include \"math.h\"\n#include \"colour.h\"\n#include \"objectInteraction.h\"\n#include \"random.h\"\n#include \"rays.h\"\n#include \"sdfModifications.h\"\n#include \"sdfs.h\"\n\n\n// Increase this if you want more than MAX_CHILD_DEPTH direct children\n#define MAX_CHILD_DEPTH 100\n\n// Increase this if you want more than MAX_NESTED_DIELECTRICS nested\n// transmissive objects\n#define MAX_NESTED_DIELECTRICS 5\n\n\nkernel PathMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    // the input which specifies the format, process is called once per pixel\n    // in this image, which also provides random seeds\n    Image<eRead, eAccessPoint, eEdgeNone> noise;\n\n    // the hdribox in latlong format\n    Image<eRead, eAccessRandom, eEdgeClamped> hdri;\n\n\n    // the shape positons.xyz, scale.w\n    Image<eRead, eAccessRandom, eEdgeNone> positions;\n\n    // the shape rotations.xyz, wall thickness.w\n    Image<eRead, eAccessRandom, eEdgeNone> rotations;\n\n    // the shape dimensions.xyzw (some shapes may not use all channels)\n    Image<eRead, eAccessRandom, eEdgeNone> dimensions;\n\n    // the shape diffusivities.xyz, refractive index.w\n    Image<eRead, eAccessRandom, eEdgeNone> diffusivities;\n\n    Image<eRead, eAccessRandom, eEdgeNone> specularities;\n\n    Image<eRead, eAccessRandom, eEdgeNone> transmittances;\n\n    Image<eRead, eAccessRandom, eEdgeNone> emittances;\n\n\n    // shape type.x, operation.y, numChildren.z, blend strength.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;\n\n    // repetition params.xyzw\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters0;\n\n    // elongation.xyz edgeRadius.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters1;\n\n    // reflection.x, transmission.y, emission.z, roughness.w\n    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;\n\n\n    // the output image\n    Image<eWrite> dst;\n\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float _focalLength;\n        float _horizontalAperture;\n        float _nearPlane;\n        float _farPlane;\n        float4x4 _cameraWorldMatrix;\n\n        // Image params\n        float _formatWidth;\n        float _formatHeight;\n\n        float _hdriOffsetAngle;\n\n        // Ray params\n        int _pathsPerPixel;\n        int _maxBounces;\n        float _maxRayDistance;\n        int _maxRaySteps;\n        float _hitTolerance;\n        float _shadowBias;\n\n        // Scene params\n        float _refractiveIndex;\n\n        // Shape Textures\n        int _objectTextureWidth;\n\n        int _outputType;\n        bool _useToneMap;\n        float _exposure;\n\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float4x4 __inverseCameraProjectionMatrix;\n\n        int __bouncesPerRay;\n\n        float2 __hdriPixelSize;\n        float2 __hdriLightPixelSize;\n        float __hdriOffsetRadians;\n\n        float3 __offset0;\n        float3 __offset1;\n        float3 __offset2;\n        float3 __offset3;\n\n\n    /**\n     * In define(), parameters can be given labels and default values.\n     */\n    void define()\n    \{\n        // Camera params\n        defineParam(_focalLength, \"Focal Length\", 50.0f);\n        defineParam(_horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(_nearPlane, \"Near Plane\", 0.1f);\n        defineParam(_farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            _cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n\n        // Image params\n        defineParam(_formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(_formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(_hdriOffsetAngle, \"HDRI Offset Angle\", 0.0f);\n\n        // Ray params\n        defineParam(_pathsPerPixel, \"Paths Per Pixel\", 1);\n        defineParam(_maxRayDistance, \"Max Ray Distance\", 1000.0f);\n        defineParam(_maxRaySteps, \"Max Ray Steps\", 128);\n        defineParam(_maxBounces, \"Max Bounces\", 1);\n        defineParam(_hitTolerance, \"Hit Tolerance\", 0.001f);\n        defineParam(_shadowBias, \"Shadow Bias\", 1.0f);\n\n        // Scene params\n        defineParam(_refractiveIndex, \"Index of Refraction\", 1.0f);\n\n        // Shape Counts\n        defineParam(_objectTextureWidth, \"Object Texture Width\", 0);\n\n        defineParam(_outputType, \"Output Type\", 0);\n        defineParam(_useToneMap, \"Use Tone Map\", true);\n        defineParam(_exposure, \"Exposure\", 1.0f);\n    \}\n\n\n    /**\n     * The init() function is run before any calls to process().\n     * Local variables can be initialized here.\n     */\n    void init()\n    \{\n        __bouncesPerRay = _maxBounces <= 0 ? 1 : _maxBounces;\n\n        // TODO use angles to allow -ve focal length like for latlongs\n        float aspect = aspectRatio(_formatHeight, _formatWidth);\n        float4x4 cameraProjectionMatrix = projectionMatrix(\n            _focalLength,\n            _horizontalAperture,\n            aspect,\n            _nearPlane,\n            _farPlane\n        );\n        __inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();\n\n        __hdriPixelSize = float2(\n            hdri.bounds.width() / (2 * PI),\n            hdri.bounds.height() / PI\n        );\n        __hdriOffsetRadians = _hdriOffsetAngle * PI / 180.0f;\n\n        __offset0 = 0.5773f * float3(1, -1, -1);\n        __offset1 = 0.5773f * float3(-1, -1, 1);\n        __offset2 = 0.5773f * float3(-1, 1, -1);\n        __offset3 = 0.5773f * float3(1, 1, 1);\n    \}\n\n\n    /**\n     * Get the value of hdri the ray would hit at infinite distance\n     *\n     * @arg rayDirection: The direction of the ray.\n     *\n     * @returns: The colour of the pixel in the direction of the ray.\n     */\n    float4 readHDRIValue(float3 rayDirection)\n    \{\n        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);\n\n        // Should be able to say image access is eEdgeClamped and not do this\n        // but I see nan pixels sooo... :(\n        const float2 indices = clamp(\n            float2(\n                __hdriPixelSize.x * angles.x,\n                hdri.bounds.height() - (__hdriPixelSize.y * angles.y)\n            ),\n            float2(0),\n            float2(hdri.bounds.width(), hdri.bounds.height()) - 1.0f\n        );\n\n        return bilinear(hdri, indices.x, indices.y);\n    \}\n\n\n    //\n    // Render Engine\n    //\n\n\n    /**\n     * Transform a ray's location.\n     *\n     * @arg rayOrigin: The location the ray originates from.\n     * @arg position: The amount to translate the ray.\n     * @arg rotation: The amount to rotate the ray (radians).\n     * @arg modifications: The modifications to perform.\n     *     Each bit will enable a modification:\n     *         bit 0: finite repetition\n     *         bit 1: infinite repetition\n     *         bit 2: elongation\n     *         bit 3: mirror x\n     *         bit 4: mirror y\n     *         bit 5: mirror z\n     * @arg repetition: The values to use when repeating the ray.\n     * @arg elongation: The values to use when elongating the ray.\n     *\n     * @returns: The transformed ray origin.\n     */\n    float3 transformRay(\n        const float3 &rayOrigin,\n        const float3 &translation,\n        const float3 &rotation,\n        const int modifications,\n        const float4 &repetition,\n        const float4 &elongation)\n    \{\n        float3x3 rotMatrix;\n        float3 transformedRay;\n        rotationMatrix(rotation, rotMatrix);\n        matmul(\n            rotMatrix.invert(),\n            rayOrigin - translation,\n            transformedRay\n        );\n        performShapeModification(\n            modifications,\n            repetition,\n            elongation,\n            transformedRay\n        );\n\n        return transformedRay;\n    \}\n\n\n    /**\n     * Compute the modified distance to an object.\n     *\n     * @arg rayOrigin: The location the ray originates from.\n     * @arg shape: The shape of the object:\n     *     0: sphere\n     *     1: ellipsoid\n     *     2: cut sphere\n     *     3: hollow sphere\n     *     4: death star\n     *     5: solid angle\n     *     6: rectangular prism\n     *     7: rectangular prism frame\n     *     8: rhombus\n     *     9: triangular prism\n     *     10: cylinder\n     *     11: infinite cylinder\n     *     12: plane\n     *     13: capsule\n     *     14: cone\n     *     15: infinite cone\n     *     16: capped cone\n     *     17: rounded cone\n     *     18: torus\n     *     19: capped torus\n     *     20: link\n     *     21: hexagonal prism\n     *     22: octahedron\n     *     23: mandelbulb\n     *     24: mandelbox\n     *     25: mandelbox (no trap colour)\n     * @arg dimensions: The dimensions of the object.\n     * @arg uniformScale: The factor to scale the object by.\n     * @arg modifications: The modifications to perform.\n     *     Each bit will enable a modification:\n     *         bit 6: hollowing\n     * @arg edgeRadius: The radius to round the edges by.\n     * @arg wallThickness: The thickness of the walls if hollowing the\n     *     object.\n     * @arg colour: The colour of the surface will be stored here.\n     *     This will only be modified by the fractals (23-25).\n     *\n     * @returns: The distance to the modified object.\n     */\n    inline float getModifiedDistance(\n        const float3 &rayOrigin,\n        const int shape,\n        const float4 &dimensions,\n        const float uniformScale,\n        const int modifications,\n        const float edgeRadius,\n        const float wallThickness,\n        float4 &colour)\n    \{\n        float nextDistance = distanceToObject(\n            rayOrigin / uniformScale,\n            shape,\n            dimensions,\n            colour\n        ) * uniformScale;\n\n        return performDistanceModification(\n            modifications,\n            edgeRadius,\n            wallThickness,\n            nextDistance\n        );\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     *\n     * @arg rayOrigin: The origin position of the ray.\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     *\n     * @returns: The minimum distance to an object in the scene.\n     */\n    float getMinDistanceToObjectInScene(const float3 &rayOrigin, const float pixelFootprint)\n    \{\n        float distance = _maxRayDistance;\n\n        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour\n        // roughness, specular colour, specular, transmissive colour, transmission,\n        // emissive colour, emission, refractive index, objectId, blendStrength\n        float parentStack\[MAX_CHILD_DEPTH]\[\n            1   // numChildren\n            + 3 // transformedRay\n            + 1 // scale\n            + 1 // mods\n            + 1 // nextDistance\n            + 1 // blendStrength\n        ];\n        int parentStackLength = 0;\n\n        for (int j=0; j < _objectTextureWidth; j++)\n        \{\n            // Read in the shape properties\n            SampleType(positions) position = positions(j, 0);\n            SampleType(rotations) rotation = rotations(j, 0);\n            SampleType(dimensions) dimension = dimensions(j, 0);\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n\n            float scale = position.w;\n\n            const int modifications = (int) shapeProperty.y;\n            float numChildren = shapeProperty.z;\n            const float blendStrength = shapeProperty.w;\n\n            int stackLastIndex = parentStackLength - 1;\n\n            // Position relative to the parent if we have any\n            float3 parentTransformedRay = rayOrigin;\n            if (parentStackLength > 0)\n            \{\n                parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                scale *= parentStack\[stackLastIndex]\[4];\n            \}\n\n            // Use parent transform to position child\n            const float3 transformedRay = transformRay(\n                parentTransformedRay,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n\n            float4 tmp;\n            // Get distance to this child\n            float nextDistance = getModifiedDistance(\n                transformedRay,\n                (int) shapeProperty.x,\n                dimension,\n                scale,\n                modifications,\n                modParameters1.w,\n                rotation.w,\n                tmp\n            );\n\n            // Track which object was hit for the alpha channel\n            float objectId = (float) j + 1.0f;\n\n            // If this is a bounding volume, we can skip its children\n            // if we aren't close to, or inside it\n            if (\n                modifications & 4096\n                && numChildren > 0\n                && nextDistance > _hitTolerance + pixelFootprint\n            ) \{\n                // Update the min distance if this bounding volume is closest.\n                // Otherwise we could step through it, or if every object in\n                // the scene is inside it, we would not step forward at all\n                if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n                \}\n\n                // This was tagged as a boundary object, skip its children\n                // since we arent close to hitting it\n                j += numChildren;\n\n                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                \{\n                    parentStack\[parentIndex]\[0] -= numChildren + 1.0f;\n                \}\n\n                // If there are no parents, or still children of the parent\n                // we do not need to compute anything further for this loop\n                if (parentStackLength <= 0 || parentStack\[stackLastIndex]\[0] > 0.0f)\n                \{\n                    continue;\n                \}\n\n                // pop stack\n                // we know that there will be no more children if we did not continue\n                numChildren = 0.0f;\n                nextDistance = parentStack\[stackLastIndex]\[6];\n                stackLastIndex--;\n                parentStackLength--;\n            \}\n\n            if (numChildren <= 0.0f)\n            \{\n                // No Children left, compute interactions with parent\n                if (parentStackLength > 0)\n                \{\n                    // Process this object, along with all parents that do not\n                    // have any more children, removing them from the stack,\n                    // but descend all the way down the stack, without removing\n                    // the objects that still have children\n                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)\n                    \{\n                        const int parentModifications = (int) parentStack\[stackIndex]\[5];\n\n                        // Do not need to interact with bounding volumes.\n                        // They are in the stack for relative positioning\n                        // if they weren't then we would have to manually move\n                        // the bounding box to follow the children\n                        if (!(parentModifications & 4096))\n                        \{\n                            const float parentNextDistance = parentStack\[stackIndex]\[6];\n                            const float parentBlendStrength = parentStack\[stackIndex]\[7];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentBlendStrength\n                            );\n                        \}\n\n                        // Update the global min distance (and surface/colour)\n                        if (fabs(nextDistance) < fabs(distance))\n                        \{\n                            distance = nextDistance;\n                        \}\n                    \}\n\n                    do\n                    \{\n                        // Decrement the number of children each parent has\n                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                        \{\n                            parentStack\[parentIndex]\[0] -= 1.0f;\n                        \}\n\n                        // Get the number of children still remaining for the parent\n                        // If there are still children, we can break out of this loop\n                        // to process the rest of them before the parent itself\n                        numChildren = parentStack\[stackLastIndex]\[0];\n                    \}\n                    while (numChildren <= 0.0f && --stackLastIndex >= 0);\n\n                    parentStackLength = stackLastIndex + 1;\n                \}\n                // No parents to interact with, simply check the distance\n                else if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n                \}\n            \}\n            else\n            \{\n                // Node has Children, push it to the stack for later\n                // processing when we have all its children\n                // parentStack.push()\n                // TODO not all this needs to be in the stack (maybe)\n                parentStack\[parentStackLength]\[0] = numChildren;\n                parentStack\[parentStackLength]\[1] = transformedRay.x;\n                parentStack\[parentStackLength]\[2] = transformedRay.y;\n                parentStack\[parentStackLength]\[3] = transformedRay.z;\n                parentStack\[parentStackLength]\[4] = scale;\n                parentStack\[parentStackLength]\[5] = (float) modifications;\n                parentStack\[parentStackLength]\[6] = nextDistance;\n                parentStack\[parentStackLength]\[7] = blendStrength;\n                parentStackLength++;\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     *\n     * @arg rayOrigin: The origin position of the ray.\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     * @arg colour: Location to store the colour of the hit object.\n     * @arg surface: Location to store the surface properties of the hit\n     *     object.\n     *\n     * @returns: The minimum distance to an object in the scene, and the\n     *     unique identifier of the object.\n     */\n    float2 getMinDistanceToObjectInScene(\n            const float3 &rayOrigin,\n            const float pixelFootprint,\n            float4 &diffusivity,\n            float4 &specularity,\n            float4 &transmittance,\n            float4 &emittance,\n            float4 &surface)\n    \{\n        float distance = _maxRayDistance;\n        float id = 0.0f;\n\n        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour\n        // roughness, specular colour, specular, transmissive colour, transmission,\n        // emissive colour, emission, refractive index, objectId, blendStrength\n        float parentStack\[MAX_CHILD_DEPTH]\[\n            1   // numChildren\n            + 3 // transformedRay\n            + 1 // scale\n            + 1 // mods\n            + 1 // nextDistance\n            + 3 // diffuse colour\n            + 1 // roughness\n            + 3 // specular colour\n            + 1 // specular\n            + 3 // transmissive colour\n            + 1 // transmission\n            + 3 // emissive colour\n            + 1 // emission\n            + 3 // unused for now\n            + 1 // refractive index\n            + 1 // objectId\n            + 1 // blendStrength\n        ];\n        int parentStackLength = 0;\n\n        for (int j=0; j < _objectTextureWidth; j++)\n        \{\n            // Read in the shape properties\n            SampleType(positions) position = positions(j, 0);\n            SampleType(rotations) rotation = rotations(j, 0);\n            SampleType(dimensions) dimension = dimensions(j, 0);\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n            SampleType(diffusivities) diffuseColour = diffusivities(j, 0);\n            SampleType(specularities) specularColour = specularities(j, 0);\n            SampleType(transmittances) transmissiveColour = transmittances(j, 0);\n            SampleType(emittances) emissiveColour = emittances(j, 0);\n            SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);\n\n            const int modifications = (int) shapeProperty.y;\n            float scale = position.w;\n\n            const float blendStrength = shapeProperty.w;\n            float numChildren = shapeProperty.z;\n\n            int stackLastIndex = parentStackLength - 1;\n\n            float4 blendedDiffuseColour = diffuseColour;\n            float4 blendedSpecularColour = specularColour;\n            float4 blendedTransmissiveColour = transmissiveColour;\n            float4 blendedEmissiveColour = emissiveColour;\n            float4 blendedSurface = surfaceProperty;\n\n            // Position relative to the parent if we have any\n            float3 parentTransformedRay = rayOrigin;\n            if (parentStackLength > 0)\n            \{\n                parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                scale *= parentStack\[stackLastIndex]\[4];\n            \}\n\n            // Use parent transform to position child\n            const float3 transformedRay = transformRay(\n                parentTransformedRay,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n\n            // Get distance to this child\n            float nextDistance = getModifiedDistance(\n                transformedRay,\n                (int) shapeProperty.x,\n                dimension,\n                scale,\n                modifications,\n                modParameters1.w,\n                rotation.w,\n                blendedDiffuseColour\n            );\n\n            // Track which object was hit for the alpha channel\n            float objectId = (float) j + 1.0f;\n\n            // If this is a bounding volume, we can skip its children\n            // if we aren't close to, or inside it\n            if (\n                modifications & 4096\n                && numChildren > 0\n                && nextDistance > _hitTolerance + pixelFootprint\n            ) \{\n                // Update the min distance if this bounding volume is closest.\n                // Otherwise we could step through it, or if every object in\n                // the scene is inside it, we would not step forward at all\n                if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n\n                    diffusivity = blendedDiffuseColour;\n                    specularity = blendedSpecularColour;\n                    transmittance = blendedTransmissiveColour;\n                    emittance = blendedEmissiveColour;\n\n                    surface = blendedSurface;\n\n                    id = objectId;\n                \}\n\n                // This was tagged as a boundary object, skip its children\n                // since we arent close to hitting it\n                j += numChildren;\n\n                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                \{\n                    parentStack\[parentIndex]\[0] -= numChildren + 1.0f;\n                \}\n\n                // If there are no parents, or still children of the parent\n                // we do not need to compute anything further for this loop\n                if (parentStackLength <= 0 || parentStack\[stackLastIndex]\[0] > 0.0f)\n                \{\n                    continue;\n                \}\n\n                // pop stack\n                // we know that there will be no more children if we did not continue\n                numChildren = 0.0f;\n                nextDistance = parentStack\[stackLastIndex]\[6];\n                blendedDiffuseColour = float4(\n                    parentStack\[stackLastIndex]\[7],\n                    parentStack\[stackLastIndex]\[8],\n                    parentStack\[stackLastIndex]\[9],\n                    parentStack\[stackLastIndex]\[10]\n                );\n                blendedSpecularColour = float4(\n                    parentStack\[stackLastIndex]\[11],\n                    parentStack\[stackLastIndex]\[12],\n                    parentStack\[stackLastIndex]\[13],\n                    parentStack\[stackLastIndex]\[14]\n                );\n                blendedTransmissiveColour = float4(\n                    parentStack\[stackLastIndex]\[15],\n                    parentStack\[stackLastIndex]\[16],\n                    parentStack\[stackLastIndex]\[17],\n                    parentStack\[stackLastIndex]\[18]\n                );\n                blendedEmissiveColour = float4(\n                    parentStack\[stackLastIndex]\[19],\n                    parentStack\[stackLastIndex]\[20],\n                    parentStack\[stackLastIndex]\[21],\n                    parentStack\[stackLastIndex]\[22]\n                );\n                blendedSurface = surfaceProperty;\n                blendedSurface = float4(\n                    parentStack\[stackLastIndex]\[23],\n                    parentStack\[stackLastIndex]\[24],\n                    parentStack\[stackLastIndex]\[25],\n                    parentStack\[stackLastIndex]\[26]\n                );\n                objectId = parentStack\[stackLastIndex]\[27];\n                stackLastIndex--;\n                parentStackLength--;\n            \}\n\n            if (numChildren <= 0.0f)\n            \{\n                // No Children left, compute interactions with parent\n                if (parentStackLength > 0)\n                \{\n                    // Process this object, along with all parents that do not\n                    // have any more children, removing them from the stack,\n                    // but descend all the way down the stack, without removing\n                    // the objects that still have children\n                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)\n                    \{\n                        const int parentModifications = (int) parentStack\[stackIndex]\[5];\n\n                        // Do not need to interact with bounding volumes.\n                        // They are in the stack for relative positioning\n                        // if they weren't then we would have to manually move\n                        // the bounding box to follow the children\n                        if (!(parentModifications & 4096))\n                        \{\n                            const float parentNextDistance = parentStack\[stackIndex]\[6];\n                            const float4 parentDiffuseColour = float4(\n                                parentStack\[stackIndex]\[7],\n                                parentStack\[stackIndex]\[8],\n                                parentStack\[stackIndex]\[9],\n                                parentStack\[stackIndex]\[10]\n                            );\n                            const float4 parentSpecularColour = float4(\n                                parentStack\[stackIndex]\[11],\n                                parentStack\[stackIndex]\[12],\n                                parentStack\[stackIndex]\[13],\n                                parentStack\[stackIndex]\[14]\n                            );\n                            const float4 parentTransmissiveColour = float4(\n                                parentStack\[stackIndex]\[15],\n                                parentStack\[stackIndex]\[16],\n                                parentStack\[stackIndex]\[17],\n                                parentStack\[stackIndex]\[18]\n                            );\n                            const float4 parentEmissiveColour = float4(\n                                parentStack\[stackIndex]\[19],\n                                parentStack\[stackIndex]\[20],\n                                parentStack\[stackIndex]\[21],\n                                parentStack\[stackIndex]\[22]\n                            );\n                            const float4 parentSurfaceProperty = float4(\n                                parentStack\[stackIndex]\[23],\n                                parentStack\[stackIndex]\[24],\n                                parentStack\[stackIndex]\[25],\n                                parentStack\[stackIndex]\[26]\n                            );\n                            if (fabs(nextDistance) > fabs(parentNextDistance))\n                            \{\n                                objectId = parentStack\[stackIndex]\[27];\n                            \}\n                            const float parentBlendStrength = parentStack\[stackIndex]\[28];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentDiffuseColour,\n                                blendedDiffuseColour,\n                                parentSpecularColour,\n                                blendedSpecularColour,\n                                parentTransmissiveColour,\n                                blendedTransmissiveColour,\n                                parentEmissiveColour,\n                                blendedEmissiveColour,\n                                parentSurfaceProperty,\n                                blendedSurface,\n                                parentBlendStrength\n                            );\n                        \}\n\n                        // Update the global min distance (and surface/colour)\n                        if (fabs(nextDistance) < fabs(distance))\n                        \{\n                            distance = nextDistance;\n\n                            diffusivity = blendedDiffuseColour;\n                            specularity = blendedSpecularColour;\n                            transmittance = blendedTransmissiveColour;\n                            emittance = blendedEmissiveColour;\n\n                            surface = blendedSurface;\n\n                            id = objectId;\n                        \}\n                    \}\n\n                    do\n                    \{\n                        // Decrement the number of children each parent has\n                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                        \{\n                            parentStack\[parentIndex]\[0] -= 1.0f;\n                        \}\n\n                        // Get the number of children still remaining for the parent\n                        // If there are still children, we can break out of this loop\n                        // to process the rest of them before the parent itself\n                        numChildren = parentStack\[stackLastIndex]\[0];\n                    \}\n                    while (numChildren <= 0.0f && --stackLastIndex >= 0);\n\n                    parentStackLength = stackLastIndex + 1;\n                \}\n                // No parents to interact with, simply check the distance\n                else if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n\n                    diffusivity = blendedDiffuseColour;\n                    specularity = blendedSpecularColour;\n                    transmittance = blendedTransmissiveColour;\n                    emittance = blendedEmissiveColour;\n\n                    surface = blendedSurface;\n\n                    id = objectId;\n                \}\n            \}\n            else\n            \{\n                // Node has Children, push it to the stack for later\n                // processing when we have all its children\n                // parentStack.push()\n                // TODO not all this needs to be in the stack (maybe)\n                parentStack\[parentStackLength]\[0] = numChildren;\n                parentStack\[parentStackLength]\[1] = transformedRay.x;\n                parentStack\[parentStackLength]\[2] = transformedRay.y;\n                parentStack\[parentStackLength]\[3] = transformedRay.z;\n                parentStack\[parentStackLength]\[4] = scale;\n                parentStack\[parentStackLength]\[5] = (float) modifications;\n                parentStack\[parentStackLength]\[6] = nextDistance;\n                parentStack\[parentStackLength]\[7] = blendedDiffuseColour.x;\n                parentStack\[parentStackLength]\[8] = blendedDiffuseColour.y;\n                parentStack\[parentStackLength]\[9] = blendedDiffuseColour.z;\n                parentStack\[parentStackLength]\[10] = blendedDiffuseColour.w;\n                parentStack\[parentStackLength]\[11] = blendedSpecularColour.x;\n                parentStack\[parentStackLength]\[12] = blendedSpecularColour.y;\n                parentStack\[parentStackLength]\[13] = blendedSpecularColour.z;\n                parentStack\[parentStackLength]\[14] = blendedSpecularColour.w;\n                parentStack\[parentStackLength]\[15] = blendedTransmissiveColour.x;\n                parentStack\[parentStackLength]\[16] = blendedTransmissiveColour.y;\n                parentStack\[parentStackLength]\[17] = blendedTransmissiveColour.z;\n                parentStack\[parentStackLength]\[18] = blendedTransmissiveColour.w;\n                parentStack\[parentStackLength]\[19] = blendedEmissiveColour.x;\n                parentStack\[parentStackLength]\[20] = blendedEmissiveColour.y;\n                parentStack\[parentStackLength]\[21] = blendedEmissiveColour.z;\n                parentStack\[parentStackLength]\[22] = blendedEmissiveColour.w;\n                parentStack\[parentStackLength]\[23] = blendedSurface.x;\n                parentStack\[parentStackLength]\[24] = blendedSurface.y;\n                parentStack\[parentStackLength]\[25] = blendedSurface.z;\n                parentStack\[parentStackLength]\[26] = blendedSurface.w;\n                parentStack\[parentStackLength]\[27] = objectId;\n                parentStack\[parentStackLength]\[28] = blendStrength;\n                parentStackLength++;\n            \}\n        \}\n\n        return float2(distance, id);\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     *\n     * @returns: The normalized surface normal.\n     */\n    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint)\n    \{\n        return normalize(\n            __offset0 * getMinDistanceToObjectInScene(\n                point + __offset0 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset1 * getMinDistanceToObjectInScene(\n                point + __offset1 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset2 * getMinDistanceToObjectInScene(\n                point + __offset2 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset3 * getMinDistanceToObjectInScene(\n                point + __offset3 * _hitTolerance,\n                pixelFootprint\n            )\n        );\n    \}\n\n\n    /**\n     * March a ray through the scene.\n     *\n     * @arg rayOrigin: The origin of the ray.\n     * @arg rayDirection: The direction of the ray.\n     * @arg seed: A random value to use as the seed for roughness.\n     *\n     * @returns: The ray colour.\n     */\n    float4 marchRay(const float3 &rayOrigin, const float3 &rayDirection, float3 &seed)\n    \{\n        float refractiveIndex = _refractiveIndex;\n\n        float nestedDielectrics\[MAX_NESTED_DIELECTRICS]\[\n            1   // Id of the dielectric we are currently in\n            + 1 // Refractive index of that object\n        ];\n        nestedDielectrics\[0]\[0] = -1;\n        nestedDielectrics\[0]\[1] = refractiveIndex;\n        int numNestedDielectrics = 0;\n\n        float4 rayColour = float4(0);\n        float4 absorption = float4(1);\n\n        float lastStepDistance = 1.0f;\n\n        float firstObjectId = 0.0f;\n        float lastRefractedId = -1.0f;\n\n        float depth = 0.0f;\n\n        int bounces = 0;\n        int iterations = 0;\n\n        float distanceTravelled = 0;\n\n        // Get the next ray\n        float3 origin = rayOrigin;\n        float3 direction = rayDirection;\n\n        float4 diffusivity;\n        float4 specularity;\n        float4 transmittance;\n        float4 emittance;\n        float4 surface;\n\n        float pixelFootprint = _hitTolerance;\n\n        // March the ray\n        while (\n            distanceTravelled < _maxRayDistance\n            && iterations < _maxRaySteps\n            // && sumComponent(absorption) > _hitTolerance\n        ) \{\n            // TODO see if its faster to use colourless until hit\n            // Get the closest distance to an object\n            const float2 result = getMinDistanceToObjectInScene(\n                origin,\n                distanceTravelled,\n                diffusivity,\n                specularity,\n                transmittance,\n                emittance,\n                surface\n            );\n\n            // Keep the signed distance so we know whether or not we are\n            // inside the object\n            const float signedStepDistance = result.x;\n\n            // Get the absolute value, the true shortest distance to a\n            // surface\n            const float stepDistance = fabs(signedStepDistance);\n\n            // Keep track of the distance the ray has travelled\n            distanceTravelled += stepDistance;\n            pixelFootprint += _hitTolerance * stepDistance;\n\n            // Step the ray forwards\n            origin += direction * stepDistance;\n\n            // Have we hit the nearest object?\n            if (stepDistance < pixelFootprint)\n            \{\n                // The actual position on the surface we hit\n                const float3 surfacePosition = origin - direction * _hitTolerance;\n\n                // The normal to the surface at that position\n                float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(\n                    surfacePosition,\n                    pixelFootprint\n                );\n\n                if (bounces == 0)\n                \{\n                    // Keep the ID of the first object hit, so we can\n                    // store it in the alpha channel\n                    firstObjectId = result.y;\n                    depth = distanceTravelled;\n\n                    // Early exit for the various AOVs that are not 'scene'\n                    if (_outputType > 0)\n                    \{\n                        if (_outputType == 1)\n                        \{\n                            return float4(\n                                surfacePosition.x,\n                                surfacePosition.y,\n                                surfacePosition.z,\n                                encodeFloatsInUint(firstObjectId, depth)\n                            );\n                        \}\n                        if (_outputType == 2)\n                        \{\n                            return float4(\n                                surfaceNormal.x,\n                                surfaceNormal.y,\n                                surfaceNormal.z,\n                                encodeFloatsInUint(firstObjectId, depth)\n                            );\n                        \}\n                        if (_outputType == 3)\n                        \{\n                            return float4(\n                                depth,\n                                0,\n                                0,\n                                encodeFloatsInUint(firstObjectId, depth)\n                            );\n                        \}\n                    \}\n                \}\n\n                // Update the colour of the ray\n                rayColour += emittance * emittance.w * absorption;\n\n                // Get the diffuse direction for the next ray\n                const float3 diffuseDirection = roughen(\n                    surfaceNormal,\n                    1.0f,\n                    seed\n                );\n\n                const float rng = random(seed.x + seed.y + seed.z);\n                float specularProbability = specularity.w;\n\n                float refractedRefractiveIndex;\n                if (nestedDielectrics\[numNestedDielectrics]\[0] == result.y)\n                \{\n                    // We are exiting the material we are in, get the\n                    // last refractive index from the top of the stack\n                    refractedRefractiveIndex = nestedDielectrics\[numNestedDielectrics - 1]\[1];\n                \}\n                else\n                \{\n                    refractedRefractiveIndex = surface.w;\n                \}\n\n                // Compute the refraction values\n                const float reflectivity = schlickReflectionCoefficient(\n                    direction,\n                    surfaceNormal,\n                    refractiveIndex,\n                    refractedRefractiveIndex\n                );\n\n                specularProbability = blend(1.0f, specularProbability, reflectivity);\n\n                // Maybe reflect the ray\n                if (specularity.w > 0.0f && rng <= specularProbability)\n                \{\n                    const float3 specularDirection = reflectRayOffSurface(\n                        direction,\n                        surfaceNormal\n                    );\n\n                    direction = blend(\n                        diffuseDirection,\n                        specularDirection,\n                        diffusivity.w * diffusivity.w\n                    );\n                    absorption *= specularity;\n\n                    // Offset the point so that it doesn't get trapped on\n                    // surface.\n                    origin = offsetPoint(\n                        origin,\n                        direction + surfaceNormal,\n                        pixelFootprint * _shadowBias\n                    );\n                \}\n                // Maybe spawn a refracted ray\n                else if (\n                    transmittance.w > 0.0f\n                    && rng - specularProbability <= transmittance.w\n                ) \{\n                    const float3 refractedDirection = refractRayThroughSurface(\n                        direction,\n                        surfaceNormal,\n                        refractiveIndex,\n                        refractedRefractiveIndex\n                    );\n\n                    direction = blend(\n                        -diffuseDirection,\n                        refractedDirection,\n                        diffusivity.w * diffusivity.w\n                    );\n                    absorption *= transmittance;\n\n                    // Offset the point so that it doesn't get trapped on\n                    // surface.\n                    origin = offsetPoint(\n                        surfacePosition,\n                        refractedDirection - surfaceNormal,\n                        (2.0f * pixelFootprint + stepDistance) * _shadowBias\n                    );\n\n                    // We are passing through the surface, so update the refractive index\n                    refractiveIndex = refractedRefractiveIndex;\n                    if (nestedDielectrics\[numNestedDielectrics]\[0] == result.y)\n                    \{\n                        // We are exiting the material we are in, get the\n                        // last refractive index, by popping the stack\n                        numNestedDielectrics--;\n                    \}\n                    else\n                    \{\n                        // We are not exiting the material we are in, so push\n                        // the next refractive index to the stack\n                        numNestedDielectrics++;\n                        nestedDielectrics\[numNestedDielectrics]\[0] = result.y;\n                        nestedDielectrics\[numNestedDielectrics]\[1] = refractedRefractiveIndex;\n                    \}\n                \}\n                // Otherwise diffuse the light\n                else\n                \{\n                    // fallback is diffuse\n                    direction = diffuseDirection;\n                    absorption *= diffusivity;\n\n                    // Offset the point so that it doesn't get trapped on\n                    // surface.\n                    origin = offsetPoint(\n                        origin,\n                        direction + surfaceNormal,\n                        pixelFootprint * _shadowBias\n                    );\n                \}\n\n                // Exit if we have reached the bounce limit\n                if (++bounces >= __bouncesPerRay)\n                \{\n                    rayColour.w = encodeFloatsInUint(firstObjectId, depth);\n                    return rayColour;\n                \}\n\n                // Update the random seed\n                seed = random(seed + rng * fabs(origin + direction));\n\n                // Reset the pixel footprint so multiple reflections don't\n                // reduce precision\n                pixelFootprint = _hitTolerance;\n            \}\n\n            lastStepDistance = signedStepDistance;\n            iterations++;\n        \}\n\n        // If we are not computing the scene value and we have missed all\n        // objects, return black.\n        if (_outputType > 0)\n        \{\n            return float4(0);\n        \}\n\n        // Otherwise, read the hdri value\n        // in the direction the ray was last travelling\n        rayColour += absorption * readHDRIValue(direction);\n\n        rayColour.w = (bounces > 0) * encodeFloatsInUint(firstObjectId, depth);\n        return rayColour;\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value.\n     * \n     * @arg pos: The x, and y location we are currently processing.\n     */\n    void process(int2 pos)\n    \{\n        SampleType(noise) noisePixel = noise();\n        float3 seed = float3(noisePixel.x, noisePixel.y, noisePixel.z);\n\n        float4 resultPixel = float4(0);\n\n        float2 pixelLocation = float2(pos.x, pos.y);\n\n        for (int path=1; path <= _pathsPerPixel; path++)\n        \{\n            seed = random(seed * path);\n\n            // Generate a ray from the camera\n            float3 rayOrigin;\n            float3 rayDirection;\n            createCameraRay(\n                _cameraWorldMatrix,\n                __inverseCameraProjectionMatrix,\n                pixelsToUV(\n                    pixelLocation\n                    + random(float2(seed.x, seed.y)),\n                    float2(_formatWidth, _formatHeight)\n                ),\n                rayOrigin,\n                rayDirection\n            );\n\n            resultPixel += marchRay(rayOrigin, rayDirection, seed);\n        \}\n\n        const float4 resultColour = resultPixel / _pathsPerPixel;\n        if (_useToneMap && _outputType == 0)\n        \{\n            const float3 toneMapped = ACESToneMap(\n                _exposure * float3(resultColour.x, resultColour.y, resultColour.z)\n            );\n            dst() = float4(toneMapped.x, toneMapped.y, toneMapped.z, resultColour.w);\n        \}\n        else\n        \{\n            dst() = float4(\n                _exposure * resultColour.x,\n                _exposure * resultColour.y,\n                _exposure * resultColour.z,\n                resultColour.w\n            );\n        \}\n    \}\n\};\n"
   rebuild ""
   "PathMarchKernel_Focal Length" {{parent.DummyCam.focal}}
   "PathMarchKernel_Horizontal Aperture" {{parent.DummyCam.haperture}}
@@ -3586,7 +4182,7 @@ push $N74c2830
   "PathMarchKernel_Screen Width" {{parent.resolution_dot.width}}
   "PathMarchKernel_Screen Height" {{parent.resolution_dot.height}}
   "PathMarchKernel_HDRI Offset Angle" {{parent.hdri_offset_angle}}
-  "PathMarchKernel_Paths Per Subpixel" {{parent.paths_per_subpixel}}
+  "PathMarchKernel_Paths Per Pixel" {{parent.paths_per_pixel}}
   "PathMarchKernel_Max Bounces" {{parent.max_bounces}}
   "PathMarchKernel_Max Ray Distance" {{parent.ray_distance}}
   "PathMarchKernel_Max Ray Steps" {{parent.max_ray_steps}}
@@ -3599,6 +4195,7 @@ push $N74c2830
   PathMarchKernel_Exposure {{parent.exposure}}
   rebuild_finalise ""
   name BlinkPathMarcher
+  selected true
   xpos 1661
   ypos -462
  }
@@ -3612,8 +4209,8 @@ push $N74c2830
   xpos 1695
   ypos -341
  }
-set N7627aa0 [stack 0]
-push $N7627aa0
+set N9e2c3d0 [stack 0]
+push $N9e2c3d0
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/decode_alpha.blink
   recompileCount 1
@@ -3699,9 +4296,8 @@ push $N7627aa0
  }
 end_group
 Viewer {
+ frame 187
  frame_range 1-400
- gain 0.42
- gamma 1.15
  name Viewer1
  xpos 188
  ypos 545

@@ -42,8 +42,8 @@ inline float random(uint seed)
 inline float2 random(float2 seed)
 {
     return float2(
-        random(floatToUint(seed.x)),
-        random(floatToUint(seed.y))
+        random(seed.x),
+        random(seed.y)
     );
 }
 
@@ -51,9 +51,9 @@ inline float2 random(float2 seed)
 inline float3 random(float3 seed)
 {
     return float3(
-        random(floatToUint(seed.x)),
-        random(floatToUint(seed.y)),
-        random(floatToUint(seed.z))
+        random(seed.x),
+        random(seed.y),
+        random(seed.z)
     );
 }
 

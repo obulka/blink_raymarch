@@ -263,6 +263,19 @@ inline float sumComponent(const float4 &vector)
  *
  * @returns: The maximum component of the vector.
  */
+inline float maxComponent(const float2 &vector)
+{
+    return max(vector.x, vector.y);
+}
+
+
+/**
+ * The maximum component of a vector.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The maximum component of the vector.
+ */
 inline float maxComponent(const float3 &vector)
 {
     return max(vector.x, max(vector.y, vector.z));
@@ -276,9 +289,22 @@ inline float maxComponent(const float3 &vector)
  *
  * @returns: The maximum component of the vector.
  */
-inline float maxComponent(const float2 &vector)
+inline float maxComponent(const float4 &vector)
 {
-    return max(vector.x, vector.y);
+    return max(vector.x, max(vector.y, max(vector.z, vector.w)));
+}
+
+
+/**
+ * The minimum component of a vector.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The minimum component of the vector.
+ */
+inline float minComponent(const float2 &vector)
+{
+    return min(vector.x, vector.y);
 }
 
 
@@ -302,9 +328,9 @@ inline float minComponent(const float3 &vector)
  *
  * @returns: The minimum component of the vector.
  */
-inline float minComponent(const float2 &vector)
+inline float minComponent(const float4 &vector)
 {
-    return min(vector.x, vector.y);
+    return min(vector.x, min(vector.y, min(vector.z, vector.w)));
 }
 
 
