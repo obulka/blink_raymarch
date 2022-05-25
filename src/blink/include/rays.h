@@ -16,10 +16,10 @@
  * @arg surfaceNormalDirection: The normal to the surface.
  */
 inline float3 reflectRayOffSurface(
-    const float3 &incidentRayDirection,
-    const float3 &surfaceNormalDirection)
+        const float3 &incidentRayDirection,
+        const float3 &surfaceNormalDirection)
 {
-    return (
+    return normalize(
         incidentRayDirection
         - 2 * dot(incidentRayDirection, surfaceNormalDirection) * surfaceNormalDirection
     );
@@ -39,10 +39,10 @@ inline float3 reflectRayOffSurface(
  * @returns: The refracted ray direction.
  */
 inline float3 refractRayThroughSurface(
-    const float3 &incidentRayDirection,
-    const float3 &surfaceNormalDirection,
-    const float incidentRefractiveIndex,
-    const float refractedRefractiveIndex)
+        const float3 &incidentRayDirection,
+        const float3 &surfaceNormalDirection,
+        const float incidentRefractiveIndex,
+        const float refractedRefractiveIndex)
 {
     const float refractiveRatio = incidentRefractiveIndex / refractedRefractiveIndex;
     const float cosIncident = -dot(incidentRayDirection, surfaceNormalDirection);
@@ -74,17 +74,17 @@ inline float3 refractRayThroughSurface(
  * @returns: The reflection coefficient.
  */
 float schlickReflectionCoefficient(
-    const float3 &incidentRayDirection,
-    const float3 &surfaceNormalDirection,
-    const float incidentRefractiveIndex,
-    const float refractedRefractiveIndex)
+        const float3 &incidentRayDirection,
+        const float3 &surfaceNormalDirection,
+        const float incidentRefractiveIndex,
+        const float refractedRefractiveIndex)
 {
     const float parallelCoefficient = pow(
         (incidentRefractiveIndex - refractedRefractiveIndex)
         / (incidentRefractiveIndex + refractedRefractiveIndex),
         2
     );
-    float cosX = -dot(incidentRayDirection, surfaceNormalDirection);
+    float cosX = -dot(surfaceNormalDirection, incidentRayDirection);
     if (incidentRefractiveIndex > refractedRefractiveIndex)
     {
         const float refractiveRatio = incidentRefractiveIndex / refractedRefractiveIndex;
@@ -97,7 +97,7 @@ float schlickReflectionCoefficient(
         }
         cosX = sqrt(1.0f - sinTransmittedSquared);
     }
-    return parallelCoefficient + (1 - parallelCoefficient) * pow(1.0f - cosX, 5);
+    return parallelCoefficient + (1.0f - parallelCoefficient) * pow(1.0f - cosX, 5);
 }
 
 
@@ -114,10 +114,10 @@ float schlickReflectionCoefficient(
  * @returns: The reflection coefficient.
  */
 float reflectionCoefficient(
-    const float3 &incidentRayDirection,
-    const float3 &surfaceNormalDirection,
-    const float incidentRefractiveIndex,
-    const float refractedRefractiveIndex)
+        const float3 &incidentRayDirection,
+        const float3 &surfaceNormalDirection,
+        const float incidentRefractiveIndex,
+        const float refractedRefractiveIndex)
 {
     const float refractiveRatio = incidentRefractiveIndex / refractedRefractiveIndex;
 
