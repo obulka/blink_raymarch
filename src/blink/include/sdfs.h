@@ -1388,38 +1388,36 @@ float distanceToObject(
         float4 &absorptionColour,
         float4 &emissionColour)
 {
-    if (shapeType == 23)
-    {
-        float4 colour;
-        const float distance = distanceToMandelbulb(
-            position,
-            dimensions.x,
-            (int) dimensions.y,
-            dimensions.z,
-            colour
-        );
-        diffuseColour = blend(
-            colour,
-            diffuseColour,
-            saturate(dimensions.w)
-        );
-        return distance;
-    }
-    if (shapeType == 24)
+    if (shapeType >= 23)
     {
         float4 colour = float4(1);
-        const float distance = distanceToMandelbox(
-            position,
-            dimensions.x,
-            (int) dimensions.y,
-            dimensions.z,
-            dimensions.w,
-            colour
-        );
+        float distance = FLT_MAX;
+        if (shapeType == 23)
+        {
+            distance = distanceToMandelbulb(
+                position,
+                dimensions.x,
+                (int) dimensions.y,
+                dimensions.z,
+                colour
+            );
+        }
+        if (shapeType == 24)
+        {
+            distance = distanceToMandelbox(
+                position,
+                dimensions.x,
+                (int) dimensions.y,
+                dimensions.z,
+                dimensions.w,
+                colour
+            );
+        }
         diffuseColour = modifications & 8192 ? diffuseColour * colour : diffuseColour;
         specularColour = modifications & 16384 ? specularColour * colour : specularColour;
         absorptionColour = modifications & 32768 ? absorptionColour * colour : absorptionColour;
         emissionColour = modifications & 65536 ? emissionColour * colour : emissionColour;
+
         return distance;
     }
 
