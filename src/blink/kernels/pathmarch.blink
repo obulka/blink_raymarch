@@ -1088,7 +1088,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
                 }
 
-
                 // Get the diffuse direction for the next ray
                 const float3 diffuseDirection = roughen(
                     surfaceNormal,
@@ -1107,7 +1106,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
                 else
                 {
-                    refractedRefractiveIndex = surface.w;
+                    refractedRefractiveIndex = surface.x;
                 }
 
                 // Compute the refraction values
@@ -1169,7 +1168,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     direction = normalize(blend(
                         -diffuseDirection,
                         refractedDirection,
-                        diffusivity.w * diffusivity.w
+                        surface.w * surface.w
                     ));
 
                     // Offset the point so that it doesn't get trapped on
@@ -1301,7 +1300,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         for (int path=1; path <= _pathsPerPixel; path++)
         {
-            seed = random(seed * path);
+            seed = length(seed) * random(seed * path);
 
             // Generate a ray from the camera
             float3 rayOrigin;
