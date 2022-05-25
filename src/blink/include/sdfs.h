@@ -1360,10 +1360,21 @@ inline float distanceToColourlessObject(
  *     22: octahedron
  *     23: mandelbulb
  *     24: mandelbox
- *     25: mandelbox (no trap colour)
  * @arg dimensions: The dimensions of the object.
- * @arg diffuseColour: The colour of the surface will be stored here.
- *     This will only be modified by the fractals (23-25).
+ * @arg modifications: The modifications to perform.
+ *     Each bit will enable a modification:
+ *         bit 13: enable diffuse trap colour
+ *         bit 14: enable specular trap colour
+ *         bit 15: enable absorption trap colour
+ *         bit 16: enable emission trap colour
+ * @arg diffuseColour: The diffuse colour of the surface will be stored
+ *     here. This will only be modified by the fractals (23-25).
+ * @arg specularColour: The specular colour of the surface will be
+ *     stored here. This will only be modified by the fractals (23-25).
+ * @arg absorptionColour: The absorption colour of the surface will be
+ *     stored here. This will only be modified by the fractals (23-25).
+ * @arg emissionColour: The emission colour of the surface will be
+ *     stored here. This will only be modified by the fractals (23-25).
  *
  * @returns: The minimum distance from the point to the shape.
  */
@@ -1371,6 +1382,7 @@ float distanceToObject(
         const float3 &position,
         const int shapeType,
         const float4 &dimensions,
+        const int modifications,
         float4 &diffuseColour,
         float4 &specularColour,
         float4 &absorptionColour,
@@ -1393,9 +1405,9 @@ float distanceToObject(
         );
         return distance;
     }
-    if (shapeType >= 24)
+    if (shapeType == 24)
     {
-        float4 colour = diffuseColour;
+        float4 colour = float4(1);
         const float distance = distanceToMandelbox(
             position,
             dimensions.x,
@@ -1404,11 +1416,10 @@ float distanceToObject(
             dimensions.w,
             colour
         );
-        diffuseColour = blend(
-            diffuseColour,
-            colour,
-            (float)(shapeType == 25)
-        );
+        diffuseColour = modifications & 8192 ? diffuseColour * colour : diffuseColour;
+        specularColour = modifications & 16384 ? specularColour * colour : specularColour;
+        absorptionColour = modifications & 32768 ? absorptionColour * colour : absorptionColour;
+        emissionColour = modifications & 65536 ? emissionColour * colour : emissionColour;
         return distance;
     }
 
@@ -1446,10 +1457,7 @@ float distanceToObject(
  *     22: octahedron
  *     23: mandelbulb
  *     24: mandelbox
- *     25: mandelbox (no trap colour)
  * @arg dimensions: The dimensions of the object.
- * @arg diffuseColour: The colour of the surface will be stored here.
- *     This will only be modified by the fractals (23-25).
  *
  * @returns: The minimum distance from the point to the shape.
  */
@@ -1467,7 +1475,7 @@ float distanceToObject(
             dimensions.z
         );
     }
-    if (shapeType >= 24)
+    if (shapeType == 24)
     {
         return distanceToMandelbox(
             position,
@@ -1518,6 +1526,10 @@ float distanceToObject(
  * @arg modifications: The modifications to perform.
  *     Each bit will enable a modification:
  *         bit 6: hollowing
+ *         bit 13: enable diffuse trap colour
+ *         bit 14: enable specular trap colour
+ *         bit 15: enable absorption trap colour
+ *         bit 16: enable emission trap colour
  * @arg edgeRadius: The radius to round the edges by.
  * @arg wallThickness: The thickness of the walls if hollowing the
  *     object.
@@ -1549,6 +1561,7 @@ inline float getModifiedDistance(
         rayOrigin / uniformScale,
         shape,
         dimensions,
+        modifications,
         diffuseColour,
         specularColour,
         absorptionColour,

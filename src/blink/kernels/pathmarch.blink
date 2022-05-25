@@ -47,7 +47,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     // the shape dimensions.xyzw (some shapes may not use all channels)
     Image<eRead, eAccessRandom, eEdgeNone> dimensions;
 
-    // the shape diffusivities.xyz, refractive index.w
+    // the shape diffusivities.xyz, specular roughness.w
     Image<eRead, eAccessRandom, eEdgeNone> diffusivities;
 
     Image<eRead, eAccessRandom, eEdgeNone> specularities;
