@@ -15,8 +15,8 @@
 #include "colour.h"
 #include "objectInteraction.h"
 #include "random.h"
-#include "rays.h"
 #include "sdfModifications.h"
+#include "rays.h"
 #include "sdfs.h"
 
 
@@ -238,122 +238,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * Transform a ray's location.
-     *
-     * @arg rayOrigin: The location the ray originates from.
-     * @arg position: The amount to translate the ray.
-     * @arg rotation: The amount to rotate the ray (radians).
-     * @arg modifications: The modifications to perform.
-     *     Each bit will enable a modification:
-     *         bit 0: finite repetition
-     *         bit 1: infinite repetition
-     *         bit 2: elongation
-     *         bit 3: mirror x
-     *         bit 4: mirror y
-     *         bit 5: mirror z
-     * @arg repetition: The values to use when repeating the ray.
-     * @arg elongation: The values to use when elongating the ray.
-     *
-     * @returns: The transformed ray origin.
-     */
-    float3 transformRay(
-        const float3 &rayOrigin,
-        const float3 &translation,
-        const float3 &rotation,
-        const int modifications,
-        const float4 &repetition,
-        const float4 &elongation)
-    {
-        float3x3 rotMatrix;
-        float3 transformedRay;
-        rotationMatrix(rotation, rotMatrix);
-        matmul(
-            rotMatrix.invert(),
-            rayOrigin - translation,
-            transformedRay
-        );
-        performShapeModification(
-            modifications,
-            repetition,
-            elongation,
-            transformedRay
-        );
-
-        return transformedRay;
-    }
-
-
-    /**
-     * Compute the modified distance to an object.
-     *
-     * @arg rayOrigin: The location the ray originates from.
-     * @arg shape: The shape of the object:
-     *     0: sphere
-     *     1: ellipsoid
-     *     2: cut sphere
-     *     3: hollow sphere
-     *     4: death star
-     *     5: solid angle
-     *     6: rectangular prism
-     *     7: rectangular prism frame
-     *     8: rhombus
-     *     9: triangular prism
-     *     10: cylinder
-     *     11: infinite cylinder
-     *     12: plane
-     *     13: capsule
-     *     14: cone
-     *     15: infinite cone
-     *     16: capped cone
-     *     17: rounded cone
-     *     18: torus
-     *     19: capped torus
-     *     20: link
-     *     21: hexagonal prism
-     *     22: octahedron
-     *     23: mandelbulb
-     *     24: mandelbox
-     *     25: mandelbox (no trap colour)
-     * @arg dimensions: The dimensions of the object.
-     * @arg uniformScale: The factor to scale the object by.
-     * @arg modifications: The modifications to perform.
-     *     Each bit will enable a modification:
-     *         bit 6: hollowing
-     * @arg edgeRadius: The radius to round the edges by.
-     * @arg wallThickness: The thickness of the walls if hollowing the
-     *     object.
-     * @arg colour: The colour of the surface will be stored here.
-     *     This will only be modified by the fractals (23-25).
-     *
-     * @returns: The distance to the modified object.
-     */
-    inline float getModifiedDistance(
-        const float3 &rayOrigin,
-        const int shape,
-        const float4 &dimensions,
-        const float uniformScale,
-        const int modifications,
-        const float edgeRadius,
-        const float wallThickness,
-        float4 &colour)
-    {
-        float nextDistance = distanceToObject(
-            rayOrigin / uniformScale,
-            shape,
-            dimensions,
-            colour
-        ) * uniformScale;
-
-        return performDistanceModification(
-            modifications,
-            edgeRadius,
-            wallThickness,
-            nextDistance
-        );
-    }
-
-
-    /**
      * Compute the minimum distance to an object in the scene
      *
      * @arg rayOrigin: The origin position of the ray.
@@ -417,7 +301,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 modParameters1
             );
 
-            float4 tmp;
             // Get distance to this child
             float nextDistance = getModifiedDistance(
                 transformedRay,
@@ -426,8 +309,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 scale,
                 modifications,
                 modParameters1.w,
-                rotation.w,
-                tmp
+                rotation.w
             );
 
             // Track which object was hit for the alpha channel
@@ -662,7 +544,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 modifications,
                 modParameters1.w,
                 rotation.w,
-                blendedDiffuseColour
+                blendedDiffuseColour,
+                blendedSpecularColour,
+                blendedTransmissiveColour,
+                blendedEmissiveColour
             );
 
             // Track which object was hit for the alpha channel

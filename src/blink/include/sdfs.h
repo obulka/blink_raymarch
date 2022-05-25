@@ -912,6 +912,58 @@ float distanceToMandelbulb(
 }
 
 
+/**
+ * Compute the min distance from a point to a mandelbulb.
+ *
+ * @arg position: The point to get the distance to, from the object.
+ * @arg power: One greater than the axes of symmetry in the xy-plane.
+ * @arg iterations: The number of iterations to compute, the higher this
+ *     is the slower it will be to compute, but the deeper the fractal
+ *     will have detail.
+ * @arg maxSquareRadius: When the square radius has reached this length,
+ *     stop iterating.
+ *
+ * @returns: The minimum distance from the point to the shape.
+ */
+float distanceToMandelbulb(
+        const float3 &position,
+        const float power,
+        const int iterations,
+        const float maxSquareRadius)
+{
+    float3 currentPosition = position;
+    float radiusSquared = dot2(currentPosition);
+
+    float3 absPosition = fabs(currentPosition);
+
+    float dradius = 1.0f;
+    for (int i=0; i < iterations; i++)
+    {
+        dradius = power * pow(radiusSquared, (power - 1) / 2) * dradius + 1.0f;
+
+        float currentRadius = length(currentPosition);
+        float theta = power * acos(currentPosition.z / currentRadius);
+        float phi = power * atan2(currentPosition.y, currentPosition.x);
+
+        currentPosition = position + pow(currentRadius, power) * float3(
+            sin(theta) * cos(phi),
+            sin(theta) * sin(phi),
+            cos(theta)
+        );
+
+        absPosition = fabs(currentPosition);
+
+        radiusSquared = dot2(currentPosition);
+        if(radiusSquared > maxSquareRadius)
+        {
+            break;
+        }
+    }
+
+    return 0.25f * log(radiusSquared) * sqrt(radiusSquared) / dradius;
+}
+
+
 inline float3 boxFold(const float3 &position, const float3 &foldingLimit)
 {
     return clamp(position, -foldingLimit, foldingLimit) * 2.0f - position;
@@ -1006,6 +1058,77 @@ float distanceToMandelbox(
 
 
 /**
+ * Compute the min distance from a point to a mandelbox.
+ *
+ * @arg position: The point to get the distance to, from the object.
+ * @arg scale:
+ * @arg iterations: The number of iterations to compute, the higher this
+ *     is the slower it will be to compute, but the deeper the fractal
+ *     will have detail.
+ *
+ * @returns: The minimum distance from the point to the shape.
+ */
+float distanceToMandelbox(
+        const float3 &position,
+        const float scale,
+        const int iterations,
+        const float minSquareRadius,
+        const float foldingLimit)
+{
+    const float4 scaleVector = float4(
+        scale,
+        scale,
+        scale,
+        fabs(scale)
+    ) / minSquareRadius;
+
+    const float4 initialPosition = float4(
+        position.x,
+        position.y,
+        position.z,
+        1.0f
+    );
+    float4 currentPosition = initialPosition;
+
+    const float3 foldingLimit3 = float3(foldingLimit);
+
+    for (int i=0; i < iterations; i++)
+    {
+        float3 currentPosition3 = float3(
+            currentPosition.x,
+            currentPosition.y,
+            currentPosition.z
+        );
+        currentPosition3 = boxFold(currentPosition3, foldingLimit3);
+
+        const float radiusSquared = dot2(currentPosition3);
+        currentPosition = sphereFold(
+            float4(
+                currentPosition3.x,
+                currentPosition3.y,
+                currentPosition3.z,
+                currentPosition.w
+            ),
+            radiusSquared,
+            minSquareRadius
+        );
+
+        currentPosition = scaleVector * currentPosition + initialPosition;
+    }
+
+    return (
+        length(
+            float3(
+                currentPosition.x,
+                currentPosition.y,
+                currentPosition.z
+            ) - fabs(scale - 1.0f)
+        ) / currentPosition.w - pow(fabs(scale), (float) (1 - iterations))
+    );
+}
+
+
+/**
  * Compute the min distance from a point to a geometric object.
  *
  * @arg position: The point to get the distance to, from the object.
@@ -1033,56 +1156,15 @@ float distanceToMandelbox(
  *     20: link
  *     21: hexagonal prism
  *     22: octahedron
- *     23: mandelbulb
- *     24: mandelbox
- *     25: mandelbox (no trap colour)
  * @arg dimensions: The dimensions of the object.
- * @arg surfaceColour: The colour of the surface will be stored here.
- *     This will only be modified by the fractals (23-25).
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToObject(
+inline float distanceToColourlessObject(
         const float3 &position,
         const int shapeType,
-        const float4 &dimensions,
-        float4 &surfaceColour)
+        const float4 &dimensions)
 {
-    if (shapeType == 23)
-    {
-        float4 colour;
-        const float distance = distanceToMandelbulb(
-            position,
-            dimensions.x,
-            (int) dimensions.y,
-            dimensions.z,
-            colour
-        );
-        surfaceColour = blend(
-            colour,
-            surfaceColour,
-            saturate(dimensions.w)
-        );
-        return distance;
-    }
-    if (shapeType == 24 || shapeType == 25)
-    {
-        float4 colour = surfaceColour;
-        const float distance = distanceToMandelbox(
-            position,
-            dimensions.x,
-            (int) dimensions.y,
-            dimensions.z,
-            dimensions.w,
-            colour
-        );
-        surfaceColour = blend(
-            surfaceColour,
-            colour,
-            (float)(shapeType == 25)
-        );
-        return distance;
-    }
     if (shapeType == 0)
     {
         return distanceToSphere(position, dimensions.x);
@@ -1245,4 +1327,304 @@ float distanceToObject(
     }
 
     return 0;
+}
+
+
+/**
+ * Compute the min distance from a point to a geometric object.
+ *
+ * @arg position: The point to get the distance to, from the object.
+ * @arg shapeType: The selection of shape to get the distance to, options:
+ *     0: sphere
+ *     1: ellipsoid
+ *     2: cut sphere
+ *     3: hollow sphere
+ *     4: death star
+ *     5: solid angle
+ *     6: rectangular prism
+ *     7: rectangular prism frame
+ *     8: rhombus
+ *     9: triangular prism
+ *     10: cylinder
+ *     11: infinite cylinder
+ *     12: plane
+ *     13: capsule
+ *     14: cone
+ *     15: infinite cone
+ *     16: capped cone
+ *     17: rounded cone
+ *     18: torus
+ *     19: capped torus
+ *     20: link
+ *     21: hexagonal prism
+ *     22: octahedron
+ *     23: mandelbulb
+ *     24: mandelbox
+ *     25: mandelbox (no trap colour)
+ * @arg dimensions: The dimensions of the object.
+ * @arg diffuseColour: The colour of the surface will be stored here.
+ *     This will only be modified by the fractals (23-25).
+ *
+ * @returns: The minimum distance from the point to the shape.
+ */
+float distanceToObject(
+        const float3 &position,
+        const int shapeType,
+        const float4 &dimensions,
+        float4 &diffuseColour,
+        float4 &specularColour,
+        float4 &absorptionColour,
+        float4 &emissionColour)
+{
+    if (shapeType == 23)
+    {
+        float4 colour;
+        const float distance = distanceToMandelbulb(
+            position,
+            dimensions.x,
+            (int) dimensions.y,
+            dimensions.z,
+            colour
+        );
+        diffuseColour = blend(
+            colour,
+            diffuseColour,
+            saturate(dimensions.w)
+        );
+        return distance;
+    }
+    if (shapeType >= 24)
+    {
+        float4 colour = diffuseColour;
+        const float distance = distanceToMandelbox(
+            position,
+            dimensions.x,
+            (int) dimensions.y,
+            dimensions.z,
+            dimensions.w,
+            colour
+        );
+        diffuseColour = blend(
+            diffuseColour,
+            colour,
+            (float)(shapeType == 25)
+        );
+        return distance;
+    }
+
+    return distanceToColourlessObject(position, shapeType, dimensions);
+}
+
+
+/**
+ * Compute the min distance from a point to a geometric object.
+ *
+ * @arg position: The point to get the distance to, from the object.
+ * @arg shapeType: The selection of shape to get the distance to, options:
+ *     0: sphere
+ *     1: ellipsoid
+ *     2: cut sphere
+ *     3: hollow sphere
+ *     4: death star
+ *     5: solid angle
+ *     6: rectangular prism
+ *     7: rectangular prism frame
+ *     8: rhombus
+ *     9: triangular prism
+ *     10: cylinder
+ *     11: infinite cylinder
+ *     12: plane
+ *     13: capsule
+ *     14: cone
+ *     15: infinite cone
+ *     16: capped cone
+ *     17: rounded cone
+ *     18: torus
+ *     19: capped torus
+ *     20: link
+ *     21: hexagonal prism
+ *     22: octahedron
+ *     23: mandelbulb
+ *     24: mandelbox
+ *     25: mandelbox (no trap colour)
+ * @arg dimensions: The dimensions of the object.
+ * @arg diffuseColour: The colour of the surface will be stored here.
+ *     This will only be modified by the fractals (23-25).
+ *
+ * @returns: The minimum distance from the point to the shape.
+ */
+float distanceToObject(
+        const float3 &position,
+        const int shapeType,
+        const float4 &dimensions)
+{
+    if (shapeType == 23)
+    {
+        return distanceToMandelbulb(
+            position,
+            dimensions.x,
+            (int) dimensions.y,
+            dimensions.z
+        );
+    }
+    if (shapeType >= 24)
+    {
+        return distanceToMandelbox(
+            position,
+            dimensions.x,
+            (int) dimensions.y,
+            dimensions.z,
+            dimensions.w
+        );
+    }
+
+    return distanceToColourlessObject(position, shapeType, dimensions);
+}
+
+
+/**
+ * Compute the modified distance to an object.
+ *
+ * @arg rayOrigin: The location the ray originates from.
+ * @arg shape: The shape of the object:
+ *     0: sphere
+ *     1: ellipsoid
+ *     2: cut sphere
+ *     3: hollow sphere
+ *     4: death star
+ *     5: solid angle
+ *     6: rectangular prism
+ *     7: rectangular prism frame
+ *     8: rhombus
+ *     9: triangular prism
+ *     10: cylinder
+ *     11: infinite cylinder
+ *     12: plane
+ *     13: capsule
+ *     14: cone
+ *     15: infinite cone
+ *     16: capped cone
+ *     17: rounded cone
+ *     18: torus
+ *     19: capped torus
+ *     20: link
+ *     21: hexagonal prism
+ *     22: octahedron
+ *     23: mandelbulb
+ *     24: mandelbox
+ *     25: mandelbox (no trap colour)
+ * @arg dimensions: The dimensions of the object.
+ * @arg uniformScale: The factor to scale the object by.
+ * @arg modifications: The modifications to perform.
+ *     Each bit will enable a modification:
+ *         bit 6: hollowing
+ * @arg edgeRadius: The radius to round the edges by.
+ * @arg wallThickness: The thickness of the walls if hollowing the
+ *     object.
+ * @arg diffuseColour: The diffuse colour of the surface will be stored
+ *     here. This will only be modified by the fractals (23-25).
+ * @arg specularColour: The specular colour of the surface will be
+ *     stored here. This will only be modified by the fractals (23-25).
+ * @arg absorptionColour: The absorption colour of the surface will be
+ *     stored here. This will only be modified by the fractals (23-25).
+ * @arg emissionColour: The emission colour of the surface will be
+ *     stored here. This will only be modified by the fractals (23-25).
+ *
+ * @returns: The distance to the modified object.
+ */
+inline float getModifiedDistance(
+    const float3 &rayOrigin,
+    const int shape,
+    const float4 &dimensions,
+    const float uniformScale,
+    const int modifications,
+    const float edgeRadius,
+    const float wallThickness,
+    float4 &diffuseColour,
+    float4 &specularColour,
+    float4 &absorptionColour,
+    float4 &emissionColour)
+{
+    float nextDistance = distanceToObject(
+        rayOrigin / uniformScale,
+        shape,
+        dimensions,
+        diffuseColour,
+        specularColour,
+        absorptionColour,
+        emissionColour
+    ) * uniformScale;
+
+    return performDistanceModification(
+        modifications,
+        edgeRadius,
+        wallThickness,
+        nextDistance
+    );
+}
+
+
+/**
+ * Compute the modified distance to an object.
+ *
+ * @arg rayOrigin: The location the ray originates from.
+ * @arg shape: The shape of the object:
+ *     0: sphere
+ *     1: ellipsoid
+ *     2: cut sphere
+ *     3: hollow sphere
+ *     4: death star
+ *     5: solid angle
+ *     6: rectangular prism
+ *     7: rectangular prism frame
+ *     8: rhombus
+ *     9: triangular prism
+ *     10: cylinder
+ *     11: infinite cylinder
+ *     12: plane
+ *     13: capsule
+ *     14: cone
+ *     15: infinite cone
+ *     16: capped cone
+ *     17: rounded cone
+ *     18: torus
+ *     19: capped torus
+ *     20: link
+ *     21: hexagonal prism
+ *     22: octahedron
+ *     23: mandelbulb
+ *     24: mandelbox
+ *     25: mandelbox (no trap colour)
+ * @arg dimensions: The dimensions of the object.
+ * @arg uniformScale: The factor to scale the object by.
+ * @arg modifications: The modifications to perform.
+ *     Each bit will enable a modification:
+ *         bit 6: hollowing
+ * @arg edgeRadius: The radius to round the edges by.
+ * @arg wallThickness: The thickness of the walls if hollowing the
+ *     object.
+ *
+ * @returns: The distance to the modified object.
+ */
+inline float getModifiedDistance(
+    const float3 &rayOrigin,
+    const int shape,
+    const float4 &dimensions,
+    const float uniformScale,
+    const int modifications,
+    const float edgeRadius,
+    const float wallThickness)
+{
+    float nextDistance = distanceToObject(
+        rayOrigin / uniformScale,
+        shape,
+        dimensions
+    ) * uniformScale;
+
+    return performDistanceModification(
+        modifications,
+        edgeRadius,
+        wallThickness,
+        nextDistance
+    );
 }
