@@ -892,7 +892,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             && iterations < _maxRaySteps
             // && sumComponent(absorption) > _hitTolerance
         ) {
-            // TODO see if its faster to use colourless until hit
             // Get the closest distance to an object
             const float2 result = getMinDistanceToObjectInScene(
                 origin,
