@@ -27,17 +27,17 @@ Gizmo {
  addUserKnob {7 roughness t "The object's surface will scatter the light more the higher this value is. Increase the 'pixel subdivisions' to make it look less aliased."}
  addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
  colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
  addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
  specular_colour {1 1 1}
  addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
- transmission 0
- addUserKnob {18 transmission_colour l "transmission colour" t "The transmissive colour."}
- transmission_colour {1 1 1}
- addUserKnob {6 transmission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
+ absorption_colour {1 2 3}
+ addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
- refractive_index 1.33
+ refractive_index 1.3
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
  emission_colour {1 1 1}
@@ -175,7 +175,7 @@ add_layer {sdf_trans_colour sdf_trans_colour.r sdf_trans_colour.g sdf_trans_colo
  Constant {
   inputs 0
   channels sdf_trans_colour
-  color {{parent.transmission_colour.r} {parent.transmission_colour.g} {parent.transmission_colour.b} {parent.transmission}}
+  color {{parent.absorption_colour.r} {parent.absorption_colour.g} {parent.absorption_colour.b} {parent.transmission}}
   format "1 1 0 0 1 1 1 1x1"
   name trans_colour
   xpos 561
@@ -304,7 +304,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set Nafe5cf0 [stack 0]
+set N619dc00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -326,7 +326,7 @@ set Nafe5cf0 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd367c60 [stack 0]
+set N61b1400 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -337,7 +337,7 @@ set Nd367c60 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nafe5cf0
+push $N619dc00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -366,7 +366,7 @@ push $Nafe5cf0
    xpos 158
    ypos 167
   }
-push $Nd367c60
+push $N61b1400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -459,7 +459,7 @@ push $Nd367c60
    xpos 192
    ypos -2
   }
-set Na8fc140 [stack 0]
+set N625e6d0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -481,7 +481,7 @@ set Na8fc140 [stack 0]
    xpos 34
    ypos -6
   }
-set Nb27c620 [stack 0]
+set N6271ed0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -492,7 +492,7 @@ set Nb27c620 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na8fc140
+push $N625e6d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -521,7 +521,7 @@ push $Na8fc140
    xpos 158
    ypos 167
   }
-push $Nb27c620
+push $N6271ed0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true

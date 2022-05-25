@@ -1118,7 +1118,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     refractedRefractiveIndex
                 );
 
-                const float specularProbability = blend(1.0f, specularity.w, reflectivity);
+                const float specularProbability = (
+                    (specularity.w + transmittance.w > 0.0f)
+                    * blend(1.0f, specularity.w, reflectivity)
+                );
 
                 const float refractionProbability = (
                     transmittance.w * (1.0f - specularProbability)
@@ -1126,7 +1129,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 // Maybe reflect the ray
-                if (specularity.w + transmittance.w > 0.0f && rng <= specularProbability)
+                if (specularProbability > 0.0f && rng <= specularProbability)
                 {
                     // Update the colour of the ray
                     rayColour += emittance * emittance.w * absorption;
@@ -1144,8 +1147,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                     absorption *= specularity * max(specularProbability, _hitTolerance);
 
-                    // Offset the point so that it doesn't get trapped on
-                    // surface.
+                    // Offset the point so that it doesn't get trapped on the surface.
                     origin = offsetPoint(
                         origin,
                         direction + surfaceNormal,
