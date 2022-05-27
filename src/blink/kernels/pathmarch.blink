@@ -33,6 +33,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     // the input which specifies the format, process is called once per pixel
     // in this image, which also provides random seeds
     Image<eRead, eAccessPoint, eEdgeNone> noise;
+    Image<eRead, eAccessPoint, eEdgeNone> src;
+    Image<eRead, eAccessPoint, eEdgeNone> variance;
 
     // the hdribox in latlong format
     Image<eRead, eAccessRandom, eEdgeClamped> hdri;
@@ -91,7 +93,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _hdriOffsetAngle;
 
         // Ray params
-        int _pathsPerPixel;
+        int _minPathsPerPixel;
+        int _maxPathsPerPixel;
         int _maxBounces;
         float _maxRayDistance;
         int _maxRaySteps;
@@ -106,8 +109,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int _objectTextureWidth;
 
         int _outputType;
-        bool _useToneMap;
-        float _exposure;
 
 
     local:
@@ -154,7 +155,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_hdriOffsetAngle, "HDRI Offset Angle", 0.0f);
 
         // Ray params
-        defineParam(_pathsPerPixel, "Paths Per Pixel", 1);
+        defineParam(_minPathsPerPixel, "Min Paths Per Pixel", 1);
+        defineParam(_maxPathsPerPixel, "Max Paths Per Pixel", 1);
         defineParam(_maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(_maxRaySteps, "Max Ray Steps", 128);
         defineParam(_maxBounces, "Max Bounces", 1);
@@ -169,8 +171,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_objectTextureWidth, "Object Texture Width", 0);
 
         defineParam(_outputType, "Output Type", 0);
-        defineParam(_useToneMap, "Use Tone Map", true);
-        defineParam(_exposure, "Exposure", 1.0f);
     }
 
 
@@ -1180,11 +1180,28 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         SampleType(noise) noisePixel = noise();
         float3 seed = float3(noisePixel.x, noisePixel.y, noisePixel.z);
 
-        float4 resultPixel = float4(0);
+        const float4 variancePixel = variance();
+
+        const int numPaths = clamp(
+            (int) round(
+                _maxPathsPerPixel
+                * length(
+                    float3(
+                        variancePixel.x,
+                        variancePixel.y,
+                        variancePixel.z
+                    )
+                )
+            ),
+            _minPathsPerPixel,
+            _maxPathsPerPixel
+        );
+
+        float4 resultPixel = src();
 
         float2 pixelLocation = float2(pos.x, pos.y);
 
-        for (int path=1; path <= _pathsPerPixel; path++)
+        for (int path=1; path <= numPaths; path++)
         {
             seed = length(seed) * random(seed * path);
 
@@ -1207,22 +1224,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             resultPixel += marchRay(rayOrigin, rayDirection, seed);
         }
 
-        const float4 resultColour = resultPixel / _pathsPerPixel;
-        if (_useToneMap && _outputType == 0)
-        {
-            const float3 toneMapped = ACESToneMap(
-                _exposure * float3(resultColour.x, resultColour.y, resultColour.z)
-            );
-            dst() = float4(toneMapped.x, toneMapped.y, toneMapped.z, resultColour.w);
-        }
-        else
-        {
-            dst() = float4(
-                _exposure * resultColour.x,
-                _exposure * resultColour.y,
-                _exposure * resultColour.z,
-                resultColour.w
-            );
-        }
+        dst() = resultPixel / (numPaths + 1.0f);
     }
 };

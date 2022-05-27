@@ -1,0 +1,67 @@
+#include "math.h"
+
+
+kernel Variance : ImageComputationKernel<ePixelWise>
+{
+    Image<eRead, eAccessRanged2D, eEdgeClamped> src; // the input image
+    Image<eWrite> dst; // the output image
+
+    param:
+        float2 _range;
+
+    local:
+        float __pixelsInRange;
+
+
+    /**
+     * In define(), parameters can be given labels and default values.
+     */
+    void define()
+    {
+        defineParam(_range, "Range", float2(3, 3));
+    }
+
+
+    /**
+     * The init() function is run before any calls to process().
+     * Local variables can be initialized here.
+     */
+    void init()
+    {
+        src.setRange(_range.x, _range.y);
+
+        const float2 rangeSize = 2.0f * _range + 1.0f; 
+        __pixelsInRange = rangeSize.x * rangeSize.y;
+    }
+
+
+    /**
+     * Compute the irradiance of a pixel.
+     * 
+     * @arg pos: The x, and y location we are currently processing.
+     */
+    void process(int2 pos)
+    {
+        float4 average = float4(0);
+        for (int yOffset=-_range.y; yOffset <= _range.y; yOffset++)
+        {
+            for (int xOffset=-_range.x; xOffset <= _range.x; xOffset++)
+            {
+                average += src(xOffset, yOffset);
+            }
+        }
+        average /= __pixelsInRange;
+
+        float4 result = float4(0);
+        for (int yOffset=-_range.y; yOffset <= _range.y; yOffset++)
+        {
+            for (int xOffset=-_range.x; xOffset <= _range.x; xOffset++)
+            {
+                const float4 difference = src(xOffset, yOffset) - average;
+                result += difference * difference;
+            }
+        }
+
+        dst() = result / (__pixelsInRange - 1.0f);
+    }
+};

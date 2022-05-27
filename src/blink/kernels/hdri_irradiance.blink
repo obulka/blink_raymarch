@@ -7,14 +7,12 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
     Image<eWrite> dst; // the output image
 
     param:
-        int hdriFormatWidth;
-        int hdriFormatHeight;
-        int2 samples;
+        int2 _samples;
 
     local:
-        float2 hdriPixelSize;
-        float3 up;
-        float2 sampleStep;
+        float2 __hdriPixelSize;
+        float3 __up;
+        float2 __sampleStep;
 
 
     /**
@@ -22,9 +20,7 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
      */
     void define()
     {
-        defineParam(hdriFormatHeight, "HDRI Lighting Height", 1024);
-        defineParam(hdriFormatWidth, "HDRI Lighting Width", 2048);
-        defineParam(samples, "Samples", int2(100, 50));
+        defineParam(_samples, "Samples", int2(100, 50));
     }
 
 
@@ -34,12 +30,12 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
      */
     void init()
     {
-        hdriPixelSize = float2(hdriFormatWidth / (2.0f * PI), hdriFormatHeight / PI);
-        up = float3(0, 1, 0);
+        __hdriPixelSize = float2(hdri.bounds.width() / (2.0f * PI), hdri.bounds.height() / PI);
+        __up = float3(0, 1, 0);
 
-        sampleStep = float2(
-            2.0f * PI / (float) samples.x,
-            PI / (2.0f * (float) samples.y)
+        __sampleStep = float2(
+            2.0f * PI / (float) _samples.x,
+            PI / (2.0f * (float) _samples.y)
         );
     }
 
@@ -57,8 +53,8 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
 
         // Why does bilinear give nans? :(
         return hdri(
-            round(hdriPixelSize.x * angles.x) - 1,
-            round(hdriFormatHeight - (hdriPixelSize.y * angles.y)) - 1
+            round(__hdriPixelSize.x * angles.x) - 1,
+            round(hdri.bounds.height() - (__hdriPixelSize.y * angles.y)) - 1
         );
     }
 
@@ -72,20 +68,20 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
     {
         const float2 uvPosition = pixelsToUV(
             float2(pos.x, pos.y),
-            float2(hdriFormatWidth, hdriFormatHeight)
+            float2(hdri.bounds.width(), hdri.bounds.height())
         );
         const float3 direction = sphericalUnitVectorToCartesion(
             uvPositionToAngles(uvPosition)
         );
 
-        const float3 tangentRight = normalize(cross(up, direction));
+        const float3 tangentRight = normalize(cross(__up, direction));
         const float3 tangentUp = normalize(cross(direction, tangentRight));
 
         float4 irradiance = float4(0);
 
-        for (float theta = 0.0f; theta < 2.0f * PI; theta += sampleStep.x)
+        for (float theta = 0.0f; theta < 2.0f * PI; theta += __sampleStep.x)
         {
-            for (float phi = PI / 2.0f; phi > 0.0f; phi -= sampleStep.y)
+            for (float phi = PI / 2.0f; phi > 0.0f; phi -= __sampleStep.y)
             {
                 const float3 tangent = sphericalUnitVectorToCartesion(float2(theta, phi));
                 const float3 sampleDirection = (
@@ -98,6 +94,6 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
             }
         }
 
-        dst() = PI * irradiance / (float) (samples.x * samples.y);
+        dst() = PI * irradiance / (float) (_samples.x * _samples.y);
     }
 };
