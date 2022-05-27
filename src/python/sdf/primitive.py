@@ -36,7 +36,6 @@ class SDFPrimitive(SDFKnobManager):
     repetition_knob_name = "repetition"
     repetition_params_knob_name = "repetition_params"
     repetition_spacing_knob_name = "repetition_spacing"
-    enable_mandelbox_trap_colour_knob_name = "use_trap_colour"
 
     mandelbox_shape_label = "mandelbox"
 
@@ -712,10 +711,6 @@ class SDFPrimitive(SDFKnobManager):
             self.dimensional_knob_defaults,
             self.dimensional_context_knobs,
             set_node_label=True,
-        )
-
-        self._node.knob(self.enable_mandelbox_trap_colour_knob_name).setVisible(
-            self._knob.value() == self.mandelbox_shape_label,
         )
 
     @_knob_changed_callbacks.register(repetition_knob_name)
