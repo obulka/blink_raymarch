@@ -8,12 +8,11 @@ Gizmo {
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
  dimension_x 0.5
- addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN R 0 10}
- dimension_y 0.25
- addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN R 0 10}
- dimension_z 0.25
- addUserKnob {7 dimension_w l "orbital trap blend strength" t "Transition between orbital trap based colouring and the colour provided by the 'colour' knob." +HIDDEN}
- dimension_w 1
+ addUserKnob {7 dimension_y l "normal y" t "The y component of the normal direction of the plane." +HIDDEN}
+ addUserKnob {7 dimension_z l "normal z" t "The z component of the normal direction of the plane." +HIDDEN}
+ dimension_z 1
+ addUserKnob {7 dimension_w l thickness t "The thickness of the frame." +HIDDEN}
+ dimension_w 0.05
  addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
  wall_thickness 0.01
  addUserKnob {6 hollow t "If enabled, the object will be hollow, with a thickness of 'wall thickness'." -STARTLINE}
@@ -55,7 +54,6 @@ Gizmo {
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
  addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
- rotate {45 0 0}
  addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
  elongation {0.1 0 0}
  addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
@@ -68,11 +66,11 @@ Gizmo {
  addUserKnob {7 repetition_spacing l spacing t "The spacing between the objects." +HIDDEN R 0 10}
  repetition_spacing 1.1
  addUserKnob {26 ""}
- addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: This object will be subtracted from all of its\n        children, leaving holes.\n    Intersection: Only the region where this object and its\n        children overlap will remain.\n    Smooth Union: All children will smoothly blend together\n        with this object according to the 'blend strength'.\n    Smooth Subtraction:This object will be subtracted from all\n        of its children,  leaving holes that are smoothed\n        according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object\n        and its children overlap will remain, and the remaining\n        regions will be smoothed according to the 'blend\n        strength'." M {union subtraction intersection "smooth union" "smooth subtraction" "smooth intersection" "" "" ""}}
- blend_type "smooth union"
- addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected."}
+ addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: This object will be subtracted from all of its\n        children, leaving holes.\n    Intersection: Only the region where this object and its\n        children overlap will remain.\n    Smooth Union: All children will smoothly blend together\n        with this object according to the 'blend strength'.\n    Smooth Subtraction:This object will be subtracted from all\n        of its children,  leaving holes that are smoothed\n        according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object\n        and its children overlap will remain, and the remaining\n        regions will be smoothed according to the 'blend\n        strength'." +DISABLED M {union subtraction intersection "smooth union" "smooth subtraction" "smooth intersection" "" "" ""}}
+ blend_type intersection
+ addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected." +DISABLED}
  blend_strength 0.125
- addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +STARTLINE}
+ addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +DISABLED +STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
@@ -315,7 +313,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N5816fc0 [stack 0]
+set N128c6e50 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -337,7 +335,7 @@ set N5816fc0 [stack 0]
    xpos 34
    ypos -6
   }
-set N582a7c0 [stack 0]
+set Nb7f5a60 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -348,7 +346,7 @@ set N582a7c0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5816fc0
+push $N128c6e50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -377,7 +375,7 @@ push $N5816fc0
    xpos 158
    ypos 167
   }
-push $N582a7c0
+push $Nb7f5a60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -470,7 +468,7 @@ push $N582a7c0
    xpos 192
    ypos -2
   }
-set N58d6600 [stack 0]
+set Nbdab390 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -492,7 +490,7 @@ set N58d6600 [stack 0]
    xpos 34
    ypos -6
   }
-set N58e9e00 [stack 0]
+set N11453470 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -503,7 +501,7 @@ set N58e9e00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N58d6600
+push $Nbdab390
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -532,7 +530,7 @@ push $N58d6600
    xpos 158
    ypos 167
   }
-push $N58e9e00
+push $N11453470
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
