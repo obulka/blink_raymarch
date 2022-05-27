@@ -1157,6 +1157,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         );
 
         // Read the hdri value in the direction the ray was last travelling
+        // and absorb an amount of light proportional to the distance travelled
+        // through the last material
         rayColour += absorption * readHDRIValue(direction) * exp(
             -absorptionColour * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
@@ -1201,6 +1203,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 rayDirection
             );
 
+            // Determine the colour of the ray
             resultPixel += marchRay(rayOrigin, rayDirection, seed);
         }
 

@@ -8,10 +8,10 @@ Gizmo {
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
  dimension_x 0.5
- addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the deeper the fractal will have detail." +HIDDEN R 1 30}
- dimension_y 10
- addUserKnob {7 dimension_z l "max square radius" t "When the square radius has reached this length, stop iterating." +HIDDEN R 1 9}
- dimension_z 4
+ addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN R 0 10}
+ dimension_y 0.25
+ addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN R 0 10}
+ dimension_z 0.25
  addUserKnob {7 dimension_w l "orbital trap blend strength" t "Transition between orbital trap based colouring and the colour provided by the 'colour' knob." +HIDDEN}
  dimension_w 1
  addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
@@ -24,29 +24,38 @@ Gizmo {
  addUserKnob {26 ""}
  addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
  colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 diffuse_use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." -STARTLINE}
- addUserKnob {26 "" +STARTLINE}
+ diffuse_use_trap_colour true
+ addUserKnob {26 ""}
  addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
  addUserKnob {7 specular_roughness l "specular roughness" t "The object's surface will scatter the specularly reflected light more the higher this value is."}
  addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
  specular_colour {1 1 1}
+ addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 specular_use_trap_colour l "use trap colour" t "Use the trap colour for specualrly reflected light." -STARTLINE}
- addUserKnob {26 "" +STARTLINE}
+ specular_use_trap_colour true
+ addUserKnob {26 ""}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
  addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
  absorption_colour {0 0 0}
+ addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
+ absorption_use_trap_colour true
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.3
- addUserKnob {26 "" +STARTLINE}
+ addUserKnob {26 ""}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
  emission_colour {1 1 1}
+ addUserKnob {6 emission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 emission_use_trap_colour l "use trap colour" t "Use the trap colour for emitted light." -STARTLINE}
+ emission_use_trap_colour true
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {13 translate t "The translation of the object in its local coordinate space."}
  addUserKnob {13 rotate t "The rotation of the object in its local coordinate space."}
+ rotate {45 0 0}
  addUserKnob {13 elongation t "The elongation of the object along the respective axes." +DISABLED}
  elongation {0.1 0 0}
  addUserKnob {6 elongate t "Enable the elongation of the object." -STARTLINE}
@@ -59,11 +68,11 @@ Gizmo {
  addUserKnob {7 repetition_spacing l spacing t "The spacing between the objects." +HIDDEN R 0 10}
  repetition_spacing 1.1
  addUserKnob {26 ""}
- addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: This object will be subtracted from all of its\n        children, leaving holes.\n    Intersection: Only the region where this object and its\n        children overlap will remain.\n    Smooth Union: All children will smoothly blend together\n        with this object according to the 'blend strength'.\n    Smooth Subtraction:This object will be subtracted from all\n        of its children,  leaving holes that are smoothed\n        according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object\n        and its children overlap will remain, and the remaining\n        regions will be smoothed according to the 'blend\n        strength'." +DISABLED M {union subtraction intersection "smooth union" "smooth subtraction" "smooth intersection" "" "" ""}}
+ addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: This object will be subtracted from all of its\n        children, leaving holes.\n    Intersection: Only the region where this object and its\n        children overlap will remain.\n    Smooth Union: All children will smoothly blend together\n        with this object according to the 'blend strength'.\n    Smooth Subtraction:This object will be subtracted from all\n        of its children,  leaving holes that are smoothed\n        according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object\n        and its children overlap will remain, and the remaining\n        regions will be smoothed according to the 'blend\n        strength'." M {union subtraction intersection "smooth union" "smooth subtraction" "smooth intersection" "" "" ""}}
  blend_type "smooth union"
- addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected." +DISABLED}
+ addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected."}
  blend_strength 0.125
- addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +DISABLED +STARTLINE}
+ addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
@@ -306,7 +315,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N619dc00 [stack 0]
+set N5816fc0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -328,7 +337,7 @@ set N619dc00 [stack 0]
    xpos 34
    ypos -6
   }
-set N61b1400 [stack 0]
+set N582a7c0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -339,7 +348,7 @@ set N61b1400 [stack 0]
    xpos -98
    ypos 336
   }
-push $N619dc00
+push $N5816fc0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -368,7 +377,7 @@ push $N619dc00
    xpos 158
    ypos 167
   }
-push $N61b1400
+push $N582a7c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -461,7 +470,7 @@ push $N61b1400
    xpos 192
    ypos -2
   }
-set N625e6d0 [stack 0]
+set N58d6600 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -483,7 +492,7 @@ set N625e6d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N6271ed0 [stack 0]
+set N58e9e00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -494,7 +503,7 @@ set N6271ed0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N625e6d0
+push $N58d6600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -523,7 +532,7 @@ push $N625e6d0
    xpos 158
    ypos 167
   }
-push $N6271ed0
+push $N58e9e00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
