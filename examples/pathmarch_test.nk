@@ -14343,7 +14343,7 @@ Group {
  addUserKnob {7 shadow_bias l "shadow bias" R 1 5}
  shadow_bias 1
  addUserKnob {13 seeds t "The seeds used to generate per-pixel noise."}
- seeds {{frame} {2*frame} {frame/2}}
+ seeds {{"frame * random()"} {2*frame*random()} {frame/2*random()}}
  addUserKnob {26 ""}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the medium that the camera is currently in." R 1 4}
  refractive_index 1
@@ -14901,4 +14901,11 @@ FrameBlend {
  name FrameBlend1
  xpos 188
  ypos 519
+}
+Viewer {
+ inputs 0
+ frame_range 1-400
+ name Viewer1
+ xpos 188
+ ypos 611
 }
