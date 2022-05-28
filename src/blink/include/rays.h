@@ -223,3 +223,14 @@ float3 transformRay(
 
     return transformedRay;
 }
+
+
+
+inline float numPathsToMarch(const float minPaths, const float maxPaths, const float3 &variance)
+{
+    return clamp(
+        round(maxPaths * length(variance)),
+        minPaths,
+        maxPaths
+    );
+}

@@ -1183,20 +1183,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         const float4 variancePixel = variance();
 
-        const float initialPaths = variancePixel.w;
-        const float numPaths = clamp(
-            (float) round(
-                _maxPathsPerPixel
-                * length(
-                    float3(
-                        variancePixel.x,
-                        variancePixel.y,
-                        variancePixel.z
-                    )
-                )
-            ),
-            (float) _minPathsPerPixel,
-            (float) _maxPathsPerPixel
+        const float numPaths = numPathsToMarch(
+            _minPathsPerPixel,
+            _maxPathsPerPixel,
+            float3(variancePixel.x, variancePixel.y, variancePixel.z)
         );
 
         float4 resultPixel = float4(0);
@@ -1227,7 +1217,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         const uint objectId = resultPixel.w / numPaths;
-        dst() = (resultPixel + initialPaths * src()) / (numPaths + initialPaths);
-        dst(3) = encodeTwoValuesInUint(objectId, numPaths + initialPaths);
+
+        const float numPrecomputedPaths = variancePixel.w;
+
+        dst() = (resultPixel + numPrecomputedPaths * src()) / (numPaths + numPrecomputedPaths);
+        dst(3) = encodeTwoValuesInUint(objectId, numPaths + numPrecomputedPaths);
     }
 };

@@ -28,7 +28,7 @@ kernel Variance : ImageComputationKernel<ePixelWise>
      */
     void init()
     {
-        src.setRange(_range.x, _range.y);
+        src.setRange(-_range.x, -_range.y, _range.x, _range.y);
     }
 
 
