@@ -58,10 +58,10 @@ inline float3 random(float3 seed)
 }
 
 
-float3 randomUnitVector(uint seed)
+float3 randomUnitVector(const float3 &seed)
 {
-    const float z = random(seed) * 2.0f - 1.0f;
-    const float a = random(seed) * 2.0f * PI;
+    const float z = random(seed.x) * 2.0f - 1.0f;
+    const float a = random(seed.y) * 2.0f * PI;
     const float r = sqrt(1.0f - z * z);
     const float x = r * cos(a);
     const float y = r * sin(a);
@@ -76,7 +76,7 @@ float3 randomUnitVector(uint seed)
  * @arg roughness: The maximum amount to roughen by.
  * @arg seed: The random seed.
  */
-float3 roughen(
+float3 randomDirectionInHemisphere(
     const float3 &normal,
     const float roughness,
     const float3 &seed)
@@ -85,7 +85,7 @@ float3 roughen(
 
     float3x3 rotation;
     rotationMatrix(
-        PI * roughness * (angle - 0.5f) / 2.0f,
+        PI * roughness * angle / 2.0f,
         rotation
     );
 

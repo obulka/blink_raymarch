@@ -168,11 +168,9 @@ void createCameraRay(
         float3 &rayDirection)
 {
     positionFromWorldMatrix(cameraWorldMatrix, rayOrigin);
-    float4 direction;
-    matmul(
+    float4 direction = matmul(
         inverseProjectionMatrix,
-        float4(uvPosition.x, uvPosition.y, 0, 1),
-        direction
+        float4(uvPosition.x, uvPosition.y, 0, 1)
     );
     matmul(
         cameraWorldMatrix,
@@ -211,12 +209,10 @@ float3 transformRay(
     const float4 &elongation)
 {
     float3x3 rotMatrix;
-    float3 transformedRay;
     rotationMatrix(rotation, rotMatrix);
-    matmul(
+    float3 transformedRay = matmul(
         rotMatrix.invert(),
-        rayOrigin - translation,
-        transformedRay
+        rayOrigin - translation
     );
     performShapeModification(
         modifications,

@@ -973,11 +973,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
 
                 // Get the diffuse direction for the next ray
-                const float3 diffuseDirection = roughen(
-                    surfaceNormal,
-                    1.0f,
-                    seed
-                );
+                // const float3 diffuseDirection = randomDirectionInHemisphere(
+                //     surfaceNormal,
+                //     1.0f,
+                //     seed
+                // );
+                const float3 diffuseDirection = normalize(surfaceNormal + randomUnitVector(seed));
 
                 const float rng = random(random(seed.x) + random(seed.y) + random(seed.z));
 

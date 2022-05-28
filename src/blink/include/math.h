@@ -527,6 +527,47 @@ inline void matmul(const float3x3 &m, const float3 &v, float3 &out)
 
 
 /**
+ * Multiply a 4d vector by a 4x4 matrix.
+ *
+ * @arg m: The matrix that will transform the vector.
+ * @arg v: The vector to transform.
+ * @arg out: The location to store the resulting vector.
+ */
+inline float4 matmul(const float4x4 &m, const float4 &v)
+{
+    float4 out;
+    for (int i=0; i < 4; i++)
+    {
+        out[i] = 0;
+
+        for (int j=0; j < 4; j++)
+        {
+            out[i] += m[i][j] * v[j];
+        }
+    }
+
+    return out;
+}
+
+
+/**
+ * Multiply a 3d vector by a 3x3 matrix.
+ *
+ * @arg m: The matrix that will transform the vector.
+ * @arg v: The vector to transform.
+ * @arg out: The location to store the resulting vector.
+ */
+inline float3 matmul(const float3x3 &m, const float3 &v)
+{
+    return float3(
+        m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z,
+        m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z,
+        m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z
+    );
+}
+
+
+/**
  * Offset a point in a direction.
  *
  * @arg point: The point to offset.
@@ -646,7 +687,8 @@ inline float minLength(const float3 &vector0, const float3 &vector1)
 
 
 /**
- * Get the value of sky the ray would hit at infinite distance
+ * Convert a cartesion vector to cylindrical, without worrying about
+ * the angle.
  *
  * @returns: Cylindrical coordinates without angle, (r, h)
  */
