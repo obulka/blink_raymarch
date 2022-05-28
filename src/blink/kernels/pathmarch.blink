@@ -948,7 +948,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                 surfacePosition.x,
                                 surfacePosition.y,
                                 surfacePosition.z,
-                                encodeFloatsInUint(firstObjectId, depth)
+                                firstObjectId
                             );
                         }
                         if (_outputType == 2)
@@ -957,7 +957,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                 surfaceNormal.x,
                                 surfaceNormal.y,
                                 surfaceNormal.z,
-                                encodeFloatsInUint(firstObjectId, depth)
+                                firstObjectId
                             );
                         }
                         if (_outputType == 3)
@@ -966,7 +966,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                 depth,
                                 0,
                                 0,
-                                encodeFloatsInUint(firstObjectId, depth)
+                                firstObjectId
                             );
                         }
                     }
@@ -1127,7 +1127,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Exit if we have reached the bounce limit
                 if (++bounces >= __bouncesPerRay)
                 {
-                    rayColour.w = encodeFloatsInUint(firstObjectId, depth);
+                    rayColour.w = firstObjectId;
                     return rayColour;
                 }
 
@@ -1166,7 +1166,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             )
         );
 
-        rayColour.w = (bounces > 0) * encodeFloatsInUint(firstObjectId, depth);
+        rayColour.w = (bounces > 0) * firstObjectId;
         return rayColour;
     }
 
@@ -1183,8 +1183,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         const float4 variancePixel = variance();
 
-        const int numPaths = clamp(
-            (int) round(
+        const float initialPaths = variancePixel.w;
+        const float numPaths = clamp(
+            (float) round(
                 _maxPathsPerPixel
                 * length(
                     float3(
@@ -1194,11 +1195,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     )
                 )
             ),
-            _minPathsPerPixel,
-            _maxPathsPerPixel
+            (float) _minPathsPerPixel,
+            (float) _maxPathsPerPixel
         );
 
-        float4 resultPixel = src();
+        float4 resultPixel = float4(0);
 
         float2 pixelLocation = float2(pos.x, pos.y);
 
@@ -1225,6 +1226,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             resultPixel += marchRay(rayOrigin, rayDirection, seed);
         }
 
-        dst() = resultPixel / (numPaths + 1.0f);
+        const uint objectId = resultPixel.w / numPaths;
+        dst() = (resultPixel + initialPaths * src()) / (numPaths + initialPaths);
+        dst(3) = encodeTwoValuesInUint(objectId, numPaths + initialPaths);
     }
 };

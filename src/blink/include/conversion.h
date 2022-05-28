@@ -103,3 +103,24 @@ float2 decodeFloatsFromUint(const uint value)
         halfToFloat(value & 0x0000FFFF)
     );
 }
+
+
+/**
+ * Encodes two 32-bit uints as 16-bit uints in a 32-bit uint.
+ */
+uint encodeTwoValuesInUint(const uint value0, const uint value1)
+{
+    return (value0 << 16) + (value1 & 0x0000FFFF);
+}
+
+
+/**
+ * Decodes two 16-bit uints as 32-bit ints from a 32-bit uint.
+ */
+int2 decodeTwoValuesFromUint(const uint value)
+{
+    return int2(
+        value >> 16,
+        value & 0x0000FFFF
+    );
+}

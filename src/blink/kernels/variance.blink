@@ -29,9 +29,6 @@ kernel Variance : ImageComputationKernel<ePixelWise>
     void init()
     {
         src.setRange(_range.x, _range.y);
-
-        const float2 rangeSize = 2.0f * _range + 1.0f; 
-        __pixelsInRange = rangeSize.x * rangeSize.y;
     }
 
 
@@ -42,26 +39,24 @@ kernel Variance : ImageComputationKernel<ePixelWise>
      */
     void process(int2 pos)
     {
-        float4 average = float4(0);
+        float4 mean = float4(0);
+        float4 sumOfSquares = float4(0);
+        float numSamples = 0.0f;
+
         for (int yOffset=-_range.y; yOffset <= _range.y; yOffset++)
         {
             for (int xOffset=-_range.x; xOffset <= _range.x; xOffset++)
             {
-                average += src(xOffset, yOffset);
-            }
-        }
-        average /= __pixelsInRange;
+                numSamples += 1.0f;
 
-        float4 result = float4(0);
-        for (int yOffset=-_range.y; yOffset <= _range.y; yOffset++)
-        {
-            for (int xOffset=-_range.x; xOffset <= _range.x; xOffset++)
-            {
-                const float4 difference = src(xOffset, yOffset) - average;
-                result += difference * difference;
+                const float4 sample = src(xOffset, yOffset);
+
+                mean += (sample - mean) / numSamples;
+
+                sumOfSquares += sample * sample;
             }
         }
 
-        dst() = result / (__pixelsInRange - 1.0f);
+        dst() = (sumOfSquares - numSamples * mean * mean) / ((numSamples - 1.0f) * numSamples);
     }
 };
