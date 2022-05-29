@@ -263,7 +263,7 @@ inline float4 emissiveTerm(const float4 &emittance, const float4 &brdf)
 /**
  *
  */
-inline void transmissiveData(
+inline void getReflectivityData(
         const float3 &direction,
         const float3 &surfaceNormal,
         const float objectId,

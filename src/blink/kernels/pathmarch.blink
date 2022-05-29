@@ -963,7 +963,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 if (specularProbability > 0.0f || refractionProbability > 0.0f)
                 {
-                    transmissiveData(
+                    getReflectivityData(
                         direction,
                         surfaceNormal,
                         result.y,
