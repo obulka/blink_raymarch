@@ -843,9 +843,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float refractiveIndex = _refractiveIndex;
 
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][
-            1   // Id of the dielectric we are currently in
+            4   // Absorption colour of object
+            + 1 // Id of the dielectric we are currently in
             + 1 // Refractive index of that object
-            + 4 // brdf colour of object
         ];
         nestedDielectrics[0][0] = _absorptionColour.x;
         nestedDielectrics[0][1] = _absorptionColour.y;
