@@ -21,11 +21,7 @@
 
 
 // Increase this if you want more than MAX_CHILD_DEPTH direct children
-#define MAX_CHILD_DEPTH 100
-
-// Increase this if you want more than MAX_NESTED_DIELECTRICS nested
-// transmissive objects
-#define MAX_NESTED_DIELECTRICS 5
+#define MAX_CHILD_DEPTH 64
 
 
 kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
@@ -1019,27 +1015,18 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Maybe reflect the ray
                 if (specularProbability > 0.0f && rng <= specularProbability)
                 {
-                    // Update the colour of the ray
-                    rayColour += emittance * emittance.w * brdf;
-
-                    const float3 specularDirection = reflectRayOffSurface(
-                        direction,
-                        surfaceNormal
-                    );
-
-                    direction = normalize(blend(
-                        diffuseDirection,
-                        specularDirection,
-                        diffusivity.w * diffusivity.w
-                    ));
-
-                    brdf *= specularity * specularProbability;
-
-                    // Offset the point so that it doesn't get trapped on the surface.
-                    origin = offsetPoint(
-                        origin,
+                    specularBounce(
+                        emittance,
+                        specularity,
                         surfaceNormal,
-                        pixelFootprint * _shadowBias
+                        diffuseDirection,
+                        diffusivity.w,
+                        specularProbability,
+                        pixelFootprint * _shadowBias,
+                        rayColour,
+                        brdf,
+                        direction,
+                        origin
                     );
                 }
                 // Maybe spawn a refracted ray
@@ -1047,81 +1034,40 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     transmittance.w > 0.0f
                     && rng <= specularProbability + refractionProbability
                 ) {
-                    const float3 refractedDirection = refractRayThroughSurface(
-                        direction,
+                    transmissiveBounce(
+                        emittance,
+                        transmittance,
                         surfaceNormal,
+                        diffuseDirection,
+                        surface.w,
+                        refractionProbability,
+                        (2.0f * pixelFootprint + stepDistance) * _shadowBias,
+                        refractedRefractiveIndex,
+                        result.y,
+                        rayColour,
+                        brdf,
+                        direction,
+                        origin,
+                        nestedDielectrics,
+                        numNestedDielectrics,
                         refractiveIndex,
-                        refractedRefractiveIndex
+                        distanceTravelledThroughMaterial
                     );
-
-                    direction = normalize(blend(
-                        -diffuseDirection,
-                        refractedDirection,
-                        surface.w * surface.w
-                    ));
-
-                    // Offset the point so that it doesn't get trapped on
-                    // surface.
-                    origin = offsetPoint(
-                        surfacePosition,
-                        -surfaceNormal,
-                        (2.0f * pixelFootprint + stepDistance) * _shadowBias
-                    );
-
-                    const float4 absorptionColour = float4(
-                        nestedDielectrics[numNestedDielectrics][0],
-                        nestedDielectrics[numNestedDielectrics][1],
-                        nestedDielectrics[numNestedDielectrics][2],
-                        nestedDielectrics[numNestedDielectrics][3]
-                    );
-
-                    brdf *= exp(-absorptionColour * distanceTravelledThroughMaterial);
-
-                    // We are entering a new material so reset the distance
-                    distanceTravelledThroughMaterial = 0.0f;
-
-                    // We are passing through the surface, so update the refractive index
-                    refractiveIndex = refractedRefractiveIndex;
-                    if (nestedDielectrics[numNestedDielectrics][4] == result.y)
-                    {
-                        // We are exiting the material we are in, get the
-                        // last refractive index, by popping the stack
-                        numNestedDielectrics--;
-                    }
-                    else
-                    {
-                        // We are not exiting the material we are in, so push
-                        // the next refractive index to the stack
-                        numNestedDielectrics++;
-                        nestedDielectrics[numNestedDielectrics][0] = transmittance.x;
-                        nestedDielectrics[numNestedDielectrics][1] = transmittance.y;
-                        nestedDielectrics[numNestedDielectrics][2] = transmittance.z;
-                        nestedDielectrics[numNestedDielectrics][3] = transmittance.w;
-                        nestedDielectrics[numNestedDielectrics][4] = result.y;
-                        nestedDielectrics[numNestedDielectrics][5] = refractedRefractiveIndex;
-                    }
-
-                    // Update the colour of the ray
-                    rayColour += emittance * emittance.w * brdf;
-
-                    brdf *= refractionProbability;
                 }
                 // Otherwise diffuse the light
                 else
                 {
-                    // Update the colour of the ray
-                    rayColour += emittance * emittance.w * brdf;
-
-                    // fallback is diffuse
-                    direction = diffuseDirection;
-                    brdf *= diffusivity * (1.0f - specularProbability - refractionProbability);
-
-                    // Offset the point so that it doesn't get trapped on
-                    // surface.
-                    origin = offsetPoint(
-                        origin,
+                    diffuseBounce(
+                        emittance,
+                        diffusivity,
                         surfaceNormal,
-                        pixelFootprint * _shadowBias
+                        diffuseDirection,
+                        1.0f - specularProbability - refractionProbability,
+                        pixelFootprint * _shadowBias,
+                        rayColour,
+                        brdf,
+                        direction,
+                        origin
                     );
                 }
 

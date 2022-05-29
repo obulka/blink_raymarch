@@ -8,6 +8,10 @@
 // Ray math
 //
 
+// Increase this if you want more than MAX_NESTED_DIELECTRICS nested
+// transmissive objects
+#define MAX_NESTED_DIELECTRICS 5
+
 
 /**
  * Reflect a ray off of a surface.
@@ -234,5 +238,170 @@ inline float numPathsToMarch(const float minPaths, const float maxPaths, const f
         round(maxPaths * length(variance)),
         minPaths,
         maxPaths
+    );
+}
+
+
+/**
+ *
+ */
+inline float balanceHeuristic(const float pdf0, const float pdf1)
+{
+    return pdf0 / (pdf0 + pdf1);
+}
+
+
+/**
+ *
+ */
+inline float4 emissiveTerm(const float4 &emittance, const float4 &brdf)
+{
+    return emittance * emittance.w * brdf;
+}
+
+
+/**
+ *
+ */
+inline void specularBounce(
+        const float4 &emittance,
+        const float4 &specularity,
+        const float3 &surfaceNormal,
+        const float3 &diffuseDirection,
+        const float roughness,
+        const float specularProbability,
+        const float offset,
+        float4 &rayColour,
+        float4 &brdf,
+        float3 &direction,
+        float3 &position)
+{
+    // Update the colour of the ray
+    rayColour += emissiveTerm(emittance, brdf);
+
+    const float3 specularDirection = reflectRayOffSurface(
+        direction,
+        surfaceNormal
+    );
+
+    direction = normalize(blend(
+        diffuseDirection,
+        specularDirection,
+        roughness * roughness
+    ));
+
+    brdf *= specularity * specularProbability;
+
+    // Offset the point so that it doesn't get trapped on the surface.
+    position = offsetPoint(
+        position,
+        surfaceNormal,
+        offset
+    );
+}
+
+
+/**
+ *
+ */
+inline void transmissiveBounce(
+        const float4 &emittance,
+        const float4 &transmittance,
+        const float3 &surfaceNormal,
+        const float3 &diffuseDirection,
+        const float roughness,
+        const float refractionProbability,
+        const float offset,
+        const float refractedRefractiveIndex,
+        const float objectId,
+        float4 &rayColour,
+        float4 &brdf,
+        float3 &direction,
+        float3 &position,
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][6],
+        int &numNestedDielectrics,
+        float &incidentRefractiveIndex,
+        float &distanceTravelledThroughMaterial)
+{
+    const float3 refractedDirection = refractRayThroughSurface(
+        direction,
+        surfaceNormal,
+        incidentRefractiveIndex,
+        refractedRefractiveIndex
+    );
+
+    direction = normalize(blend(-diffuseDirection, refractedDirection, roughness * roughness));
+
+    // Offset the point so that it doesn't get trapped on
+    // surface.
+    position = offsetPoint(position, -surfaceNormal, offset);
+
+    const float4 absorptionColour = float4(
+        nestedDielectrics[numNestedDielectrics][0],
+        nestedDielectrics[numNestedDielectrics][1],
+        nestedDielectrics[numNestedDielectrics][2],
+        nestedDielectrics[numNestedDielectrics][3]
+    );
+
+    brdf *= exp(-absorptionColour * distanceTravelledThroughMaterial);
+
+    // We are entering a new material so reset the distance
+    distanceTravelledThroughMaterial = 0.0f;
+
+    // We are passing through the surface, so update the refractive index
+    incidentRefractiveIndex = refractedRefractiveIndex;
+    if (nestedDielectrics[numNestedDielectrics][4] == objectId)
+    {
+        // We are exiting the material we are in, get the
+        // last refractive index, by popping the stack
+        numNestedDielectrics--;
+    }
+    else
+    {
+        // We are not exiting the material we are in, so push
+        // the next refractive index to the stack
+        numNestedDielectrics++;
+        nestedDielectrics[numNestedDielectrics][0] = transmittance.x;
+        nestedDielectrics[numNestedDielectrics][1] = transmittance.y;
+        nestedDielectrics[numNestedDielectrics][2] = transmittance.z;
+        nestedDielectrics[numNestedDielectrics][3] = transmittance.w;
+        nestedDielectrics[numNestedDielectrics][4] = objectId;
+        nestedDielectrics[numNestedDielectrics][5] = refractedRefractiveIndex;
+    }
+
+    // Update the colour of the ray
+    rayColour += emissiveTerm(emittance, brdf);
+
+    brdf *= refractionProbability;
+}
+
+
+/**
+ *
+ */
+inline void diffuseBounce(
+        const float4 &emittance,
+        const float4 &diffusivity,
+        const float3 &surfaceNormal,
+        const float3 &diffuseDirection,
+        const float diffuseProbability,
+        const float offset,
+        float4 &rayColour,
+        float4 &brdf,
+        float3 &direction,
+        float3 &position)
+{
+    // Update the colour of the ray
+    rayColour += emissiveTerm(emittance, brdf);
+
+    direction = diffuseDirection;
+    brdf *= diffusivity * diffuseProbability;
+
+    // Offset the point so that it doesn't get trapped on
+    // surface.
+    position = offsetPoint(
+        position,
+        surfaceNormal,
+        offset
     );
 }
