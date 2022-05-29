@@ -8,6 +8,7 @@
 // BlinkScript Ray Marcher
 //
 
+#include "aovs.h"
 #include "camera.h"
 #include "conversion.h"
 #include "lights.h"
@@ -936,35 +937,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     depth = distanceTravelled;
 
                     // Early exit for the various AOVs that are not 'scene'
-                    if (_outputType > 0)
+                    if (_outputType > 0 && _outputType < 4)
                     {
-                        if (_outputType == 1)
-                        {
-                            return float4(
-                                surfacePosition.x,
-                                surfacePosition.y,
-                                surfacePosition.z,
-                                firstObjectId
-                            );
-                        }
-                        if (_outputType == 2)
-                        {
-                            return float4(
-                                surfaceNormal.x,
-                                surfaceNormal.y,
-                                surfaceNormal.z,
-                                firstObjectId
-                            );
-                        }
-                        if (_outputType == 3)
-                        {
-                            return float4(
-                                depth,
-                                0,
-                                0,
-                                firstObjectId
-                            );
-                        }
+                        return earlyExitAOVs(
+                            _outputType,
+                            surfacePosition,
+                            surfaceNormal,
+                            depth,
+                            firstObjectId
+                        );
                     }
                 }
 
@@ -982,33 +963,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 if (specularProbability > 0.0f || refractionProbability > 0.0f)
                 {
-                    if (nestedDielectrics[numNestedDielectrics][4] == result.y)
-                    {
-                        // We are exiting the material we are in, get the
-                        // last refractive index from the top of the stack
-                        refractedRefractiveIndex = nestedDielectrics[numNestedDielectrics - 1][5];
-                    }
-                    else
-                    {
-                        refractedRefractiveIndex = surface.x;
-                    }
-
-                    // Compute the refraction values
-                    const float reflectivity = schlickReflectionCoefficient(
+                    transmissiveData(
                         direction,
                         surfaceNormal,
+                        result.y,
+                        nestedDielectrics,
+                        numNestedDielectrics,
+                        surface.x,
                         refractiveIndex,
-                        refractedRefractiveIndex
-                    );
-
-                    specularProbability = (
-                        (specularProbability + refractionProbability > 0.0f)
-                        * blend(1.0f, specularProbability, reflectivity)
-                    );
-
-                    refractionProbability = (
-                        refractionProbability * (1.0f - specularProbability)
-                        / (1.0f - specularity.w)
+                        refractedRefractiveIndex,
+                        specularProbability,
+                        refractionProbability
                     );
                 }
 
@@ -1076,17 +1041,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Exit if we have reached the bounce limit
                 if (++bounces >= __bouncesPerRay || exitProbability <= random(rng))
                 {
-                    if (_outputType == 4)
-                    {
-                        return float4(
-                            iterations,
-                            bounces,
-                            0,
-                            firstObjectId
-                        );
-                    }
-                    rayColour.w = firstObjectId;
-                    return rayColour;
+                    return finalAOVs(
+                        _outputType,
+                        iterations,
+                        bounces,
+                        firstObjectId,
+                        rayColour
+                    );
                 }
 
                 brdf /= exitProbability;
@@ -1107,16 +1068,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // objects, return black.
         if (_outputType > 0)
         {
-            if (_outputType == 4)
-            {
-                return float4(
-                    iterations,
-                    bounces,
-                    0,
-                    firstObjectId
-                );
-            }
-            return float4(0);
+            return rayMissAOVs(
+                _outputType,
+                iterations,
+                bounces,
+                firstObjectId
+            );
         }
 
         const float4 absorptionColour = float4(

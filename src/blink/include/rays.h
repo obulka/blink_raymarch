@@ -263,6 +263,54 @@ inline float4 emissiveTerm(const float4 &emittance, const float4 &brdf)
 /**
  *
  */
+inline void transmissiveData(
+        const float3 &direction,
+        const float3 &surfaceNormal,
+        const float objectId,
+        const float nestedDielectrics[MAX_NESTED_DIELECTRICS][6],
+        const int numNestedDielectrics,
+        const float surfaceRefractiveIndex,
+        const float incidentRefractiveIndex,
+        float &refractedRefractiveIndex,
+        float &specularProbability,
+        float &refractionProbability)
+{
+    if (nestedDielectrics[numNestedDielectrics][4] == objectId)
+    {
+        // We are exiting the material we are in, get the
+        // last refractive index from the top of the stack
+        refractedRefractiveIndex = nestedDielectrics[numNestedDielectrics - 1][5];
+    }
+    else
+    {
+        refractedRefractiveIndex = surfaceRefractiveIndex;
+    }
+
+    // Compute the refraction values
+    const float reflectivity = schlickReflectionCoefficient(
+        direction,
+        surfaceNormal,
+        incidentRefractiveIndex,
+        refractedRefractiveIndex
+    );
+
+    const float initialSpecularProbability = specularProbability;
+
+    specularProbability = (
+        (specularProbability + refractionProbability > 0.0f)
+        * blend(1.0f, specularProbability, reflectivity)
+    );
+
+    refractionProbability = (
+        refractionProbability * (1.0f - specularProbability)
+        / (1.0f - initialSpecularProbability)
+    );
+}
+
+
+/**
+ *
+ */
 inline void specularBounce(
         const float4 &emittance,
         const float4 &specularity,
