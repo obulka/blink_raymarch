@@ -165,7 +165,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Scene params
         defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
-        defineParam(_absorptionColour, "Absorption Colour", float4(1));
+        defineParam(_absorptionColour, "brdf Colour", float4(1));
 
         // Shape Counts
         defineParam(_objectTextureWidth, "Object Texture Width", 0);
@@ -848,7 +848,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][
             1   // Id of the dielectric we are currently in
             + 1 // Refractive index of that object
-            + 4 // Absorption colour of object
+            + 4 // brdf colour of object
         ];
         nestedDielectrics[0][0] = _absorptionColour.x;
         nestedDielectrics[0][1] = _absorptionColour.y;
@@ -859,7 +859,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int numNestedDielectrics = 0;
 
         float4 rayColour = float4(0);
-        float4 absorption = float4(1);
+        float4 brdf = float4(1);
 
         float lastStepDistance = 1.0f;
 
@@ -868,8 +868,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float depth = 0.0f;
 
-        int bounces = 0;
         int iterations = 0;
+        int bounces = 0;
 
         float distanceTravelled = 0;
         float distanceTravelledThroughMaterial = distanceTravelled;
@@ -890,7 +890,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         while (
             distanceTravelled < _maxRayDistance
             && iterations < _maxRaySteps
-            // && sumComponent(absorption) > _hitTolerance
+            && sumComponent(brdf) > _hitTolerance
         ) {
             // Get the closest distance to an object
             const float2 result = getMinDistanceToObjectInScene(
@@ -973,50 +973,54 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
 
                 // Get the diffuse direction for the next ray
-                // const float3 diffuseDirection = randomDirectionInHemisphere(
-                //     surfaceNormal,
-                //     1.0f,
-                //     seed
-                // );
-                const float3 diffuseDirection = normalize(surfaceNormal + randomUnitVector(seed));
+                const float3 diffuseDirection = cosineDirectionInHemisphere(
+                    surfaceNormal,
+                    seed
+                );
 
                 const float rng = random(random(seed.x) + random(seed.y) + random(seed.z));
 
-                float refractedRefractiveIndex;
-                if (nestedDielectrics[numNestedDielectrics][4] == result.y)
+                float refractedRefractiveIndex = 1.0f;
+                float specularProbability = specularity.w;
+                float refractionProbability = transmittance.w;
+
+                if (specularProbability > 0.0f || refractionProbability > 0.0f)
                 {
-                    // We are exiting the material we are in, get the
-                    // last refractive index from the top of the stack
-                    refractedRefractiveIndex = nestedDielectrics[numNestedDielectrics - 1][5];
+                    if (nestedDielectrics[numNestedDielectrics][4] == result.y)
+                    {
+                        // We are exiting the material we are in, get the
+                        // last refractive index from the top of the stack
+                        refractedRefractiveIndex = nestedDielectrics[numNestedDielectrics - 1][5];
+                    }
+                    else
+                    {
+                        refractedRefractiveIndex = surface.x;
+                    }
+
+                    // Compute the refraction values
+                    const float reflectivity = schlickReflectionCoefficient(
+                        direction,
+                        surfaceNormal,
+                        refractiveIndex,
+                        refractedRefractiveIndex
+                    );
+
+                    specularProbability = (
+                        (specularProbability + refractionProbability > 0.0f)
+                        * blend(1.0f, specularProbability, reflectivity)
+                    );
+
+                    refractionProbability = (
+                        refractionProbability * (1.0f - specularProbability)
+                        / (1.0f - specularity.w)
+                    );
                 }
-                else
-                {
-                    refractedRefractiveIndex = surface.x;
-                }
-
-                // Compute the refraction values
-                const float reflectivity = schlickReflectionCoefficient(
-                    direction,
-                    surfaceNormal,
-                    refractiveIndex,
-                    refractedRefractiveIndex
-                );
-
-                const float specularProbability = (
-                    (specularity.w + transmittance.w > 0.0f)
-                    * blend(1.0f, specularity.w, reflectivity)
-                );
-
-                const float refractionProbability = (
-                    transmittance.w * (1.0f - specularProbability)
-                    / (1.0f - specularity.w)
-                );
 
                 // Maybe reflect the ray
                 if (specularProbability > 0.0f && rng <= specularProbability)
                 {
                     // Update the colour of the ray
-                    rayColour += emittance * emittance.w * absorption;
+                    rayColour += emittance * emittance.w * brdf;
 
                     const float3 specularDirection = reflectRayOffSurface(
                         direction,
@@ -1029,12 +1033,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         diffusivity.w * diffusivity.w
                     ));
 
-                    absorption *= specularity * max(specularProbability, _hitTolerance);
+                    brdf *= specularity * specularProbability;
 
                     // Offset the point so that it doesn't get trapped on the surface.
                     origin = offsetPoint(
                         origin,
-                        direction + surfaceNormal,
+                        surfaceNormal,
                         pixelFootprint * _shadowBias
                     );
                 }
@@ -1060,7 +1064,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     // surface.
                     origin = offsetPoint(
                         surfacePosition,
-                        refractedDirection - surfaceNormal,
+                        -surfaceNormal,
                         (2.0f * pixelFootprint + stepDistance) * _shadowBias
                     );
 
@@ -1071,7 +1075,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         nestedDielectrics[numNestedDielectrics][3]
                     );
 
-                    absorption *= exp(-absorptionColour * distanceTravelledThroughMaterial);
+                    brdf *= exp(-absorptionColour * distanceTravelledThroughMaterial);
 
                     // We are entering a new material so reset the distance
                     distanceTravelledThroughMaterial = 0.0f;
@@ -1098,38 +1102,48 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
 
                     // Update the colour of the ray
-                    rayColour += emittance * emittance.w * absorption;
+                    rayColour += emittance * emittance.w * brdf;
 
-                    absorption *= max(refractionProbability, _hitTolerance);
+                    brdf *= refractionProbability;
                 }
                 // Otherwise diffuse the light
                 else
                 {
                     // Update the colour of the ray
-                    rayColour += emittance * emittance.w * absorption;
+                    rayColour += emittance * emittance.w * brdf;
 
                     // fallback is diffuse
                     direction = diffuseDirection;
-                    absorption *= diffusivity * max(
-                        1.0f - specularProbability - refractionProbability,
-                        _hitTolerance
-                    );
+                    brdf *= diffusivity * (1.0f - specularProbability - refractionProbability);
 
                     // Offset the point so that it doesn't get trapped on
                     // surface.
                     origin = offsetPoint(
                         origin,
-                        direction + surfaceNormal,
+                        surfaceNormal,
                         pixelFootprint * _shadowBias
                     );
                 }
 
+                const float exitProbability = max(brdf.x, brdf.y, brdf.z);
+
                 // Exit if we have reached the bounce limit
-                if (++bounces >= __bouncesPerRay)
+                if (++bounces >= __bouncesPerRay || exitProbability <= random(rng))
                 {
+                    if (_outputType == 4)
+                    {
+                        return float4(
+                            iterations,
+                            bounces,
+                            0,
+                            firstObjectId
+                        );
+                    }
                     rayColour.w = firstObjectId;
                     return rayColour;
                 }
+
+                brdf /= exitProbability;
 
                 // Update the random seed
                 seed = random(seed + rng + fabs(origin + direction));
@@ -1147,6 +1161,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // objects, return black.
         if (_outputType > 0)
         {
+            if (_outputType == 4)
+            {
+                return float4(
+                    iterations,
+                    bounces,
+                    0,
+                    firstObjectId
+                );
+            }
             return float4(0);
         }
 
@@ -1160,7 +1183,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
-        rayColour += absorption * readHDRIValue(direction) * exp(
+        rayColour += brdf * readHDRIValue(direction) * exp(
             -absorptionColour * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
             )
@@ -1179,7 +1202,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     void process(int2 pos)
     {
         SampleType(noise) noisePixel = noise();
-        float3 seed = float3(noisePixel.x, noisePixel.y, noisePixel.z);
+        float3 seed = random(float3(noisePixel.x, noisePixel.y, noisePixel.z));
 
         const float4 variancePixel = variance();
 
@@ -1221,6 +1244,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         const float numPrecomputedPaths = variancePixel.w;
 
         dst() = (resultPixel + numPrecomputedPaths * src()) / (numPaths + numPrecomputedPaths);
+
+        if (_outputType == 4)
+        {
+            dst(2) = numPaths + numPrecomputedPaths;
+        }
+
         dst(3) = encodeTwoValuesInUint(objectId, numPaths + numPrecomputedPaths);
     }
 };

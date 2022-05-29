@@ -475,16 +475,51 @@ inline float dot2(const float4 &vector)
  */
 inline void rotationMatrix(const float3 &angles, float3x3 &out)
 {
+    const float3 cosAngles = cos(angles);
+    const float3 sinAngles = sin(angles);
+
     // Why tf can I not init a float3x3 normally??
-    out[0][0] = cos(angles.y) * cos(angles.z);
-    out[0][1] = sin(angles.x) * sin(angles.y) * cos(angles.z) - cos(angles.x) * sin(angles.z);
-    out[0][2] = cos(angles.x) * sin(angles.y) * cos(angles.z) + sin(angles.x) * sin(angles.z);
-    out[1][0] = cos(angles.y) * sin(angles.z);
-    out[1][1] = sin(angles.x) * sin(angles.y) * sin(angles.z) + cos(angles.x) * cos(angles.z);
-    out[1][2] = cos(angles.x) * sin(angles.y) * sin(angles.z) - sin(angles.x) * cos(angles.z);
-    out[2][0] = -sin(angles.y);
-    out[2][1] = sin(angles.x) * cos(angles.y);
-    out[2][2] = cos(angles.x) * cos(angles.y);
+    out[0][0] = cosAngles.y * cosAngles.z;
+    out[0][1] = sinAngles.x * sinAngles.y * cosAngles.z - cosAngles.x * sinAngles.z;
+    out[0][2] = cosAngles.x * sinAngles.y * cosAngles.z + sinAngles.x * sinAngles.z;
+    out[1][0] = cosAngles.y * sinAngles.z;
+    out[1][1] = sinAngles.x * sinAngles.y * sinAngles.z + cosAngles.x * cosAngles.z;
+    out[1][2] = cosAngles.x * sinAngles.y * sinAngles.z - sinAngles.x * cosAngles.z;
+    out[2][0] = -sinAngles.y;
+    out[2][1] = sinAngles.x * cosAngles.y;
+    out[2][2] = cosAngles.x * cosAngles.y;
+}
+
+
+/**
+ * Get a rotation matrix from an axis and an angle about that axis.
+ *
+ * @arg angles: The rotation angles in radians.
+ * @arg out: The location to store the rotation matrix.
+ */
+inline void axisAngleRotationMatrix(const float3 &axis, const float angle, float3x3 &out)
+{
+    const float cosAngle = cos(angle);
+    const float oneMinusCosAngle = 1.0f - cosAngle;
+    const float sinAngle = sin(angle);
+
+    const float3 axisSquared = axis * axis;
+
+    const float axisXY = axis.x * axis.y * oneMinusCosAngle;
+    const float axisXZ = axis.x * axis.z * oneMinusCosAngle;
+    const float axisYZ = axis.y * axis.z * oneMinusCosAngle;
+
+    const float3 axisSinAngle = axis * sinAngle;
+
+    out[0][0] = cosAngle + axisSquared.x * oneMinusCosAngle;
+    out[0][1] = axisXY - axisSinAngle.z;
+    out[0][2] = axisXZ + axisSinAngle.y;
+    out[1][0] = axisXY + axisSinAngle.z;
+    out[1][1] = cosAngle + axisSquared.y * oneMinusCosAngle;
+    out[1][2] = axisYZ - axisSinAngle.x;
+    out[2][0] = axisXZ - axisSinAngle.y;
+    out[2][1] = axisYZ + axisSinAngle.x;
+    out[2][2] = cosAngle + axisSquared.z * oneMinusCosAngle;
 }
 
 
@@ -734,6 +769,53 @@ inline float2 normalizeAngles(const float2 &angles)
     normalizedAngles.y += PI * (normalizedAngles.y < 0);
 
     return normalizedAngles;
+}
+
+
+float3 anglesBetweenVectors(const float3 &vector0, const float3 &vector1)
+{
+    return float3(
+        acos(dot(float2(vector0.y, vector0.z), float2(vector1.y, vector1.z))),
+        acos(dot(float2(vector0.x, vector0.z), float2(vector1.x, vector1.z))),
+        acos(dot(float2(vector0.x, vector0.y), float2(vector1.x, vector1.y)))
+    );
+}
+
+
+/**
+ * Get the angle and axis to use to rotate a vector onto another.
+ *
+ * @arg axis: The rotation angles in radians.
+ * @arg out: The location to store the axis.
+ *
+ * @returns: The angle.
+ */
+inline float getAngleAndAxisBetweenVectors(
+        const float3 &vector0,
+        const float3 &vector1,
+        float3 &axis)
+{
+    axis = cross(vector0, vector1);
+    return acos(dot(vector0, vector1));
+}
+
+
+float3 alignWithDirection(
+        const float3 &unalignedAxis,
+        const float3 &alignDirection,
+        const float3 &vectorToAlign)
+{
+    float3 rotationAxis;
+    const float angle = getAngleAndAxisBetweenVectors(
+        unalignedAxis,
+        alignDirection,
+        rotationAxis
+    );
+
+    float3x3 rotationMatrix;
+    axisAngleRotationMatrix(rotationAxis, angle, rotationMatrix);
+
+    return matmul(rotationMatrix, vectorToAlign);
 }
 
 

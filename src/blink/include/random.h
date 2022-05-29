@@ -9,6 +9,9 @@
 //
 
 
+/**
+ *
+ */
 inline uint wangHash(uint seed)
 {
     seed = uint(seed ^ uint(61)) ^ uint(seed >> uint(16));
@@ -33,12 +36,18 @@ inline float random(const float seed)
 }
 
 
+/**
+ *
+ */
 inline float random(uint seed)
 {
     return float(wangHash(seed)) / 4294967296.0f;
 }
 
 
+/**
+ *
+ */
 inline float2 random(float2 seed)
 {
     return float2(
@@ -48,6 +57,9 @@ inline float2 random(float2 seed)
 }
 
 
+/**
+ *
+ */
 inline float3 random(float3 seed)
 {
     return float3(
@@ -58,6 +70,9 @@ inline float3 random(float3 seed)
 }
 
 
+/**
+ *
+ */
 float3 randomUnitVector(const float3 &seed)
 {
     const float z = random(seed.x) * 2.0f - 1.0f;
@@ -70,27 +85,82 @@ float3 randomUnitVector(const float3 &seed)
 
 
 /**
- * Randomly redirect the surface normal to give it roughness.
  *
- * @arg normal: The normal to redirect.
- * @arg roughness: The maximum amount to roughen by.
+ */
+float3 uniformDirectionInZHemisphere(const float3 &seed)
+{
+    const float uniform = random(seed.x);
+    const float r = sqrt(1.0f - uniform * uniform);
+    const float phi = 2 * PI * random(seed.y);
+ 
+    return float3(cos(phi) * r, sin(phi) * r, uniform);
+}
+
+
+/**
+ *
+ */
+float3 uniformDirectionInHemisphere(const float3 &axis, const float3 &seed)
+{
+    return normalize(alignWithDirection(
+        float3(0, 0, 1),
+        axis,
+        uniformDirectionInZHemisphere(seed)
+    ));
+}
+
+
+/**
+ *
+ */
+float3 cosineDirectionInZHemisphere(const float3 &seed)
+{
+    const float uniform = random(seed.x);
+    const float r = sqrt(uniform);
+    const float angle = 2 * PI * random(seed.y);
+ 
+    const float x = r * cos(angle);
+    const float y = r * sin(angle);
+ 
+    return float3(x, y, sqrt(positivePart(1 - uniform)));
+}
+
+
+/**
+ *
+ */
+float3 cosineDirectionInHemisphere(const float3 &axis, const float3 &seed)
+{
+    return normalize(alignWithDirection(
+        float3(0, 0, 1),
+        axis,
+        cosineDirectionInZHemisphere(seed)
+    ));
+}
+
+
+/**
+ * Get a random direction within a solid angle.
+ *
+ * @arg axis: The direction the solid angle is aligned with.
+ * @arg angle: The angle from the axis to the conical surface.
  * @arg seed: The random seed.
  */
-float3 randomDirectionInHemisphere(
-    const float3 &normal,
-    const float roughness,
-    const float3 &seed)
+float3 randomDirectionInSolidAngle(
+        const float3 &axis,
+        const float angle,
+        const float3 &seed)
 {
-    const float3 angle = random(seed);
+    const float3 uniform = random(seed);
 
     float3x3 rotation;
     rotationMatrix(
-        PI * roughness * angle / 2.0f,
+        angle * uniform,
         rotation
     );
 
-    float3 roughened;
-    matmul(rotation, normal, roughened);
+    float3 direction;
+    matmul(rotation, axis, direction);
 
-    return normalize(roughened);
+    return normalize(direction);
 }

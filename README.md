@@ -90,3 +90,4 @@ The AOV options are:
 - https://iquilezles.org/articles/distfunctions/
 - http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-v-the-mandelbulb-different-de-approximations/
 - https://blog.demofox.org/2020/05/25/casual-shadertoy-path-tracing-1-basic-camera-diffuse-emissive/
+- https://www.researchgate.net/publication/354065092_Multiple_Importance_Sampling_101
