@@ -863,8 +863,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float firstObjectId = 0.0f;
         float lastRefractedId = -1.0f;
 
-        float depth = 0.0f;
-
         int iterations = 0;
         int bounces = 0;
 
@@ -934,7 +932,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     // Keep the ID of the first object hit, so we can
                     // store it in the alpha channel
                     firstObjectId = result.y;
-                    depth = distanceTravelled;
 
                     // Early exit for the various AOVs that are not 'scene'
                     if (_outputType > 0 && _outputType < 4)
@@ -943,7 +940,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             _outputType,
                             surfacePosition,
                             surfaceNormal,
-                            depth,
+                            distanceTravelled,
                             firstObjectId
                         );
                     }
