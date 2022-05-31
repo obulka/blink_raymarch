@@ -621,28 +621,6 @@ inline float3 offsetPoint(
 
 
 /**
- * Offset a point away from the surface of an object.
- *
- * @arg surfacePoint: The point to offset.
- * @arg direction: The direction to offset in.
- * @arg normal: The normal direction to the surface.
- * @arg bias: Will increase the offset by this factor.
- * @arg tolerance: The hit tolerance.
- *
- * @returns: The offset point.
- */
-inline float3 surfaceOffsetPoint(
-        const float3 &surfacePoint,
-        const float3 &direction,
-        const float3 &normal,
-        const float bias,
-        const float tolerance)
-{
-    return tolerance * bias * (direction + normal) + surfacePoint;
-}
-
-
-/**
  * The distance from a point to the y-axis.
  *
  * @arg position: The position to get the distance from.

@@ -809,97 +809,307 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    // /**
-    //  * Compute the combined intensity of all lights on the surface of an
-    //  * object.
-    //  *
-    //  * @arg pointOnSurface: The point on the surface to compute the
-    //  *     light intensity at.
-    //  * @arg surfaceNormal: The normal direction to the surface.
-    //  * @arg surfaceColour: The colour of the object.
-    //  * @arg surface: The surface properties of the object.
-    //  * @arg lightColour: Will store the light colour.
-    //  *
-    //  * @returns: The light intensity.
-    //  */
-    // float lightIntensityOnSurface(
-    //         const float3 &pointOnSurface,
-    //         const float3 &surfaceNormal,
-    //         const float4 &surfaceColour,
-    //         const float4 &surface,
-    //         float4 &lightColour)
-    // {
-    //     float2 lightIntensity = float2(surface.z, 0);
-    //     lightColour = surface.z * surfaceColour;
+    /**
+     * Compute a soft shadow value.
+     *
+     * @arg rayDirection: The direction of the shadow ray.
+     * @arg distanceToShadePoint: The maximum distance to check for
+     *     a shadow casting object.
+     * @arg softness: The softness of the shadow.
+     * @arg rayOrigin: The origin of the ray.
+     * @arg colour: Will store the colour of the object which casts the
+     *     shadow.
+     * @arg surface: Will store the surface properties of the object
+     *     which casts the shadow.
+     *
+     * @returns: The intenstity of shadow.
+     */
+    float computeSoftShadow(
+            const float3 &rayDirection,
+            const float distanceToShadePoint,
+            const float softness,
+            float3 &rayOrigin)
+    {
+        float distanceTravelled = 0;
+        float shadowIntensity = 1.0f;
+        float lastStepDistance = FLT_MAX;
 
-    //     float2 currentLightIntensity;
+        int iterations = 0;
+        while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)
+        {
+            const float stepDistance = fabs(
+                getMinDistanceToObjectInScene(rayOrigin, distanceTravelled)
+            );
+            const float stepDistanceSquared = stepDistance * stepDistance;
+            float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);
+            shadowIntensity = min(
+                shadowIntensity,
+                softness * sqrt(stepDistanceSquared - softOffset * softOffset)
+                / max(0.0f, distanceTravelled - softOffset)
+            );
 
-    //     // for each light in the scene
-    //     for (int i=0; i < lightTextureWidth; i++)
-    //     {
-    //         float4 hitSurface = float4(0);
-    //         float4 hitColour = float4(0);
+            if (stepDistance < _hitTolerance * distanceTravelled)
+            {
+                shadowIntensity = saturate(shadowIntensity);
+                return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
+            }
 
-    //         // Read the light properties
-    //         SampleType(lights) light = lights(i, 0);
-    //         SampleType(lightProperties) lightProperty = lightProperties(i, 0);
-    //         SampleType(lightProperties1) lightProperty1 = lightProperties1(i, 0);
+            lastStepDistance = stepDistance;
+            rayOrigin += rayDirection * stepDistance;
+            distanceTravelled += stepDistance;
+            iterations++;
+        }
 
-    //         int lightType = (int) lightProperty.w;
-    //         if (fabs(lightType) == 2)
-    //         {
-    //             // Ambient light, simply return the intensity.
-    //             currentLightIntensity = float2(light.w, 1);
-    //         }
-    //         else
-    //         {
-    //             // Compute the intensity
-    //             currentLightIntensity = intensityOfLightOnSurface(
-    //                 pointOnSurface,
-    //                 surfaceNormal,
-    //                 float3(light.x, light.y, light.z),
-    //                 lightType,
-    //                 light.w,
-    //                 lightProperty1.y,
-    //                 lightProperty1.x,
-    //                 hitColour,
-    //                 hitSurface
-    //             );
-    //             lightColour += hitSurface.z * hitColour;
-    //             lightIntensity += float2(hitSurface.z, 1.0f);
-    //         }
+        shadowIntensity = saturate(shadowIntensity);
+        return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
+    }
 
-    //         // Merge the intensity values
-    //         lightColour += currentLightIntensity.x * currentLightIntensity.y * float4(
-    //             lightProperty.x,
-    //             lightProperty.y,
-    //             lightProperty.z,
-    //             0.0f
-    //         );
-    //         lightIntensity += currentLightIntensity;
-    //     }
 
-    //     // Read the hdri diffuse light contribution
-    //     const float diffuse = saturate(1.0f - surface.x - surface.y);
-    //     if (diffuse > hitTolerance)
-    //     {
-    //         const float4 hdriLightColour = readHDRILightValue(surfaceNormal);
-    //         lightColour += diffuse * hdriLightColour;
-    //         lightIntensity += float2(
-    //             diffuse * length(
-    //                 float3(
-    //                     hdriLightColour.x,
-    //                     hdriLightColour.y,
-    //                     hdriLightColour.z
-    //                 )
-    //             ),
-    //             1.0f
-    //         );
-    //     }
+    /**
+     * Compute a shadow value.
+     *
+     * @arg rayDirection: The direction of the shadow ray.
+     * @arg distanceToShadePoint: The maximum distance to check for
+     *     a shadow casting object.
+     * @arg rayOrigin: The origin of the ray.
+     * @arg colour: Will store the colour of the object which casts the
+     *     shadow.
+     * @arg surface: Will store the surface properties of the object
+     *     which casts the shadow.
+     *
+     * @returns: The intenstity of shadow.
+     */
+    float computeShadow(
+            const float3 &rayDirection,
+            const float distanceToShadePoint,
+            float3 &rayOrigin)
+    {
+        float distanceTravelled = 0;
+        int iterations = 0;
+        while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)
+        {
+            float stepDistance = fabs(
+                getMinDistanceToObjectInScene(rayOrigin, distanceTravelled)
+            );
 
-    //     lightColour = saturate(lightColour);
-    //     return saturate(lightIntensity.x * lightIntensity.y);
-    // }
+            if (stepDistance < _hitTolerance * distanceTravelled)
+            {
+                return 0;
+            }
+
+            rayOrigin += rayDirection * stepDistance;
+            distanceTravelled += stepDistance;
+            iterations++;
+        }
+
+        return 1;
+    }
+
+
+    /**
+     * Compute the ambient occlusion.
+     *
+     * @arg rayDirection: The direction of the shadow ray.
+     * @arg rayOrigin: The origin of the ray.
+     * @arg amount: The amount to scale the occlusion value by.
+     * @arg iterations: The number of iterations to refine the
+     *     occlusion.
+     * @arg colour: Will store the colour of the final occluding object.
+     * @arg surface: Will store the surface properties of the final
+     *     occluding object.
+     *
+     * @returns: The occlusion.
+     */
+    float computeAmbientOcclusion(
+            const float3 &rayDirection,
+            const float3 &rayOrigin,
+            const float amount,
+            const int iterations)
+    {
+        float occlusion = 0.0f;
+        float occlusionScaleFactor = 1.0f;
+        for(int iteration=0; iteration < iterations; iteration++)
+        {
+            const float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;
+            const float distanceToClosestObject = fabs(
+                getMinDistanceToObjectInScene(rayOrigin + stepDistance * rayDirection, 1.0f)
+            );
+            occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;
+            occlusionScaleFactor *= 0.95;
+        }
+
+        return (
+            amount
+            * saturate(0.5f + 0.5f * rayDirection.y)  // ambient
+            * saturate(1.0f - 1.5f * occlusion)       // occlusion
+        );
+    }
+
+
+    /**
+     * Compute the intensity of a light on a surface.
+     *
+     * @arg pointOnSurface: The point on the surface to compute the
+     *     light intensity at.
+     * @arg surfaceNormal: The normal direction to the surface.
+     * @arg light: The light properties which depend on the light type.
+     * @arg lightType: The type of light to compute the intensity for.
+     *     0: directional
+     *     1: point
+     *     2: ambient
+     *     3: ambient occlusion
+     * @arg intensity: The light intensity.
+     * @arg falloff: The power of the falloff of the light.
+     * @arg softness: The softness of the shadow.
+     * @arg hitColour: Will store the colour of the object.
+     * @arg hitSurface: Will store the surface properties of the object.
+     *
+     * @returns: The light intensity.
+     */
+    inline float2 intensityOfLightOnSurface(
+            const float3 &pointOnSurface,
+            const float3 &surfaceNormal,
+            const float3 &light,
+            const int lightType,
+            const float intensity,
+            const float falloff,
+            const float softness,
+            const float offset)
+    {
+        int absLightType = abs(lightType);
+        if (absLightType == 3)
+        {
+            float2 result = float2(
+                1.0f,
+                computeAmbientOcclusion(
+                    surfaceNormal,
+                    pointOnSurface,
+                    intensity,
+                    (int) light.x
+                )
+            );
+            return result;
+        }
+
+        float distanceToLight;
+        float3 lightDirection;
+        float intensityAtPosition = getLightData(
+            pointOnSurface,
+            surfaceNormal,
+            light,
+            absLightType,
+            intensity,
+            falloff,
+            _maxRayDistance,
+            distanceToLight,
+            lightDirection
+        );
+        float3 surfaceOffset = offsetPoint(
+            pointOnSurface,
+            surfaceNormal,
+            offset
+        );
+        lightDirection = normalize(lightDirection);
+
+        float normalFactor = dot(surfaceNormal, lightDirection);
+
+        float shadowIntensityAtPosition;
+        if (lightType < 0)
+        {
+            shadowIntensityAtPosition = computeSoftShadow(
+                lightDirection,
+                distanceToLight,
+                softness,
+                surfaceOffset
+            );
+        }
+        else
+        {
+            shadowIntensityAtPosition = computeShadow(
+                lightDirection,
+                distanceToLight,
+                surfaceOffset
+            );
+        }
+
+        return saturate(
+            normalFactor * float2(intensityAtPosition, shadowIntensityAtPosition)
+        );
+    }
+
+
+    /**
+     * Compute the combined intensity of all lights on the surface of an
+     * object.
+     *
+     * @arg pointOnSurface: The point on the surface to compute the
+     *     light intensity at.
+     * @arg surfaceNormal: The normal direction to the surface.
+     * @arg surfaceColour: The colour of the object.
+     * @arg surface: The surface properties of the object.
+     * @arg lightColour: Will store the light colour.
+     *
+     * @returns: The light intensity.
+     */
+    float sampleLight(
+            const float3 &seed,
+            const float3 &pointOnSurface,
+            const float3 &surfaceNormal,
+            const float4 &brdf,
+            const float offset,
+            float4 &rayColour)
+    {
+        if (_lightTextureWidth <= 0)
+        {
+            return 0.0f;
+        }
+
+        float pdf = 1.0f / _lightTextureWidth;
+
+        const float rng = random(random(seed.x + seed.y) + random(seed.z));
+        const int selectedLight = floor(rng * _lightTextureWidth);
+
+        // Read the light properties
+        SampleType(lights) light = lights(selectedLight, 0);
+        SampleType(lightProperties) lightProperty = lightProperties(selectedLight, 0);
+        SampleType(lightProperties1) lightProperty1 = lightProperties1(selectedLight, 0);
+
+        float2 lightIntensity;
+
+        int lightType = (int) lightProperty.w;
+        if (fabs(lightType) == 2)
+        {
+            // Ambient light, simply return the intensity.
+            lightIntensity = float2(light.w, 1);
+        }
+        else
+        {
+            // Compute the intensity
+            lightIntensity = intensityOfLightOnSurface(
+                pointOnSurface,
+                surfaceNormal,
+                float3(light.x, light.y, light.z),
+                lightType,
+                light.w,
+                lightProperty1.y,
+                lightProperty1.x,
+                offset
+            );
+        }
+
+        // Merge the intensity values
+        rayColour += emissiveTerm(
+            float4(
+                lightProperty.x,
+                lightProperty.y,
+                lightProperty.z,
+                lightIntensity.x * lightIntensity.y
+            ),
+            brdf
+        );
+
+        return pdf;
+    }
 
 
     /**
@@ -1052,10 +1262,22 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
                 }
 
+                const float reflectionOffset = pixelFootprint * _shadowBias;
+
+                const float lightPDF = sampleLight(
+                    seed,
+                    origin,
+                    surfaceNormal,
+                    brdf,
+                    reflectionOffset,
+                    rayColour
+                );
+
                 const float materialPDF = sampleMaterial(
+                    seed,
                     surfaceNormal,
                     diffusivity,
-                    pixelFootprint * _shadowBias,
+                    reflectionOffset,
                     (2.0f * pixelFootprint + stepDistance) * _shadowBias,
                     transmittance,
                     surface.x,
@@ -1064,7 +1286,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     diffusivity.w,
                     emittance,
                     result.y,
-                    seed,
                     rayColour,
                     brdf,
                     direction,

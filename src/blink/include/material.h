@@ -465,6 +465,7 @@ inline float diffuseBounce(
  *
  */
 inline float sampleMaterial(
+        const float3 &seed,
         const float3 &surfaceNormal,
         const float4 &diffusivity,
         const float reflectionOffset,
@@ -476,7 +477,6 @@ inline float sampleMaterial(
         const float specularRoughness,
         const float4 &emittance,
         const float objectId,
-        const float3 &seed,
         float4 &rayColour,
         float4 &brdf,
         float3 &direction,
