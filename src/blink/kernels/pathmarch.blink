@@ -498,7 +498,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             SampleType(emittances) emissiveColour = emittances(j, 0);
             SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);
 
-            const int modifications = (int) shapeProperty.y;
+            const int modifications = ((int) shapeProperty.y) | ((int) surfaceProperty.y);
             float scale = position.w;
 
             const float blendStrength = shapeProperty.w;
