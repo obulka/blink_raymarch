@@ -959,99 +959,34 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
                 }
 
-                // Get the diffuse direction for the next ray
-                const float3 diffuseDirection = cosineDirectionInHemisphere(
+                sampleMaterial(
                     surfaceNormal,
-                    seed
+                    diffusivity,
+                    pixelFootprint * _shadowBias,
+                    (2.0f * pixelFootprint + stepDistance) * _shadowBias,
+                    transmittance,
+                    surface.x,
+                    surface.w,
+                    specularity,
+                    diffusivity.w,
+                    emittance,
+                    result.y,
+                    seed,
+                    rayColour,
+                    brdf,
+                    direction,
+                    origin,
+                    nestedDielectrics,
+                    numNestedDielectrics,
+                    refractiveIndex,
+                    distanceTravelledThroughMaterial
                 );
-
-                const float rng = random(random(seed.x) + random(seed.y) + random(seed.z));
-
-                float refractedRefractiveIndex;
-                float specularProbability = specularity.w;
-                float refractionProbability = transmittance.w;
-
-                if (specularProbability > 0.0f || refractionProbability > 0.0f)
-                {
-                    getReflectivityData(
-                        direction,
-                        surfaceNormal,
-                        result.y,
-                        nestedDielectrics,
-                        numNestedDielectrics,
-                        surface.x,
-                        refractiveIndex,
-                        refractedRefractiveIndex,
-                        specularProbability,
-                        refractionProbability
-                    );
-                }
-
-                // Maybe reflect the ray
-                if (specularProbability > 0.0f && rng <= specularProbability)
-                {
-                    specularBounce(
-                        emittance,
-                        specularity,
-                        surfaceNormal,
-                        diffuseDirection,
-                        diffusivity.w,
-                        specularProbability,
-                        pixelFootprint * _shadowBias,
-                        rayColour,
-                        brdf,
-                        direction,
-                        origin
-                    );
-                }
-                // Maybe refract the ray
-                else if (
-                    transmittance.w > 0.0f
-                    && rng <= specularProbability + refractionProbability
-                ) {
-                    transmissiveBounce(
-                        emittance,
-                        transmittance,
-                        surfaceNormal,
-                        diffuseDirection,
-                        surface.w,
-                        refractionProbability,
-                        (2.0f * pixelFootprint + stepDistance) * _shadowBias,
-                        refractedRefractiveIndex,
-                        result.y,
-                        rayColour,
-                        brdf,
-                        direction,
-                        origin,
-                        nestedDielectrics,
-                        numNestedDielectrics,
-                        refractiveIndex,
-                        distanceTravelledThroughMaterial
-                    );
-                }
-                // Otherwise diffuse the light
-                else
-                {
-                    diffuseBounce(
-                        emittance,
-                        diffusivity,
-                        surfaceNormal,
-                        diffuseDirection,
-                        1.0f - specularProbability - refractionProbability,
-                        pixelFootprint * _shadowBias,
-                        rayColour,
-                        brdf,
-                        direction,
-                        origin
-                    );
-                }
-
 
                 // Exit if we have reached the bounce limit
                 // or with a random chance
                 const float exitProbability = max(brdf.x, brdf.y, brdf.z);
-
-                if (++bounces >= __bouncesPerRay || exitProbability <= random(rng))
+                const float rng = random(random(seed.x) + seed.y);
+                if (++bounces >= __bouncesPerRay || exitProbability <= rng)
                 {
                     return finalAOVs(
                         _outputType,

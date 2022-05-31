@@ -453,3 +453,117 @@ inline void diffuseBounce(
         offset
     );
 }
+
+
+/**
+ *
+ */
+inline void sampleMaterial(
+        const float3 &surfaceNormal,
+        const float4 &diffusivity,
+        const float reflectionOffset,
+        const float transmissionOffset,
+        const float4 &transmittance,
+        const float surfaceRefractiveIndex,
+        const float transmissiveRoughness,
+        const float4 &specularity,
+        const float specularRoughness,
+        const float4 &emittance,
+        const float objectId,
+        const float3 &seed,
+        float4 &rayColour,
+        float4 &brdf,
+        float3 &direction,
+        float3 &position,
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][6],
+        int &numNestedDielectrics,
+        float &incidentRefractiveIndex,
+        float &distanceTravelledThroughMaterial)
+{
+    // Get the diffuse direction for the next ray
+    const float3 diffuseDirection = cosineDirectionInHemisphere(
+        surfaceNormal,
+        seed
+    );
+
+    const float rng = random(random(seed.x) + random(seed.y) + random(seed.z));
+
+    float refractedRefractiveIndex;
+    float specularProbability = specularity.w;
+    float refractionProbability = transmittance.w;
+
+    if (specularProbability > 0.0f || refractionProbability > 0.0f)
+    {
+        getReflectivityData(
+            direction,
+            surfaceNormal,
+            objectId,
+            nestedDielectrics,
+            numNestedDielectrics,
+            surfaceRefractiveIndex,
+            incidentRefractiveIndex,
+            refractedRefractiveIndex,
+            specularProbability,
+            refractionProbability
+        );
+    }
+
+    // Maybe reflect the ray
+    if (specularProbability > 0.0f && rng <= specularProbability)
+    {
+        specularBounce(
+            emittance,
+            specularity,
+            surfaceNormal,
+            diffuseDirection,
+            specularRoughness,
+            specularProbability,
+            reflectionOffset,
+            rayColour,
+            brdf,
+            direction,
+            position
+        );
+    }
+    // Maybe refract the ray
+    else if (
+        transmittance.w > 0.0f
+        && rng <= specularProbability + refractionProbability
+    ) {
+        transmissiveBounce(
+            emittance,
+            transmittance,
+            surfaceNormal,
+            diffuseDirection,
+            transmissiveRoughness,
+            refractionProbability,
+            transmissionOffset,
+            refractedRefractiveIndex,
+            objectId,
+            rayColour,
+            brdf,
+            direction,
+            position,
+            nestedDielectrics,
+            numNestedDielectrics,
+            incidentRefractiveIndex,
+            distanceTravelledThroughMaterial
+        );
+    }
+    // Otherwise diffuse the light
+    else
+    {
+        diffuseBounce(
+            emittance,
+            diffusivity,
+            surfaceNormal,
+            diffuseDirection,
+            1.0f - specularProbability - refractionProbability,
+            reflectionOffset,
+            rayColour,
+            brdf,
+            direction,
+            position
+        );
+    }
+}
