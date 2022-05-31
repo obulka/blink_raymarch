@@ -311,7 +311,7 @@ inline void getReflectivityData(
 /**
  *
  */
-inline void specularBounce(
+inline float specularBounce(
         const float4 &emittance,
         const float4 &specularity,
         const float3 &surfaceNormal,
@@ -346,13 +346,15 @@ inline void specularBounce(
         surfaceNormal,
         offset
     );
+
+    return dot(direction, surfaceNormal) / PI;
 }
 
 
 /**
  *
  */
-inline void transmissiveBounce(
+inline float transmissiveBounce(
         const float4 &emittance,
         const float4 &transmittance,
         const float3 &surfaceNormal,
@@ -421,13 +423,15 @@ inline void transmissiveBounce(
     rayColour += emissiveTerm(emittance, brdf);
 
     brdf *= refractionProbability;
+
+    return fabs(dot(direction, surfaceNormal)) / PI;
 }
 
 
 /**
  *
  */
-inline void diffuseBounce(
+inline float diffuseBounce(
         const float4 &emittance,
         const float4 &diffusivity,
         const float3 &surfaceNormal,
@@ -452,13 +456,15 @@ inline void diffuseBounce(
         surfaceNormal,
         offset
     );
+
+    return dot(direction, surfaceNormal) / PI;
 }
 
 
 /**
  *
  */
-inline void sampleMaterial(
+inline float sampleMaterial(
         const float3 &surfaceNormal,
         const float4 &diffusivity,
         const float reflectionOffset,
@@ -508,10 +514,12 @@ inline void sampleMaterial(
         );
     }
 
+    float pdf;
+
     // Maybe reflect the ray
     if (specularProbability > 0.0f && rng <= specularProbability)
     {
-        specularBounce(
+        pdf = specularBounce(
             emittance,
             specularity,
             surfaceNormal,
@@ -530,7 +538,7 @@ inline void sampleMaterial(
         transmittance.w > 0.0f
         && rng <= specularProbability + refractionProbability
     ) {
-        transmissiveBounce(
+        pdf = transmissiveBounce(
             emittance,
             transmittance,
             surfaceNormal,
@@ -553,7 +561,7 @@ inline void sampleMaterial(
     // Otherwise diffuse the light
     else
     {
-        diffuseBounce(
+        pdf = diffuseBounce(
             emittance,
             diffusivity,
             surfaceNormal,
@@ -566,4 +574,6 @@ inline void sampleMaterial(
             position
         );
     }
+
+    return pdf;
 }

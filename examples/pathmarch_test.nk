@@ -79,7 +79,7 @@ Group {
  addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
  absorption_use_trap_colour true
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
- refractive_index 1.3
+ refractive_index 1.33
  addUserKnob {26 ""}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
@@ -216,7 +216,7 @@ Group {
  addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
  absorption_use_trap_colour true
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
- refractive_index 1.48
+ refractive_index 1.56
  addUserKnob {26 ""}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
