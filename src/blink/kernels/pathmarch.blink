@@ -69,6 +69,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;
 
 
+    // the input lights direction/position.xyz intensity.w
+    Image<eRead, eAccessRandom, eEdgeNone> lights;
+
+    // colour.xyz, type.w
+    // w in [0, 1) = directional, [1, inf) = point
+    Image<eRead, eAccessRandom, eEdgeNone> lightProperties;
+
+    // shadow hardness.x
+    Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;
+
+
     // the output image
     Image<eWrite> dst;
 
@@ -104,6 +115,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Shape Textures
         int _objectTextureWidth;
+        int _lightTextureWidth;
 
         int _outputType;
 
@@ -166,6 +178,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Shape Counts
         defineParam(_objectTextureWidth, "Object Texture Width", 0);
+        defineParam(_lightTextureWidth, "Light Texture Width", 0);
 
         defineParam(_outputType, "Output Type", 0);
     }
@@ -1033,9 +1046,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
                 }
 
-                const float exitProbability = max(brdf.x, brdf.y, brdf.z);
 
                 // Exit if we have reached the bounce limit
+                // or with a random chance
+                const float exitProbability = max(brdf.x, brdf.y, brdf.z);
+
                 if (++bounces >= __bouncesPerRay || exitProbability <= random(rng))
                 {
                     return finalAOVs(
@@ -1047,6 +1062,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
                 }
 
+                // Account for the lost intensity from the early exits
                 brdf /= exitProbability;
 
                 // Update the random seed
