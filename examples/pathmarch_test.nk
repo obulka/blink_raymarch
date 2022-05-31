@@ -19,7 +19,6 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
-                    <page id="DAG.2"/>
                 </dock>
             </splitter>
             <split size="615"/>
@@ -362,7 +361,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N6919820 [stack 0]
+set N5f77ca0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -384,7 +383,7 @@ set N6919820 [stack 0]
    xpos 34
    ypos -6
   }
-set N692d230 [stack 0]
+set N5f8b6b0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -395,7 +394,7 @@ set N692d230 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6919820
+push $N5f77ca0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -424,7 +423,7 @@ push $N6919820
    xpos 158
    ypos 167
   }
-push $N692d230
+push $N5f8b6b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -517,7 +516,7 @@ push $N692d230
    xpos 192
    ypos -2
   }
-set N69da220 [stack 0]
+set N60387c0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -539,7 +538,7 @@ set N69da220 [stack 0]
    xpos 34
    ypos -6
   }
-set N69eda20 [stack 0]
+set N604bfc0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -550,7 +549,7 @@ set N69eda20 [stack 0]
    xpos -98
    ypos 336
   }
-push $N69da220
+push $N60387c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -579,7 +578,7 @@ push $N69da220
    xpos 158
    ypos 167
   }
-push $N69eda20
+push $N604bfc0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -952,7 +951,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6bc37f0 [stack 0]
+set N6222790 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -974,7 +973,7 @@ set N6bc37f0 [stack 0]
    xpos 34
    ypos -6
   }
-set N6bd6ff0 [stack 0]
+set N6235f90 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -985,7 +984,7 @@ set N6bd6ff0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6bc37f0
+push $N6222790
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1014,7 +1013,7 @@ push $N6bc37f0
    xpos 158
    ypos 167
   }
-push $N6bd6ff0
+push $N6235f90
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1107,7 +1106,7 @@ push $N6bd6ff0
    xpos 192
    ypos -2
   }
-set N6c82ac0 [stack 0]
+set N62e19d0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1129,7 +1128,7 @@ set N6c82ac0 [stack 0]
    xpos 34
    ypos -6
   }
-set N6c962c0 [stack 0]
+set N62f51d0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1140,7 +1139,7 @@ set N6c962c0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6c82ac0
+push $N62e19d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1169,7 +1168,7 @@ push $N6c82ac0
    xpos 158
    ypos 167
   }
-push $N6c962c0
+push $N62f51d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1542,7 +1541,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6e6d760 [stack 0]
+set N64cc0e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1564,7 +1563,7 @@ set N6e6d760 [stack 0]
    xpos 34
    ypos -6
   }
-set N6e80f60 [stack 0]
+set N64df8e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1575,7 +1574,7 @@ set N6e80f60 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6e6d760
+push $N64cc0e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1604,7 +1603,7 @@ push $N6e6d760
    xpos 158
    ypos 167
   }
-push $N6e80f60
+push $N64df8e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1697,7 +1696,7 @@ push $N6e80f60
    xpos 192
    ypos -2
   }
-set N6f2c8b0 [stack 0]
+set N658b230 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1719,7 +1718,7 @@ set N6f2c8b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N6f400b0 [stack 0]
+set N659ea30 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1730,7 +1729,7 @@ set N6f400b0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6f2c8b0
+push $N658b230
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1759,7 +1758,7 @@ push $N6f2c8b0
    xpos 158
    ypos 167
   }
-push $N6f400b0
+push $N659ea30
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2132,7 +2131,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N7117e90 [stack 0]
+set N6776810 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2154,7 +2153,7 @@ set N7117e90 [stack 0]
    xpos 34
    ypos -6
   }
-set N712bea0 [stack 0]
+set N678a820 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2165,7 +2164,7 @@ set N712bea0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7117e90
+push $N6776810
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2194,7 +2193,7 @@ push $N7117e90
    xpos 158
    ypos 167
   }
-push $N712bea0
+push $N678a820
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2287,7 +2286,7 @@ push $N712bea0
    xpos 192
    ypos -2
   }
-set N71d77f0 [stack 0]
+set N6836170 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2309,7 +2308,7 @@ set N71d77f0 [stack 0]
    xpos 34
    ypos -6
   }
-set N71eaff0 [stack 0]
+set N6849970 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2320,7 +2319,7 @@ set N71eaff0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N71d77f0
+push $N6836170
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2349,7 +2348,7 @@ push $N71d77f0
    xpos 158
    ypos 167
   }
-push $N71eaff0
+push $N6849970
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2722,7 +2721,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N73c2a30 [stack 0]
+set N6a213b0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2744,7 +2743,7 @@ set N73c2a30 [stack 0]
    xpos 34
    ypos -6
   }
-set N73d6230 [stack 0]
+set N6a34bb0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2755,7 +2754,7 @@ set N73d6230 [stack 0]
    xpos -98
    ypos 336
   }
-push $N73c2a30
+push $N6a213b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2784,7 +2783,7 @@ push $N73c2a30
    xpos 158
    ypos 167
   }
-push $N73d6230
+push $N6a34bb0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2877,7 +2876,7 @@ push $N73d6230
    xpos 192
    ypos -2
   }
-set N7481e90 [stack 0]
+set N6ae0810 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2899,7 +2898,7 @@ set N7481e90 [stack 0]
    xpos 34
    ypos -6
   }
-set N7495690 [stack 0]
+set N6af4010 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2910,7 +2909,7 @@ set N7495690 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7481e90
+push $N6ae0810
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2939,7 +2938,7 @@ push $N7481e90
    xpos 158
    ypos 167
   }
-push $N7495690
+push $N6af4010
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3318,7 +3317,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N76730b0 [stack 0]
+set N6cd1a30 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3340,7 +3339,7 @@ set N76730b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N76868b0 [stack 0]
+set N6ce5230 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3351,7 +3350,7 @@ set N76868b0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N76730b0
+push $N6cd1a30
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3380,7 +3379,7 @@ push $N76730b0
    xpos 158
    ypos 167
   }
-push $N76868b0
+push $N6ce5230
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3473,7 +3472,7 @@ push $N76868b0
    xpos 192
    ypos -2
   }
-set N7732510 [stack 0]
+set N6d90e90 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3495,7 +3494,7 @@ set N7732510 [stack 0]
    xpos 34
    ypos -6
   }
-set N7745d10 [stack 0]
+set N6da4690 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3506,7 +3505,7 @@ set N7745d10 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7732510
+push $N6d90e90
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3535,7 +3534,7 @@ push $N7732510
    xpos 158
    ypos 167
   }
-push $N7745d10
+push $N6da4690
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3908,7 +3907,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N791d770 [stack 0]
+set N6f7c0f0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3930,7 +3929,7 @@ set N791d770 [stack 0]
    xpos 34
    ypos -6
   }
-set N7930f70 [stack 0]
+set N6f8f8f0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3941,7 +3940,7 @@ set N7930f70 [stack 0]
    xpos -98
    ypos 336
   }
-push $N791d770
+push $N6f7c0f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3970,7 +3969,7 @@ push $N791d770
    xpos 158
    ypos 167
   }
-push $N7930f70
+push $N6f8f8f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4063,7 +4062,7 @@ push $N7930f70
    xpos 192
    ypos -2
   }
-set N79dcbd0 [stack 0]
+set N703b550 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4085,7 +4084,7 @@ set N79dcbd0 [stack 0]
    xpos 34
    ypos -6
   }
-set N79f03d0 [stack 0]
+set N704ed50 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4096,7 +4095,7 @@ set N79f03d0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N79dcbd0
+push $N703b550
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4125,7 +4124,7 @@ push $N79dcbd0
    xpos 158
    ypos 167
   }
-push $N79f03d0
+push $N704ed50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4193,7 +4192,7 @@ push $N79f03d0
   ypos 1002
  }
 end_group
-set N77da700 [stack 0]
+set N6e39080 [stack 0]
 Group {
  name sdf_primitive24
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
@@ -4504,7 +4503,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N7bca6e0 [stack 0]
+set N7229060 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4526,7 +4525,7 @@ set N7bca6e0 [stack 0]
    xpos 34
    ypos -6
   }
-set N7bddee0 [stack 0]
+set N723c860 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4537,7 +4536,7 @@ set N7bddee0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7bca6e0
+push $N7229060
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4566,7 +4565,7 @@ push $N7bca6e0
    xpos 158
    ypos 167
   }
-push $N7bddee0
+push $N723c860
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4659,7 +4658,7 @@ push $N7bddee0
    xpos 192
    ypos -2
   }
-set N7c89b40 [stack 0]
+set N72e84c0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4681,7 +4680,7 @@ set N7c89b40 [stack 0]
    xpos 34
    ypos -6
   }
-set N7c9d340 [stack 0]
+set N72fbcc0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4692,7 +4691,7 @@ set N7c9d340 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7c89b40
+push $N72e84c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4721,7 +4720,7 @@ push $N7c89b40
    xpos 158
    ypos 167
   }
-push $N7c9d340
+push $N72fbcc0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5099,7 +5098,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N7e76020 [stack 0]
+set N74d49a0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5121,7 +5120,7 @@ set N7e76020 [stack 0]
    xpos 34
    ypos -6
   }
-set N7e89820 [stack 0]
+set N74e81a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5132,7 +5131,7 @@ set N7e89820 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7e76020
+push $N74d49a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5161,7 +5160,7 @@ push $N7e76020
    xpos 158
    ypos 167
   }
-push $N7e89820
+push $N74e81a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5254,7 +5253,7 @@ push $N7e89820
    xpos 192
    ypos -2
   }
-set N7f35480 [stack 0]
+set N7593e00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5276,7 +5275,7 @@ set N7f35480 [stack 0]
    xpos 34
    ypos -6
   }
-set N7f48c80 [stack 0]
+set N75a7600 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5287,7 +5286,7 @@ set N7f48c80 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7f35480
+push $N7593e00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5316,7 +5315,7 @@ push $N7f35480
    xpos 158
    ypos 167
   }
-push $N7f48c80
+push $N75a7600
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5691,7 +5690,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N8120aa0 [stack 0]
+set N777f420 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5713,7 +5712,7 @@ set N8120aa0 [stack 0]
    xpos 34
    ypos -6
   }
-set N81342a0 [stack 0]
+set N7792c20 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5724,7 +5723,7 @@ set N81342a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8120aa0
+push $N777f420
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5753,7 +5752,7 @@ push $N8120aa0
    xpos 158
    ypos 167
   }
-push $N81342a0
+push $N7792c20
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5846,7 +5845,7 @@ push $N81342a0
    xpos 192
    ypos -2
   }
-set N81dff00 [stack 0]
+set N783e880 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5868,7 +5867,7 @@ set N81dff00 [stack 0]
    xpos 34
    ypos -6
   }
-set N81f3700 [stack 0]
+set N7852080 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5879,7 +5878,7 @@ set N81f3700 [stack 0]
    xpos -98
    ypos 336
   }
-push $N81dff00
+push $N783e880
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5908,7 +5907,7 @@ push $N81dff00
    xpos 158
    ypos 167
   }
-push $N81f3700
+push $N7852080
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6284,7 +6283,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N83cb520 [stack 0]
+set N7a29ea0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6306,7 +6305,7 @@ set N83cb520 [stack 0]
    xpos 34
    ypos -6
   }
-set N83ded20 [stack 0]
+set N7a3d6a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6317,7 +6316,7 @@ set N83ded20 [stack 0]
    xpos -98
    ypos 336
   }
-push $N83cb520
+push $N7a29ea0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6346,7 +6345,7 @@ push $N83cb520
    xpos 158
    ypos 167
   }
-push $N83ded20
+push $N7a3d6a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6439,7 +6438,7 @@ push $N83ded20
    xpos 192
    ypos -2
   }
-set N848a980 [stack 0]
+set N7ae9300 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6461,7 +6460,7 @@ set N848a980 [stack 0]
    xpos 34
    ypos -6
   }
-set N849e180 [stack 0]
+set N7afcb00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6472,7 +6471,7 @@ set N849e180 [stack 0]
    xpos -98
    ypos 336
   }
-push $N848a980
+push $N7ae9300
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6501,7 +6500,7 @@ push $N848a980
    xpos 158
    ypos 167
   }
-push $N849e180
+push $N7afcb00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6879,7 +6878,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N8676240 [stack 0]
+set N7cd4bc0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6901,7 +6900,7 @@ set N8676240 [stack 0]
    xpos 34
    ypos -6
   }
-set N8689a40 [stack 0]
+set N7ce83c0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6912,7 +6911,7 @@ set N8689a40 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8676240
+push $N7cd4bc0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6941,7 +6940,7 @@ push $N8676240
    xpos 158
    ypos 167
   }
-push $N8689a40
+push $N7ce83c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7034,7 +7033,7 @@ push $N8689a40
    xpos 192
    ypos -2
   }
-set N87356a0 [stack 0]
+set N7d94020 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7056,7 +7055,7 @@ set N87356a0 [stack 0]
    xpos 34
    ypos -6
   }
-set N8748ea0 [stack 0]
+set N7da7820 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7067,7 +7066,7 @@ set N8748ea0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N87356a0
+push $N7d94020
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7096,7 +7095,7 @@ push $N87356a0
    xpos 158
    ypos 167
   }
-push $N8748ea0
+push $N7da7820
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7473,7 +7472,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N89211d0 [stack 0]
+set N7f7fb50 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7495,7 +7494,7 @@ set N89211d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N89349d0 [stack 0]
+set N7f93350 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7506,7 +7505,7 @@ set N89349d0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N89211d0
+push $N7f7fb50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7535,7 +7534,7 @@ push $N89211d0
    xpos 158
    ypos 167
   }
-push $N89349d0
+push $N7f93350
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7628,7 +7627,7 @@ push $N89349d0
    xpos 192
    ypos -2
   }
-set N89e0630 [stack 0]
+set N803efb0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7650,7 +7649,7 @@ set N89e0630 [stack 0]
    xpos 34
    ypos -6
   }
-set N89f3e30 [stack 0]
+set N80527b0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7661,7 +7660,7 @@ set N89f3e30 [stack 0]
    xpos -98
    ypos 336
   }
-push $N89e0630
+push $N803efb0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7690,7 +7689,7 @@ push $N89e0630
    xpos 158
    ypos 167
   }
-push $N89f3e30
+push $N80527b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8067,7 +8066,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N8bcba40 [stack 0]
+set N822a3c0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8089,7 +8088,7 @@ set N8bcba40 [stack 0]
    xpos 34
    ypos -6
   }
-set N8bdf240 [stack 0]
+set N823dbc0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8100,7 +8099,7 @@ set N8bdf240 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8bcba40
+push $N822a3c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8129,7 +8128,7 @@ push $N8bcba40
    xpos 158
    ypos 167
   }
-push $N8bdf240
+push $N823dbc0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8222,7 +8221,7 @@ push $N8bdf240
    xpos 192
    ypos -2
   }
-set N8c8aea0 [stack 0]
+set N82e9820 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8244,7 +8243,7 @@ set N8c8aea0 [stack 0]
    xpos 34
    ypos -6
   }
-set N8c9e6a0 [stack 0]
+set N82fd020 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8255,7 +8254,7 @@ set N8c9e6a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8c8aea0
+push $N82e9820
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8284,7 +8283,7 @@ push $N8c8aea0
    xpos 158
    ypos 167
   }
-push $N8c9e6a0
+push $N82fd020
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8660,7 +8659,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N8e7f8e0 [stack 0]
+set N84de260 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8682,7 +8681,7 @@ set N8e7f8e0 [stack 0]
    xpos 34
    ypos -6
   }
-set N8e930e0 [stack 0]
+set N84f1a60 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8693,7 +8692,7 @@ set N8e930e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8e7f8e0
+push $N84de260
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8722,7 +8721,7 @@ push $N8e7f8e0
    xpos 158
    ypos 167
   }
-push $N8e930e0
+push $N84f1a60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8815,7 +8814,7 @@ push $N8e930e0
    xpos 192
    ypos -2
   }
-set N8f3ed40 [stack 0]
+set N859d6c0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8837,7 +8836,7 @@ set N8f3ed40 [stack 0]
    xpos 34
    ypos -6
   }
-set N8f52540 [stack 0]
+set N85b0ec0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8848,7 +8847,7 @@ set N8f52540 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8f3ed40
+push $N859d6c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8877,7 +8876,7 @@ push $N8f3ed40
    xpos 158
    ypos 167
   }
-push $N8f52540
+push $N85b0ec0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9256,7 +9255,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N912a5a0 [stack 0]
+set N8788f20 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -9278,7 +9277,7 @@ set N912a5a0 [stack 0]
    xpos 34
    ypos -6
   }
-set N913dda0 [stack 0]
+set N879c720 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -9289,7 +9288,7 @@ set N913dda0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N912a5a0
+push $N8788f20
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9318,7 +9317,7 @@ push $N912a5a0
    xpos 158
    ypos 167
   }
-push $N913dda0
+push $N879c720
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9411,7 +9410,7 @@ push $N913dda0
    xpos 192
    ypos -2
   }
-set N91e9a00 [stack 0]
+set N8848380 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -9433,7 +9432,7 @@ set N91e9a00 [stack 0]
    xpos 34
    ypos -6
   }
-set N91fd200 [stack 0]
+set N885bb80 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -9444,7 +9443,7 @@ set N91fd200 [stack 0]
    xpos -98
    ypos 336
   }
-push $N91e9a00
+push $N8848380
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9473,7 +9472,7 @@ push $N91e9a00
    xpos 158
    ypos 167
   }
-push $N91fd200
+push $N885bb80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9851,7 +9850,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N93d5580 [stack 0]
+set N8a33f00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -9873,7 +9872,7 @@ set N93d5580 [stack 0]
    xpos 34
    ypos -6
   }
-set N93e8d80 [stack 0]
+set N8a47700 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -9884,7 +9883,7 @@ set N93e8d80 [stack 0]
    xpos -98
    ypos 336
   }
-push $N93d5580
+push $N8a33f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9913,7 +9912,7 @@ push $N93d5580
    xpos 158
    ypos 167
   }
-push $N93e8d80
+push $N8a47700
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10006,7 +10005,7 @@ push $N93e8d80
    xpos 192
    ypos -2
   }
-set N94949e0 [stack 0]
+set N8af3360 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -10028,7 +10027,7 @@ set N94949e0 [stack 0]
    xpos 34
    ypos -6
   }
-set N94a81e0 [stack 0]
+set N8b06b60 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -10039,7 +10038,7 @@ set N94a81e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N94949e0
+push $N8af3360
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10068,7 +10067,7 @@ push $N94949e0
    xpos 158
    ypos 167
   }
-push $N94a81e0
+push $N8b06b60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10445,7 +10444,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N9680520 [stack 0]
+set N8cdeea0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -10467,7 +10466,7 @@ set N9680520 [stack 0]
    xpos 34
    ypos -6
   }
-set N9693d20 [stack 0]
+set N8cf26a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -10478,7 +10477,7 @@ set N9693d20 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9680520
+push $N8cdeea0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10507,7 +10506,7 @@ push $N9680520
    xpos 158
    ypos 167
   }
-push $N9693d20
+push $N8cf26a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10600,7 +10599,7 @@ push $N9693d20
    xpos 192
    ypos -2
   }
-set N973f980 [stack 0]
+set N8d9e300 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -10622,7 +10621,7 @@ set N973f980 [stack 0]
    xpos 34
    ypos -6
   }
-set N9753180 [stack 0]
+set N8db1b00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -10633,7 +10632,7 @@ set N9753180 [stack 0]
    xpos -98
    ypos 336
   }
-push $N973f980
+push $N8d9e300
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10662,7 +10661,7 @@ push $N973f980
    xpos 158
    ypos 167
   }
-push $N9753180
+push $N8db1b00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11042,7 +11041,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N992b250 [stack 0]
+set N8f89bd0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -11064,7 +11063,7 @@ set N992b250 [stack 0]
    xpos 34
    ypos -6
   }
-set N993ea50 [stack 0]
+set N8f9d3d0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -11075,7 +11074,7 @@ set N993ea50 [stack 0]
    xpos -98
    ypos 336
   }
-push $N992b250
+push $N8f89bd0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11104,7 +11103,7 @@ push $N992b250
    xpos 158
    ypos 167
   }
-push $N993ea50
+push $N8f9d3d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11197,7 +11196,7 @@ push $N993ea50
    xpos 192
    ypos -2
   }
-set N99ea6b0 [stack 0]
+set N9049030 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -11219,7 +11218,7 @@ set N99ea6b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N99fdeb0 [stack 0]
+set N905c830 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -11230,7 +11229,7 @@ set N99fdeb0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N99ea6b0
+push $N9049030
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11259,7 +11258,7 @@ push $N99ea6b0
    xpos 158
    ypos 167
   }
-push $N99fdeb0
+push $N905c830
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11635,7 +11634,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N9bd6150 [stack 0]
+set N9234ad0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -11657,7 +11656,7 @@ set N9bd6150 [stack 0]
    xpos 34
    ypos -6
   }
-set N9be9950 [stack 0]
+set N92482d0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -11668,7 +11667,7 @@ set N9be9950 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9bd6150
+push $N9234ad0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11697,7 +11696,7 @@ push $N9bd6150
    xpos 158
    ypos 167
   }
-push $N9be9950
+push $N92482d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11790,7 +11789,7 @@ push $N9be9950
    xpos 192
    ypos -2
   }
-set N9c955b0 [stack 0]
+set N92f3f30 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -11812,7 +11811,7 @@ set N9c955b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N9ca8db0 [stack 0]
+set N9307730 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -11823,7 +11822,7 @@ set N9ca8db0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9c955b0
+push $N92f3f30
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11852,7 +11851,7 @@ push $N9c955b0
    xpos 158
    ypos 167
   }
-push $N9ca8db0
+push $N9307730
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12229,7 +12228,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N9e81050 [stack 0]
+set N94df9d0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -12251,7 +12250,7 @@ set N9e81050 [stack 0]
    xpos 34
    ypos -6
   }
-set N9e94850 [stack 0]
+set N94f31d0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -12262,7 +12261,7 @@ set N9e94850 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9e81050
+push $N94df9d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12291,7 +12290,7 @@ push $N9e81050
    xpos 158
    ypos 167
   }
-push $N9e94850
+push $N94f31d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12384,7 +12383,7 @@ push $N9e94850
    xpos 192
    ypos -2
   }
-set N9f404b0 [stack 0]
+set N959ee30 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -12406,7 +12405,7 @@ set N9f404b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N9f53cb0 [stack 0]
+set N95b2630 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -12417,7 +12416,7 @@ set N9f53cb0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9f404b0
+push $N959ee30
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12446,7 +12445,7 @@ push $N9f404b0
    xpos 158
    ypos 167
   }
-push $N9f53cb0
+push $N95b2630
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12824,7 +12823,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na12c1f0 [stack 0]
+set N978ab70 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -12846,7 +12845,7 @@ set Na12c1f0 [stack 0]
    xpos 34
    ypos -6
   }
-set Na13f9f0 [stack 0]
+set N979e370 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -12857,7 +12856,7 @@ set Na13f9f0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na12c1f0
+push $N978ab70
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12886,7 +12885,7 @@ push $Na12c1f0
    xpos 158
    ypos 167
   }
-push $Na13f9f0
+push $N979e370
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12979,7 +12978,7 @@ push $Na13f9f0
    xpos 192
    ypos -2
   }
-set Na1eb650 [stack 0]
+set N9849fd0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -13001,7 +13000,7 @@ set Na1eb650 [stack 0]
    xpos 34
    ypos -6
   }
-set Na1fee50 [stack 0]
+set N985d7d0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -13012,7 +13011,7 @@ set Na1fee50 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na1eb650
+push $N9849fd0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -13041,7 +13040,7 @@ push $Na1eb650
    xpos 158
    ypos 167
   }
-push $Na1fee50
+push $N985d7d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -13418,7 +13417,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na3d73d0 [stack 0]
+set N9a35d50 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -13440,7 +13439,7 @@ set Na3d73d0 [stack 0]
    xpos 34
    ypos -6
   }
-set Na3eabd0 [stack 0]
+set N9a49550 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -13451,7 +13450,7 @@ set Na3eabd0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na3d73d0
+push $N9a35d50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -13480,7 +13479,7 @@ push $Na3d73d0
    xpos 158
    ypos 167
   }
-push $Na3eabd0
+push $N9a49550
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -13573,7 +13572,7 @@ push $Na3eabd0
    xpos 192
    ypos -2
   }
-set Na496830 [stack 0]
+set N9af51b0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -13595,7 +13594,7 @@ set Na496830 [stack 0]
    xpos 34
    ypos -6
   }
-set Na4aa030 [stack 0]
+set N9b089b0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -13606,7 +13605,7 @@ set Na4aa030 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na496830
+push $N9af51b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -13635,7 +13634,7 @@ push $Na496830
    xpos 158
    ypos 167
   }
-push $Na4aa030
+push $N9b089b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14013,7 +14012,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na682100 [stack 0]
+set N9ce0a80 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -14035,7 +14034,7 @@ set Na682100 [stack 0]
    xpos 34
    ypos -6
   }
-set Na695900 [stack 0]
+set N9cf4280 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -14046,7 +14045,7 @@ set Na695900 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na682100
+push $N9ce0a80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14075,7 +14074,7 @@ push $Na682100
    xpos 158
    ypos 167
   }
-push $Na695900
+push $N9cf4280
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14168,7 +14167,7 @@ push $Na695900
    xpos 192
    ypos -2
   }
-set Na741560 [stack 0]
+set N9d9fee0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -14190,7 +14189,7 @@ set Na741560 [stack 0]
    xpos 34
    ypos -6
   }
-set Na754d60 [stack 0]
+set N9db36e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -14201,7 +14200,7 @@ set Na754d60 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na741560
+push $N9d9fee0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14230,7 +14229,7 @@ push $Na741560
    xpos 158
    ypos 167
   }
-push $Na754d60
+push $N9db36e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14608,7 +14607,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na92ca00 [stack 0]
+set N9f8b380 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -14630,7 +14629,7 @@ set Na92ca00 [stack 0]
    xpos 34
    ypos -6
   }
-set Na940200 [stack 0]
+set N9f9eb80 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -14641,7 +14640,7 @@ set Na940200 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na92ca00
+push $N9f8b380
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14670,7 +14669,7 @@ push $Na92ca00
    xpos 158
    ypos 167
   }
-push $Na940200
+push $N9f9eb80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14763,7 +14762,7 @@ push $Na940200
    xpos 192
    ypos -2
   }
-set Na9ebe60 [stack 0]
+set Na04a7e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -14785,7 +14784,7 @@ set Na9ebe60 [stack 0]
    xpos 34
    ypos -6
   }
-set Na9ff660 [stack 0]
+set Na05dfe0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -14796,7 +14795,7 @@ set Na9ff660 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na9ebe60
+push $Na04a7e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14825,7 +14824,7 @@ push $Na9ebe60
    xpos 158
    ypos 167
   }
-push $Na9ff660
+push $Na05dfe0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15202,7 +15201,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nabd7340 [stack 0]
+set Na235cc0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -15224,7 +15223,7 @@ set Nabd7340 [stack 0]
    xpos 34
    ypos -6
   }
-set Nabeab40 [stack 0]
+set Na2494c0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -15235,7 +15234,7 @@ set Nabeab40 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nabd7340
+push $Na235cc0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15264,7 +15263,7 @@ push $Nabd7340
    xpos 158
    ypos 167
   }
-push $Nabeab40
+push $Na2494c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15357,7 +15356,7 @@ push $Nabeab40
    xpos 192
    ypos -2
   }
-set Nac967a0 [stack 0]
+set Na2f5120 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -15379,7 +15378,7 @@ set Nac967a0 [stack 0]
    xpos 34
    ypos -6
   }
-set Naca9fa0 [stack 0]
+set Na308920 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -15390,7 +15389,7 @@ set Naca9fa0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nac967a0
+push $Na2f5120
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15419,7 +15418,7 @@ push $Nac967a0
    xpos 158
    ypos 167
   }
-push $Naca9fa0
+push $Na308920
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15795,7 +15794,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nae81a10 [stack 0]
+set Na4e0390 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -15817,7 +15816,7 @@ set Nae81a10 [stack 0]
    xpos 34
    ypos -6
   }
-set Nae95210 [stack 0]
+set Na4f3b90 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -15828,7 +15827,7 @@ set Nae95210 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nae81a10
+push $Na4e0390
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15857,7 +15856,7 @@ push $Nae81a10
    xpos 158
    ypos 167
   }
-push $Nae95210
+push $Na4f3b90
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15950,7 +15949,7 @@ push $Nae95210
    xpos 192
    ypos -2
   }
-set Naf40e70 [stack 0]
+set Na59f7f0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -15972,7 +15971,7 @@ set Naf40e70 [stack 0]
    xpos 34
    ypos -6
   }
-set Naf54670 [stack 0]
+set Na5b2ff0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -15983,7 +15982,7 @@ set Naf54670 [stack 0]
    xpos -98
    ypos 336
   }
-push $Naf40e70
+push $Na59f7f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16012,7 +16011,7 @@ push $Naf40e70
    xpos 158
    ypos 167
   }
-push $Naf54670
+push $Na5b2ff0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16390,7 +16389,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nb12c0a0 [stack 0]
+set Na78aa20 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -16412,7 +16411,7 @@ set Nb12c0a0 [stack 0]
    xpos 34
    ypos -6
   }
-set Nb13f8a0 [stack 0]
+set Na79e220 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -16423,7 +16422,7 @@ set Nb13f8a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nb12c0a0
+push $Na78aa20
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16452,7 +16451,7 @@ push $Nb12c0a0
    xpos 158
    ypos 167
   }
-push $Nb13f8a0
+push $Na79e220
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16545,7 +16544,7 @@ push $Nb13f8a0
    xpos 192
    ypos -2
   }
-set Nb1ef500 [stack 0]
+set Na84de80 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -16567,7 +16566,7 @@ set Nb1ef500 [stack 0]
    xpos 34
    ypos -6
   }
-set Nb202d00 [stack 0]
+set Na861680 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -16578,7 +16577,7 @@ set Nb202d00 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nb1ef500
+push $Na84de80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16607,7 +16606,7 @@ push $Nb1ef500
    xpos 158
    ypos 167
   }
-push $Nb202d00
+push $Na861680
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16678,7 +16677,6 @@ end_group
 Group {
  inputs 0
  name sdf_material
- onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
  tile_color 0xffffffff
  xpos -1054
@@ -16784,7 +16782,7 @@ Group {
  Constant {
   inputs 0
   channels sdf_surface
-  color {{parent.refractive_index} 1 1 {parent.transmission_roughness}}
+  color {{parent.refractive_index} {"(parent.diffuse_use_trap_colour ? 8192 : 0)  | (parent.specular_use_trap_colour ? 16384 : 0) | (parent.absorption_use_trap_colour ? 32768 : 0) | (parent.emission_use_trap_colour ? 65536 : 0)"} 1 {parent.transmission_roughness}}
   format "1 1 0 0 1 1 1 1x1"
   name surface
   xpos 966
@@ -16812,11 +16810,10 @@ push 0
 Group {
  inputs 0
  name sdf_material1
- onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
  tile_color 0xffffffff
  xpos -919
- ypos 353
+ ypos 356
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
  colour {1 1 1}
@@ -16842,7 +16839,7 @@ Group {
  addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
  absorption_use_trap_colour true
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
- refractive_index 1.48
+ refractive_index 1.47
  addUserKnob {26 ""}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
@@ -16918,7 +16915,7 @@ Group {
  Constant {
   inputs 0
   channels sdf_surface
-  color {{parent.refractive_index} 1 1 {parent.transmission_roughness}}
+  color {{parent.refractive_index} {"(parent.diffuse_use_trap_colour ? 8192 : 0)  | (parent.specular_use_trap_colour ? 16384 : 0) | (parent.absorption_use_trap_colour ? 32768 : 0) | (parent.emission_use_trap_colour ? 65536 : 0)"} 1 {parent.transmission_roughness}}
   format "1 1 0 0 1 1 1 1x1"
   name surface
   xpos 966
@@ -17156,7 +17153,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nfccf9f0 [stack 0]
+set Naada1e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -17178,7 +17175,7 @@ set Nfccf9f0 [stack 0]
    xpos 34
    ypos -6
   }
-set Nfce32b0 [stack 0]
+set Naaed9e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -17189,7 +17186,7 @@ set Nfce32b0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nfccf9f0
+push $Naada1e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17218,7 +17215,7 @@ push $Nfccf9f0
    xpos 158
    ypos 167
   }
-push $Nfce32b0
+push $Naaed9e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17311,7 +17308,7 @@ push $Nfce32b0
    xpos 192
    ypos -2
   }
-set Nfd8cf90 [stack 0]
+set Nab99b80 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -17333,7 +17330,7 @@ set Nfd8cf90 [stack 0]
    xpos 34
    ypos -6
   }
-set Nfda0850 [stack 0]
+set Nabad380 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -17344,7 +17341,7 @@ set Nfda0850 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nfd8cf90
+push $Nab99b80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17373,7 +17370,7 @@ push $Nfd8cf90
    xpos 158
    ypos 167
   }
-push $Nfda0850
+push $Nabad380
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17653,7 +17650,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nb6bfcb0 [stack 0]
+set Nad1e990 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -17675,7 +17672,7 @@ set Nb6bfcb0 [stack 0]
    xpos 34
    ypos -6
   }
-set Nb6d34b0 [stack 0]
+set Nad32190 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -17686,7 +17683,7 @@ set Nb6d34b0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nb6bfcb0
+push $Nad1e990
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17715,7 +17712,7 @@ push $Nb6bfcb0
    xpos 158
    ypos 167
   }
-push $Nb6d34b0
+push $Nad32190
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17808,7 +17805,7 @@ push $Nb6d34b0
    xpos 192
    ypos -2
   }
-set Nb77f650 [stack 0]
+set Nadde330 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -17830,7 +17827,7 @@ set Nb77f650 [stack 0]
    xpos 34
    ypos -6
   }
-set Nb792e50 [stack 0]
+set Nadf1b30 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -17841,7 +17838,7 @@ set Nb792e50 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nb77f650
+push $Nadde330
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17870,7 +17867,7 @@ push $Nb77f650
    xpos 158
    ypos 167
   }
-push $Nb792e50
+push $Nadf1b30
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17943,7 +17940,7 @@ Dot {
  xpos -234
  ypos 518
 }
-set Nb8275c0 [stack 0]
+set Nae862a0 [stack 0]
 Dot {
  name Dot3
  xpos -234
@@ -17977,7 +17974,7 @@ Dot {
  xpos -85
  ypos 458
 }
-set Nb86d040 [stack 0]
+set Naecbd20 [stack 0]
 Dot {
  name Dot5
  xpos -85
@@ -18005,7 +18002,7 @@ Dot {
  xpos 70
  ypos 410
 }
-set Nb88cb90 [stack 0]
+set Naeeb870 [stack 0]
 Dot {
  name Dot6
  xpos 70
@@ -18021,9 +18018,9 @@ Dot {
  xpos 70
  ypos 908
 }
-push $Nb88cb90
-push $Nb86d040
-push $Nb8275c0
+push $Naeeb870
+push $Naecbd20
+push $Nae862a0
 Group {
  inputs 3
  name path_march1
@@ -18132,19 +18129,19 @@ Group {
   xpos -422
   ypos -1549
  }
-set Nb8dbaa0 [stack 0]
+set Naf3a3c0 [stack 0]
  Dot {
   name Dot16
   xpos 589
   ypos -1549
  }
-set Nb8e0960 [stack 0]
+set Naf3f280 [stack 0]
  Dot {
   name Dot1
   xpos 589
   ypos -1473
  }
-push $Nb8e0960
+push $Naf3f280
  Input {
   inputs 0
   name scene
@@ -18188,7 +18185,7 @@ push $Nb8e0960
    xpos 192
    ypos -2
   }
-set Nb91bca0 [stack 0]
+set Naf7a5c0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -18210,7 +18207,7 @@ set Nb91bca0 [stack 0]
    xpos 34
    ypos -6
   }
-set Nb92f4a0 [stack 0]
+set Naf8ddc0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -18221,7 +18218,7 @@ set Nb92f4a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nb91bca0
+push $Naf7a5c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -18250,7 +18247,7 @@ push $Nb91bca0
    xpos 158
    ypos 167
   }
-push $Nb92f4a0
+push $Naf8ddc0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -18317,7 +18314,7 @@ push $Nb92f4a0
   xpos 701
   ypos -1315
  }
-set Nb9beab0 [stack 0]
+set Nb01d3d0 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -18329,7 +18326,7 @@ set Nb9beab0 [stack 0]
   xpos 408
   ypos -862
  }
-push $Nb9beab0
+push $Nb01d3d0
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -18341,7 +18338,7 @@ push $Nb9beab0
   xpos 783
   ypos -862
  }
-push $Nb9beab0
+push $Nb01d3d0
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -18353,7 +18350,7 @@ push $Nb9beab0
   xpos 644
   ypos -861
  }
-push $Nb9beab0
+push $Nb01d3d0
  Shuffle {
   in sdf_shape
   name shape
@@ -18365,7 +18362,7 @@ push $Nb9beab0
   xpos 533
   ypos -860
  }
-push $Nb9beab0
+push $Nb01d3d0
  Shuffle {
   in sdf_emm_colour
   name emm_colour
@@ -18377,7 +18374,7 @@ push $Nb9beab0
   xpos 301
   ypos -864
  }
-push $Nb9beab0
+push $Nb01d3d0
  Shuffle {
   in sdf_trans_colour
   name trans_colour
@@ -18389,7 +18386,7 @@ push $Nb9beab0
   xpos 204
   ypos -863
  }
-push $Nb9beab0
+push $Nb01d3d0
  Shuffle {
   in sdf_spec_colour
   name spec_colour
@@ -18401,7 +18398,7 @@ push $Nb9beab0
   xpos 104
   ypos -862
  }
-push $Nb9beab0
+push $Nb01d3d0
  Shuffle {
   in sdf_colour
   name diff_colour
@@ -18413,7 +18410,7 @@ push $Nb9beab0
   xpos -12
   ypos -863
  }
-push $Nb9beab0
+push $Nb01d3d0
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -18425,7 +18422,7 @@ push $Nb9beab0
   xpos 1230
   ypos -854
  }
-push $Nb9beab0
+push $Nb01d3d0
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -18437,7 +18434,7 @@ push $Nb9beab0
   xpos 1079
   ypos -851
  }
-push $Nb9beab0
+push $Nb01d3d0
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -18474,13 +18471,13 @@ push $Nb9beab0
   xpos 1695
   ypos -1474
  }
-push $Nb8dbaa0
+push $Naf3a3c0
  Reformat {
   name Reformat2
   xpos -456
   ypos -1503
  }
-set Nbad1ed0 [stack 0]
+set Nb1307f0 [stack 0]
  Input {
   inputs 0
   name previous
@@ -18499,7 +18496,7 @@ set Nbad1ed0 [stack 0]
   xpos -250
   ypos -1385
  }
-set Nbaf6510 [stack 0]
+set Nb154e30 [stack 0]
 add_layer {variance variance.red variance.green variance.blue variance.num_paths}
  Shuffle {
   in variance
@@ -18512,7 +18509,7 @@ add_layer {variance variance.red variance.green variance.blue variance.num_paths
   xpos -319
   ypos -1310
  }
-push $Nbad1ed0
+push $Nb1307f0
  Invert {
   channels rgb
   name Invert2
@@ -18531,7 +18528,7 @@ push $Nbad1ed0
   xpos -422
   ypos -451
  }
-push $Nbaf6510
+push $Nb154e30
  Dot {
   name Dot21
   xpos -250
@@ -18628,7 +18625,7 @@ push $Nbaf6510
   xpos 1695
   ypos -341
  }
-set Nbb82b80 [stack 0]
+set Nb1e14a0 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/decode_alpha.blink
   recompileCount 2
@@ -18640,8 +18637,8 @@ set Nbb82b80 [stack 0]
   xpos 1661
   ypos -228
  }
-set Ncf198f0 [stack 0]
-push $Nbb82b80
+set Nc5771f0 [stack 0]
+push $Nb1e14a0
  Dot {
   name Dot8
   xpos 1830
@@ -18656,7 +18653,7 @@ push $Nbb82b80
   xpos 1796
   ypos -221
  }
-push $Nbb82b80
+push $Nb1e14a0
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/variance.blink
   recompileCount 16
@@ -18669,7 +18666,7 @@ push $Nbb82b80
   xpos 1526
   ypos -352
  }
-push $Ncf198f0
+push $Nc5771f0
  ShuffleCopy {
   inputs 2
   in rgb
@@ -18700,7 +18697,7 @@ push $Ncf198f0
   ypos -29
  }
 end_group
-set Nb8a05a0 [stack 0]
+set Naeff280 [stack 0]
 Write {
  file /home/ob1/software/nuke/dev/raymarch/images/path_march_test/path_march_test.####.exr
  file_type exr
@@ -18738,7 +18735,7 @@ Write {
  xpos 967
  ypos 659
 }
-push $Nb8a05a0
+push $Naeff280
 Grade {
  channels {variance.red variance.green variance.blue -variance.num_paths}
  white 50
@@ -18753,7 +18750,7 @@ Shuffle {
  xpos 387
  ypos 579
 }
-push $N77da700
+push $N6e39080
 Group {
  name sdf_primitive1
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
@@ -19062,7 +19059,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nd1860f0 [stack 0]
+set Nc7e3a00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -19084,7 +19081,7 @@ set Nd1860f0 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd1998f0 [stack 0]
+set Nc7f7200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -19095,7 +19092,7 @@ set Nd1998f0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nd1860f0
+push $Nc7e3a00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -19124,7 +19121,7 @@ push $Nd1860f0
    xpos 158
    ypos 167
   }
-push $Nd1998f0
+push $Nc7f7200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -19217,7 +19214,7 @@ push $Nd1998f0
    xpos 192
    ypos -2
   }
-set Nd245390 [stack 0]
+set Nc8a2ca0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -19239,7 +19236,7 @@ set Nd245390 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd258b90 [stack 0]
+set Nc8b64a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -19250,7 +19247,7 @@ set Nd258b90 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nd245390
+push $Nc8a2ca0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -19279,7 +19276,7 @@ push $Nd245390
    xpos 158
    ypos 167
   }
-push $Nd258b90
+push $Nc8b64a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -19347,6 +19344,13 @@ push $Nd258b90
   ypos 1002
  }
 end_group
+push $Naeff280
+Viewer {
+ frame_range 1-400
+ name Viewer1
+ xpos -578
+ ypos 808
+}
 Group {
  inputs 0
  name sdf_primitive31
@@ -19655,7 +19659,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nd4305b0 [stack 0]
+set Ncab62f0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -19677,7 +19681,7 @@ set Nd4305b0 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd443db0 [stack 0]
+set Ncac9af0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -19688,7 +19692,7 @@ set Nd443db0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nd4305b0
+push $Ncab62f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -19717,7 +19721,7 @@ push $Nd4305b0
    xpos 158
    ypos 167
   }
-push $Nd443db0
+push $Ncac9af0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -19810,7 +19814,7 @@ push $Nd443db0
    xpos 192
    ypos -2
   }
-set Nd4efa10 [stack 0]
+set Ncb75640 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -19832,7 +19836,7 @@ set Nd4efa10 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd503210 [stack 0]
+set Ncb88e40 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -19843,7 +19847,7 @@ set Nd503210 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nd4efa10
+push $Ncb75640
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -19872,7 +19876,7 @@ push $Nd4efa10
    xpos 158
    ypos 167
   }
-push $Nd503210
+push $Ncb88e40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -20159,6 +20163,7 @@ Group {
   color {{parent.shape} {"parent.repetition | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0) | (parent.is_bound ? 4096 : 0) | (parent.diffuse_use_trap_colour ? 8192 : 0)  | (parent.specular_use_trap_colour ? 16384 : 0) | (parent.absorption_use_trap_colour ? 32768 : 0) | (parent.emission_use_trap_colour ? 65536 : 0)"} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
   format "1 1 0 0 1 1 1 1x1"
   name shape
+  selected true
   xpos 806
   ypos 462
  }
@@ -20248,7 +20253,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Nd6e0c80 [stack 0]
+set Ncd665a0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -20270,7 +20275,7 @@ set Nd6e0c80 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd6f4480 [stack 0]
+set Ncd79da0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -20281,7 +20286,7 @@ set Nd6f4480 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nd6e0c80
+push $Ncd665a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -20310,7 +20315,7 @@ push $Nd6e0c80
    xpos 158
    ypos 167
   }
-push $Nd6f4480
+push $Ncd79da0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -20403,7 +20408,7 @@ push $Nd6f4480
    xpos 192
    ypos -2
   }
-set Nd7a00e0 [stack 0]
+set Nce25a00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -20425,7 +20430,7 @@ set Nd7a00e0 [stack 0]
    xpos 34
    ypos -6
   }
-set Nd7b38e0 [stack 0]
+set Nce39200 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -20436,7 +20441,7 @@ set Nd7b38e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nd7a00e0
+push $Nce25a00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -20465,7 +20470,7 @@ push $Nd7a00e0
    xpos 158
    ypos 167
   }
-push $Nd7b38e0
+push $Nce39200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -20533,10 +20538,3 @@ push $Nd7b38e0
   ypos 1002
  }
 end_group
-push $Nb8a05a0
-Viewer {
- frame_range 1-400
- name Viewer1
- xpos -578
- ypos 808
-}

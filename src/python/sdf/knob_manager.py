@@ -56,7 +56,7 @@ class KnobManager(object):
         """Called when the input has changed"""
 
 
-class SDFKnobManager(KnobManager):
+class SDFGeoKnobManager(KnobManager):
     """Knob manager for primitive shapes in signed distance fields."""
 
     sibling_input_index = 0
@@ -69,7 +69,7 @@ class SDFKnobManager(KnobManager):
 
     def __init__(self):
         """Initialize the manager"""
-        super(SDFKnobManager, self).__init__()
+        super(SDFGeoKnobManager, self).__init__()
 
         self._knob_names_only_enabled_if_parent = set()
 

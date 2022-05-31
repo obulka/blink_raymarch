@@ -12,18 +12,18 @@ nuke.toNode("sdf_material").knob("knobChanged").setValue(
 """
 from collections import OrderedDict
 
-from .knob_manager import KnobChangedCallbacks, SDFKnobManager
+from .knob_manager import KnobChangedCallbacks, KnobManager
 from .utils import rgb_to_hex
 
 
-class SDFMaterial(SDFKnobManager):
+class SDFMaterial(KnobManager):
     """Knob manager for primitive shapes in signed distance fields."""
 
     specular_knob_name = "specular"
     transmission_knob_name = "transmission"
     colour_knob_name = "colour"
 
-    _knob_changed_callbacks = KnobChangedCallbacks(SDFKnobManager._knob_changed_callbacks)
+    _knob_changed_callbacks = KnobChangedCallbacks(KnobManager._knob_changed_callbacks)
 
 
     @_knob_changed_callbacks.register(colour_knob_name)

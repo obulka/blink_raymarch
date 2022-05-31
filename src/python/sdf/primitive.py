@@ -17,10 +17,10 @@ nuke.toNode("sdf_primitive").knob("onCreate").setValue(
 """
 from collections import OrderedDict
 
-from .knob_manager import KnobChangedCallbacks, SDFKnobManager
+from .knob_manager import KnobChangedCallbacks, SDFGeoKnobManager
 
 
-class SDFPrimitive(SDFKnobManager):
+class SDFPrimitive(SDFGeoKnobManager):
     """Knob manager for primitive shapes in signed distance fields."""
 
     shape_knob_name = "shape"
@@ -37,9 +37,9 @@ class SDFPrimitive(SDFKnobManager):
 
     mandelbox_shape_label = "mandelbox"
 
-    _dimensional_axes = SDFKnobManager._dimensional_axes + ("w",)
+    _dimensional_axes = SDFGeoKnobManager._dimensional_axes + ("w",)
 
-    _knob_changed_callbacks = KnobChangedCallbacks(SDFKnobManager._knob_changed_callbacks)
+    _knob_changed_callbacks = KnobChangedCallbacks(SDFGeoKnobManager._knob_changed_callbacks)
 
     dimensional_knob_defaults = {
         "sphere": OrderedDict([
