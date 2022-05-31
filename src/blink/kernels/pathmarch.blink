@@ -991,7 +991,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         origin
                     );
                 }
-                // Maybe spawn a refracted ray
+                // Maybe refract the ray
                 else if (
                     transmittance.w > 0.0f
                     && rng <= specularProbability + refractionProbability

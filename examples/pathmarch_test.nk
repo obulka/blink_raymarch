@@ -1,21 +1,20 @@
 #! /usr/local/Nuke12.0v8/libnuke-12.0.8.so -nx
-#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/path_march_test/path_march_test.%04d.exr" format:"1024 778 1" chans:":" framerange:"1 400" fps:"0" colorspace:"default (linear)" datatype:"16 bit half" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 12.0 v8
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="0" y="161" w="1920" h="1043" maximized="1" screen="1">
+    <window x="1976" y="188" w="2504" h="1376" maximized="1" screen="0">
         <splitter orientation="1">
             <split size="40"/>
             <dock id="" hideTitles="1" activePageId="Toolbar.1">
                 <page id="Toolbar.1"/>
             </dock>
-            <split size="1257" stretch="1"/>
+            <split size="1841" stretch="1"/>
             <splitter orientation="2">
-                <split size="586"/>
+                <split size="782"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="413"/>
+                <split size="550"/>
                 <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
@@ -35,7 +34,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/examples/pathmarch_test.nk
- frame 28
+ frame 3
  last_frame 400
  format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
  colorManagement Nuke
@@ -53,8 +52,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0x66ff66ff
  label plane
- xpos -431
- ypos -322
+ xpos -720
+ ypos -318
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape plane
@@ -363,7 +362,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N5382a10 [stack 0]
+set N61ebf50 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -385,7 +384,7 @@ set N5382a10 [stack 0]
    xpos 34
    ypos -6
   }
-set N5396420 [stack 0]
+set N61ff960 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -396,7 +395,7 @@ set N5396420 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5382a10
+push $N61ebf50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -425,7 +424,7 @@ push $N5382a10
    xpos 158
    ypos 167
   }
-push $N5396420
+push $N61ff960
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -518,7 +517,7 @@ push $N5396420
    xpos 192
    ypos -2
   }
-set N5443710 [stack 0]
+set N62acb40 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -540,7 +539,7 @@ set N5443710 [stack 0]
    xpos 34
    ypos -6
   }
-set N5456f10 [stack 0]
+set N62c0340 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -551,7 +550,7 @@ set N5456f10 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5443710
+push $N62acb40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -580,7 +579,7 @@ push $N5443710
    xpos 158
    ypos 167
   }
-push $N5456f10
+push $N62c0340
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -654,8 +653,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xff6666ff
  label plane
- xpos -431
- ypos -245
+ xpos -720
+ ypos -241
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape plane
@@ -953,7 +952,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N562d020 [stack 0]
+set N6496110 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -975,7 +974,7 @@ set N562d020 [stack 0]
    xpos 34
    ypos -6
   }
-set N5640820 [stack 0]
+set N64a9910 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -986,7 +985,7 @@ set N5640820 [stack 0]
    xpos -98
    ypos 336
   }
-push $N562d020
+push $N6496110
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1015,7 +1014,7 @@ push $N562d020
    xpos 158
    ypos 167
   }
-push $N5640820
+push $N64a9910
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1108,7 +1107,7 @@ push $N5640820
    xpos 192
    ypos -2
   }
-set N56ebb60 [stack 0]
+set N6555350 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1130,7 +1129,7 @@ set N56ebb60 [stack 0]
    xpos 34
    ypos -6
   }
-set N56ff360 [stack 0]
+set N6568b50 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1141,7 +1140,7 @@ set N56ff360 [stack 0]
    xpos -98
    ypos 336
   }
-push $N56ebb60
+push $N6555350
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1170,7 +1169,7 @@ push $N56ebb60
    xpos 158
    ypos 167
   }
-push $N56ff360
+push $N6568b50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1244,8 +1243,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label plane
- xpos -431
- ypos -167
+ xpos -720
+ ypos -163
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape plane
@@ -1543,7 +1542,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N58d65b0 [stack 0]
+set N673fa60 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1565,7 +1564,7 @@ set N58d65b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N58e9db0 [stack 0]
+set N6753260 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1576,7 +1575,7 @@ set N58e9db0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N58d65b0
+push $N673fa60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1605,7 +1604,7 @@ push $N58d65b0
    xpos 158
    ypos 167
   }
-push $N58e9db0
+push $N6753260
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1698,7 +1697,7 @@ push $N58e9db0
    xpos 192
    ypos -2
   }
-set N5995700 [stack 0]
+set N67febb0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1720,7 +1719,7 @@ set N5995700 [stack 0]
    xpos 34
    ypos -6
   }
-set N59a8f00 [stack 0]
+set N68123b0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1731,7 +1730,7 @@ set N59a8f00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5995700
+push $N67febb0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1760,7 +1759,7 @@ push $N5995700
    xpos 158
    ypos 167
   }
-push $N59a8f00
+push $N68123b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1834,8 +1833,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label plane
- xpos -431
- ypos -77
+ xpos -720
+ ypos -73
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape plane
@@ -2133,7 +2132,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N5b80ce0 [stack 0]
+set N69ea190 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2155,7 +2154,7 @@ set N5b80ce0 [stack 0]
    xpos 34
    ypos -6
   }
-set N5b94cf0 [stack 0]
+set N69fe1a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2166,7 +2165,7 @@ set N5b94cf0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5b80ce0
+push $N69ea190
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2195,7 +2194,7 @@ push $N5b80ce0
    xpos 158
    ypos 167
   }
-push $N5b94cf0
+push $N69fe1a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2288,7 +2287,7 @@ push $N5b94cf0
    xpos 192
    ypos -2
   }
-set N5c40640 [stack 0]
+set N6aa9af0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2310,7 +2309,7 @@ set N5c40640 [stack 0]
    xpos 34
    ypos -6
   }
-set N5c53e40 [stack 0]
+set N6abd2f0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2321,7 +2320,7 @@ set N5c53e40 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5c40640
+push $N6aa9af0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2350,7 +2349,7 @@ push $N5c40640
    xpos 158
    ypos 167
   }
-push $N5c53e40
+push $N6abd2f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2424,8 +2423,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0x6666ffff
  label plane
- xpos -431
- ypos 14
+ xpos -720
+ ypos 18
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape plane
@@ -2723,7 +2722,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N5e2b880 [stack 0]
+set N6c94d30 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2745,7 +2744,7 @@ set N5e2b880 [stack 0]
    xpos 34
    ypos -6
   }
-set N5e3f080 [stack 0]
+set N6ca8530 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2756,7 +2755,7 @@ set N5e3f080 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5e2b880
+push $N6c94d30
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2785,7 +2784,7 @@ push $N5e2b880
    xpos 158
    ypos 167
   }
-push $N5e3f080
+push $N6ca8530
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2878,7 +2877,7 @@ push $N5e3f080
    xpos 192
    ypos -2
   }
-set N5eeace0 [stack 0]
+set N6d54190 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2900,7 +2899,7 @@ set N5eeace0 [stack 0]
    xpos 34
    ypos -6
   }
-set N5efe4e0 [stack 0]
+set N6d67990 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2911,7 +2910,7 @@ set N5efe4e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5eeace0
+push $N6d54190
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2940,7 +2939,7 @@ push $N5eeace0
    xpos 158
    ypos 167
   }
-push $N5efe4e0
+push $N6d67990
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3015,8 +3014,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label torus
- xpos -129
- ypos -114
+ xpos -557
+ ypos -103
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape torus
@@ -3319,7 +3318,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N60dbf00 [stack 0]
+set N6f453b0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3341,7 +3340,7 @@ set N60dbf00 [stack 0]
    xpos 34
    ypos -6
   }
-set N60ef700 [stack 0]
+set N6f58bb0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3352,7 +3351,7 @@ set N60ef700 [stack 0]
    xpos -98
    ypos 336
   }
-push $N60dbf00
+push $N6f453b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3381,7 +3380,7 @@ push $N60dbf00
    xpos 158
    ypos 167
   }
-push $N60ef700
+push $N6f58bb0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3474,7 +3473,7 @@ push $N60ef700
    xpos 192
    ypos -2
   }
-set N619b360 [stack 0]
+set N7004810 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3496,7 +3495,7 @@ set N619b360 [stack 0]
    xpos 34
    ypos -6
   }
-set N61aeb60 [stack 0]
+set N7018010 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3507,7 +3506,7 @@ set N61aeb60 [stack 0]
    xpos -98
    ypos 336
   }
-push $N619b360
+push $N7004810
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3536,7 +3535,7 @@ push $N619b360
    xpos 158
    ypos 167
   }
-push $N61aeb60
+push $N7018010
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3611,8 +3610,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label plane
- xpos -268
- ypos 14
+ xpos -557
+ ypos 18
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape plane
@@ -3909,7 +3908,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N63865c0 [stack 0]
+set N71efa70 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3931,7 +3930,7 @@ set N63865c0 [stack 0]
    xpos 34
    ypos -6
   }
-set N6399dc0 [stack 0]
+set N7203270 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3942,7 +3941,7 @@ set N6399dc0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N63865c0
+push $N71efa70
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3971,7 +3970,7 @@ push $N63865c0
    xpos 158
    ypos 167
   }
-push $N6399dc0
+push $N7203270
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4064,7 +4063,7 @@ push $N6399dc0
    xpos 192
    ypos -2
   }
-set N6445a20 [stack 0]
+set N72aeed0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4086,7 +4085,7 @@ set N6445a20 [stack 0]
    xpos 34
    ypos -6
   }
-set N6459220 [stack 0]
+set N72c26d0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4097,7 +4096,7 @@ set N6459220 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6445a20
+push $N72aeed0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4126,7 +4125,7 @@ push $N6445a20
    xpos 158
    ypos 167
   }
-push $N6459220
+push $N72c26d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4194,15 +4193,15 @@ push $N6459220
   ypos 1002
  }
 end_group
-set N6243550 [stack 0]
+set N70aca00 [stack 0]
 Group {
  name sdf_primitive24
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0x33ff33ff
  label "rectangular prism"
- xpos -380
- ypos 143
+ xpos -669
+ ypos 147
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape "rectangular prism"
@@ -4505,7 +4504,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6633530 [stack 0]
+set N749c9e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4527,7 +4526,7 @@ set N6633530 [stack 0]
    xpos 34
    ypos -6
   }
-set N6646d30 [stack 0]
+set N74b01e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4538,7 +4537,7 @@ set N6646d30 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6633530
+push $N749c9e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4567,7 +4566,7 @@ push $N6633530
    xpos 158
    ypos 167
   }
-push $N6646d30
+push $N74b01e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4660,7 +4659,7 @@ push $N6646d30
    xpos 192
    ypos -2
   }
-set N66f2990 [stack 0]
+set N755be40 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -4682,7 +4681,7 @@ set N66f2990 [stack 0]
    xpos 34
    ypos -6
   }
-set N6706190 [stack 0]
+set N756f640 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -4693,7 +4692,7 @@ set N6706190 [stack 0]
    xpos -98
    ypos 336
   }
-push $N66f2990
+push $N755be40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4722,7 +4721,7 @@ push $N66f2990
    xpos 158
    ypos 167
   }
-push $N6706190
+push $N756f640
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -4796,8 +4795,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xff3333ff
  label "rectangular prism"
- xpos -380
- ypos 218
+ xpos -669
+ ypos 222
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape "rectangular prism"
@@ -5100,7 +5099,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N68dee70 [stack 0]
+set N7748320 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5122,7 +5121,7 @@ set N68dee70 [stack 0]
    xpos 34
    ypos -6
   }
-set N68f2670 [stack 0]
+set N775bb20 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5133,7 +5132,7 @@ set N68f2670 [stack 0]
    xpos -98
    ypos 336
   }
-push $N68dee70
+push $N7748320
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5162,7 +5161,7 @@ push $N68dee70
    xpos 158
    ypos 167
   }
-push $N68f2670
+push $N775bb20
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5255,7 +5254,7 @@ push $N68f2670
    xpos 192
    ypos -2
   }
-set N699e2d0 [stack 0]
+set N7807780 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5277,7 +5276,7 @@ set N699e2d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N69b1ad0 [stack 0]
+set N781af80 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5288,7 +5287,7 @@ set N69b1ad0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N699e2d0
+push $N7807780
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5317,7 +5316,7 @@ push $N699e2d0
    xpos 158
    ypos 167
   }
-push $N69b1ad0
+push $N781af80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5692,7 +5691,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6b898f0 [stack 0]
+set N79f2da0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5714,7 +5713,7 @@ set N6b898f0 [stack 0]
    xpos 34
    ypos -6
   }
-set N6b9d0f0 [stack 0]
+set N7a065a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5725,7 +5724,7 @@ set N6b9d0f0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6b898f0
+push $N79f2da0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5754,7 +5753,7 @@ push $N6b898f0
    xpos 158
    ypos 167
   }
-push $N6b9d0f0
+push $N7a065a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5847,7 +5846,7 @@ push $N6b9d0f0
    xpos 192
    ypos -2
   }
-set N6c48d50 [stack 0]
+set N7ab2200 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -5869,7 +5868,7 @@ set N6c48d50 [stack 0]
    xpos 34
    ypos -6
   }
-set N6c5c550 [stack 0]
+set N7ac5a00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -5880,7 +5879,7 @@ set N6c5c550 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6c48d50
+push $N7ab2200
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -5909,7 +5908,7 @@ push $N6c48d50
    xpos 158
    ypos 167
   }
-push $N6c5c550
+push $N7ac5a00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6285,7 +6284,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N6e34370 [stack 0]
+set N7c9d820 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6307,7 +6306,7 @@ set N6e34370 [stack 0]
    xpos 34
    ypos -6
   }
-set N6e47b70 [stack 0]
+set N7cb1020 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6318,7 +6317,7 @@ set N6e47b70 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6e34370
+push $N7c9d820
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6347,7 +6346,7 @@ push $N6e34370
    xpos 158
    ypos 167
   }
-push $N6e47b70
+push $N7cb1020
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6440,7 +6439,7 @@ push $N6e47b70
    xpos 192
    ypos -2
   }
-set N6ef37d0 [stack 0]
+set N7d5cc80 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6462,7 +6461,7 @@ set N6ef37d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N6f06fd0 [stack 0]
+set N7d70480 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6473,7 +6472,7 @@ set N6f06fd0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N6ef37d0
+push $N7d5cc80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6502,7 +6501,7 @@ push $N6ef37d0
    xpos 158
    ypos 167
   }
-push $N6f06fd0
+push $N7d70480
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6880,7 +6879,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N70df090 [stack 0]
+set N7f48540 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -6902,7 +6901,7 @@ set N70df090 [stack 0]
    xpos 34
    ypos -6
   }
-set N70f2890 [stack 0]
+set N7f5bd40 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -6913,7 +6912,7 @@ set N70f2890 [stack 0]
    xpos -98
    ypos 336
   }
-push $N70df090
+push $N7f48540
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -6942,7 +6941,7 @@ push $N70df090
    xpos 158
    ypos 167
   }
-push $N70f2890
+push $N7f5bd40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7035,7 +7034,7 @@ push $N70f2890
    xpos 192
    ypos -2
   }
-set N719e4f0 [stack 0]
+set N80079a0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7057,7 +7056,7 @@ set N719e4f0 [stack 0]
    xpos 34
    ypos -6
   }
-set N71b1cf0 [stack 0]
+set N801b1a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7068,7 +7067,7 @@ set N71b1cf0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N719e4f0
+push $N80079a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7097,7 +7096,7 @@ push $N719e4f0
    xpos 158
    ypos 167
   }
-push $N71b1cf0
+push $N801b1a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7474,7 +7473,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N738a020 [stack 0]
+set N81f34d0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7496,7 +7495,7 @@ set N738a020 [stack 0]
    xpos 34
    ypos -6
   }
-set N739d820 [stack 0]
+set N8206cd0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7507,7 +7506,7 @@ set N739d820 [stack 0]
    xpos -98
    ypos 336
   }
-push $N738a020
+push $N81f34d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7536,7 +7535,7 @@ push $N738a020
    xpos 158
    ypos 167
   }
-push $N739d820
+push $N8206cd0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7629,7 +7628,7 @@ push $N739d820
    xpos 192
    ypos -2
   }
-set N7449480 [stack 0]
+set N82b2930 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -7651,7 +7650,7 @@ set N7449480 [stack 0]
    xpos 34
    ypos -6
   }
-set N745cc80 [stack 0]
+set N82c6130 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -7662,7 +7661,7 @@ set N745cc80 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7449480
+push $N82b2930
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -7691,7 +7690,7 @@ push $N7449480
    xpos 158
    ypos 167
   }
-push $N745cc80
+push $N82c6130
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8068,7 +8067,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N7634890 [stack 0]
+set N849dd40 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8090,7 +8089,7 @@ set N7634890 [stack 0]
    xpos 34
    ypos -6
   }
-set N7648090 [stack 0]
+set N84b1540 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8101,7 +8100,7 @@ set N7648090 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7634890
+push $N849dd40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8130,7 +8129,7 @@ push $N7634890
    xpos 158
    ypos 167
   }
-push $N7648090
+push $N84b1540
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8223,7 +8222,7 @@ push $N7648090
    xpos 192
    ypos -2
   }
-set N76f3cf0 [stack 0]
+set N855d1a0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8245,7 +8244,7 @@ set N76f3cf0 [stack 0]
    xpos 34
    ypos -6
   }
-set N77074f0 [stack 0]
+set N85709a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8256,7 +8255,7 @@ set N77074f0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N76f3cf0
+push $N855d1a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8285,7 +8284,7 @@ push $N76f3cf0
    xpos 158
    ypos 167
   }
-push $N77074f0
+push $N85709a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8661,7 +8660,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N78e8730 [stack 0]
+set N8751be0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8683,7 +8682,7 @@ set N78e8730 [stack 0]
    xpos 34
    ypos -6
   }
-set N78fbf30 [stack 0]
+set N87653e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8694,7 +8693,7 @@ set N78fbf30 [stack 0]
    xpos -98
    ypos 336
   }
-push $N78e8730
+push $N8751be0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8723,7 +8722,7 @@ push $N78e8730
    xpos 158
    ypos 167
   }
-push $N78fbf30
+push $N87653e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8816,7 +8815,7 @@ push $N78fbf30
    xpos 192
    ypos -2
   }
-set N79a7b90 [stack 0]
+set N8811040 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -8838,7 +8837,7 @@ set N79a7b90 [stack 0]
    xpos 34
    ypos -6
   }
-set N79bb390 [stack 0]
+set N8824840 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -8849,7 +8848,7 @@ set N79bb390 [stack 0]
    xpos -98
    ypos 336
   }
-push $N79a7b90
+push $N8811040
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -8878,7 +8877,7 @@ push $N79a7b90
    xpos 158
    ypos 167
   }
-push $N79bb390
+push $N8824840
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9257,7 +9256,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N7b933f0 [stack 0]
+set N89fc8a0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -9279,7 +9278,7 @@ set N7b933f0 [stack 0]
    xpos 34
    ypos -6
   }
-set N7ba6bf0 [stack 0]
+set N8a100a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -9290,7 +9289,7 @@ set N7ba6bf0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7b933f0
+push $N89fc8a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9319,7 +9318,7 @@ push $N7b933f0
    xpos 158
    ypos 167
   }
-push $N7ba6bf0
+push $N8a100a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9412,7 +9411,7 @@ push $N7ba6bf0
    xpos 192
    ypos -2
   }
-set N7c52850 [stack 0]
+set N8abbd00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -9434,7 +9433,7 @@ set N7c52850 [stack 0]
    xpos 34
    ypos -6
   }
-set N7c66050 [stack 0]
+set N8acf500 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -9445,7 +9444,7 @@ set N7c66050 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7c52850
+push $N8abbd00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9474,7 +9473,7 @@ push $N7c52850
    xpos 158
    ypos 167
   }
-push $N7c66050
+push $N8acf500
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9852,7 +9851,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N7e3e3d0 [stack 0]
+set N8ca7880 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -9874,7 +9873,7 @@ set N7e3e3d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N7e51bd0 [stack 0]
+set N8cbb080 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -9885,7 +9884,7 @@ set N7e51bd0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7e3e3d0
+push $N8ca7880
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -9914,7 +9913,7 @@ push $N7e3e3d0
    xpos 158
    ypos 167
   }
-push $N7e51bd0
+push $N8cbb080
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10007,7 +10006,7 @@ push $N7e51bd0
    xpos 192
    ypos -2
   }
-set N7efd830 [stack 0]
+set N8d66ce0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -10029,7 +10028,7 @@ set N7efd830 [stack 0]
    xpos 34
    ypos -6
   }
-set N7f11030 [stack 0]
+set N8d7a4e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -10040,7 +10039,7 @@ set N7f11030 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7efd830
+push $N8d66ce0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10069,7 +10068,7 @@ push $N7efd830
    xpos 158
    ypos 167
   }
-push $N7f11030
+push $N8d7a4e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10446,7 +10445,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N80e9370 [stack 0]
+set N8f52820 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -10468,7 +10467,7 @@ set N80e9370 [stack 0]
    xpos 34
    ypos -6
   }
-set N80fcb70 [stack 0]
+set N8f66020 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -10479,7 +10478,7 @@ set N80fcb70 [stack 0]
    xpos -98
    ypos 336
   }
-push $N80e9370
+push $N8f52820
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10508,7 +10507,7 @@ push $N80e9370
    xpos 158
    ypos 167
   }
-push $N80fcb70
+push $N8f66020
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10601,7 +10600,7 @@ push $N80fcb70
    xpos 192
    ypos -2
   }
-set N81a87d0 [stack 0]
+set N9011c80 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -10623,7 +10622,7 @@ set N81a87d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N81bbfd0 [stack 0]
+set N9025480 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -10634,7 +10633,7 @@ set N81bbfd0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N81a87d0
+push $N9011c80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -10663,7 +10662,7 @@ push $N81a87d0
    xpos 158
    ypos 167
   }
-push $N81bbfd0
+push $N9025480
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11043,7 +11042,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N83940a0 [stack 0]
+set N91fd550 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -11065,7 +11064,7 @@ set N83940a0 [stack 0]
    xpos 34
    ypos -6
   }
-set N83a78a0 [stack 0]
+set N9210d50 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -11076,7 +11075,7 @@ set N83a78a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N83940a0
+push $N91fd550
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11105,7 +11104,7 @@ push $N83940a0
    xpos 158
    ypos 167
   }
-push $N83a78a0
+push $N9210d50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11198,7 +11197,7 @@ push $N83a78a0
    xpos 192
    ypos -2
   }
-set N8453500 [stack 0]
+set N92bc9b0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -11220,7 +11219,7 @@ set N8453500 [stack 0]
    xpos 34
    ypos -6
   }
-set N8466d00 [stack 0]
+set N92d01b0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -11231,7 +11230,7 @@ set N8466d00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8453500
+push $N92bc9b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11260,7 +11259,7 @@ push $N8453500
    xpos 158
    ypos 167
   }
-push $N8466d00
+push $N92d01b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11636,7 +11635,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N863efa0 [stack 0]
+set N94a8450 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -11658,7 +11657,7 @@ set N863efa0 [stack 0]
    xpos 34
    ypos -6
   }
-set N86527a0 [stack 0]
+set N94bbc50 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -11669,7 +11668,7 @@ set N86527a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N863efa0
+push $N94a8450
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11698,7 +11697,7 @@ push $N863efa0
    xpos 158
    ypos 167
   }
-push $N86527a0
+push $N94bbc50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11791,7 +11790,7 @@ push $N86527a0
    xpos 192
    ypos -2
   }
-set N86fe400 [stack 0]
+set N95678b0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -11813,7 +11812,7 @@ set N86fe400 [stack 0]
    xpos 34
    ypos -6
   }
-set N8711c00 [stack 0]
+set N957b0b0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -11824,7 +11823,7 @@ set N8711c00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N86fe400
+push $N95678b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -11853,7 +11852,7 @@ push $N86fe400
    xpos 158
    ypos 167
   }
-push $N8711c00
+push $N957b0b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12230,7 +12229,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N88e9ea0 [stack 0]
+set N9753350 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -12252,7 +12251,7 @@ set N88e9ea0 [stack 0]
    xpos 34
    ypos -6
   }
-set N88fd6a0 [stack 0]
+set N9766b50 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -12263,7 +12262,7 @@ set N88fd6a0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N88e9ea0
+push $N9753350
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12292,7 +12291,7 @@ push $N88e9ea0
    xpos 158
    ypos 167
   }
-push $N88fd6a0
+push $N9766b50
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12385,7 +12384,7 @@ push $N88fd6a0
    xpos 192
    ypos -2
   }
-set N89a9300 [stack 0]
+set N98127b0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -12407,7 +12406,7 @@ set N89a9300 [stack 0]
    xpos 34
    ypos -6
   }
-set N89bcb00 [stack 0]
+set N9825fb0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -12418,7 +12417,7 @@ set N89bcb00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N89a9300
+push $N98127b0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12447,7 +12446,7 @@ push $N89a9300
    xpos 158
    ypos 167
   }
-push $N89bcb00
+push $N9825fb0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12825,7 +12824,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N8b95040 [stack 0]
+set N99fe4f0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -12847,7 +12846,7 @@ set N8b95040 [stack 0]
    xpos 34
    ypos -6
   }
-set N8ba8840 [stack 0]
+set N9a11cf0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -12858,7 +12857,7 @@ set N8ba8840 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8b95040
+push $N99fe4f0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12887,7 +12886,7 @@ push $N8b95040
    xpos 158
    ypos 167
   }
-push $N8ba8840
+push $N9a11cf0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -12980,7 +12979,7 @@ push $N8ba8840
    xpos 192
    ypos -2
   }
-set N8c544a0 [stack 0]
+set N9abd950 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -13002,7 +13001,7 @@ set N8c544a0 [stack 0]
    xpos 34
    ypos -6
   }
-set N8c67ca0 [stack 0]
+set N9ad1150 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -13013,7 +13012,7 @@ set N8c67ca0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8c544a0
+push $N9abd950
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -13042,7 +13041,7 @@ push $N8c544a0
    xpos 158
    ypos 167
   }
-push $N8c67ca0
+push $N9ad1150
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -13419,7 +13418,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N8e40220 [stack 0]
+set N9ca96d0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -13441,7 +13440,7 @@ set N8e40220 [stack 0]
    xpos 34
    ypos -6
   }
-set N8e53a20 [stack 0]
+set N9cbced0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -13452,7 +13451,7 @@ set N8e53a20 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8e40220
+push $N9ca96d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -13481,7 +13480,7 @@ push $N8e40220
    xpos 158
    ypos 167
   }
-push $N8e53a20
+push $N9cbced0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -13574,7 +13573,7 @@ push $N8e53a20
    xpos 192
    ypos -2
   }
-set N8eff680 [stack 0]
+set N9d68b30 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -13596,7 +13595,7 @@ set N8eff680 [stack 0]
    xpos 34
    ypos -6
   }
-set N8f12e80 [stack 0]
+set N9d7c330 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -13607,7 +13606,7 @@ set N8f12e80 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8eff680
+push $N9d68b30
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -13636,7 +13635,7 @@ push $N8eff680
    xpos 158
    ypos 167
   }
-push $N8f12e80
+push $N9d7c330
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14014,7 +14013,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N90eaf50 [stack 0]
+set N9f54400 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -14036,7 +14035,7 @@ set N90eaf50 [stack 0]
    xpos 34
    ypos -6
   }
-set N90fe750 [stack 0]
+set N9f67c00 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -14047,7 +14046,7 @@ set N90fe750 [stack 0]
    xpos -98
    ypos 336
   }
-push $N90eaf50
+push $N9f54400
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14076,7 +14075,7 @@ push $N90eaf50
    xpos 158
    ypos 167
   }
-push $N90fe750
+push $N9f67c00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14169,7 +14168,7 @@ push $N90fe750
    xpos 192
    ypos -2
   }
-set N91aa3b0 [stack 0]
+set Na013860 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -14191,7 +14190,7 @@ set N91aa3b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N91bdbb0 [stack 0]
+set Na027060 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -14202,7 +14201,7 @@ set N91bdbb0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N91aa3b0
+push $Na013860
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14231,7 +14230,7 @@ push $N91aa3b0
    xpos 158
    ypos 167
   }
-push $N91bdbb0
+push $Na027060
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14609,7 +14608,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N9395850 [stack 0]
+set Na1fed00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -14631,7 +14630,7 @@ set N9395850 [stack 0]
    xpos 34
    ypos -6
   }
-set N93a9050 [stack 0]
+set Na212500 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -14642,7 +14641,7 @@ set N93a9050 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9395850
+push $Na1fed00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14671,7 +14670,7 @@ push $N9395850
    xpos 158
    ypos 167
   }
-push $N93a9050
+push $Na212500
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14764,7 +14763,7 @@ push $N93a9050
    xpos 192
    ypos -2
   }
-set N9454cb0 [stack 0]
+set Na2be160 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -14786,7 +14785,7 @@ set N9454cb0 [stack 0]
    xpos 34
    ypos -6
   }
-set N94684b0 [stack 0]
+set Na2d1960 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -14797,7 +14796,7 @@ set N94684b0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9454cb0
+push $Na2be160
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -14826,7 +14825,7 @@ push $N9454cb0
    xpos 158
    ypos 167
   }
-push $N94684b0
+push $Na2d1960
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15203,7 +15202,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N9640190 [stack 0]
+set Na4a9640 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -15225,7 +15224,7 @@ set N9640190 [stack 0]
    xpos 34
    ypos -6
   }
-set N9653990 [stack 0]
+set Na4bce40 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -15236,7 +15235,7 @@ set N9653990 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9640190
+push $Na4a9640
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15265,7 +15264,7 @@ push $N9640190
    xpos 158
    ypos 167
   }
-push $N9653990
+push $Na4bce40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15358,7 +15357,7 @@ push $N9653990
    xpos 192
    ypos -2
   }
-set N96ff5f0 [stack 0]
+set Na568aa0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -15380,7 +15379,7 @@ set N96ff5f0 [stack 0]
    xpos 34
    ypos -6
   }
-set N9712df0 [stack 0]
+set Na57c2a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -15391,7 +15390,7 @@ set N9712df0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N96ff5f0
+push $Na568aa0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15420,7 +15419,7 @@ push $N96ff5f0
    xpos 158
    ypos 167
   }
-push $N9712df0
+push $Na57c2a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15796,7 +15795,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N98ea860 [stack 0]
+set Na753d10 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -15818,7 +15817,7 @@ set N98ea860 [stack 0]
    xpos 34
    ypos -6
   }
-set N98fe060 [stack 0]
+set Na767510 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -15829,7 +15828,7 @@ set N98fe060 [stack 0]
    xpos -98
    ypos 336
   }
-push $N98ea860
+push $Na753d10
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15858,7 +15857,7 @@ push $N98ea860
    xpos 158
    ypos 167
   }
-push $N98fe060
+push $Na767510
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -15951,7 +15950,7 @@ push $N98fe060
    xpos 192
    ypos -2
   }
-set N99a9cc0 [stack 0]
+set Na813170 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -15973,7 +15972,7 @@ set N99a9cc0 [stack 0]
    xpos 34
    ypos -6
   }
-set N99bd4c0 [stack 0]
+set Na826970 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -15984,7 +15983,7 @@ set N99bd4c0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N99a9cc0
+push $Na813170
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16013,7 +16012,7 @@ push $N99a9cc0
    xpos 158
    ypos 167
   }
-push $N99bd4c0
+push $Na826970
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16391,7 +16390,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N9b94ef0 [stack 0]
+set Na9fe3a0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -16413,7 +16412,7 @@ set N9b94ef0 [stack 0]
    xpos 34
    ypos -6
   }
-set N9ba86f0 [stack 0]
+set Naa11ba0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -16424,7 +16423,7 @@ set N9ba86f0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9b94ef0
+push $Na9fe3a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16453,7 +16452,7 @@ push $N9b94ef0
    xpos 158
    ypos 167
   }
-push $N9ba86f0
+push $Naa11ba0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16546,7 +16545,7 @@ push $N9ba86f0
    xpos 192
    ypos -2
   }
-set N9c58350 [stack 0]
+set Naac1800 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -16568,7 +16567,7 @@ set N9c58350 [stack 0]
    xpos 34
    ypos -6
   }
-set N9c6bb50 [stack 0]
+set Naad5000 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -16579,7 +16578,7 @@ set N9c6bb50 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9c58350
+push $Naac1800
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16608,7 +16607,7 @@ push $N9c58350
    xpos 158
    ypos 167
   }
-push $N9c6bb50
+push $Naad5000
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -16676,36 +16675,24 @@ push $N9c6bb50
   ypos 1002
  }
 end_group
-Write {
- inputs 0
- channels all
- file /home/ob1/software/nuke/dev/raymarch/images/path_march_test/path_march_test.####.exr
- file_type exr
- write_ACES_compliant_EXR true
- first_part rgba
- version 2
- name Write1
- xpos 555
- ypos 988
-}
 Group {
  inputs 0
  name sdf_primitive31
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
- label torus
- xpos 355
- ypos 136
+ label link
+ xpos -268
+ ypos 183
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
- shape torus
- addUserKnob {7 dimension_x l "ring radius" t "The radius (xy-plane) of the ring of the torus." R 0 10}
+ shape link
+ addUserKnob {7 dimension_x l "ring radius" t "The radius (xy-plane) of the ring of the torus that will be stretched to create the link." R 0 10}
  dimension_x 1
- addUserKnob {7 dimension_y l "tube radius" t "The radius of the tube of the torus." R 0 5}
+ addUserKnob {7 dimension_y l "tube radius" t "The radius of the tube that makes the link." R 0 5}
  dimension_y 0.5
- addUserKnob {7 dimension_z l "min square radius" t "The minimum square radius to use when spherically folding." +HIDDEN R 0.001 1}
- dimension_z 0.001
+ addUserKnob {7 dimension_z l height t "The height (y-axis) to elongate the torus." R 0 10}
+ dimension_z 0.3
  addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold. Higher values will result in a denser fractal." +HIDDEN R 0.01 2}
  dimension_w 0.8
  addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
@@ -16724,7 +16711,6 @@ Group {
  addUserKnob {26 ""}
  addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
  addUserKnob {7 specular_roughness l "specular roughness" t "The object's surface will scatter the specularly reflected light more the higher this value is."}
- specular_roughness 0.275
  addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
  specular_colour {1 1 1}
  addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
@@ -16734,11 +16720,11 @@ Group {
  transmission 1
  addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
  addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
- absorption_colour {1 1 0}
+ absorption_colour {0 0 0}
  addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
- refractive_index 1.39
+ refractive_index 1.27
  addUserKnob {26 ""}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
@@ -16997,7 +16983,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N9e687d0 [stack 0]
+set Nacd1c80 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -17019,7 +17005,7 @@ set N9e687d0 [stack 0]
    xpos 34
    ypos -6
   }
-set N9e7bfd0 [stack 0]
+set Nace5480 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -17030,7 +17016,7 @@ set N9e7bfd0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9e687d0
+push $Nacd1c80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17059,7 +17045,7 @@ push $N9e687d0
    xpos 158
    ypos 167
   }
-push $N9e7bfd0
+push $Nace5480
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17152,7 +17138,7 @@ push $N9e7bfd0
    xpos 192
    ypos -2
   }
-set N9f27c30 [stack 0]
+set Nad910e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -17174,7 +17160,7 @@ set N9f27c30 [stack 0]
    xpos 34
    ypos -6
   }
-set N9f3b430 [stack 0]
+set Nada48e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -17185,7 +17171,7 @@ set N9f3b430 [stack 0]
    xpos -98
    ypos 336
   }
-push $N9f27c30
+push $Nad910e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17214,7 +17200,7 @@ push $N9f27c30
    xpos 158
    ypos 167
   }
-push $N9f3b430
+push $Nada48e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17288,12 +17274,12 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label sphere
- xpos 258
- ypos 225
+ xpos -268
+ ypos 289
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
- dimension_x 0.3
+ dimension_x 0.25
  addUserKnob {7 dimension_y l "tube radius" t "The radius of the tube of the torus." +HIDDEN R 0 5}
  dimension_y 0.5
  addUserKnob {7 dimension_z l "min square radius" t "The minimum square radius to use when spherically folding." +HIDDEN R 0.001 1}
@@ -17326,7 +17312,7 @@ Group {
  transmission 1
  addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
  addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
- absorption_colour {0 0 1}
+ absorption_colour {0 0 0}
  addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
@@ -17590,7 +17576,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na115590 [stack 0]
+set Naf7ea40 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -17612,7 +17598,7 @@ set Na115590 [stack 0]
    xpos 34
    ypos -6
   }
-set Na128d90 [stack 0]
+set Naf92240 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -17623,7 +17609,7 @@ set Na128d90 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na115590
+push $Naf7ea40
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17652,7 +17638,7 @@ push $Na115590
    xpos 158
    ypos 167
   }
-push $Na128d90
+push $Naf92240
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17745,7 +17731,7 @@ push $Na128d90
    xpos 192
    ypos -2
   }
-set Na1d49f0 [stack 0]
+set Nb03dea0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -17767,7 +17753,7 @@ set Na1d49f0 [stack 0]
    xpos 34
    ypos -6
   }
-set Na1e81f0 [stack 0]
+set Nb0516a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -17778,7 +17764,7 @@ set Na1e81f0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na1d49f0
+push $Nb03dea0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17807,7 +17793,7 @@ push $Na1d49f0
    xpos 158
    ypos 167
   }
-push $Na1e81f0
+push $Nb0516a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -17880,21 +17866,21 @@ Dot {
  xpos -234
  ypos 518
 }
-set Na27cbe0 [stack 0]
+set Nb0e6090 [stack 0]
 Dot {
  name Dot3
  xpos -234
- ypos 674
+ ypos 683
 }
 Dot {
  name Dot9
  xpos -234
- ypos 835
+ ypos 853
 }
 Dot {
  name Dot10
  xpos -234
- ypos 1013
+ ypos 1029
 }
 Axis2 {
  inputs 0
@@ -17912,23 +17898,23 @@ Camera2 {
 Dot {
  name Dot2
  xpos -85
- ypos 476
+ ypos 458
 }
-set Na2c3190 [stack 0]
+set Nb12c640 [stack 0]
 Dot {
  name Dot5
  xpos -85
- ypos 608
+ ypos 632
 }
 Dot {
  name Dot8
  xpos -85
- ypos 789
+ ypos 807
 }
 Dot {
  name Dot11
  xpos -85
- ypos 942
+ ypos 958
 }
 CheckerBoard2 {
  inputs 0
@@ -17940,9 +17926,9 @@ CheckerBoard2 {
 Dot {
  name Dot4
  xpos 70
- ypos 463
+ ypos 410
 }
-set Na2e2f00 [stack 0]
+set Nb14c3b0 [stack 0]
 Dot {
  name Dot6
  xpos 70
@@ -17958,27 +17944,15 @@ Dot {
  xpos 70
  ypos 908
 }
-Read {
- inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/path_march_test/path_march_test.####.exr
- format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
- last 2
- origlast 2
- origset true
- name Read2
- xpos 495
- ypos 434
-}
-push $N6243550
+push $N70aca00
 Group {
  name sdf_primitive1
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffb366ff
  label "rectangular prism"
- xpos -268
- ypos 320
+ xpos -557
+ ypos 324
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  shape "rectangular prism"
@@ -18279,7 +18253,7 @@ Group {
    xpos 192
    ypos -2
   }
-set Na45e870 [stack 0]
+set Nb2c7d20 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -18301,7 +18275,7 @@ set Na45e870 [stack 0]
    xpos 34
    ypos -6
   }
-set Na472070 [stack 0]
+set Nb2db520 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -18312,7 +18286,7 @@ set Na472070 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na45e870
+push $Nb2c7d20
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -18341,7 +18315,7 @@ push $Na45e870
    xpos 158
    ypos 167
   }
-push $Na472070
+push $Nb2db520
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -18434,7 +18408,7 @@ push $Na472070
    xpos 192
    ypos -2
   }
-set Na51d9e0 [stack 0]
+set Nb386e90 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -18456,7 +18430,7 @@ set Na51d9e0 [stack 0]
    xpos 34
    ypos -6
   }
-set Na5311e0 [stack 0]
+set Nb39a690 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -18467,7 +18441,7 @@ set Na5311e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na51d9e0
+push $Nb386e90
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -18496,7 +18470,7 @@ push $Na51d9e0
    xpos 158
    ypos 167
   }
-push $Na5311e0
+push $Nb39a690
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -18564,9 +18538,9 @@ push $Na5311e0
   ypos 1002
  }
 end_group
-push $Na2e2f00
-push $Na2c3190
-push $Na27cbe0
+push $Nb14c3b0
+push $Nb12c640
+push $Nb0e6090
 Group {
  inputs 3
  name path_march1
@@ -18581,7 +18555,7 @@ Group {
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
  hit_tolerance 0.001
  addUserKnob {3 max_bounces l "max bounces" t "Limits the number of times the rays can intersect an object per subpixel."}
- max_bounces 10
+ max_bounces 8
  addUserKnob {7 ray_distance l "max ray distance" t "Each ray, once spawned is only allowed to travel this distance before it is culled." R 10 10000}
  ray_distance {{"6*(max_bounces + 1)"}}
  addUserKnob {3 max_ray_steps l "max ray steps" t "Limit the number of steps a ray can be marched before it is culled. Shadow rays are given half this number of steps."}
@@ -18675,19 +18649,19 @@ Group {
   xpos -422
   ypos -1549
  }
-set Na600350 [stack 0]
+set Nb469420 [stack 0]
  Dot {
   name Dot16
   xpos 589
   ypos -1549
  }
-set Na605210 [stack 0]
+set Nb46e2e0 [stack 0]
  Dot {
   name Dot1
   xpos 589
   ypos -1473
  }
-push $Na605210
+push $Nb46e2e0
  Input {
   inputs 0
   name scene
@@ -18731,7 +18705,7 @@ push $Na605210
    xpos 192
    ypos -2
   }
-set Na640550 [stack 0]
+set Nb4a9620 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -18753,7 +18727,7 @@ set Na640550 [stack 0]
    xpos 34
    ypos -6
   }
-set Na653d50 [stack 0]
+set Nb4bce20 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -18764,7 +18738,7 @@ set Na653d50 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na640550
+push $Nb4a9620
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -18793,7 +18767,7 @@ push $Na640550
    xpos 158
    ypos 167
   }
-push $Na653d50
+push $Nb4bce20
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -18860,7 +18834,7 @@ push $Na653d50
   xpos 701
   ypos -1315
  }
-set Na6e3360 [stack 0]
+set Nb54c430 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -18872,7 +18846,7 @@ set Na6e3360 [stack 0]
   xpos 408
   ypos -862
  }
-push $Na6e3360
+push $Nb54c430
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -18884,7 +18858,7 @@ push $Na6e3360
   xpos 783
   ypos -862
  }
-push $Na6e3360
+push $Nb54c430
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -18896,7 +18870,7 @@ push $Na6e3360
   xpos 644
   ypos -861
  }
-push $Na6e3360
+push $Nb54c430
  Shuffle {
   in sdf_shape
   name shape
@@ -18908,7 +18882,7 @@ push $Na6e3360
   xpos 533
   ypos -860
  }
-push $Na6e3360
+push $Nb54c430
  Shuffle {
   in sdf_emm_colour
   name emm_colour
@@ -18920,7 +18894,7 @@ push $Na6e3360
   xpos 301
   ypos -864
  }
-push $Na6e3360
+push $Nb54c430
  Shuffle {
   in sdf_trans_colour
   name trans_colour
@@ -18932,7 +18906,7 @@ push $Na6e3360
   xpos 204
   ypos -863
  }
-push $Na6e3360
+push $Nb54c430
  Shuffle {
   in sdf_spec_colour
   name spec_colour
@@ -18944,7 +18918,7 @@ push $Na6e3360
   xpos 104
   ypos -862
  }
-push $Na6e3360
+push $Nb54c430
  Shuffle {
   in sdf_colour
   name diff_colour
@@ -18956,7 +18930,7 @@ push $Na6e3360
   xpos -12
   ypos -863
  }
-push $Na6e3360
+push $Nb54c430
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -18968,7 +18942,7 @@ push $Na6e3360
   xpos 1230
   ypos -854
  }
-push $Na6e3360
+push $Nb54c430
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -18980,7 +18954,7 @@ push $Na6e3360
   xpos 1079
   ypos -851
  }
-push $Na6e3360
+push $Nb54c430
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -19017,13 +18991,13 @@ push $Na6e3360
   xpos 1695
   ypos -1474
  }
-push $Na600350
+push $Nb469420
  Reformat {
   name Reformat2
   xpos -456
   ypos -1503
  }
-set Na7f6780 [stack 0]
+set Nb65f850 [stack 0]
  Input {
   inputs 0
   name previous
@@ -19042,7 +19016,7 @@ set Na7f6780 [stack 0]
   xpos -250
   ypos -1385
  }
-set Na81adc0 [stack 0]
+set Nb683e90 [stack 0]
 add_layer {variance variance.red variance.green variance.blue variance.num_paths}
  Shuffle {
   in variance
@@ -19055,7 +19029,7 @@ add_layer {variance variance.red variance.green variance.blue variance.num_paths
   xpos -319
   ypos -1310
  }
-push $Na7f6780
+push $Nb65f850
  Invert {
   channels rgb
   name Invert2
@@ -19074,7 +19048,7 @@ push $Na7f6780
   xpos -422
   ypos -451
  }
-push $Na81adc0
+push $Nb683e90
  Dot {
   name Dot21
   xpos -250
@@ -19127,7 +19101,7 @@ push $Na81adc0
  BlinkScript {
   inputs 15
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/pathmarch.blink
-  recompileCount 2221
+  recompileCount 2223
   ProgramGroup 1
   KernelDescription "2 \"PathMarchKernel\" iterate pixelWise 92d88a607b4a1b2dee2d946afa89b80bc5af26794555f6595edd0cd5a7febe3f 16 \"noise\" Read Point \"src\" Read Point \"variance\" Read Point \"hdri\" Read Random \"positions\" Read Random \"rotations\" Read Random \"dimensions\" Read Random \"diffusivities\" Read Random \"specularities\" Read Random \"transmittances\" Read Random \"emittances\" Read Random \"shapeProperties\" Read Random \"shapeModParameters0\" Read Random \"shapeModParameters1\" Read Random \"surfaceProperties\" Read Random \"dst\" Write Point 19 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"HDRI Offset Angle\" Float 1 AAAAAA== \"Min Paths Per Pixel\" Int 1 AQAAAA== \"Max Paths Per Pixel\" Int 1 AQAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AAB6RA== \"Max Ray Steps\" Int 1 gAAAAA== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 AACAPw== \"Index of Refraction\" Float 1 AACAPw== \"brdf Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== \"Object Texture Width\" Int 1 AAAAAA== \"Output Type\" Int 1 AAAAAA== 19 \"_focalLength\" 1 1 \"_horizontalAperture\" 1 1 \"_nearPlane\" 1 1 \"_farPlane\" 1 1 \"_cameraWorldMatrix\" 16 1 \"_formatWidth\" 1 1 \"_formatHeight\" 1 1 \"_hdriOffsetAngle\" 1 1 \"_minPathsPerPixel\" 1 1 \"_maxPathsPerPixel\" 1 1 \"_maxBounces\" 1 1 \"_maxRayDistance\" 1 1 \"_maxRaySteps\" 1 1 \"_hitTolerance\" 1 1 \"_shadowBias\" 1 1 \"_refractiveIndex\" 1 1 \"_absorptionColour\" 4 1 \"_objectTextureWidth\" 1 1 \"_outputType\" 1 1 9 \"__inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"__bouncesPerRay\" Int 1 1 AAAAAA== \"__hdriPixelSize\" Float 2 1 AAAAAAAAAAA= \"__hdriLightPixelSize\" Float 2 1 AAAAAAAAAAA= \"__hdriOffsetRadians\" Float 1 1 AAAAAA== \"__offset0\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset1\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset2\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset3\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA=="
   kernelSource "// Copyright 2022 by Owen Bulka.\n// All rights reserved.\n// This file is released under the \"MIT License Agreement\".\n// Please see the LICENSE.md file that should have been included as part\n// of this package.\n\n//\n// BlinkScript Ray Marcher\n//\n\n#include \"aovs.h\"\n#include \"camera.h\"\n#include \"conversion.h\"\n#include \"lights.h\"\n#include \"math.h\"\n#include \"colour.h\"\n#include \"objectInteraction.h\"\n#include \"random.h\"\n#include \"sdfModifications.h\"\n#include \"rays.h\"\n#include \"sdfs.h\"\n\n\n// Increase this if you want more than MAX_CHILD_DEPTH direct children\n#define MAX_CHILD_DEPTH 64\n\n\nkernel PathMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    // the input which specifies the format, process is called once per pixel\n    // in this image, which also provides random seeds\n    Image<eRead, eAccessPoint, eEdgeNone> noise;\n    Image<eRead, eAccessPoint, eEdgeNone> src;\n    Image<eRead, eAccessPoint, eEdgeNone> variance;\n\n    // the hdribox in latlong format\n    Image<eRead, eAccessRandom, eEdgeClamped> hdri;\n\n\n    // the shape positons.xyz, scale.w\n    Image<eRead, eAccessRandom, eEdgeNone> positions;\n\n    // the shape rotations.xyz, wall thickness.w\n    Image<eRead, eAccessRandom, eEdgeNone> rotations;\n\n    // the shape dimensions.xyzw (some shapes may not use all channels)\n    Image<eRead, eAccessRandom, eEdgeNone> dimensions;\n\n    // the shape diffusivities.xyz, specular roughness.w\n    Image<eRead, eAccessRandom, eEdgeNone> diffusivities;\n\n    Image<eRead, eAccessRandom, eEdgeNone> specularities;\n\n    Image<eRead, eAccessRandom, eEdgeNone> transmittances;\n\n    Image<eRead, eAccessRandom, eEdgeNone> emittances;\n\n\n    // shape type.x, operation.y, numChildren.z, blend strength.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;\n\n    // repetition params.xyzw\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters0;\n\n    // elongation.xyz edgeRadius.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters1;\n\n    // reflection.x, transmission.y, emission.z, roughness.w\n    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;\n\n\n    // the output image\n    Image<eWrite> dst;\n\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float _focalLength;\n        float _horizontalAperture;\n        float _nearPlane;\n        float _farPlane;\n        float4x4 _cameraWorldMatrix;\n\n        // Image params\n        float _formatWidth;\n        float _formatHeight;\n\n        float _hdriOffsetAngle;\n\n        // Ray params\n        int _minPathsPerPixel;\n        int _maxPathsPerPixel;\n        int _maxBounces;\n        float _maxRayDistance;\n        int _maxRaySteps;\n        float _hitTolerance;\n        float _shadowBias;\n\n        // Scene params\n        float _refractiveIndex;\n        float4 _absorptionColour;\n\n        // Shape Textures\n        int _objectTextureWidth;\n\n        int _outputType;\n\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float4x4 __inverseCameraProjectionMatrix;\n\n        int __bouncesPerRay;\n\n        float2 __hdriPixelSize;\n        float2 __hdriLightPixelSize;\n        float __hdriOffsetRadians;\n\n        float3 __offset0;\n        float3 __offset1;\n        float3 __offset2;\n        float3 __offset3;\n\n\n    /**\n     * In define(), parameters can be given labels and default values.\n     */\n    void define()\n    \{\n        // Camera params\n        defineParam(_focalLength, \"Focal Length\", 50.0f);\n        defineParam(_horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(_nearPlane, \"Near Plane\", 0.1f);\n        defineParam(_farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            _cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n\n        // Image params\n        defineParam(_formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(_formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(_hdriOffsetAngle, \"HDRI Offset Angle\", 0.0f);\n\n        // Ray params\n        defineParam(_minPathsPerPixel, \"Min Paths Per Pixel\", 1);\n        defineParam(_maxPathsPerPixel, \"Max Paths Per Pixel\", 1);\n        defineParam(_maxRayDistance, \"Max Ray Distance\", 1000.0f);\n        defineParam(_maxRaySteps, \"Max Ray Steps\", 128);\n        defineParam(_maxBounces, \"Max Bounces\", 1);\n        defineParam(_hitTolerance, \"Hit Tolerance\", 0.001f);\n        defineParam(_shadowBias, \"Shadow Bias\", 1.0f);\n\n        // Scene params\n        defineParam(_refractiveIndex, \"Index of Refraction\", 1.0f);\n        defineParam(_absorptionColour, \"brdf Colour\", float4(1));\n\n        // Shape Counts\n        defineParam(_objectTextureWidth, \"Object Texture Width\", 0);\n\n        defineParam(_outputType, \"Output Type\", 0);\n    \}\n\n\n    /**\n     * The init() function is run before any calls to process().\n     * Local variables can be initialized here.\n     */\n    void init()\n    \{\n        __bouncesPerRay = _maxBounces <= 0 ? 1 : _maxBounces;\n\n        // TODO use angles to allow -ve focal length like for latlongs\n        float aspect = aspectRatio(_formatHeight, _formatWidth);\n        float4x4 cameraProjectionMatrix = projectionMatrix(\n            _focalLength,\n            _horizontalAperture,\n            aspect,\n            _nearPlane,\n            _farPlane\n        );\n        __inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();\n\n        __hdriPixelSize = float2(\n            hdri.bounds.width() / (2 * PI),\n            hdri.bounds.height() / PI\n        );\n        __hdriOffsetRadians = _hdriOffsetAngle * PI / 180.0f;\n\n        __offset0 = 0.5773f * float3(1, -1, -1);\n        __offset1 = 0.5773f * float3(-1, -1, 1);\n        __offset2 = 0.5773f * float3(-1, 1, -1);\n        __offset3 = 0.5773f * float3(1, 1, 1);\n    \}\n\n\n    /**\n     * Get the value of hdri the ray would hit at infinite distance\n     *\n     * @arg rayDirection: The direction of the ray.\n     *\n     * @returns: The colour of the pixel in the direction of the ray.\n     */\n    float4 readHDRIValue(float3 rayDirection)\n    \{\n        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);\n\n        // Should be able to say image access is eEdgeClamped and not do this\n        // but I see nan pixels sooo... :(\n        const float2 indices = clamp(\n            float2(\n                __hdriPixelSize.x * angles.x,\n                hdri.bounds.height() - (__hdriPixelSize.y * angles.y)\n            ),\n            float2(0),\n            float2(hdri.bounds.width(), hdri.bounds.height()) - 1.0f\n        );\n\n        return bilinear(hdri, indices.x, indices.y);\n    \}\n\n\n    //\n    // Render Engine\n    //\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     *\n     * @arg rayOrigin: The origin position of the ray.\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     *\n     * @returns: The minimum distance to an object in the scene.\n     */\n    float getMinDistanceToObjectInScene(const float3 &rayOrigin, const float pixelFootprint)\n    \{\n        float distance = _maxRayDistance;\n\n        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour\n        // roughness, specular colour, specular, transmissive colour, transmission,\n        // emissive colour, emission, refractive index, objectId, blendStrength\n        float parentStack\[MAX_CHILD_DEPTH]\[\n            1   // numChildren\n            + 3 // transformedRay\n            + 1 // scale\n            + 1 // mods\n            + 1 // nextDistance\n            + 1 // blendStrength\n        ];\n        int parentStackLength = 0;\n\n        for (int j=0; j < _objectTextureWidth; j++)\n        \{\n            // Read in the shape properties\n            SampleType(positions) position = positions(j, 0);\n            SampleType(rotations) rotation = rotations(j, 0);\n            SampleType(dimensions) dimension = dimensions(j, 0);\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n\n            float scale = position.w;\n\n            const int modifications = (int) shapeProperty.y;\n            float numChildren = shapeProperty.z;\n            const float blendStrength = shapeProperty.w;\n\n            int stackLastIndex = parentStackLength - 1;\n\n            // Position relative to the parent if we have any\n            float3 parentTransformedRay = rayOrigin;\n            if (parentStackLength > 0)\n            \{\n                parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                scale *= parentStack\[stackLastIndex]\[4];\n            \}\n\n            // Use parent transform to position child\n            const float3 transformedRay = transformRay(\n                parentTransformedRay,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n\n            // Get distance to this child\n            float nextDistance = getModifiedDistance(\n                transformedRay,\n                (int) shapeProperty.x,\n                dimension,\n                scale,\n                modifications,\n                modParameters1.w,\n                rotation.w\n            );\n\n            // Track which object was hit for the alpha channel\n            float objectId = (float) j + 1.0f;\n\n            // If this is a bounding volume, we can skip its children\n            // if we aren't close to, or inside it\n            if (\n                modifications & 4096\n                && numChildren > 0\n                && nextDistance > _hitTolerance + pixelFootprint\n            ) \{\n                // Update the min distance if this bounding volume is closest.\n                // Otherwise we could step through it, or if every object in\n                // the scene is inside it, we would not step forward at all\n                if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n                \}\n\n                // This was tagged as a boundary object, skip its children\n                // since we arent close to hitting it\n                j += numChildren;\n\n                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                \{\n                    parentStack\[parentIndex]\[0] -= numChildren + 1.0f;\n                \}\n\n                // If there are no parents, or still children of the parent\n                // we do not need to compute anything further for this loop\n                if (parentStackLength <= 0 || parentStack\[stackLastIndex]\[0] > 0.0f)\n                \{\n                    continue;\n                \}\n\n                // pop stack\n                // we know that there will be no more children if we did not continue\n                numChildren = 0.0f;\n                nextDistance = parentStack\[stackLastIndex]\[6];\n                stackLastIndex--;\n                parentStackLength--;\n            \}\n\n            if (numChildren <= 0.0f)\n            \{\n                // No Children left, compute interactions with parent\n                if (parentStackLength > 0)\n                \{\n                    // Process this object, along with all parents that do not\n                    // have any more children, removing them from the stack,\n                    // but descend all the way down the stack, without removing\n                    // the objects that still have children\n                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)\n                    \{\n                        const int parentModifications = (int) parentStack\[stackIndex]\[5];\n\n                        // Do not need to interact with bounding volumes.\n                        // They are in the stack for relative positioning\n                        // if they weren't then we would have to manually move\n                        // the bounding box to follow the children\n                        if (!(parentModifications & 4096))\n                        \{\n                            const float parentNextDistance = parentStack\[stackIndex]\[6];\n                            const float parentBlendStrength = parentStack\[stackIndex]\[7];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentBlendStrength\n                            );\n                        \}\n\n                        // Update the global min distance (and surface/colour)\n                        if (fabs(nextDistance) < fabs(distance))\n                        \{\n                            distance = nextDistance;\n                        \}\n                    \}\n\n                    do\n                    \{\n                        // Decrement the number of children each parent has\n                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                        \{\n                            parentStack\[parentIndex]\[0] -= 1.0f;\n                        \}\n\n                        // Get the number of children still remaining for the parent\n                        // If there are still children, we can break out of this loop\n                        // to process the rest of them before the parent itself\n                        numChildren = parentStack\[stackLastIndex]\[0];\n                    \}\n                    while (numChildren <= 0.0f && --stackLastIndex >= 0);\n\n                    parentStackLength = stackLastIndex + 1;\n                \}\n                // No parents to interact with, simply check the distance\n                else if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n                \}\n            \}\n            else\n            \{\n                // Node has Children, push it to the stack for later\n                // processing when we have all its children\n                // parentStack.push()\n                // TODO not all this needs to be in the stack (maybe)\n                parentStack\[parentStackLength]\[0] = numChildren;\n                parentStack\[parentStackLength]\[1] = transformedRay.x;\n                parentStack\[parentStackLength]\[2] = transformedRay.y;\n                parentStack\[parentStackLength]\[3] = transformedRay.z;\n                parentStack\[parentStackLength]\[4] = scale;\n                parentStack\[parentStackLength]\[5] = (float) modifications;\n                parentStack\[parentStackLength]\[6] = nextDistance;\n                parentStack\[parentStackLength]\[7] = blendStrength;\n                parentStackLength++;\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     *\n     * @arg rayOrigin: The origin position of the ray.\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     * @arg colour: Location to store the colour of the hit object.\n     * @arg surface: Location to store the surface properties of the hit\n     *     object.\n     *\n     * @returns: The minimum distance to an object in the scene, and the\n     *     unique identifier of the object.\n     */\n    float2 getMinDistanceToObjectInScene(\n            const float3 &rayOrigin,\n            const float pixelFootprint,\n            float4 &diffusivity,\n            float4 &specularity,\n            float4 &transmittance,\n            float4 &emittance,\n            float4 &surface)\n    \{\n        float distance = _maxRayDistance;\n        float id = 0.0f;\n\n        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour\n        // roughness, specular colour, specular, transmissive colour, transmission,\n        // emissive colour, emission, refractive index, objectId, blendStrength\n        float parentStack\[MAX_CHILD_DEPTH]\[\n            1   // numChildren\n            + 3 // transformedRay\n            + 1 // scale\n            + 1 // mods\n            + 1 // nextDistance\n            + 3 // diffuse colour\n            + 1 // roughness\n            + 3 // specular colour\n            + 1 // specular\n            + 3 // transmissive colour\n            + 1 // transmission\n            + 3 // emissive colour\n            + 1 // emission\n            + 3 // unused for now\n            + 1 // refractive index\n            + 1 // objectId\n            + 1 // blendStrength\n        ];\n        int parentStackLength = 0;\n\n        for (int j=0; j < _objectTextureWidth; j++)\n        \{\n            // Read in the shape properties\n            SampleType(positions) position = positions(j, 0);\n            SampleType(rotations) rotation = rotations(j, 0);\n            SampleType(dimensions) dimension = dimensions(j, 0);\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n            SampleType(diffusivities) diffuseColour = diffusivities(j, 0);\n            SampleType(specularities) specularColour = specularities(j, 0);\n            SampleType(transmittances) transmissiveColour = transmittances(j, 0);\n            SampleType(emittances) emissiveColour = emittances(j, 0);\n            SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);\n\n            const int modifications = (int) shapeProperty.y;\n            float scale = position.w;\n\n            const float blendStrength = shapeProperty.w;\n            float numChildren = shapeProperty.z;\n\n            int stackLastIndex = parentStackLength - 1;\n\n            float4 blendedDiffuseColour = diffuseColour;\n            float4 blendedSpecularColour = specularColour;\n            float4 blendedTransmissiveColour = transmissiveColour;\n            float4 blendedEmissiveColour = emissiveColour;\n            float4 blendedSurface = surfaceProperty;\n\n            // Position relative to the parent if we have any\n            float3 parentTransformedRay = rayOrigin;\n            if (parentStackLength > 0)\n            \{\n                parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                scale *= parentStack\[stackLastIndex]\[4];\n            \}\n\n            // Use parent transform to position child\n            const float3 transformedRay = transformRay(\n                parentTransformedRay,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n\n            // Get distance to this child\n            float nextDistance = getModifiedDistance(\n                transformedRay,\n                (int) shapeProperty.x,\n                dimension,\n                scale,\n                modifications,\n                modParameters1.w,\n                rotation.w,\n                blendedDiffuseColour,\n                blendedSpecularColour,\n                blendedTransmissiveColour,\n                blendedEmissiveColour\n            );\n\n            // Track which object was hit for the alpha channel\n            float objectId = (float) j + 1.0f;\n\n            // If this is a bounding volume, we can skip its children\n            // if we aren't close to, or inside it\n            if (\n                modifications & 4096\n                && numChildren > 0\n                && nextDistance > _hitTolerance + pixelFootprint\n            ) \{\n                // Update the min distance if this bounding volume is closest.\n                // Otherwise we could step through it, or if every object in\n                // the scene is inside it, we would not step forward at all\n                if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n\n                    diffusivity = blendedDiffuseColour;\n                    specularity = blendedSpecularColour;\n                    transmittance = blendedTransmissiveColour;\n                    emittance = blendedEmissiveColour;\n\n                    surface = blendedSurface;\n\n                    id = objectId;\n                \}\n\n                // This was tagged as a boundary object, skip its children\n                // since we arent close to hitting it\n                j += numChildren;\n\n                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                \{\n                    parentStack\[parentIndex]\[0] -= numChildren + 1.0f;\n                \}\n\n                // If there are no parents, or still children of the parent\n                // we do not need to compute anything further for this loop\n                if (parentStackLength <= 0 || parentStack\[stackLastIndex]\[0] > 0.0f)\n                \{\n                    continue;\n                \}\n\n                // pop stack\n                // we know that there will be no more children if we did not continue\n                numChildren = 0.0f;\n                nextDistance = parentStack\[stackLastIndex]\[6];\n                blendedDiffuseColour = float4(\n                    parentStack\[stackLastIndex]\[7],\n                    parentStack\[stackLastIndex]\[8],\n                    parentStack\[stackLastIndex]\[9],\n                    parentStack\[stackLastIndex]\[10]\n                );\n                blendedSpecularColour = float4(\n                    parentStack\[stackLastIndex]\[11],\n                    parentStack\[stackLastIndex]\[12],\n                    parentStack\[stackLastIndex]\[13],\n                    parentStack\[stackLastIndex]\[14]\n                );\n                blendedTransmissiveColour = float4(\n                    parentStack\[stackLastIndex]\[15],\n                    parentStack\[stackLastIndex]\[16],\n                    parentStack\[stackLastIndex]\[17],\n                    parentStack\[stackLastIndex]\[18]\n                );\n                blendedEmissiveColour = float4(\n                    parentStack\[stackLastIndex]\[19],\n                    parentStack\[stackLastIndex]\[20],\n                    parentStack\[stackLastIndex]\[21],\n                    parentStack\[stackLastIndex]\[22]\n                );\n                blendedSurface = surfaceProperty;\n                blendedSurface = float4(\n                    parentStack\[stackLastIndex]\[23],\n                    parentStack\[stackLastIndex]\[24],\n                    parentStack\[stackLastIndex]\[25],\n                    parentStack\[stackLastIndex]\[26]\n                );\n                objectId = parentStack\[stackLastIndex]\[27];\n                stackLastIndex--;\n                parentStackLength--;\n            \}\n\n            if (numChildren <= 0.0f)\n            \{\n                // No Children left, compute interactions with parent\n                if (parentStackLength > 0)\n                \{\n                    // Process this object, along with all parents that do not\n                    // have any more children, removing them from the stack,\n                    // but descend all the way down the stack, without removing\n                    // the objects that still have children\n                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)\n                    \{\n                        const int parentModifications = (int) parentStack\[stackIndex]\[5];\n\n                        // Do not need to interact with bounding volumes.\n                        // They are in the stack for relative positioning\n                        // if they weren't then we would have to manually move\n                        // the bounding box to follow the children\n                        if (!(parentModifications & 4096))\n                        \{\n                            const float parentNextDistance = parentStack\[stackIndex]\[6];\n                            const float4 parentDiffuseColour = float4(\n                                parentStack\[stackIndex]\[7],\n                                parentStack\[stackIndex]\[8],\n                                parentStack\[stackIndex]\[9],\n                                parentStack\[stackIndex]\[10]\n                            );\n                            const float4 parentSpecularColour = float4(\n                                parentStack\[stackIndex]\[11],\n                                parentStack\[stackIndex]\[12],\n                                parentStack\[stackIndex]\[13],\n                                parentStack\[stackIndex]\[14]\n                            );\n                            const float4 parentTransmissiveColour = float4(\n                                parentStack\[stackIndex]\[15],\n                                parentStack\[stackIndex]\[16],\n                                parentStack\[stackIndex]\[17],\n                                parentStack\[stackIndex]\[18]\n                            );\n                            const float4 parentEmissiveColour = float4(\n                                parentStack\[stackIndex]\[19],\n                                parentStack\[stackIndex]\[20],\n                                parentStack\[stackIndex]\[21],\n                                parentStack\[stackIndex]\[22]\n                            );\n                            const float4 parentSurfaceProperty = float4(\n                                parentStack\[stackIndex]\[23],\n                                parentStack\[stackIndex]\[24],\n                                parentStack\[stackIndex]\[25],\n                                parentStack\[stackIndex]\[26]\n                            );\n                            if (fabs(nextDistance) > fabs(parentNextDistance))\n                            \{\n                                objectId = parentStack\[stackIndex]\[27];\n                            \}\n                            const float parentBlendStrength = parentStack\[stackIndex]\[28];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentDiffuseColour,\n                                blendedDiffuseColour,\n                                parentSpecularColour,\n                                blendedSpecularColour,\n                                parentTransmissiveColour,\n                                blendedTransmissiveColour,\n                                parentEmissiveColour,\n                                blendedEmissiveColour,\n                                parentSurfaceProperty,\n                                blendedSurface,\n                                parentBlendStrength\n                            );\n                        \}\n\n                        // Update the global min distance (and surface/colour)\n                        if (fabs(nextDistance) < fabs(distance))\n                        \{\n                            distance = nextDistance;\n\n                            diffusivity = blendedDiffuseColour;\n                            specularity = blendedSpecularColour;\n                            transmittance = blendedTransmissiveColour;\n                            emittance = blendedEmissiveColour;\n\n                            surface = blendedSurface;\n\n                            id = objectId;\n                        \}\n                    \}\n\n                    do\n                    \{\n                        // Decrement the number of children each parent has\n                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                        \{\n                            parentStack\[parentIndex]\[0] -= 1.0f;\n                        \}\n\n                        // Get the number of children still remaining for the parent\n                        // If there are still children, we can break out of this loop\n                        // to process the rest of them before the parent itself\n                        numChildren = parentStack\[stackLastIndex]\[0];\n                    \}\n                    while (numChildren <= 0.0f && --stackLastIndex >= 0);\n\n                    parentStackLength = stackLastIndex + 1;\n                \}\n                // No parents to interact with, simply check the distance\n                else if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n\n                    diffusivity = blendedDiffuseColour;\n                    specularity = blendedSpecularColour;\n                    transmittance = blendedTransmissiveColour;\n                    emittance = blendedEmissiveColour;\n\n                    surface = blendedSurface;\n\n                    id = objectId;\n                \}\n            \}\n            else\n            \{\n                // Node has Children, push it to the stack for later\n                // processing when we have all its children\n                // parentStack.push()\n                // TODO not all this needs to be in the stack (maybe)\n                parentStack\[parentStackLength]\[0] = numChildren;\n                parentStack\[parentStackLength]\[1] = transformedRay.x;\n                parentStack\[parentStackLength]\[2] = transformedRay.y;\n                parentStack\[parentStackLength]\[3] = transformedRay.z;\n                parentStack\[parentStackLength]\[4] = scale;\n                parentStack\[parentStackLength]\[5] = (float) modifications;\n                parentStack\[parentStackLength]\[6] = nextDistance;\n                parentStack\[parentStackLength]\[7] = blendedDiffuseColour.x;\n                parentStack\[parentStackLength]\[8] = blendedDiffuseColour.y;\n                parentStack\[parentStackLength]\[9] = blendedDiffuseColour.z;\n                parentStack\[parentStackLength]\[10] = blendedDiffuseColour.w;\n                parentStack\[parentStackLength]\[11] = blendedSpecularColour.x;\n                parentStack\[parentStackLength]\[12] = blendedSpecularColour.y;\n                parentStack\[parentStackLength]\[13] = blendedSpecularColour.z;\n                parentStack\[parentStackLength]\[14] = blendedSpecularColour.w;\n                parentStack\[parentStackLength]\[15] = blendedTransmissiveColour.x;\n                parentStack\[parentStackLength]\[16] = blendedTransmissiveColour.y;\n                parentStack\[parentStackLength]\[17] = blendedTransmissiveColour.z;\n                parentStack\[parentStackLength]\[18] = blendedTransmissiveColour.w;\n                parentStack\[parentStackLength]\[19] = blendedEmissiveColour.x;\n                parentStack\[parentStackLength]\[20] = blendedEmissiveColour.y;\n                parentStack\[parentStackLength]\[21] = blendedEmissiveColour.z;\n                parentStack\[parentStackLength]\[22] = blendedEmissiveColour.w;\n                parentStack\[parentStackLength]\[23] = blendedSurface.x;\n                parentStack\[parentStackLength]\[24] = blendedSurface.y;\n                parentStack\[parentStackLength]\[25] = blendedSurface.z;\n                parentStack\[parentStackLength]\[26] = blendedSurface.w;\n                parentStack\[parentStackLength]\[27] = objectId;\n                parentStack\[parentStackLength]\[28] = blendStrength;\n                parentStackLength++;\n            \}\n        \}\n\n        return float2(distance, id);\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     *\n     * @returns: The normalized surface normal.\n     */\n    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint)\n    \{\n        return normalize(\n            __offset0 * getMinDistanceToObjectInScene(\n                point + __offset0 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset1 * getMinDistanceToObjectInScene(\n                point + __offset1 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset2 * getMinDistanceToObjectInScene(\n                point + __offset2 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset3 * getMinDistanceToObjectInScene(\n                point + __offset3 * _hitTolerance,\n                pixelFootprint\n            )\n        );\n    \}\n\n\n    /**\n     * March a ray through the scene.\n     *\n     * @arg rayOrigin: The origin of the ray.\n     * @arg rayDirection: The direction of the ray.\n     * @arg seed: A random value to use as the seed for roughness.\n     *\n     * @returns: The ray colour.\n     */\n    float4 marchRay(const float3 &rayOrigin, const float3 &rayDirection, float3 &seed)\n    \{\n        float refractiveIndex = _refractiveIndex;\n\n        float nestedDielectrics\[MAX_NESTED_DIELECTRICS]\[\n            4   // Absorption colour of object\n            + 1 // Id of the dielectric we are currently in\n            + 1 // Refractive index of that object\n        ];\n        nestedDielectrics\[0]\[0] = _absorptionColour.x;\n        nestedDielectrics\[0]\[1] = _absorptionColour.y;\n        nestedDielectrics\[0]\[2] = _absorptionColour.z;\n        nestedDielectrics\[0]\[3] = _absorptionColour.w;\n        nestedDielectrics\[0]\[4] = -1;\n        nestedDielectrics\[0]\[5] = refractiveIndex;\n        int numNestedDielectrics = 0;\n\n        float4 rayColour = float4(0);\n        float4 brdf = float4(1);\n\n        float lastStepDistance = 1.0f;\n\n        float firstObjectId = 0.0f;\n        float lastRefractedId = -1.0f;\n\n        int iterations = 0;\n        int bounces = 0;\n\n        float distanceTravelled = 0;\n        float distanceTravelledThroughMaterial = distanceTravelled;\n\n        // Get the next ray\n        float3 origin = rayOrigin;\n        float3 direction = rayDirection;\n\n        float4 diffusivity;\n        float4 specularity;\n        float4 transmittance;\n        float4 emittance;\n        float4 surface;\n\n        float pixelFootprint = _hitTolerance;\n\n        // March the ray\n        while (\n            distanceTravelled < _maxRayDistance\n            && iterations < _maxRaySteps\n            && sumComponent(brdf) > _hitTolerance\n        ) \{\n            // Get the closest distance to an object\n            const float2 result = getMinDistanceToObjectInScene(\n                origin,\n                distanceTravelled,\n                diffusivity,\n                specularity,\n                transmittance,\n                emittance,\n                surface\n            );\n\n            // Keep the signed distance so we know whether or not we are\n            // inside the object\n            const float signedStepDistance = result.x;\n\n            // Get the absolute value, the true shortest distance to a\n            // surface\n            const float stepDistance = fabs(signedStepDistance);\n\n            // Keep track of the distance the ray has travelled\n            distanceTravelled += stepDistance;\n            distanceTravelledThroughMaterial += stepDistance;\n\n            pixelFootprint += _hitTolerance * stepDistance;\n\n            // Step the ray forwards\n            origin += direction * stepDistance;\n\n            // Have we hit the nearest object?\n            if (stepDistance < pixelFootprint)\n            \{\n                // The actual position on the surface we hit\n                const float3 surfacePosition = origin - direction * _hitTolerance;\n\n                // The normal to the surface at that position\n                float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(\n                    surfacePosition,\n                    pixelFootprint\n                );\n\n                if (bounces == 0)\n                \{\n                    // Keep the ID of the first object hit, so we can\n                    // store it in the alpha channel\n                    firstObjectId = result.y;\n\n                    // Early exit for the various AOVs that are not 'scene'\n                    if (_outputType > 0 && _outputType < 4)\n                    \{\n                        return earlyExitAOVs(\n                            _outputType,\n                            surfacePosition,\n                            surfaceNormal,\n                            distanceTravelled,\n                            firstObjectId\n                        );\n                    \}\n                \}\n\n                // Get the diffuse direction for the next ray\n                const float3 diffuseDirection = cosineDirectionInHemisphere(\n                    surfaceNormal,\n                    seed\n                );\n\n                const float rng = random(random(seed.x) + random(seed.y) + random(seed.z));\n\n                float refractedRefractiveIndex = 1.0f;\n                float specularProbability = specularity.w;\n                float refractionProbability = transmittance.w;\n\n                if (specularProbability > 0.0f || refractionProbability > 0.0f)\n                \{\n                    getReflectivityData(\n                        direction,\n                        surfaceNormal,\n                        result.y,\n                        nestedDielectrics,\n                        numNestedDielectrics,\n                        surface.x,\n                        refractiveIndex,\n                        refractedRefractiveIndex,\n                        specularProbability,\n                        refractionProbability\n                    );\n                \}\n\n                // Maybe reflect the ray\n                if (specularProbability > 0.0f && rng <= specularProbability)\n                \{\n                    specularBounce(\n                        emittance,\n                        specularity,\n                        surfaceNormal,\n                        diffuseDirection,\n                        diffusivity.w,\n                        specularProbability,\n                        pixelFootprint * _shadowBias,\n                        rayColour,\n                        brdf,\n                        direction,\n                        origin\n                    );\n                \}\n                // Maybe spawn a refracted ray\n                else if (\n                    transmittance.w > 0.0f\n                    && rng <= specularProbability + refractionProbability\n                ) \{\n                    transmissiveBounce(\n                        emittance,\n                        transmittance,\n                        surfaceNormal,\n                        diffuseDirection,\n                        surface.w,\n                        refractionProbability,\n                        (2.0f * pixelFootprint + stepDistance) * _shadowBias,\n                        refractedRefractiveIndex,\n                        result.y,\n                        rayColour,\n                        brdf,\n                        direction,\n                        origin,\n                        nestedDielectrics,\n                        numNestedDielectrics,\n                        refractiveIndex,\n                        distanceTravelledThroughMaterial\n                    );\n                \}\n                // Otherwise diffuse the light\n                else\n                \{\n                    diffuseBounce(\n                        emittance,\n                        diffusivity,\n                        surfaceNormal,\n                        diffuseDirection,\n                        1.0f - specularProbability - refractionProbability,\n                        pixelFootprint * _shadowBias,\n                        rayColour,\n                        brdf,\n                        direction,\n                        origin\n                    );\n                \}\n\n                const float exitProbability = max(brdf.x, brdf.y, brdf.z);\n\n                // Exit if we have reached the bounce limit\n                if (++bounces >= __bouncesPerRay || exitProbability <= random(rng))\n                \{\n                    return finalAOVs(\n                        _outputType,\n                        iterations,\n                        bounces,\n                        firstObjectId,\n                        rayColour\n                    );\n                \}\n\n                brdf /= exitProbability;\n\n                // Update the random seed\n                seed = random(seed + rng + fabs(origin + direction));\n\n                // Reset the pixel footprint so multiple reflections don't\n                // reduce precision\n                pixelFootprint = _hitTolerance;\n            \}\n\n            lastStepDistance = signedStepDistance;\n            iterations++;\n        \}\n\n        // If we are not computing the scene value and we have missed all\n        // objects, return black.\n        if (_outputType > 0)\n        \{\n            return rayMissAOVs(\n                _outputType,\n                iterations,\n                bounces,\n                firstObjectId\n            );\n        \}\n\n        const float4 absorptionColour = float4(\n            nestedDielectrics\[numNestedDielectrics]\[0],\n            nestedDielectrics\[numNestedDielectrics]\[1],\n            nestedDielectrics\[numNestedDielectrics]\[2],\n            nestedDielectrics\[numNestedDielectrics]\[3]\n        );\n\n        // Read the hdri value in the direction the ray was last travelling\n        // and absorb an amount of light proportional to the distance travelled\n        // through the last material\n        rayColour += brdf * readHDRIValue(direction) * exp(\n            -absorptionColour * (\n                distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled\n            )\n        );\n\n        rayColour.w = (bounces > 0) * firstObjectId;\n        return rayColour;\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value.\n     * \n     * @arg pos: The x, and y location we are currently processing.\n     */\n    void process(int2 pos)\n    \{\n        SampleType(noise) noisePixel = noise();\n        float3 seed = random(float3(noisePixel.x, noisePixel.y, noisePixel.z));\n\n        const float4 variancePixel = variance();\n\n        const float numPaths = numPathsToMarch(\n            _minPathsPerPixel,\n            _maxPathsPerPixel,\n            float3(variancePixel.x, variancePixel.y, variancePixel.z)\n        );\n\n        float4 resultPixel = float4(0);\n\n        float2 pixelLocation = float2(pos.x, pos.y);\n\n        for (int path=1; path <= numPaths; path++)\n        \{\n            seed = length(seed) * random(seed * path);\n\n            // Generate a ray from the camera\n            float3 rayOrigin;\n            float3 rayDirection;\n            createCameraRay(\n                _cameraWorldMatrix,\n                __inverseCameraProjectionMatrix,\n                pixelsToUV(\n                    pixelLocation\n                    + random(float2(seed.x, seed.y)),\n                    float2(_formatWidth, _formatHeight)\n                ),\n                rayOrigin,\n                rayDirection\n            );\n\n            // Determine the colour of the ray\n            resultPixel += marchRay(rayOrigin, rayDirection, seed);\n        \}\n\n        const uint objectId = resultPixel.w / numPaths;\n\n        const float numPrecomputedPaths = variancePixel.w;\n\n        dst() = (resultPixel + numPrecomputedPaths * src()) / (numPaths + numPrecomputedPaths);\n\n        if (_outputType == 4)\n        \{\n            dst(2) = numPaths + numPrecomputedPaths;\n        \}\n\n        dst(3) = encodeTwoValuesInUint(objectId, numPaths + numPrecomputedPaths);\n    \}\n\};\n"
@@ -19158,7 +19132,6 @@ push $Na81adc0
   "PathMarchKernel_Output Type" {{parent.output_type}}
   rebuild_finalise ""
   name BlinkPathMarcher
-  selected true
   xpos 1661
   ypos -462
  }
@@ -19172,7 +19145,7 @@ push $Na81adc0
   xpos 1695
   ypos -341
  }
-set Na8a6310 [stack 0]
+set Nb710400 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/decode_alpha.blink
   recompileCount 2
@@ -19184,8 +19157,8 @@ set Na8a6310 [stack 0]
   xpos 1661
   ypos -228
  }
-set Na8ab260 [stack 0]
-push $Na8a6310
+set Ncaa6080 [stack 0]
+push $Nb710400
  Dot {
   name Dot8
   xpos 1830
@@ -19200,7 +19173,7 @@ push $Na8a6310
   xpos 1796
   ypos -221
  }
-push $Na8a6310
+push $Nb710400
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/variance.blink
   recompileCount 16
@@ -19213,7 +19186,7 @@ push $Na8a6310
   xpos 1526
   ypos -352
  }
-push $Na8ab260
+push $Ncaa6080
  ShuffleCopy {
   inputs 2
   in rgb
@@ -19244,19 +19217,61 @@ push $Na8ab260
   ypos -29
  }
 end_group
-set Na5c5bd0 [stack 0]
+set Nb42f080 [stack 0]
+Write {
+ file /home/ob1/software/nuke/dev/raymarch/images/path_march_test/path_march_test.####.exr
+ file_type exr
+ write_ACES_compliant_EXR true
+ first_part rgba
+ version 1
+ name Write2
+ xpos 700
+ ypos 507
+}
+Read {
+ inputs 0
+ file_type exr
+ file /home/ob1/software/nuke/dev/raymarch/images/path_march_test/path_march_test.####.exr
+ format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ last 3
+ origlast 3
+ origset true
+ name Read1
+ xpos 967
+ ypos 454
+}
+Write {
+ channels all
+ file /home/ob1/software/nuke/dev/raymarch/images/checks.png
+ file_type png
+ datatype "16 bit"
+ checkHashOnRead false
+ version 3
+ name Write1
+ xpos 967
+ ypos 659
+}
+push $Nb42f080
 Grade {
  channels {variance.red variance.green variance.blue -variance.num_paths}
  white 50
- gamma 1.02
+ gamma 1.84
  name Grade1
  xpos 179
  ypos 572
 }
-push $Na5c5bd0
+Shuffle {
+ in variance
+ name Shuffle2
+ xpos 387
+ ypos 579
+}
+push $Nb42f080
 Viewer {
+ inputs 2
+ frame 3
  frame_range 1-400
  name Viewer1
- xpos 547
- ypos 651
+ xpos 562
+ ypos 694
 }
