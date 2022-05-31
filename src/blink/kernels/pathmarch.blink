@@ -1057,11 +1057,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &surfaceNormal,
             const float4 &brdf,
             const float offset,
-            float4 &rayColour)
+            float4 &emissiveColour)
     {
         if (_lightTextureWidth <= 0)
         {
-            return 0.0f;
+            return 1.0f;
         }
 
         float pdf = 1.0f / _lightTextureWidth;
@@ -1098,7 +1098,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         // Merge the intensity values
-        rayColour += emissiveTerm(
+        emissiveColour += emissiveTerm(
             float4(
                 lightProperty.x,
                 lightProperty.y,
@@ -1264,15 +1264,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 const float reflectionOffset = pixelFootprint * _shadowBias;
 
-                const float lightPDF = sampleLight(
-                    seed,
-                    origin,
-                    surfaceNormal,
-                    brdf,
-                    reflectionOffset,
-                    rayColour
-                );
-
+                float4 materialBRDF;
                 const float materialPDF = sampleMaterial(
                     seed,
                     surfaceNormal,
@@ -1287,13 +1279,24 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     emittance,
                     result.y,
                     rayColour,
-                    brdf,
+                    materialBRDF,
                     direction,
                     origin,
                     nestedDielectrics,
                     numNestedDielectrics,
                     refractiveIndex,
                     distanceTravelledThroughMaterial
+                );
+
+                brdf *= materialBRDF;
+
+                const float lightPDF = sampleLight(
+                    seed,
+                    origin,
+                    surfaceNormal,
+                    materialBRDF,
+                    reflectionOffset,
+                    rayColour
                 );
 
                 // Exit if we have reached the bounce limit

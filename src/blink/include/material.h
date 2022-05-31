@@ -319,13 +319,13 @@ inline float specularBounce(
         const float roughness,
         const float specularProbability,
         const float offset,
-        float4 &rayColour,
+        float4 &emissiveColour,
         float4 &brdf,
         float3 &direction,
         float3 &position)
 {
     // Update the colour of the ray
-    rayColour += emissiveTerm(emittance, brdf);
+    emissiveColour += emissiveTerm(emittance, brdf);
 
     const float3 specularDirection = reflectRayOffSurface(
         direction,
@@ -338,7 +338,7 @@ inline float specularBounce(
         roughness * roughness
     ));
 
-    brdf *= specularity * specularProbability;
+    brdf = specularity * specularProbability;
 
     // Offset the point so that it doesn't get trapped on the surface.
     position = offsetPoint(
@@ -364,7 +364,7 @@ inline float transmissiveBounce(
         const float offset,
         const float refractedRefractiveIndex,
         const float objectId,
-        float4 &rayColour,
+        float4 &emissiveColour,
         float4 &brdf,
         float3 &direction,
         float3 &position,
@@ -393,7 +393,7 @@ inline float transmissiveBounce(
         nestedDielectrics[numNestedDielectrics][3]
     );
 
-    brdf *= exp(-absorptionColour * distanceTravelledThroughMaterial);
+    brdf = exp(-absorptionColour * distanceTravelledThroughMaterial);
 
     // We are entering a new material so reset the distance
     distanceTravelledThroughMaterial = 0.0f;
@@ -420,7 +420,7 @@ inline float transmissiveBounce(
     }
 
     // Update the colour of the ray
-    rayColour += emissiveTerm(emittance, brdf);
+    emissiveColour += emissiveTerm(emittance, brdf);
 
     brdf *= refractionProbability;
 
@@ -438,16 +438,16 @@ inline float diffuseBounce(
         const float3 &diffuseDirection,
         const float diffuseProbability,
         const float offset,
-        float4 &rayColour,
+        float4 &emissiveColour,
         float4 &brdf,
         float3 &direction,
         float3 &position)
 {
     // Update the colour of the ray
-    rayColour += emissiveTerm(emittance, brdf);
+    emissiveColour += emissiveTerm(emittance, brdf);
 
     direction = diffuseDirection;
-    brdf *= diffusivity * diffuseProbability;
+    brdf = diffusivity * diffuseProbability;
 
     // Offset the point so that it doesn't get trapped on
     // surface.
@@ -477,7 +477,7 @@ inline float sampleMaterial(
         const float specularRoughness,
         const float4 &emittance,
         const float objectId,
-        float4 &rayColour,
+        float4 &emissiveColour,
         float4 &brdf,
         float3 &direction,
         float3 &position,
@@ -527,7 +527,7 @@ inline float sampleMaterial(
             specularRoughness,
             specularProbability,
             reflectionOffset,
-            rayColour,
+            emissiveColour,
             brdf,
             direction,
             position
@@ -548,7 +548,7 @@ inline float sampleMaterial(
             transmissionOffset,
             refractedRefractiveIndex,
             objectId,
-            rayColour,
+            emissiveColour,
             brdf,
             direction,
             position,
@@ -568,7 +568,7 @@ inline float sampleMaterial(
             diffuseDirection,
             1.0f - specularProbability - refractionProbability,
             reflectionOffset,
-            rayColour,
+            emissiveColour,
             brdf,
             direction,
             position
