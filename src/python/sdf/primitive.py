@@ -31,8 +31,6 @@ class SDFPrimitive(SDFKnobManager):
     is_bound_knob_name = "is_bound"
     blend_strength_knob_name = "blend_strength"
     blend_type_knob_name = "blend_type"
-    specular_knob_name = "specular"
-    transmission_knob_name = "transmission"
     repetition_knob_name = "repetition"
     repetition_params_knob_name = "repetition_params"
     repetition_spacing_knob_name = "repetition_spacing"
@@ -736,24 +734,6 @@ class SDFPrimitive(SDFKnobManager):
         on whether or not elongate has been enabled.
         """
         self._node.knob(self.elongation_knob_name).setEnabled(self._knob.value())
-
-    @_knob_changed_callbacks.register(specular_knob_name)
-    def _specular_changed(self):
-        """Ensure that specular + transmission <= 1"""
-        specular = self._knob.value()
-        transmission_knob = self._node.knob(self.transmission_knob_name)
-
-        if specular + transmission_knob.value() > 1.:
-            transmission_knob.setValue(1. - specular)
-
-    @_knob_changed_callbacks.register(transmission_knob_name)
-    def _transmission_changed(self):
-        """Ensure that specular + transmission <= 1"""
-        transmission = self._knob.value()
-        specular_knob = self._node.knob(self.specular_knob_name)
-
-        if transmission + specular_knob.value() > 1.:
-            specular_knob.setValue(1. - transmission)
 
     @_knob_changed_callbacks.register(blend_type_knob_name)
     def _blend_type_changed(self):

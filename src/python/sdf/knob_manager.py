@@ -8,8 +8,6 @@ import logging
 
 import nuke
 
-from .utils import rgb_to_hex
-
 
 _LOGGER = logging.getLogger(__file__)
 
@@ -64,8 +62,6 @@ class SDFKnobManager(KnobManager):
     sibling_input_index = 0
     children_input_index = 1
 
-    colour_knob_name = "colour"
-
     _knob_changed_callbacks = KnobChangedCallbacks(KnobManager._knob_changed_callbacks)
 
     _dimensional_axes = ("x", "y", "z")
@@ -91,11 +87,6 @@ class SDFKnobManager(KnobManager):
     def has_children(self):
         """bool: True if a node is connected to the 'children' input."""
         return self._node.input(self.children_input_index) is not None
-
-    @_knob_changed_callbacks.register(colour_knob_name)
-    def _colour_changed(self):
-        """Change the node colour to match the object for easier ID."""
-        self._node.knob("tile_color").setValue(rgb_to_hex(self._knob.value()))
 
     @_knob_changed_callbacks.register("inputChange")
     def _input_changed(self):
