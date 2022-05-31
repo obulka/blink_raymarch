@@ -11,13 +11,13 @@
 #include "aovs.h"
 #include "camera.h"
 #include "conversion.h"
-#include "lights.h"
 #include "math.h"
+#include "lights.h"
 #include "colour.h"
 #include "objectInteraction.h"
 #include "random.h"
 #include "sdfModifications.h"
-#include "rays.h"
+#include "material.h"
 #include "sdfs.h"
 
 
@@ -807,6 +807,99 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         return float2(distance, id);
     }
+
+
+    // /**
+    //  * Compute the combined intensity of all lights on the surface of an
+    //  * object.
+    //  *
+    //  * @arg pointOnSurface: The point on the surface to compute the
+    //  *     light intensity at.
+    //  * @arg surfaceNormal: The normal direction to the surface.
+    //  * @arg surfaceColour: The colour of the object.
+    //  * @arg surface: The surface properties of the object.
+    //  * @arg lightColour: Will store the light colour.
+    //  *
+    //  * @returns: The light intensity.
+    //  */
+    // float lightIntensityOnSurface(
+    //         const float3 &pointOnSurface,
+    //         const float3 &surfaceNormal,
+    //         const float4 &surfaceColour,
+    //         const float4 &surface,
+    //         float4 &lightColour)
+    // {
+    //     float2 lightIntensity = float2(surface.z, 0);
+    //     lightColour = surface.z * surfaceColour;
+
+    //     float2 currentLightIntensity;
+
+    //     // for each light in the scene
+    //     for (int i=0; i < lightTextureWidth; i++)
+    //     {
+    //         float4 hitSurface = float4(0);
+    //         float4 hitColour = float4(0);
+
+    //         // Read the light properties
+    //         SampleType(lights) light = lights(i, 0);
+    //         SampleType(lightProperties) lightProperty = lightProperties(i, 0);
+    //         SampleType(lightProperties1) lightProperty1 = lightProperties1(i, 0);
+
+    //         int lightType = (int) lightProperty.w;
+    //         if (fabs(lightType) == 2)
+    //         {
+    //             // Ambient light, simply return the intensity.
+    //             currentLightIntensity = float2(light.w, 1);
+    //         }
+    //         else
+    //         {
+    //             // Compute the intensity
+    //             currentLightIntensity = intensityOfLightOnSurface(
+    //                 pointOnSurface,
+    //                 surfaceNormal,
+    //                 float3(light.x, light.y, light.z),
+    //                 lightType,
+    //                 light.w,
+    //                 lightProperty1.y,
+    //                 lightProperty1.x,
+    //                 hitColour,
+    //                 hitSurface
+    //             );
+    //             lightColour += hitSurface.z * hitColour;
+    //             lightIntensity += float2(hitSurface.z, 1.0f);
+    //         }
+
+    //         // Merge the intensity values
+    //         lightColour += currentLightIntensity.x * currentLightIntensity.y * float4(
+    //             lightProperty.x,
+    //             lightProperty.y,
+    //             lightProperty.z,
+    //             0.0f
+    //         );
+    //         lightIntensity += currentLightIntensity;
+    //     }
+
+    //     // Read the hdri diffuse light contribution
+    //     const float diffuse = saturate(1.0f - surface.x - surface.y);
+    //     if (diffuse > hitTolerance)
+    //     {
+    //         const float4 hdriLightColour = readHDRILightValue(surfaceNormal);
+    //         lightColour += diffuse * hdriLightColour;
+    //         lightIntensity += float2(
+    //             diffuse * length(
+    //                 float3(
+    //                     hdriLightColour.x,
+    //                     hdriLightColour.y,
+    //                     hdriLightColour.z
+    //                 )
+    //             ),
+    //             1.0f
+    //         );
+    //     }
+
+    //     lightColour = saturate(lightColour);
+    //     return saturate(lightIntensity.x * lightIntensity.y);
+    // }
 
 
     /**

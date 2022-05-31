@@ -48,6 +48,21 @@ inline void pointLightData(
 
 
 /**
+ *
+ */
+inline float geometryFactor(
+        const float3 &position,
+        const float3 &lightSurfacePosition,
+        const float3 &lightSurfaceNormal)
+{
+    const float3 positionToLight = lightSurfacePosition - position;
+    return fabs(
+        dot(lightSurfaceNormal , normalize(positionToLight))
+    ) / dot2(positionToLight);
+}
+
+
+/**
  * Get the direction, distance, and intensity of a light.
  *
  * @arg pointOnSurface: The point on the surface to compute the
