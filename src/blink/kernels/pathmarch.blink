@@ -954,7 +954,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 const float rng = random(random(seed.x) + random(seed.y) + random(seed.z));
 
-                float refractedRefractiveIndex = 1.0f;
+                float refractedRefractiveIndex;
                 float specularProbability = specularity.w;
                 float refractionProbability = transmittance.w;
 
