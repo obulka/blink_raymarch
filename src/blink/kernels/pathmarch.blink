@@ -136,6 +136,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float3 __offset2;
         float3 __offset3;
 
+        float __numLights;
+
 
     /**
      * In define(), parameters can be given labels and default values.
@@ -213,6 +215,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         __offset1 = 0.5773f * float3(-1, -1, 1);
         __offset2 = 0.5773f * float3(-1, 1, -1);
         __offset3 = 0.5773f * float3(1, 1, 1);
+
+        __numLights = max(1.0f, (float) _lightTextureWidth);
     }
 
 
@@ -1098,14 +1102,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         // Merge the intensity values
-        emissiveColour += emissiveTerm(
+        emissiveColour = emissiveTerm(
             float4(
                 lightProperty.x,
                 lightProperty.y,
                 lightProperty.z,
                 lightIntensity.x * lightIntensity.y
-            ),
-            brdf
+            )
         );
 
         return pdf;
@@ -1264,10 +1267,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 const float reflectionOffset = pixelFootprint * _shadowBias;
 
+                // Material sampling
                 float4 materialBRDF;
+                float4 emissiveColour;
+                float3 bounceDirection;
                 const float materialPDF = sampleMaterial(
                     seed,
                     surfaceNormal,
+                    direction,
                     diffusivity,
                     reflectionOffset,
                     (2.0f * pixelFootprint + stepDistance) * _shadowBias,
@@ -1278,9 +1285,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     diffusivity.w,
                     emittance,
                     result.y,
-                    rayColour,
+                    emissiveColour,
                     materialBRDF,
-                    direction,
+                    bounceDirection,
                     origin,
                     nestedDielectrics,
                     numNestedDielectrics,
@@ -1288,16 +1295,34 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     distanceTravelledThroughMaterial
                 );
 
-                throughput *= materialBRDF;
-
-                const float lightPDF = sampleLight(
-                    seed,
-                    origin,
-                    surfaceNormal,
-                    materialBRDF,
-                    reflectionOffset,
-                    rayColour
+                throughput *= (
+                    materialBRDF
+                    * fabs(dot(bounceDirection, surfaceNormal))
+                    / materialPDF
                 );
+
+                rayColour += (
+                    emissiveColour
+                    * throughput
+                    * balanceHeuristic(
+                        materialPDF * geometryFactor(direction, surfaceNormal),
+                        // TODO this 1.0f should be the SA
+                        // __numLights should also include emissive objects
+                        // and those emissive objects should have a chance of
+                        // being sampled in sampleLight
+                        sampleLightsPDF(__numLights, 1.0f)
+                    )
+                );
+
+                // // Light Sampling
+                // const float lightPDF = sampleLight(
+                //     seed,
+                //     origin,
+                //     surfaceNormal,
+                //     materialBRDF,
+                //     reflectionOffset,
+                //     rayColour
+                // );
 
                 // Exit if we have reached the bounce limit
                 // or with a random chance
@@ -1313,6 +1338,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         rayColour
                     );
                 }
+
+                direction = bounceDirection;
 
                 // Account for the lost intensity from the early exits
                 throughput /= exitProbability;

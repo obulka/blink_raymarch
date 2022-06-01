@@ -167,21 +167,9 @@ inline float balanceHeuristic(const float pdf0, const float pdf1)
 /**
  *
  */
-inline float4 emissiveTerm(const float4 &emittance, const float4 &brdf)
+inline float4 emissiveTerm(const float4 &emittance)
 {
-    return emittance * emittance.w * brdf;
-}
-
-
-/**
- *
- */
-inline float sampleMaterialPDF(
-        const float3 &surfaceNormal,
-        const float3 &outgoingDirection,
-        const float3 &lightDirection)
-{
-    return dot(outgoingDirection, surfaceNormal) / PI;
+    return emittance * emittance.w;
 }
 
 
@@ -237,33 +225,29 @@ inline void getReflectivityData(
  *
  */
 inline float specularBounce(
+        const float3 &incidentDirection,
+        const float3 &surfaceNormal,
         const float4 &emittance,
         const float4 &specularity,
-        const float3 &surfaceNormal,
         const float3 &diffuseDirection,
         const float roughness,
         const float specularProbability,
         const float offset,
         float4 &emissiveColour,
         float4 &brdf,
-        float3 &direction,
+        float3 &specularDirection,
         float3 &position)
 {
-    // Update the colour of the ray
-    emissiveColour += emissiveTerm(emittance, brdf);
-
-    const float3 specularDirection = reflectRayOffSurface(
-        direction,
+    specularDirection = reflectRayOffSurface(
+        incidentDirection,
         surfaceNormal
     );
 
-    direction = normalize(blend(
+    specularDirection = normalize(blend(
         diffuseDirection,
         specularDirection,
         roughness * roughness
     ));
-
-    brdf = specularity * specularProbability;
 
     // Offset the point so that it doesn't get trapped on the surface.
     position = offsetPoint(
@@ -272,7 +256,12 @@ inline float specularBounce(
         offset
     );
 
-    return dot(direction, surfaceNormal) / PI;
+    brdf = specularity;
+
+    // Update the colour of the ray
+    emissiveColour = emissiveTerm(emittance);
+
+    return specularProbability * dot(specularDirection, surfaceNormal) / PI;
 }
 
 
@@ -280,9 +269,10 @@ inline float specularBounce(
  *
  */
 inline float transmissiveBounce(
+        const float3 &incidentDirection,
+        const float3 &surfaceNormal,
         const float4 &emittance,
         const float4 &transmittance,
-        const float3 &surfaceNormal,
         const float3 &diffuseDirection,
         const float roughness,
         const float refractionProbability,
@@ -291,21 +281,25 @@ inline float transmissiveBounce(
         const float objectId,
         float4 &emissiveColour,
         float4 &brdf,
-        float3 &direction,
+        float3 &refractedDirection,
         float3 &position,
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][6],
         int &numNestedDielectrics,
         float &incidentRefractiveIndex,
         float &distanceTravelledThroughMaterial)
 {
-    const float3 refractedDirection = refractRayThroughSurface(
-        direction,
+    refractedDirection = refractRayThroughSurface(
+        incidentDirection,
         surfaceNormal,
         incidentRefractiveIndex,
         refractedRefractiveIndex
     );
 
-    direction = normalize(blend(-diffuseDirection, refractedDirection, roughness * roughness));
+    refractedDirection = normalize(blend(
+        -diffuseDirection,
+        refractedDirection,
+        roughness * roughness
+    ));
 
     // Offset the point so that it doesn't get trapped on
     // surface.
@@ -317,11 +311,6 @@ inline float transmissiveBounce(
         nestedDielectrics[numNestedDielectrics][2],
         nestedDielectrics[numNestedDielectrics][3]
     );
-
-    brdf = exp(-absorptionColour * distanceTravelledThroughMaterial);
-
-    // We are entering a new material so reset the distance
-    distanceTravelledThroughMaterial = 0.0f;
 
     // We are passing through the surface, so update the refractive index
     incidentRefractiveIndex = refractedRefractiveIndex;
@@ -344,12 +333,15 @@ inline float transmissiveBounce(
         nestedDielectrics[numNestedDielectrics][5] = refractedRefractiveIndex;
     }
 
+    brdf = exp(-absorptionColour * distanceTravelledThroughMaterial);
+
     // Update the colour of the ray
-    emissiveColour += emissiveTerm(emittance, brdf);
+    emissiveColour = emissiveTerm(emittance);
 
-    brdf *= refractionProbability;
+    // We are entering a new material so reset the distance
+    distanceTravelledThroughMaterial = 0.0f;
 
-    return fabs(dot(direction, surfaceNormal)) / PI;
+    return refractionProbability * fabs(dot(refractedDirection, surfaceNormal)) / PI;
 }
 
 
@@ -357,9 +349,9 @@ inline float transmissiveBounce(
  *
  */
 inline float diffuseBounce(
+        const float3 &surfaceNormal,
         const float4 &emittance,
         const float4 &diffusivity,
-        const float3 &surfaceNormal,
         const float3 &diffuseDirection,
         const float diffuseProbability,
         const float offset,
@@ -368,11 +360,7 @@ inline float diffuseBounce(
         float3 &direction,
         float3 &position)
 {
-    // Update the colour of the ray
-    emissiveColour += emissiveTerm(emittance, brdf);
-
     direction = diffuseDirection;
-    brdf = diffusivity * diffuseProbability;
 
     // Offset the point so that it doesn't get trapped on
     // surface.
@@ -382,7 +370,12 @@ inline float diffuseBounce(
         offset
     );
 
-    return dot(direction, surfaceNormal) / PI;
+    brdf = diffusivity;
+
+    // Update the colour of the ray
+    emissiveColour = emissiveTerm(emittance);
+
+    return diffuseProbability * dot(direction, surfaceNormal) / PI;
 }
 
 
@@ -392,6 +385,7 @@ inline float diffuseBounce(
 inline float sampleMaterial(
         const float3 &seed,
         const float3 &surfaceNormal,
+        const float3 &incidentDirection,
         const float4 &diffusivity,
         const float reflectionOffset,
         const float transmissionOffset,
@@ -404,7 +398,7 @@ inline float sampleMaterial(
         const float objectId,
         float4 &emissiveColour,
         float4 &brdf,
-        float3 &direction,
+        float3 &outgoingDirection,
         float3 &position,
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][6],
         int &numNestedDielectrics,
@@ -426,7 +420,7 @@ inline float sampleMaterial(
     if (specularProbability > 0.0f || refractionProbability > 0.0f)
     {
         getReflectivityData(
-            direction,
+            incidentDirection,
             surfaceNormal,
             objectId,
             nestedDielectrics,
@@ -445,16 +439,17 @@ inline float sampleMaterial(
     if (specularProbability > 0.0f && rng <= specularProbability)
     {
         pdf = specularBounce(
+            incidentDirection,
+            surfaceNormal,
             emittance,
             specularity,
-            surfaceNormal,
             diffuseDirection,
             specularRoughness,
             specularProbability,
             reflectionOffset,
             emissiveColour,
             brdf,
-            direction,
+            outgoingDirection,
             position
         );
     }
@@ -464,9 +459,10 @@ inline float sampleMaterial(
         && rng <= specularProbability + refractionProbability
     ) {
         pdf = transmissiveBounce(
+            incidentDirection,
+            surfaceNormal,
             emittance,
             transmittance,
-            surfaceNormal,
             diffuseDirection,
             transmissiveRoughness,
             refractionProbability,
@@ -475,7 +471,7 @@ inline float sampleMaterial(
             objectId,
             emissiveColour,
             brdf,
-            direction,
+            outgoingDirection,
             position,
             nestedDielectrics,
             numNestedDielectrics,
@@ -487,15 +483,15 @@ inline float sampleMaterial(
     else
     {
         pdf = diffuseBounce(
+            surfaceNormal,
             emittance,
             diffusivity,
-            surfaceNormal,
             diffuseDirection,
             1.0f - specularProbability - refractionProbability,
             reflectionOffset,
             emissiveColour,
             brdf,
-            direction,
+            outgoingDirection,
             position
         );
     }

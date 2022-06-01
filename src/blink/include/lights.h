@@ -50,15 +50,11 @@ inline void pointLightData(
 /**
  *
  */
-inline float geometryFactor(
-        const float3 &position,
-        const float3 &lightSurfacePosition,
-        const float3 &lightSurfaceNormal)
+inline float geometryFactor(const float3 &incidentDirection, const float3 &surfaceNormal)
 {
-    const float3 positionToLight = lightSurfacePosition - position;
     return fabs(
-        dot(lightSurfaceNormal , normalize(positionToLight))
-    ) / dot2(positionToLight);
+        dot(surfaceNormal, incidentDirection)
+    ) / dot2(incidentDirection);
 }
 
 
