@@ -62,3 +62,33 @@ float4x4 projectionMatrix(
         0, 0, -1, 0
     );
 }
+
+
+/**
+ * Generate a ray out of a camera.
+ *
+ * @arg cameraWorldMatrix: The camera matrix.
+ * @arg inverseProjectionMatrix: The inverse of the projection matrix.
+ * @arg uvPosition: The UV position in the resulting image.
+ * @arg rayOrigin: Will store the origin of the ray.
+ * @arg rayDirection: Will store the direction of the ray.
+ */
+void createCameraRay(
+        const float4x4 &cameraWorldMatrix,
+        const float4x4 &inverseProjectionMatrix,
+        const float2 &uvPosition,
+        float3 &rayOrigin,
+        float3 &rayDirection)
+{
+    positionFromWorldMatrix(cameraWorldMatrix, rayOrigin);
+    float4 direction = matmul(
+        inverseProjectionMatrix,
+        float4(uvPosition.x, uvPosition.y, 0, 1)
+    );
+    matmul(
+        cameraWorldMatrix,
+        float4(direction.x, direction.y, direction.z, 0),
+        direction
+    );
+    rayDirection = normalize(float3(direction.x, direction.y, direction.z));
+}

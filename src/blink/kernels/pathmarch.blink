@@ -9,9 +9,9 @@
 //
 
 #include "aovs.h"
-#include "camera.h"
 #include "conversion.h"
 #include "math.h"
+#include "camera.h"
 #include "lights.h"
 #include "colour.h"
 #include "objectInteraction.h"
@@ -1374,7 +1374,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         const float4 variancePixel = variance();
 
-        const float numPaths = numPathsToMarch(
+        const float numPaths = adaptiveSamples(
             _minPathsPerPixel,
             _maxPathsPerPixel,
             float3(variancePixel.x, variancePixel.y, variancePixel.z)

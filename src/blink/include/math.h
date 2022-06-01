@@ -944,3 +944,19 @@ inline void positionFromWorldMatrix(const float4x4 &worldMatrix, float3 &positio
         worldMatrix[2][3]
     );
 }
+
+
+/**
+ *
+ */
+inline float adaptiveSamples(
+        const float minPaths,
+        const float maxPaths,
+        const float3 &variance)
+{
+    return clamp(
+        round(maxPaths * length(variance)),
+        minPaths,
+        maxPaths
+    );
+}
