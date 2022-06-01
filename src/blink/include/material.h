@@ -167,15 +167,6 @@ inline float balanceHeuristic(const float pdf0, const float pdf1)
 /**
  *
  */
-inline float4 emissiveTerm(const float4 &emittance)
-{
-    return emittance * emittance.w;
-}
-
-
-/**
- *
- */
 inline void getReflectivityData(
         const float3 &direction,
         const float3 &surfaceNormal,
@@ -238,14 +229,14 @@ inline float specularBounce(
         float3 &specularDirection,
         float3 &position)
 {
-    specularDirection = reflectRayOffSurface(
+    const float3 idealSpecularDirection = reflectRayOffSurface(
         incidentDirection,
         surfaceNormal
     );
 
     specularDirection = normalize(blend(
         diffuseDirection,
-        specularDirection,
+        idealSpecularDirection,
         roughness * roughness
     ));
 
@@ -261,7 +252,7 @@ inline float specularBounce(
     // Update the colour of the ray
     emissiveColour = emissiveTerm(emittance);
 
-    return specularProbability * dot(specularDirection, surfaceNormal) / PI;
+    return specularProbability * dot(idealSpecularDirection, specularDirection) / PI;
 }
 
 
@@ -288,7 +279,7 @@ inline float transmissiveBounce(
         float &incidentRefractiveIndex,
         float &distanceTravelledThroughMaterial)
 {
-    refractedDirection = refractRayThroughSurface(
+    const float3 idealRefractedDirection = refractRayThroughSurface(
         incidentDirection,
         surfaceNormal,
         incidentRefractiveIndex,
@@ -297,7 +288,7 @@ inline float transmissiveBounce(
 
     refractedDirection = normalize(blend(
         -diffuseDirection,
-        refractedDirection,
+        idealRefractedDirection,
         roughness * roughness
     ));
 
@@ -341,7 +332,7 @@ inline float transmissiveBounce(
     // We are entering a new material so reset the distance
     distanceTravelledThroughMaterial = 0.0f;
 
-    return refractionProbability * fabs(dot(refractedDirection, surfaceNormal)) / PI;
+    return refractionProbability * fabs(dot(idealRefractedDirection, refractedDirection)) / PI;
 }
 
 

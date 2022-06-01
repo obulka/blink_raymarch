@@ -50,6 +50,15 @@ inline void pointLightData(
 /**
  *
  */
+inline float4 emissiveTerm(const float4 &emittance)
+{
+    return emittance * emittance.w;
+}
+
+
+/**
+ *
+ */
 inline float geometryFactor(const float3 &incidentDirection, const float3 &surfaceNormal)
 {
     return fabs(
@@ -115,6 +124,8 @@ float getLightData(
             distanceToLight
         );
     }
+
+    lightDirection = normalize(lightDirection);
 
     return intensity / pow(1.0f + distanceToLight, falloff);
 }

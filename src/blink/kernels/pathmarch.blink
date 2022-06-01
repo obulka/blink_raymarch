@@ -828,10 +828,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The intenstity of shadow.
      */
-    float computeSoftShadow(
+    inline float computeSoftShadow(
             const float3 &rayDirection,
-            const float &distanceToShadePoint,
-            const float &softness,
+            const float distanceToShadePoint,
+            const float softness,
             float3 &rayOrigin)
     {
         float distanceTravelled = 0;
@@ -924,11 +924,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The occlusion.
      */
-    float computeAmbientOcclusion(
+    inline float computeAmbientOcclusion(
             const float3 &rayDirection,
             const float3 &rayOrigin,
-            const float &amount,
-            const int &iterations)
+            const float amount,
+            const int iterations)
     {
         float occlusion = 0.0f;
         float occlusionScaleFactor = 1.0f;
@@ -951,98 +951,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * Compute the intensity of a light on a surface.
-     *
-     * @arg pointOnSurface: The point on the surface to compute the
-     *     light intensity at.
-     * @arg surfaceNormal: The normal direction to the surface.
-     * @arg light: The light properties which depend on the light type.
-     * @arg lightType: The type of light to compute the intensity for.
-     *     0: directional
-     *     1: point
-     *     2: ambient
-     *     3: ambient occlusion
-     * @arg intensity: The light intensity.
-     * @arg falloff: The power of the falloff of the light.
-     * @arg softness: The softness of the shadow.
-     * @arg hitColour: Will store the colour of the object.
-     * @arg hitSurface: Will store the surface properties of the object.
-     *
-     * @returns: The light intensity.
-     */
-    inline float2 intensityOfLightOnSurface(
-            const float3 &pointOnSurface,
-            const float3 &surfaceNormal,
-            const float3 &light,
-            const int lightType,
-            const float intensity,
-            const float falloff,
-            const float softness,
-            const float offset)
-    {
-        int absLightType = abs(lightType);
-        if (absLightType == 3)
-        {
-            float2 result = float2(
-                1.0f,
-                computeAmbientOcclusion(
-                    surfaceNormal,
-                    pointOnSurface,
-                    intensity,
-                    (int) light.x
-                )
-            );
-            return result;
-        }
-
-        float distanceToLight;
-        float3 lightDirection;
-        float intensityAtPosition = getLightData(
-            pointOnSurface,
-            surfaceNormal,
-            light,
-            absLightType,
-            intensity,
-            falloff,
-            _maxRayDistance,
-            distanceToLight,
-            lightDirection
-        );
-        float3 surfaceOffset = offsetPoint(
-            pointOnSurface,
-            surfaceNormal,
-            offset
-        );
-        lightDirection = normalize(lightDirection);
-
-        float normalFactor = dot(surfaceNormal, lightDirection);
-
-        float shadowIntensityAtPosition;
-        if (lightType < 0)
-        {
-            shadowIntensityAtPosition = computeSoftShadow(
-                lightDirection,
-                distanceToLight,
-                softness,
-                surfaceOffset
-            );
-        }
-        else
-        {
-            shadowIntensityAtPosition = computeShadow(
-                lightDirection,
-                distanceToLight,
-                surfaceOffset
-            );
-        }
-
-        return saturate(
-            normalFactor * float2(intensityAtPosition, shadowIntensityAtPosition)
-        );
-    }
-
-
-    /**
      * Compute the combined intensity of all lights on the surface of an
      * object.
      *
@@ -1059,17 +967,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &seed,
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
-            const float4 &brdf,
             const float &offset,
-            float4 &emissiveColour)
+            float4 &emissiveColour,
+            float3 &lightDirection,
+            float3 &lightNormal)
     {
-        if (_lightTextureWidth <= 0)
-        {
-            return 1.0f;
-        }
-
-        float pdf = 1.0f / _lightTextureWidth;
-
         const float rng = random(random(seed.x + seed.y) + random(seed.z));
         const int selectedLight = floor(rng * _lightTextureWidth);
 
@@ -1080,28 +982,75 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float2 lightIntensity;
 
+        float surfaceArea = 1.0f;
+
         int lightType = (int) lightProperty.w;
-        if (fabs(lightType) == 2)
+        int absLightType = abs(lightType);
+
+        if (absLightType == 2)
         {
             // Ambient light, simply return the intensity.
             lightIntensity = float2(light.w, 1);
         }
+        else if (absLightType == 3)
+        {
+            lightIntensity = float2(
+                1.0f,
+                computeAmbientOcclusion(
+                    surfaceNormal,
+                    pointOnSurface,
+                    light.w,
+                    (int) light.x
+                )
+            );
+        }
         else
         {
-            // Compute the intensity
-            lightIntensity = intensityOfLightOnSurface(
+            float distanceToLight;
+            float intensityAtPosition = getLightData(
                 pointOnSurface,
                 surfaceNormal,
                 float3(light.x, light.y, light.z),
-                lightType,
+                absLightType,
                 light.w,
                 lightProperty1.y,
-                lightProperty1.x,
+                _maxRayDistance,
+                distanceToLight,
+                lightDirection
+            );
+            float3 surfaceOffset = offsetPoint(
+                pointOnSurface,
+                surfaceNormal,
                 offset
+            );
+
+            float normalFactor = dot(surfaceNormal, lightDirection);
+
+            float shadowIntensityAtPosition;
+            if (lightType < 0)
+            {
+                shadowIntensityAtPosition = computeSoftShadow(
+                    lightDirection,
+                    distanceToLight,
+                    lightProperty1.x,
+                    surfaceOffset
+                );
+            }
+            else
+            {
+                shadowIntensityAtPosition = computeShadow(
+                    lightDirection,
+                    distanceToLight,
+                    surfaceOffset
+                );
+            }
+
+            lightIntensity = saturate(
+                normalFactor * float2(intensityAtPosition, shadowIntensityAtPosition)
             );
         }
 
-        // Merge the intensity values
+        // // Merge the intensity values
         emissiveColour = emissiveTerm(
             float4(
                 lightProperty.x,
@@ -1111,7 +1060,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             )
         );
 
-        return pdf;
+        // TODO use normal of surfaces when we sample surfaces
+        lightNormal = -lightDirection;
+
+        // TODO this 1.0f should be the SA
+        // __numLights should also include emissive objects
+        // and those emissive objects should have a chance of
+        // being sampled in sampleLight
+        return sampleLightsPDF(__numLights, surfaceArea);
     }
 
 
@@ -1269,7 +1225,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 // Material sampling
                 float4 materialBRDF;
-                float4 emissiveColour;
+                float4 materialEmissiveColour;
                 float3 bounceDirection;
                 const float materialPDF = sampleMaterial(
                     seed,
@@ -1285,7 +1241,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     diffusivity.w,
                     emittance,
                     result.y,
-                    emissiveColour,
+                    materialEmissiveColour,
                     materialBRDF,
                     bounceDirection,
                     origin,
@@ -1295,6 +1251,41 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     distanceTravelledThroughMaterial
                 );
 
+                if (_lightTextureWidth > 0)
+                {
+                    // Light Sampling
+                    float4 lightEmissiveColour;
+                    float3 lightDirection;
+                    float3 lightNormal;
+                    const float lightPDF = sampleLight(
+                        seed,
+                        origin,
+                        surfaceNormal,
+                        reflectionOffset,
+                        lightEmissiveColour,
+                        lightDirection,
+                        lightNormal
+                    );
+
+                    const float lightGeometryFactor = geometryFactor(direction, surfaceNormal);
+
+                    rayColour += (
+                        lightEmissiveColour
+                        * throughput
+                        * materialBRDF
+                        * lightGeometryFactor
+                        * saturate(dot(surfaceNormal, lightDirection))
+                        * balanceHeuristic(
+                            // TODO this 1.0f should be the SA of this object
+                            // __numLights should also include emissive objects
+                            // and those emissive objects should have a chance of
+                            // being sampled in sampleLight
+                            lightPDF,
+                            materialPDF * lightGeometryFactor
+                        ) / lightPDF
+                    );
+                }
+
                 throughput *= (
                     materialBRDF
                     * fabs(dot(bounceDirection, surfaceNormal))
@@ -1302,27 +1293,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 rayColour += (
-                    emissiveColour
+                    materialEmissiveColour
                     * throughput
                     * balanceHeuristic(
                         materialPDF * geometryFactor(direction, surfaceNormal),
-                        // TODO this 1.0f should be the SA
+                        // TODO this 1.0f should be the SA of this object
                         // __numLights should also include emissive objects
                         // and those emissive objects should have a chance of
                         // being sampled in sampleLight
                         sampleLightsPDF(__numLights, 1.0f)
                     )
                 );
-
-                // // Light Sampling
-                // const float lightPDF = sampleLight(
-                //     seed,
-                //     origin,
-                //     surfaceNormal,
-                //     materialBRDF,
-                //     reflectionOffset,
-                //     rayColour
-                // );
 
                 // Exit if we have reached the bounce limit
                 // or with a random chance
