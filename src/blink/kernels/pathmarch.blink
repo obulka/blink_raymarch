@@ -1222,6 +1222,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
 
                 const float reflectionOffset = pixelFootprint * _shadowBias;
+                const float transmissionOffset = (
+                    (2.0f * pixelFootprint + stepDistance)
+                    * _shadowBias
+                );
 
                 // Material sampling
                 float4 materialBRDF;
@@ -1233,7 +1237,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     direction,
                     diffusivity,
                     reflectionOffset,
-                    (2.0f * pixelFootprint + stepDistance) * _shadowBias,
+                    transmissionOffset,
                     transmittance,
                     surface.x,
                     surface.w,
@@ -1267,7 +1271,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         lightNormal
                     );
 
-                    const float lightGeometryFactor = geometryFactor(direction, surfaceNormal);
+                    const float lightGeometryFactor = geometryFactor(
+                        lightDirection,
+                        lightNormal
+                    );
 
                     rayColour += (
                         lightEmissiveColour

@@ -218,18 +218,14 @@ inline void getReflectivityData(
 inline float specularBounce(
         const float3 &incidentDirection,
         const float3 &surfaceNormal,
-        const float4 &emittance,
-        const float4 &specularity,
         const float3 &diffuseDirection,
         const float roughness,
-        const float specularProbability,
         const float offset,
-        float4 &emissiveColour,
-        float4 &brdf,
+        float3 &idealSpecularDirection,
         float3 &specularDirection,
         float3 &position)
 {
-    const float3 idealSpecularDirection = reflectRayOffSurface(
+    idealSpecularDirection = reflectRayOffSurface(
         incidentDirection,
         surfaceNormal
     );
@@ -246,7 +242,21 @@ inline float specularBounce(
         surfaceNormal,
         offset
     );
+}
 
+
+/**
+ *
+ */
+inline float sampleSpecular(
+        const float3 &idealSpecularDirection,
+        const float3 &specularDirection,
+        const float4 &emittance,
+        const float4 &specularity,
+        const float specularProbability,
+        float4 &emissiveColour,
+        float4 &brdf)
+{
     brdf = specularity;
 
     // Update the colour of the ray
@@ -259,43 +269,53 @@ inline float specularBounce(
 /**
  *
  */
-inline float transmissiveBounce(
+inline void transmissiveBounce(
         const float3 &incidentDirection,
         const float3 &surfaceNormal,
-        const float4 &emittance,
-        const float4 &transmittance,
         const float3 &diffuseDirection,
         const float roughness,
-        const float refractionProbability,
         const float offset,
+        const float incidentRefractiveIndex,
         const float refractedRefractiveIndex,
-        const float objectId,
-        float4 &emissiveColour,
-        float4 &brdf,
+        float3 &idealRefractedDirection,
         float3 &refractedDirection,
-        float3 &position,
-        float nestedDielectrics[MAX_NESTED_DIELECTRICS][6],
-        int &numNestedDielectrics,
-        float &incidentRefractiveIndex,
-        float &distanceTravelledThroughMaterial)
+        float3 &position)
 {
-    const float3 idealRefractedDirection = refractRayThroughSurface(
+    idealRefractedDirection = refractRayThroughSurface(
         incidentDirection,
         surfaceNormal,
         incidentRefractiveIndex,
         refractedRefractiveIndex
     );
 
-    refractedDirection = normalize(blend(
-        -diffuseDirection,
-        idealRefractedDirection,
-        roughness * roughness
-    ));
+    refractedDirection = normalize(
+        blend(-diffuseDirection, idealRefractedDirection, roughness * roughness)
+    );
 
     // Offset the point so that it doesn't get trapped on
     // surface.
     position = offsetPoint(position, -surfaceNormal, offset);
+}
 
+
+/**
+ *
+ */
+inline float sampleTransmissive(
+        const float3 &idealRefractedDirection,
+        const float3 &refractedDirection,
+        const float4 &emittance,
+        const float4 &transmittance,
+        const float refractionProbability,
+        const float refractedRefractiveIndex,
+        const float objectId,
+        float4 &emissiveColour,
+        float4 &brdf,
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][6],
+        int &numNestedDielectrics,
+        float &incidentRefractiveIndex,
+        float &distanceTravelledThroughMaterial)
+{
     const float4 absorptionColour = float4(
         nestedDielectrics[numNestedDielectrics][0],
         nestedDielectrics[numNestedDielectrics][1],
@@ -339,15 +359,10 @@ inline float transmissiveBounce(
 /**
  *
  */
-inline float diffuseBounce(
+inline void diffuseBounce(
         const float3 &surfaceNormal,
-        const float4 &emittance,
-        const float4 &diffusivity,
         const float3 &diffuseDirection,
-        const float diffuseProbability,
         const float offset,
-        float4 &emissiveColour,
-        float4 &brdf,
         float3 &direction,
         float3 &position)
 {
@@ -360,13 +375,27 @@ inline float diffuseBounce(
         surfaceNormal,
         offset
     );
+}
 
+
+/**
+ *
+ */
+inline float sampleDiffuse(
+        const float3 &surfaceNormal,
+        const float4 &emittance,
+        const float4 &diffusivity,
+        const float3 &diffuseDirection,
+        const float diffuseProbability,
+        float4 &emissiveColour,
+        float4 &brdf)
+{
     brdf = diffusivity;
 
     // Update the colour of the ray
     emissiveColour = emissiveTerm(emittance);
 
-    return diffuseProbability * dot(direction, surfaceNormal) / PI;
+    return diffuseProbability * dot(diffuseDirection, surfaceNormal) / PI;
 }
 
 
@@ -429,19 +458,26 @@ inline float sampleMaterial(
     // Maybe reflect the ray
     if (specularProbability > 0.0f && rng <= specularProbability)
     {
-        pdf = specularBounce(
+        float3 idealSpecularDirection;
+        specularBounce(
             incidentDirection,
             surfaceNormal,
-            emittance,
-            specularity,
             diffuseDirection,
             specularRoughness,
-            specularProbability,
             reflectionOffset,
-            emissiveColour,
-            brdf,
+            idealSpecularDirection,
             outgoingDirection,
             position
+        );
+
+        pdf = sampleSpecular(
+            idealSpecularDirection,
+            outgoingDirection,
+            emittance,
+            specularity,
+            specularProbability,
+            emissiveColour,
+            brdf
         );
     }
     // Maybe refract the ray
@@ -449,21 +485,30 @@ inline float sampleMaterial(
         transmittance.w > 0.0f
         && rng <= specularProbability + refractionProbability
     ) {
-        pdf = transmissiveBounce(
+        float3 idealRefractedDirection;
+        transmissiveBounce(
             incidentDirection,
             surfaceNormal,
-            emittance,
-            transmittance,
             diffuseDirection,
             transmissiveRoughness,
-            refractionProbability,
             transmissionOffset,
+            incidentRefractiveIndex,
+            refractedRefractiveIndex,
+            idealRefractedDirection,
+            outgoingDirection,
+            position
+        );
+
+        pdf = sampleTransmissive(
+            idealRefractedDirection,
+            outgoingDirection,
+            emittance,
+            transmittance,
+            refractionProbability,
             refractedRefractiveIndex,
             objectId,
             emissiveColour,
             brdf,
-            outgoingDirection,
-            position,
             nestedDielectrics,
             numNestedDielectrics,
             incidentRefractiveIndex,
@@ -473,17 +518,22 @@ inline float sampleMaterial(
     // Otherwise diffuse the light
     else
     {
-        pdf = diffuseBounce(
+        diffuseBounce(
+            surfaceNormal,
+            diffuseDirection,
+            reflectionOffset,
+            outgoingDirection,
+            position
+        );
+
+        pdf = sampleDiffuse(
             surfaceNormal,
             emittance,
             diffusivity,
-            diffuseDirection,
-            1.0f - specularProbability - refractionProbability,
-            reflectionOffset,
-            emissiveColour,
-            brdf,
             outgoingDirection,
-            position
+            1.0f - specularProbability - refractionProbability,
+            emissiveColour,
+            brdf
         );
     }
 
