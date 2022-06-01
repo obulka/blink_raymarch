@@ -970,7 +970,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float &offset,
             float4 &emissiveColour,
             float3 &lightDirection,
-            float3 &lightNormal)
+            float3 &lightNormal,
+            float &distanceToLight)
     {
         const float rng = random(random(seed.x + seed.y) + random(seed.z));
         const int selectedLight = floor(rng * _lightTextureWidth);
@@ -1006,7 +1007,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
         else
         {
-            float distanceToLight;
             float intensityAtPosition = getLightData(
                 pointOnSurface,
                 surfaceNormal,
@@ -1227,14 +1227,37 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     * _shadowBias
                 );
 
+                float3 lightDirection = float3(0, 0, 1);
+                float distanceToLight = 0.0f;
+                float lightPDF = 1.0f;
+                float4 lightEmissiveColour;
+                float3 lightNormal;
+                if (_lightTextureWidth > 0)
+                {
+                    // Light Sampling
+                    lightPDF = sampleLight(
+                        seed,
+                        origin,
+                        surfaceNormal,
+                        reflectionOffset,
+                        lightEmissiveColour,
+                        lightDirection,
+                        lightNormal,
+                        distanceToLight
+                    );
+                }
+
                 // Material sampling
                 float4 materialBRDF;
+                float4 lightBRDF;
                 float4 materialEmissiveColour;
                 float3 bounceDirection;
+                float materialLightPDF;
                 const float materialPDF = sampleMaterial(
                     seed,
                     surfaceNormal,
                     direction,
+                    lightDirection,
                     diffusivity,
                     reflectionOffset,
                     transmissionOffset,
@@ -1245,32 +1268,21 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     diffusivity.w,
                     emittance,
                     result.y,
+                    distanceToLight,
                     materialEmissiveColour,
                     materialBRDF,
+                    lightBRDF,
                     bounceDirection,
                     origin,
                     nestedDielectrics,
                     numNestedDielectrics,
                     refractiveIndex,
-                    distanceTravelledThroughMaterial
+                    distanceTravelledThroughMaterial,
+                    materialLightPDF
                 );
 
                 if (_lightTextureWidth > 0)
                 {
-                    // Light Sampling
-                    float4 lightEmissiveColour;
-                    float3 lightDirection;
-                    float3 lightNormal;
-                    const float lightPDF = sampleLight(
-                        seed,
-                        origin,
-                        surfaceNormal,
-                        reflectionOffset,
-                        lightEmissiveColour,
-                        lightDirection,
-                        lightNormal
-                    );
-
                     const float lightGeometryFactor = geometryFactor(
                         lightDirection,
                         lightNormal
@@ -1279,7 +1291,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     rayColour += (
                         lightEmissiveColour
                         * throughput
-                        * materialBRDF
+                        * lightBRDF
                         * lightGeometryFactor
                         * saturate(dot(surfaceNormal, lightDirection))
                         * balanceHeuristic(
@@ -1288,7 +1300,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             // and those emissive objects should have a chance of
                             // being sampled in sampleLight
                             lightPDF,
-                            materialPDF * lightGeometryFactor
+                            materialLightPDF * lightGeometryFactor
                         ) / lightPDF
                     );
                 }
