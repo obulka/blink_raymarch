@@ -750,7 +750,7 @@ inline float2 normalizeAngles(const float2 &angles)
 }
 
 
-float3 anglesBetweenVectors(const float3 &vector0, const float3 &vector1)
+inline float3 anglesBetweenVectors(const float3 &vector0, const float3 &vector1)
 {
     return float3(
         acos(dot(float2(vector0.y, vector0.z), float2(vector1.y, vector1.z))),
@@ -778,7 +778,7 @@ inline float getAngleAndAxisBetweenVectors(
 }
 
 
-float3 alignWithDirection(
+inline float3 alignWithDirection(
         const float3 &unalignedAxis,
         const float3 &alignDirection,
         const float3 &vectorToAlign)
@@ -805,7 +805,9 @@ float3 alignWithDirection(
  *
  * @returns: The spherical angles in radians.
  */
-float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float thetaOffset)
+inline float2 cartesionUnitVectorToSpherical(
+        const float3 &rayDirection,
+        const float thetaOffset)
 {
     return normalizeAngles(float2(
         atan2(rayDirection.z, rayDirection.x) + thetaOffset,
@@ -821,7 +823,7 @@ float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float th
  *
  * @returns: The spherical angles in radians.
  */
-float2 cartesionUnitVectorToSpherical(const float3 &rayDirection)
+inline float2 cartesionUnitVectorToSpherical(const float3 &rayDirection)
 {
     return normalizeAngles(float2(
         atan2(rayDirection.y, rayDirection.x),
@@ -838,7 +840,7 @@ float2 cartesionUnitVectorToSpherical(const float3 &rayDirection)
  *
  * @returns: The spherical dot product.
  */
-float sphericalUnitDot(const float2 &vector0, const float2 &vector1)
+inline float sphericalUnitDot(const float2 &vector0, const float2 &vector1)
 {
     return (
         cos(vector0.x) * cos(vector1.x)

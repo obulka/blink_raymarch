@@ -256,7 +256,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The minimum distance to an object in the scene.
      */
-    float getMinDistanceToObjectInScene(const float3 &rayOrigin, const float pixelFootprint)
+    float getMinDistanceToObjectInScene(const float3 &rayOrigin, const float &pixelFootprint)
     {
         float distance = _maxRayDistance;
 
@@ -462,7 +462,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float2 getMinDistanceToObjectInScene(
             const float3 &rayOrigin,
-            const float pixelFootprint,
+            const float &pixelFootprint,
             float4 &diffusivity,
             float4 &specularity,
             float4 &transmittance,
@@ -826,8 +826,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float computeSoftShadow(
             const float3 &rayDirection,
-            const float distanceToShadePoint,
-            const float softness,
+            const float &distanceToShadePoint,
+            const float &softness,
             float3 &rayOrigin)
     {
         float distanceTravelled = 0;
@@ -881,7 +881,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float computeShadow(
             const float3 &rayDirection,
-            const float distanceToShadePoint,
+            const float &distanceToShadePoint,
             float3 &rayOrigin)
     {
         float distanceTravelled = 0;
@@ -923,8 +923,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     float computeAmbientOcclusion(
             const float3 &rayDirection,
             const float3 &rayOrigin,
-            const float amount,
-            const int iterations)
+            const float &amount,
+            const int &iterations)
     {
         float occlusion = 0.0f;
         float occlusionScaleFactor = 1.0f;
@@ -1056,7 +1056,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
             const float4 &brdf,
-            const float offset,
+            const float &offset,
             float4 &emissiveColour)
     {
         if (_lightTextureWidth <= 0)
@@ -1122,7 +1122,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The normalized surface normal.
      */
-    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint)
+    float3 estimateSurfaceNormal(const float3 &point, const float &pixelFootprint)
     {
         return normalize(
             __offset0 * getMinDistanceToObjectInScene(
@@ -1172,7 +1172,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int numNestedDielectrics = 0;
 
         float4 rayColour = float4(0);
-        float4 brdf = float4(1);
+        float4 throughput = float4(1);
 
         float lastStepDistance = 1.0f;
 
@@ -1201,7 +1201,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         while (
             distanceTravelled < _maxRayDistance
             && iterations < _maxRaySteps
-            && sumComponent(brdf) > _hitTolerance
+            && sumComponent(throughput) > _hitTolerance
         ) {
             // Get the closest distance to an object
             const float2 result = getMinDistanceToObjectInScene(
@@ -1288,7 +1288,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     distanceTravelledThroughMaterial
                 );
 
-                brdf *= materialBRDF;
+                throughput *= materialBRDF;
 
                 const float lightPDF = sampleLight(
                     seed,
@@ -1301,7 +1301,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 // Exit if we have reached the bounce limit
                 // or with a random chance
-                const float exitProbability = max(brdf.x, brdf.y, brdf.z);
+                const float exitProbability = max(throughput.x, throughput.y, throughput.z);
                 const float rng = random(random(seed.x) + seed.y);
                 if (++bounces >= __bouncesPerRay || exitProbability <= rng)
                 {
@@ -1315,7 +1315,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
 
                 // Account for the lost intensity from the early exits
-                brdf /= exitProbability;
+                throughput /= exitProbability;
 
                 // Update the random seed
                 seed = random(seed + rng + fabs(origin + direction));
@@ -1351,7 +1351,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
-        rayColour += brdf * readHDRIValue(direction) * exp(
+        rayColour += throughput * readHDRIValue(direction) * exp(
             -absorptionColour * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
             )

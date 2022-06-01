@@ -92,7 +92,7 @@ inline float distanceToEllipsoid(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToCutSphere(
+inline float distanceToCutSphere(
         const float3 &position,
         const float radius,
         const float height)
@@ -145,7 +145,7 @@ float distanceToCutSphere(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToHollowSphere(
+inline float distanceToHollowSphere(
         const float3 &position,
         const float radius,
         const float height,
@@ -181,7 +181,7 @@ float distanceToHollowSphere(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToDeathStar(
+inline float distanceToDeathStar(
         const float3 &position,
         const float solidRadius,
         const float hollowRadius,
@@ -225,7 +225,7 @@ float distanceToDeathStar(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToSolidAngle(
+inline float distanceToSolidAngle(
         const float3 &position,
         const float radius,
         const float angle)
@@ -265,7 +265,7 @@ float distanceToSolidAngle(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToRectangularPrism(
+inline float distanceToRectangularPrism(
         const float3 &position,
         const float width,
         const float height,
@@ -291,7 +291,7 @@ float distanceToRectangularPrism(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToRectangularPrismFrame(
+inline float distanceToRectangularPrismFrame(
         const float3 &position,
         const float width,
         const float height,
@@ -322,7 +322,7 @@ float distanceToRectangularPrismFrame(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToRhombus(
+inline float distanceToRhombus(
         const float3 &position,
         const float width,
         const float height,
@@ -404,7 +404,7 @@ inline float distanceToTriangularPrism(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToCylinder(
+inline float distanceToCylinder(
         const float3 &position,
         const float radius,
         const float height)
@@ -426,7 +426,7 @@ float distanceToCylinder(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToInfiniteCylinder(const float3 &position, const float radius)
+inline float distanceToInfiniteCylinder(const float3 &position, const float radius)
 {
     return distanceToCircle(float2(position.x, position.z), radius);
 }
@@ -488,7 +488,10 @@ inline float distanceToCapsule(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToCone(const float3 &position, const float angle, const float height)
+inline float distanceToCone(
+        const float3 &position,
+        const float angle,
+        const float height)
 {
     // Cylindrical coordinates (r, h), ignoring the angle due to symmetry
     const float2 cylindricalPosition = cartesianToCylindrical(position);
@@ -533,7 +536,7 @@ float distanceToCone(const float3 &position, const float angle, const float heig
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToInfiniteCone(const float3 &position, const float angle)
+inline float distanceToInfiniteCone(const float3 &position, const float angle)
 {
     // The normalized cylindrical coordinates of the edge of the cone base
     const float2 coneEdgeDirection = float2(sin(angle), cos(angle));
@@ -570,7 +573,7 @@ float distanceToInfiniteCone(const float3 &position, const float angle)
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToCappedCone(
+inline float distanceToCappedCone(
         const float3 &position,
         const float height,
         const float lowerRadius,
@@ -625,7 +628,7 @@ float distanceToCappedCone(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToRoundedCone(
+inline float distanceToRoundedCone(
         const float3 &position,
         const float height,
         const float lowerRadius,
@@ -666,7 +669,7 @@ float distanceToRoundedCone(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToTorus(
+inline float distanceToTorus(
         const float3 &position,
         const float ringRadius,
         const float tubeRadius)
@@ -693,7 +696,7 @@ float distanceToTorus(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToCappedTorus(
+inline float distanceToCappedTorus(
         const float3 &position,
         const float ringRadius,
         const float tubeRadius,
@@ -733,7 +736,7 @@ float distanceToCappedTorus(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToLink(
+inline float distanceToLink(
         const float3 &position,
         const float ringRadius,
         const float tubeRadius,
@@ -763,7 +766,7 @@ float distanceToLink(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToHexagonalPrism(
+inline float distanceToHexagonalPrism(
         const float3 &position,
         const float height,
         const float depth)
@@ -803,7 +806,7 @@ float distanceToHexagonalPrism(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-float distanceToOctahedron(
+inline float distanceToOctahedron(
         const float3 &position,
         const float radialExtent)
 {
@@ -1160,7 +1163,7 @@ float distanceToMandelbox(
  *
  * @returns: The minimum distance from the point to the shape.
  */
-inline float distanceToColourlessObject(
+float distanceToColourlessObject(
         const float3 &position,
         const int shapeType,
         const float4 &dimensions)

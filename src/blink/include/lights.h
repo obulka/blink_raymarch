@@ -62,6 +62,12 @@ inline float geometryFactor(
 }
 
 
+inline float sampleLightsPDF(const float numLights, const float emissiveSurfaceArea)
+{
+    return 1.0f / numLights / emissiveSurfaceArea;
+}
+
+
 /**
  * Get the direction, distance, and intensity of a light.
  *

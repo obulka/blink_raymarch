@@ -48,7 +48,7 @@ inline float random(uint seed)
 /**
  *
  */
-inline float2 random(float2 seed)
+inline float2 random(const float2 &seed)
 {
     return float2(
         random(seed.x),
@@ -60,7 +60,7 @@ inline float2 random(float2 seed)
 /**
  *
  */
-inline float3 random(float3 seed)
+inline float3 random(const float3 &seed)
 {
     return float3(
         random(seed.x),
