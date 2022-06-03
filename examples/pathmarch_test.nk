@@ -2,19 +2,19 @@
 version 12.0 v8
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="0" y="161" w="1920" h="1043" maximized="1" screen="1">
+    <window x="1976" y="188" w="2504" h="1376" maximized="1" screen="0">
         <splitter orientation="1">
             <split size="40"/>
             <dock id="" hideTitles="1" activePageId="Toolbar.1">
                 <page id="Toolbar.1"/>
             </dock>
-            <split size="1257" stretch="1"/>
+            <split size="1841" stretch="1"/>
             <splitter orientation="2">
-                <split size="586"/>
+                <split size="782"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="413"/>
+                <split size="550"/>
                 <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
@@ -1694,7 +1694,7 @@ Group {
  addUserKnob {26 ""}
  addUserKnob {3 variance_range l "variance range"}
  variance_range 2
- addUserKnob {4 output_type l output t "The AOV type to output.\n\nThe iterations AOV has the average number of steps in the red channel, the average number of bounces in the green channel, and the total number of paths that have been traced for a pixel in the blue channel." M {Beauty Position Normal Depth Iterations "" "" "" ""}}
+ addUserKnob {4 output_type l output t "The AOV type to output.\n\nThe stats AOV has the average number of steps in the red channel, the average number of bounces in the green channel, and the total number of paths that have been traced for a pixel in the blue channel." M {Beauty Position Normal Depth Stats "" "" "" "" "" ""}}
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
