@@ -1254,8 +1254,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
                 float lightPDF = 0.0f;
-                float3 lightNormal;
                 float3 lightDirection = surfaceNormal;
+                float3 lightNormal = -surfaceNormal;
                 float distanceToLight = 0.0f;
                 int selectedLight;
 
