@@ -38,9 +38,7 @@ The surface properties include:
 
 ### sdf_primitive
 
-This gizmo lets you choose the shape, dimensions, location, and surface properties of an object. It takes other sdf_primitives as inputs, and all nodes in the 'children' input will be positioned relative to it. The children will also interact with the shape according to your selection, allowing you to intersect, subtract, and blend the objects. You can also use any shape as a bounding volume of its children in order to improve performance.
-
-You can select the refractive index of the object as well as the medium the camera, and therefore the ray, starts in.
+This gizmo lets you choose the shape, dimensions, and location of an object. It takes other sdf_primitives as inputs, and all nodes in the 'children' input will be positioned relative to it. The children will also interact with the shape according to your selection, allowing you to intersect, subtract, and blend the objects. You can also use any shape as a bounding volume of its children in order to improve performance.
 
 There are also controls for:
 - elongating about the x, y, and z axes
