@@ -20,12 +20,14 @@ inline void directionalLightData(
         const float3 &direction,
         const float maxRayDistance,
         float3 &lightDirection,
-        float &solidAngle,
-        float &distanceToLight)
+        float3 &lightNormal,
+        float &distanceToLight,
+        float &solidAngle)
 {
     lightDirection = -direction;
     solidAngle = PI;
     distanceToLight = maxRayDistance;
+    lightNormal = direction;
 }
 
 
@@ -42,12 +44,14 @@ inline void pointLightData(
         const float3 &pointOnSurface,
         const float3 &position,
         float3 &lightDirection,
-        float &solidAngle,
-        float &distanceToLight)
+        float3 &lightNormal,
+        float &distanceToLight,
+        float &solidAngle)
 {
     lightDirection = position - pointOnSurface;
     solidAngle = 0.0f;
     distanceToLight = length(lightDirection);
+    lightNormal = -lightDirection;
 }
 
 
@@ -71,11 +75,14 @@ inline float geometryFactor(const float3 &incidentDirection, const float3 &surfa
 }
 
 
+/**
+ *
+ */
 inline float sampleLightsPDF(const float numLights, const float solidAngle)
 {
-    if (numLights == 0.0f || solidAngle == 0.0f)
+    if (solidAngle == 0.0f)
     {
-        return FLT_MAX;
+        return 1.0f / numLights;
     }
     else
     {
@@ -87,34 +94,45 @@ inline float sampleLightsPDF(const float numLights, const float solidAngle)
 /**
  * Get the direction, distance, and intensity of a light.
  *
+ * @arg intensity: The light intensity.
+ * @arg falloff: The power of the falloff of the light.
+ * @arg distanceToLight: The distance to the light.
+ *
+ * @returns: The light intensity.
+ */
+inline float lightIntensity(
+        const float intensity,
+        const float falloff,
+        const float distanceToLight)
+{
+    return intensity / pow(1.0f + distanceToLight, falloff);
+}
+
+
+/**
+ * Get the direction, distance, and intensity of a light.
+ *
  * @arg pointOnSurface: The point on the surface to compute the
  *     light intensity at.
- * @arg surfaceNormal: The normal direction to the surface.
  * @arg light: The light properties which depend on the light type.
  * @arg lightType: The type of light to compute the intensity for.
  *     0: directional
  *     1: point
  *     2: ambient
  *     3: ambient occlusion
- * @arg intensity: The light intensity.
- * @arg falloff: The power of the falloff of the light.
  * @arg maxRayDistance: The maximum distance a ray can travel.
  * @arg distanceToLight: Will store the distance to the light.
  * @arg lightDirection: Will store the direction to the light.
- *
- * @returns: The light intensity.
  */
-float getLightData(
+inline void getLightData(
         const float3 &pointOnSurface,
-        const float3 &surfaceNormal,
         const float3 &light,
         const int lightType,
-        const float intensity,
-        const float falloff,
         const float maxRayDistance,
         float &distanceToLight,
         float &solidAngle,
-        float3 &lightDirection)
+        float3 &lightDirection,
+        float3 &lightNormal)
 {
     if (lightType == 0)
     {
@@ -123,6 +141,7 @@ float getLightData(
             light,
             maxRayDistance,
             lightDirection,
+            lightNormal,
             distanceToLight,
             solidAngle
         );
@@ -134,12 +153,11 @@ float getLightData(
             pointOnSurface,
             light,
             lightDirection,
+            lightNormal,
             distanceToLight,
             solidAngle
         );
     }
 
     lightDirection = normalize(lightDirection);
-
-    return intensity / pow(1.0f + distanceToLight, falloff);
 }

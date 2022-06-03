@@ -967,27 +967,20 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The light intensity.
      */
-    float sampleLight(
-            const float3 &seed,
+    float4 sampleLight(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
             const float &offset,
-            float4 &emissiveColour,
-            float3 &lightDirection,
-            float3 &lightNormal,
-            float &distanceToLight)
+            const float3 &lightDirection,
+            const float &distanceToLight,
+            const int &selectedLight)
     {
-        const float rng = random(random(seed.x + seed.y) + random(seed.z));
-        const int selectedLight = floor(rng * _lightTextureWidth);
-
         // Read the light properties
         SampleType(lights) light = lights(selectedLight, 0);
         SampleType(lightProperties) lightProperty = lightProperties(selectedLight, 0);
         SampleType(lightProperties1) lightProperty1 = lightProperties1(selectedLight, 0);
 
-        float2 lightIntensity;
-
-        float soldAngle = 1.0f;
+        float2 intensity;
 
         int lightType = (int) lightProperty.w;
         int absLightType = abs(lightType);
@@ -995,11 +988,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         if (absLightType == 2)
         {
             // Ambient light, simply return the intensity.
-            lightIntensity = float2(light.w, 1);
+            intensity = float2(light.w, 1);
         }
         else if (absLightType == 3)
         {
-            lightIntensity = float2(
+            intensity = float2(
                 1.0f,
                 computeAmbientOcclusion(
                     surfaceNormal,
@@ -1011,17 +1004,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
         else
         {
-            float intensityAtPosition = getLightData(
-                pointOnSurface,
-                surfaceNormal,
-                float3(light.x, light.y, light.z),
-                absLightType,
+            float intensityAtPosition = lightIntensity(
                 light.w,
                 lightProperty1.y,
-                _maxRayDistance,
-                distanceToLight,
-                soldAngle,
-                lightDirection
+                distanceToLight
             );
             float3 surfaceOffset = offsetPoint(
                 pointOnSurface,
@@ -1029,7 +1015,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 offset
             );
 
-            float normalFactor = dot(surfaceNormal, lightDirection);
+            const float normalFactor = dot(surfaceNormal, lightDirection);
 
             float shadowIntensityAtPosition;
             if (lightType < 0)
@@ -1050,29 +1036,63 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
             }
 
-            lightIntensity = saturate(
+            intensity = saturate(
                 normalFactor * float2(intensityAtPosition, shadowIntensityAtPosition)
             );
         }
 
         // // Merge the intensity values
-        emissiveColour = emissiveTerm(
+        return emissiveTerm(
             float4(
                 lightProperty.x,
                 lightProperty.y,
                 lightProperty.z,
-                lightIntensity.x * lightIntensity.y
+                intensity.x * intensity.y
             )
         );
+    }
 
-        // TODO use normal of surfaces when we sample surfaces
-        lightNormal = -lightDirection;
+
+
+    /**
+     *
+     */
+    float sampleLightData(
+            const float3 &seed,
+            const float3 &pointOnSurface,
+            float3 &lightDirection,
+            float3 &lightNormal,
+            float &distanceToLight,
+            int &selectedLight)
+    {
+        const float rng = random(random(seed.x + seed.y) + random(seed.z));
+        selectedLight = floor(rng * _lightTextureWidth);
+
+        // Read the light properties
+        SampleType(lights) light = lights(selectedLight, 0);
+        const int lightType = abs((int) lightProperties(selectedLight, 0, 3));
+
+        float solidAngle = 1.0f;
+
+        if (lightType < 2)
+        {
+            getLightData(
+                pointOnSurface,
+                float3(light.x, light.y, light.z),
+                lightType,
+                _maxRayDistance,
+                distanceToLight,
+                solidAngle,
+                lightDirection,
+                lightNormal
+            );
+        }
 
         // TODO this 1.0f should be the SA
         // __numLights should also include emissive objects
         // and those emissive objects should have a chance of
         // being sampled in sampleLight
-        return sampleLightsPDF(__numLights, soldAngle);
+        return sampleLightsPDF(__numLights, solidAngle);
     }
 
 
@@ -1233,24 +1253,22 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
 
+                float lightPDF = 0.0f;
+                float3 lightNormal;
                 float3 lightDirection = surfaceNormal;
                 float distanceToLight = 0.0f;
-                float4 lightEmissiveColour;
-                float3 lightNormal;
+                int selectedLight;
 
-                float lightPDF = 0.0f;
                 if (_lightSamplingEnabled && _lightTextureWidth > 0)
                 {
                     // Light Sampling
-                    lightPDF = sampleLight(
+                    lightPDF = sampleLightData(
                         seed,
                         origin,
-                        surfaceNormal,
-                        reflectionOffset,
-                        lightEmissiveColour,
                         lightDirection,
                         lightNormal,
-                        distanceToLight
+                        distanceToLight,
+                        selectedLight
                     );
                 }
 
@@ -1293,6 +1311,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     && lightPDF > pixelFootprint
                     && materialLightPDF > pixelFootprint
                 ) {
+                    const float4 lightEmissiveColour = sampleLight(
+                        origin,
+                        surfaceNormal,
+                        reflectionOffset,
+                        lightDirection,
+                        distanceToLight,
+                        selectedLight
+                    );
+
                     const float lightGeometryFactor = geometryFactor(
                         lightDirection,
                         lightNormal
