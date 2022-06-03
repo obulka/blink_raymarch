@@ -1,6 +1,6 @@
 # BlinkScript Ray Marcher for Nuke
 
-This project contains three gizmos that allow you to ray march a wide variety of shapes, including fractals, utilizing the GPU. Included are two blink kernels, one that is used to precompute the irradiance of a latlong, hdr image, and the other is the main ray marching engine.
+This project contains four gizmos that allow you to ray march a wide variety of shapes, including fractals, utilizing the GPU. Included are two blink kernels, one that is used to precompute the irradiance of a latlong, hdr image, and the other is the main ray marching engine.
 
 ![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164989275-4eb4791c-df89-4332-981d-aac79b607762.png)
 
@@ -20,16 +20,25 @@ This project has been tested in Nuke 12.0v8, 12.1v5, and 13.0v2. I recommend usi
 
 ## Gizmos
 
+### sdf_material
+
+This gizmo lets you set the surface properties of an object, and can be passed into an 'sdf_primitive' node in order to apply the surface material to the primitive.
+
+The surface properties include:
+- diffuse colour
+- specular
+- specular roughness
+- specular colour
+- transmission
+- transmission roughness
+- absorption colour
+- refractive index
+- emission
+- emission colour
+
 ### sdf_primitive
 
 This gizmo lets you choose the shape, dimensions, location, and surface properties of an object. It takes other sdf_primitives as inputs, and all nodes in the 'children' input will be positioned relative to it. The children will also interact with the shape according to your selection, allowing you to intersect, subtract, and blend the objects. You can also use any shape as a bounding volume of its children in order to improve performance.
-
-The surface properties include:
-- reflection
-- transmission
-- diffuse colour
-- roughness
-- emission (placeholder for when 'path marched' global illumination is added)
 
 You can select the refractive index of the object as well as the medium the camera, and therefore the ray, starts in.
 
@@ -76,7 +85,24 @@ This gizmo allows you to light the scene with a few different light types, namel
 
 You can choose the colour, intensity, and falloff of the light. You can also soften the shadows with a slider.
 
+### path_march
+
+This gizmo renders the scene using a ray marching algorithm, with support for multiple importance sampled, global illumination, and hdri image based lighting. You can input a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
+
+The AOV options are:
+- scene
+- normal
+- position
+- depth
+- stats
+
+The stats AOV gives you the average number of iterations, the average number of bounces, the total number of paths traced per pixel in the r, g, and b channels, respectively.
+
+The output of this node can be passed as input to an identical node with a different seed, and the child node will use the variance of the input to determine how many paths should be traced for a given pixel, between a minimum and maximum paths per pixel as set on the knobs.
+
 ### ray_march
+
+(currently broken on this branch)
 
 This gizmo renders the scene using a ray marching algorithm, with support for hdri image based lighting. You can input a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
 
