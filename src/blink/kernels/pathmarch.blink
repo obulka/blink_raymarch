@@ -992,6 +992,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int lightType = (int) lightProperty.w;
         int absLightType = abs(lightType);
 
+        lightDirection = float3(0);
+
         if (absLightType == 2)
         {
             // Ambient light, simply return the intensity.
