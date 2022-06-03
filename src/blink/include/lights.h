@@ -20,9 +20,11 @@ inline void directionalLightData(
         const float3 &direction,
         const float maxRayDistance,
         float3 &lightDirection,
+        float &solidAngle,
         float &distanceToLight)
 {
     lightDirection = -direction;
+    solidAngle = PI;
     distanceToLight = maxRayDistance;
 }
 
@@ -40,9 +42,11 @@ inline void pointLightData(
         const float3 &pointOnSurface,
         const float3 &position,
         float3 &lightDirection,
+        float &solidAngle,
         float &distanceToLight)
 {
     lightDirection = position - pointOnSurface;
+    solidAngle = 0.0f;
     distanceToLight = length(lightDirection);
 }
 
@@ -67,9 +71,16 @@ inline float geometryFactor(const float3 &incidentDirection, const float3 &surfa
 }
 
 
-inline float sampleLightsPDF(const float numLights, const float emissiveSurfaceArea)
+inline float sampleLightsPDF(const float numLights, const float solidAngle)
 {
-    return 1.0f / numLights / emissiveSurfaceArea;
+    if (numLights == 0.0f || solidAngle == 0.0f)
+    {
+        return FLT_MAX;
+    }
+    else
+    {
+        return 1.0f / numLights / solidAngle;
+    }
 }
 
 
@@ -102,6 +113,7 @@ float getLightData(
         const float falloff,
         const float maxRayDistance,
         float &distanceToLight,
+        float &solidAngle,
         float3 &lightDirection)
 {
     if (lightType == 0)
@@ -111,7 +123,8 @@ float getLightData(
             light,
             maxRayDistance,
             lightDirection,
-            distanceToLight
+            distanceToLight,
+            solidAngle
         );
     }
     else if (lightType == 1)
@@ -121,7 +134,8 @@ float getLightData(
             pointOnSurface,
             light,
             lightDirection,
-            distanceToLight
+            distanceToLight,
+            solidAngle
         );
     }
 

@@ -117,6 +117,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int _objectTextureWidth;
         int _lightTextureWidth;
 
+        bool _lightSamplingEnabled;
+
         int _outputType;
 
 
@@ -181,6 +183,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // Shape Counts
         defineParam(_objectTextureWidth, "Object Texture Width", 0);
         defineParam(_lightTextureWidth, "Light Texture Width", 0);
+
+        defineParam(_lightSamplingEnabled, "Enable Light Sampling", true);
 
         defineParam(_outputType, "Output Type", 0);
     }
@@ -983,7 +987,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float2 lightIntensity;
 
-        float surfaceArea = 1.0f;
+        float soldAngle = 1.0f;
 
         int lightType = (int) lightProperty.w;
         int absLightType = abs(lightType);
@@ -1016,6 +1020,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightProperty1.y,
                 _maxRayDistance,
                 distanceToLight,
+                soldAngle,
                 lightDirection
             );
             float3 surfaceOffset = offsetPoint(
@@ -1067,7 +1072,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // __numLights should also include emissive objects
         // and those emissive objects should have a chance of
         // being sampled in sampleLight
-        return sampleLightsPDF(__numLights, surfaceArea);
+        return sampleLightsPDF(__numLights, soldAngle);
     }
 
 
@@ -1227,12 +1232,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     * _shadowBias
                 );
 
+
                 float3 lightDirection = float3(0, 0, 1);
                 float distanceToLight = 0.0f;
-                float lightPDF = 1.0f;
                 float4 lightEmissiveColour;
                 float3 lightNormal;
-                if (_lightTextureWidth > 0)
+
+                float lightPDF = 0.0f;
+                if (_lightSamplingEnabled && _lightTextureWidth > 0)
                 {
                     // Light Sampling
                     lightPDF = sampleLight(
@@ -1281,8 +1288,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     materialLightPDF
                 );
 
-                if (_lightTextureWidth > 0)
-                {
+                if (
+                    _lightSamplingEnabled
+                    && lightPDF > pixelFootprint
+                    && materialLightPDF > pixelFootprint
+                ) {
                     const float lightGeometryFactor = geometryFactor(
                         lightDirection,
                         lightNormal
