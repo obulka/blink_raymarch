@@ -247,6 +247,46 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    float3 getObjectPosition(const int index)
+    {
+        float3 transformedPosition = float3(0);
+        for (int j=0; j <= index; j++)
+        {
+            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
+            const float numChildren = shapeProperty.z;
+
+            if (j + numChildren < index)
+            {
+                j += numChildren;
+                continue;
+            }
+
+            // Read in the shape properties
+            const SampleType(positions) position = positions(j, 0);
+            const SampleType(rotations) rotation = rotations(j, 0);
+            const SampleType(dimensions) dimension = dimensions(j, 0);
+            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
+            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
+
+            const float scale = position.w;
+            const int modifications = (int) shapeProperty.y;
+            const float blendStrength = shapeProperty.w;
+
+            // Use parent transform to position child
+            transformedPosition = transformRay(
+                transformedPosition,
+                float3(position.x, position.y, position.z),
+                float3(rotation.x, rotation.y, rotation.z),
+                modifications,
+                modParameters0,
+                modParameters1
+            );
+        }
+
+        return -transformedPosition;
+    }
+
+
     /**
      * Compute the minimum distance to an object in the scene
      *
@@ -1130,14 +1170,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             if (stepDistance < pixelFootprint)
             {
-                const float4 emission = emissiveTerm(emittance);
-                if (emission.w > 0.0f)
+                if (emittance.w > 0.0f)
                 {
                     lightNormal = estimateSurfaceNormal(
                         rayOrigin - lightDirection * pixelFootprint,
                         pixelFootprint
                     );
-                    return emissiveTerm(emission);
+                    return emissiveTerm(emittance);
                 }
                 return float4(0);
             }
@@ -1196,17 +1235,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         {
             // Selected one of the emissive objects
 
+            const int objectIndex = emissiveIndices[selectedLight - _lightTextureWidth];
+
+            const float3 position = getObjectPosition(objectIndex);
+
             // TODO don't assume it's a sphere
-            const float radius = dimensions(
-                emissiveIndices[selectedLight - _lightTextureWidth],
-                0,
-                0
-            );
+            const float radius = dimensions(objectIndex, 0, 0);
 
             sphericalLightData(
                 seed,
                 pointOnSurface,
-                float3(0, 1.5f, 1.45f),
+                position,
                 radius,
                 lightDirection,
                 lightNormal,
@@ -1409,6 +1448,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     _lightSamplingEnabled
                     && lightPDF > pixelFootprint
                     && materialLightPDF > pixelFootprint
+                    && emissiveIndices[selectedLight - _lightTextureWidth] + 1 != result.y
                 ) {
                     float4 lightEmissiveColour;
                     if (selectedLight < _lightTextureWidth)
@@ -1478,8 +1518,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // or with a random chance
                 const float exitProbability = max(throughput.x, throughput.y, throughput.z);
                 const float rng = random(random(seed.x) + seed.y);
-                if (++bounces >= __bouncesPerRay || exitProbability <= rng)
-                {
+                if (
+                    ++bounces >= __bouncesPerRay
+                    || exitProbability <= rng
+                    || materialEmissiveColour.w > 0.0f
+                ) {
                     return finalAOVs(
                         _outputType,
                         iterations,
