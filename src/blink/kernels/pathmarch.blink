@@ -8,16 +8,16 @@
 // BlinkScript Ray Marcher
 //
 
-#include "aovs.h"
-#include "conversion.h"
 #include "math.h"
-#include "camera.h"
-#include "lights.h"
 #include "colour.h"
-#include "objectInteraction.h"
 #include "random.h"
-#include "sdfModifications.h"
+#include "conversion.h"
+#include "aovs.h"
+#include "lights.h"
 #include "material.h"
+#include "camera.h"
+#include "objectInteraction.h"
+#include "sdfModifications.h"
 #include "sdfs.h"
 
 
@@ -1057,6 +1057,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     float sampleLightData(
             const float3 &seed,
             const float3 &pointOnSurface,
+            const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numLights,
             float3 &lightDirection,
             float3 &lightNormal,
@@ -1066,7 +1067,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         const float rng = random(random(seed.x + seed.y) + random(seed.z));
         selectedLight = max(0, (int) floor(rng * (numLights - _hitTolerance)));
 
-        float solidAngle = 1.0f;
+        float visibleSurfaceArea = 1.0f;
 
         if (selectedLight < _lightTextureWidth)
         {
@@ -1082,7 +1083,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     lightType,
                     _maxRayDistance,
                     distanceToLight,
-                    solidAngle,
+                    visibleSurfaceArea,
                     lightDirection,
                     lightNormal
                 );
@@ -1091,6 +1092,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         else
         {
             // Selected one of the emissive objects
+
+            // TODO don't assume it's a sphere
+            const float radius = dimensions(selectedLight - _lightTextureWidth, 0, 0);
+
+            visibleSurfaceArea = 2.0f * PI * radius * radius;
 
             lightDirection = float3(1, 0, 0);
             lightNormal = float3(1, 0, 0);
@@ -1101,7 +1107,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // __numLights should also include emissive objects
         // and those emissive objects should have a chance of
         // being sampled in sampleLight
-        return sampleLightsPDF(numLights, solidAngle);
+        return sampleLightsPDF(numLights, visibleSurfaceArea);
     }
 
 
@@ -1281,6 +1287,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     lightPDF = sampleLightData(
                         seed,
                         origin,
+                        emissiveIndices,
                         numLights,
                         lightDirection,
                         lightNormal,

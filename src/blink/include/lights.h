@@ -10,6 +10,32 @@
 
 
 /**
+ * Get the direction, and distance of a spherical light.
+ *
+ * @arg direction: The direction the light is travelling.
+ * @arg lightDirection: Will store the direction to the light.
+ * @arg distanceToLight: Will store the distance to the light.
+ */
+inline void sphericalLightData(
+        const float3 &seed,
+        const float3 &pointOnSurface,
+        const float3 &position,
+        const float radius,
+        float3 &lightDirection,
+        float3 &lightNormal,
+        float &distanceToLight,
+        float &visibleSurfaceArea)
+{
+    visibleSurfaceArea = 2.0f * PI * radius * radius;
+    lightNormal = cosineDirectionInHemisphere(pointOnSurface - position, seed);
+    lightDirection = pointOnSurface - position - lightNormal * radius;
+    distanceToLight = length(lightDirection);
+    lightDirection = normalize(lightDirection);
+}
+
+
+
+/**
  * Get the direction, and distance of a directional light.
  *
  * @arg direction: The direction the light is travelling.
@@ -22,11 +48,11 @@ inline void directionalLightData(
         float3 &lightDirection,
         float3 &lightNormal,
         float &distanceToLight,
-        float &solidAngle)
+        float &visibleSurfaceArea)
 {
-    lightDirection = -direction;
-    solidAngle = PI;
+    visibleSurfaceArea = 2.0f * PI;// * maxRayDistance * maxRayDistance;
     distanceToLight = maxRayDistance;
+    lightDirection = normalize(-direction);
     lightNormal = direction;
 }
 
@@ -46,11 +72,12 @@ inline void pointLightData(
         float3 &lightDirection,
         float3 &lightNormal,
         float &distanceToLight,
-        float &solidAngle)
+        float &visibleSurfaceArea)
 {
+    visibleSurfaceArea = 0.0f;
     lightDirection = position - pointOnSurface;
-    solidAngle = 0.0f;
     distanceToLight = length(lightDirection);
+    lightDirection = normalize(lightDirection);
     lightNormal = -lightDirection;
 }
 
@@ -78,15 +105,15 @@ inline float geometryFactor(const float3 &incidentDirection, const float3 &surfa
 /**
  *
  */
-inline float sampleLightsPDF(const float numLights, const float solidAngle)
+inline float sampleLightsPDF(const float numLights, const float visibleSurfaceArea)
 {
-    if (solidAngle == 0.0f)
+    if (visibleSurfaceArea == 0.0f)
     {
         return 1.0f / numLights;
     }
     else
     {
-        return 1.0f / numLights / solidAngle;
+        return 1.0f / numLights / visibleSurfaceArea;
     }
 }
 
@@ -158,6 +185,4 @@ inline void getLightData(
             solidAngle
         );
     }
-
-    lightDirection = normalize(lightDirection);
 }
