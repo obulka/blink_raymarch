@@ -88,7 +88,7 @@ You can choose the colour, intensity, and falloff of the light. You can also sof
 This gizmo renders the scene using a ray marching algorithm, with support for multiple importance sampled, global illumination, and hdri image based lighting. You can input a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
 
 The AOV options are:
-- scene
+- beauty
 - normal
 - position
 - depth
@@ -105,7 +105,7 @@ The output of this node can be passed as input to an identical node with a diffe
 This gizmo renders the scene using a ray marching algorithm, with support for hdri image based lighting. You can input a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
 
 The AOV options are:
-- scene
+- beauty
 - normal
 - position
 - depth
