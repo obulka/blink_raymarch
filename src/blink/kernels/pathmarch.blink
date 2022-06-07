@@ -247,11 +247,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    //
-    // Render Engine
-    //
-
-
     /**
      * Compute the minimum distance to an object in the scene
      *
@@ -815,6 +810,39 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     * Estimate the surface normal at the closest point on the closest
+     * object to a point
+     *
+     * @arg point: The point near which to get the surface normal
+     * @arg pixelFootprint: A value proportional to the amount of world
+     *     space that fills a pixel, like the distance from camera.
+     *
+     * @returns: The normalized surface normal.
+     */
+    float3 estimateSurfaceNormal(const float3 &point, const float &pixelFootprint)
+    {
+        return normalize(
+            __offset0 * getMinDistanceToObjectInScene(
+                point + __offset0 * _hitTolerance,
+                pixelFootprint
+            )
+            + __offset1 * getMinDistanceToObjectInScene(
+                point + __offset1 * _hitTolerance,
+                pixelFootprint
+            )
+            + __offset2 * getMinDistanceToObjectInScene(
+                point + __offset2 * _hitTolerance,
+                pixelFootprint
+            )
+            + __offset3 * getMinDistanceToObjectInScene(
+                point + __offset3 * _hitTolerance,
+                pixelFootprint
+            )
+        );
+    }
+
+
+    /**
      * Compute a soft shadow value.
      *
      * @arg rayDirection: The direction of the shadow ray.
@@ -840,10 +868,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float lastStepDistance = FLT_MAX;
 
         int iterations = 0;
+        float pixelFootprint = _hitTolerance;
         while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)
         {
             const float stepDistance = fabs(
-                getMinDistanceToObjectInScene(rayOrigin, distanceTravelled)
+                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint)
             );
             const float stepDistanceSquared = stepDistance * stepDistance;
             float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);
@@ -853,7 +882,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 / max(0.0f, distanceTravelled - softOffset)
             );
 
-            if (stepDistance < _hitTolerance * distanceTravelled)
+            if (stepDistance < pixelFootprint)
             {
                 shadowIntensity = saturate(shadowIntensity);
                 return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
@@ -862,6 +891,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             lastStepDistance = stepDistance;
             rayOrigin += rayDirection * stepDistance;
             distanceTravelled += stepDistance;
+            pixelFootprint += stepDistance * _hitTolerance;
             iterations++;
         }
 
@@ -891,19 +921,21 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     {
         float distanceTravelled = 0;
         int iterations = 0;
+        float pixelFootprint = _hitTolerance;
         while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)
         {
-            float stepDistance = fabs(
-                getMinDistanceToObjectInScene(rayOrigin, distanceTravelled)
+            const float stepDistance = fabs(
+                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint)
             );
 
-            if (stepDistance < _hitTolerance * distanceTravelled)
+            if (stepDistance < pixelFootprint)
             {
                 return 0;
             }
 
             rayOrigin += rayDirection * stepDistance;
             distanceTravelled += stepDistance;
+            pixelFootprint += stepDistance * _hitTolerance;
             iterations++;
         }
 
@@ -937,7 +969,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         {
             const float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;
             const float distanceToClosestObject = fabs(
-                getMinDistanceToObjectInScene(rayOrigin + stepDistance * rayDirection, 1.0f)
+                getMinDistanceToObjectInScene(
+                    rayOrigin + stepDistance * rayDirection,
+                    _hitTolerance
+                )
             );
             occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;
             occlusionScaleFactor *= 0.95;
@@ -1038,7 +1073,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        // // Merge the intensity values
         return emissiveTerm(
             float4(
                 lightProperty.x,
@@ -1049,6 +1083,75 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         );
     }
 
+
+    /**
+     * Compute the combined intensity of all lights on the surface of an
+     * object.
+     *
+     * @arg pointOnSurface: The point on the surface to compute the
+     *     light intensity at.
+     * @arg surfaceNormal: The normal direction to the surface.
+     * @arg surfaceColour: The colour of the object.
+     * @arg surface: The surface properties of the object.
+     * @arg lightColour: Will store the light colour.
+     *
+     * @returns: The light intensity.
+     */
+    float4 sampleLight(
+            const float3 &lightDirection,
+            const float &distanceToLight,
+            float3 &rayOrigin,
+            float3 &lightNormal)
+    {
+        float4 diffusivity;
+        float4 specularity;
+        float4 transmittance;
+        float4 emittance;
+        float4 surface;
+
+        float distanceTravelled = 0;
+        int iterations = 0;
+        float pixelFootprint = _hitTolerance;
+
+        while (
+            distanceTravelled < distanceToLight * 2.0f
+            && iterations < _maxRaySteps / 2
+        ) {
+            const float2 result = getMinDistanceToObjectInScene(
+                rayOrigin,
+                pixelFootprint,
+                diffusivity,
+                specularity,
+                transmittance,
+                emittance,
+                surface
+            );
+            const float stepDistance = fabs(result.x);
+
+            if (stepDistance < pixelFootprint)
+            {
+                const float4 emission = emissiveTerm(emittance);
+                if (emission.w > 0.0f)
+                {
+                    lightNormal = estimateSurfaceNormal(
+                        rayOrigin - lightDirection * pixelFootprint,
+                        pixelFootprint
+                    );
+                    return emissiveTerm(emission);
+                }
+                return float4(0);
+            }
+
+            rayOrigin += lightDirection * stepDistance;
+            distanceTravelled += stepDistance;
+            pixelFootprint += stepDistance * _hitTolerance;
+            iterations++;
+        }
+
+        lightNormal = -lightDirection;
+
+        return readHDRIValue(lightDirection); // TODO add absorption
+    }
 
 
     /**
@@ -1094,53 +1197,25 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Selected one of the emissive objects
 
             // TODO don't assume it's a sphere
-            const float radius = dimensions(selectedLight - _lightTextureWidth, 0, 0);
+            const float radius = dimensions(
+                emissiveIndices[selectedLight - _lightTextureWidth],
+                0,
+                0
+            );
 
-            visibleSurfaceArea = 2.0f * PI * radius * radius;
-
-            lightDirection = float3(1, 0, 0);
-            lightNormal = float3(1, 0, 0);
-            distanceToLight = 1.0f;
+            sphericalLightData(
+                seed,
+                pointOnSurface,
+                float3(0, 1.5f, 1.45f),
+                radius,
+                lightDirection,
+                lightNormal,
+                distanceToLight,
+                visibleSurfaceArea
+            );
         }
 
-        // TODO this 1.0f should be the SA
-        // __numLights should also include emissive objects
-        // and those emissive objects should have a chance of
-        // being sampled in sampleLight
         return sampleLightsPDF(numLights, visibleSurfaceArea);
-    }
-
-
-    /**
-     * Estimate the surface normal at the closest point on the closest
-     * object to a point
-     *
-     * @arg point: The point near which to get the surface normal
-     * @arg pixelFootprint: A value proportional to the amount of world
-     *     space that fills a pixel, like the distance from camera.
-     *
-     * @returns: The normalized surface normal.
-     */
-    float3 estimateSurfaceNormal(const float3 &point, const float &pixelFootprint)
-    {
-        return normalize(
-            __offset0 * getMinDistanceToObjectInScene(
-                point + __offset0 * _hitTolerance,
-                pixelFootprint
-            )
-            + __offset1 * getMinDistanceToObjectInScene(
-                point + __offset1 * _hitTolerance,
-                pixelFootprint
-            )
-            + __offset2 * getMinDistanceToObjectInScene(
-                point + __offset2 * _hitTolerance,
-                pixelFootprint
-            )
-            + __offset3 * getMinDistanceToObjectInScene(
-                point + __offset3 * _hitTolerance,
-                pixelFootprint
-            )
-        );
     }
 
 
@@ -1212,7 +1287,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Get the closest distance to an object
             const float2 result = getMinDistanceToObjectInScene(
                 origin,
-                distanceTravelled,
+                pixelFootprint,
                 diffusivity,
                 specularity,
                 transmittance,
@@ -1241,7 +1316,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             if (stepDistance < pixelFootprint)
             {
                 // The actual position on the surface we hit
-                const float3 surfacePosition = origin - direction * _hitTolerance;
+                const float3 surfacePosition = origin - direction * pixelFootprint;
 
                 // The normal to the surface at that position
                 float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
@@ -1349,7 +1424,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
                     else
                     {
-                        lightEmissiveColour = float4(0);
+                        float3 surfacePosition = offsetPoint(
+                            origin,
+                            surfaceNormal,
+                            reflectionOffset
+                        );
+                        lightEmissiveColour = sampleLight(
+                            lightDirection,
+                            distanceToLight,
+                            surfacePosition,
+                            lightNormal
+                        );
                     }
 
                     const float lightGeometryFactor = geometryFactor(
@@ -1376,16 +1461,16 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     / materialPDF
                 );
 
+                // TODO don't assume this object is a sphere
+                const float radius = dimensions(result.y - 1, 0, 0);
+                const float visibleSurfaceArea = 2 * PI * radius * radius;
+
                 rayColour += (
                     materialEmissiveColour
                     * throughput
                     * balanceHeuristic(
                         materialPDF * geometryFactor(direction, surfaceNormal),
-                        // TODO this 1.0f should be the SA of this object
-                        // __numLights should also include emissive objects
-                        // and those emissive objects should have a chance of
-                        // being sampled in sampleLight
-                        sampleLightsPDF(numLights, 1.0f)
+                        sampleLightsPDF(numLights, visibleSurfaceArea)
                     )
                 );
 
@@ -1462,7 +1547,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int currentIndex = 0;
         for (int j=0; j < min(_objectTextureWidth, MAX_MIS_EMISSIVE_SHAPES); j++)
         {
-            if (emittances(j, 0, 3) > 0.0f && shapeProperties(j, 0, 0) <= SUPPORTED_MIS_SHAPES)
+            if (emittances(j, 0, 3) > 0.0f)
             {
                 emissiveIndices[currentIndex++] = j;
             }

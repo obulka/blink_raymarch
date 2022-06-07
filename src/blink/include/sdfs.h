@@ -12,9 +12,6 @@
 //
 
 
-#define SUPPORTED_MIS_SHAPES 0
-
-
 /**
  * Compute the min distance from a point to a point.
  *

@@ -27,8 +27,11 @@ inline void sphericalLightData(
         float &visibleSurfaceArea)
 {
     visibleSurfaceArea = 2.0f * PI * radius * radius;
-    lightNormal = cosineDirectionInHemisphere(pointOnSurface - position, seed);
-    lightDirection = pointOnSurface - position - lightNormal * radius;
+    lightNormal = uniformDirectionInHemisphere(
+        normalize(pointOnSurface - position),
+        seed
+    );
+    lightDirection = position + lightNormal * radius - pointOnSurface;
     distanceToLight = length(lightDirection);
     lightDirection = normalize(lightDirection);
 }
@@ -50,7 +53,7 @@ inline void directionalLightData(
         float &distanceToLight,
         float &visibleSurfaceArea)
 {
-    visibleSurfaceArea = 2.0f * PI;// * maxRayDistance * maxRayDistance;
+    visibleSurfaceArea = 2.0f * PI;
     distanceToLight = maxRayDistance;
     lightDirection = normalize(-direction);
     lightNormal = direction;
