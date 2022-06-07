@@ -23,6 +23,7 @@
 
 // Increase this if you want more than MAX_CHILD_DEPTH direct children
 #define MAX_CHILD_DEPTH 64
+#define MAX_MIS_EMISSIVE_SHAPES 64
 
 
 kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
@@ -138,8 +139,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float3 __offset2;
         float3 __offset3;
 
-        float __numLights;
-
 
     /**
      * In define(), parameters can be given labels and default values.
@@ -219,8 +218,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         __offset1 = 0.5773f * float3(-1, -1, 1);
         __offset2 = 0.5773f * float3(-1, 1, -1);
         __offset3 = 0.5773f * float3(1, 1, 1);
-
-        __numLights = max(1.0f, (float) _lightTextureWidth);
     }
 
 
@@ -967,7 +964,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The light intensity.
      */
-    float4 sampleLight(
+    float4 sampleArtificialLight(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
             const float &offset,
@@ -1060,39 +1057,51 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     float sampleLightData(
             const float3 &seed,
             const float3 &pointOnSurface,
+            const int numLights,
             float3 &lightDirection,
             float3 &lightNormal,
             float &distanceToLight,
             int &selectedLight)
     {
         const float rng = random(random(seed.x + seed.y) + random(seed.z));
-        selectedLight = floor(rng * _lightTextureWidth);
-
-        // Read the light properties
-        SampleType(lights) light = lights(selectedLight, 0);
-        const int lightType = abs((int) lightProperties(selectedLight, 0, 3));
+        selectedLight = max(0, (int) floor(rng * (numLights - _hitTolerance)));
 
         float solidAngle = 1.0f;
 
-        if (lightType < 2)
+        if (selectedLight < _lightTextureWidth)
         {
-            getLightData(
-                pointOnSurface,
-                float3(light.x, light.y, light.z),
-                lightType,
-                _maxRayDistance,
-                distanceToLight,
-                solidAngle,
-                lightDirection,
-                lightNormal
-            );
+            // Selected a 'fake' light eg. point, directional, ambient
+            SampleType(lights) light = lights(selectedLight, 0);
+            const int lightType = abs((int) lightProperties(selectedLight, 0, 3));
+
+            if (lightType < 2)
+            {
+                getLightData(
+                    pointOnSurface,
+                    float3(light.x, light.y, light.z),
+                    lightType,
+                    _maxRayDistance,
+                    distanceToLight,
+                    solidAngle,
+                    lightDirection,
+                    lightNormal
+                );
+            }
+        }
+        else
+        {
+            // Selected one of the emissive objects
+
+            lightDirection = float3(1, 0, 0);
+            lightNormal = float3(1, 0, 0);
+            distanceToLight = 1.0f;
         }
 
         // TODO this 1.0f should be the SA
         // __numLights should also include emissive objects
         // and those emissive objects should have a chance of
         // being sampled in sampleLight
-        return sampleLightsPDF(__numLights, solidAngle);
+        return sampleLightsPDF(numLights, solidAngle);
     }
 
 
@@ -1138,8 +1147,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The ray colour.
      */
-    float4 marchRay(const float3 &rayOrigin, const float3 &rayDirection, float3 &seed)
+    float4 marchRay(
+            const float3 &rayOrigin,
+            const float3 &rayDirection,
+            const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
+            const int numEmissive,
+            float3 &seed)
     {
+        const int numLights = _lightTextureWidth + numEmissive;
+
         float refractiveIndex = _refractiveIndex;
 
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][
@@ -1259,12 +1275,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 float distanceToLight = 0.0f;
                 int selectedLight;
 
-                if (_lightSamplingEnabled && _lightTextureWidth > 0)
+                if (_lightSamplingEnabled && numLights > 0)
                 {
                     // Light Sampling
                     lightPDF = sampleLightData(
                         seed,
                         origin,
+                        numLights,
                         lightDirection,
                         lightNormal,
                         distanceToLight,
@@ -1311,14 +1328,22 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     && lightPDF > pixelFootprint
                     && materialLightPDF > pixelFootprint
                 ) {
-                    const float4 lightEmissiveColour = sampleLight(
-                        origin,
-                        surfaceNormal,
-                        reflectionOffset,
-                        lightDirection,
-                        distanceToLight,
-                        selectedLight
-                    );
+                    float4 lightEmissiveColour;
+                    if (selectedLight < _lightTextureWidth)
+                    {
+                        lightEmissiveColour = sampleArtificialLight(
+                            origin,
+                            surfaceNormal,
+                            reflectionOffset,
+                            lightDirection,
+                            distanceToLight,
+                            selectedLight
+                        );
+                    }
+                    else
+                    {
+                        lightEmissiveColour = float4(0);
+                    }
 
                     const float lightGeometryFactor = geometryFactor(
                         lightDirection,
@@ -1332,10 +1357,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         * lightGeometryFactor
                         * saturate(dot(surfaceNormal, lightDirection))
                         * balanceHeuristic(
-                            // TODO this 1.0f should be the SA of this object
-                            // __numLights should also include emissive objects
-                            // and those emissive objects should have a chance of
-                            // being sampled in sampleLight
                             lightPDF,
                             materialLightPDF * lightGeometryFactor
                         ) / lightPDF
@@ -1357,7 +1378,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         // __numLights should also include emissive objects
                         // and those emissive objects should have a chance of
                         // being sampled in sampleLight
-                        sampleLightsPDF(__numLights, 1.0f)
+                        sampleLightsPDF(numLights, 1.0f)
                     )
                 );
 
@@ -1427,8 +1448,26 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     *
+     */
+    int getEmissiveIndices(int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES])
+    {
+        int currentIndex = 0;
+        for (int j=0; j < min(_objectTextureWidth, MAX_MIS_EMISSIVE_SHAPES); j++)
+        {
+            if (emittances(j, 0, 3) > 0.0f && shapeProperties(j, 0, 0) <= SUPPORTED_MIS_SHAPES)
+            {
+                emissiveIndices[currentIndex++] = j;
+            }
+        }
+
+        return currentIndex;
+    }
+
+
+    /**
      * Compute a raymarched pixel value.
-     * 
+     *
      * @arg pos: The x, and y location we are currently processing.
      */
     void process(int2 pos)
@@ -1447,6 +1486,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float4 resultPixel = float4(0);
 
         float2 pixelLocation = float2(pos.x, pos.y);
+
+        int emissiveMISOptions[MAX_MIS_EMISSIVE_SHAPES];
+
+        const int numEmissive = getEmissiveIndices(emissiveMISOptions);
 
         for (int path=1; path <= numPaths; path++)
         {
@@ -1468,7 +1511,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             // Determine the colour of the ray
-            resultPixel += marchRay(rayOrigin, rayDirection, seed);
+            resultPixel += marchRay(
+                rayOrigin,
+                rayDirection,
+                emissiveMISOptions,
+                numEmissive,
+                seed
+            );
         }
 
         const uint objectId = resultPixel.w / numPaths;
