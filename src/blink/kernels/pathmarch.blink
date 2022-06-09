@@ -201,7 +201,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     {
         __bouncesPerRay = _maxBounces <= 0 ? 1 : _maxBounces;
 
-        // TODO use angles to allow -ve focal length like for latlongs
         float aspect = aspectRatio(_formatHeight, _formatWidth);
         float4x4 cameraProjectionMatrix = projectionMatrix(
             _focalLength,
