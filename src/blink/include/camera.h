@@ -92,3 +92,22 @@ void createCameraRay(
     );
     rayDirection = normalize(float3(direction.x, direction.y, direction.z));
 }
+
+
+/**
+ * Generate a LatLong ray out of a camera.
+ *
+ * @arg cameraWorldMatrix: The camera matrix.
+ * @arg uvPosition: The UV position in the resulting image.
+ * @arg rayOrigin: Will store the origin of the ray.
+ * @arg rayDirection: Will store the direction of the ray.
+ */
+void createLatLongCameraRay(
+        const float4x4 &cameraWorldMatrix,
+        const float2 &uvPosition,
+        float3 &rayOrigin,
+        float3 &rayDirection)
+{
+    positionFromWorldMatrix(cameraWorldMatrix, rayOrigin);
+    rayDirection = sphericalUnitVectorToCartesion(uvPositionToAngles(uvPosition));
+}

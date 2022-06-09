@@ -122,6 +122,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         int _outputType;
 
+        bool _latLong;
+
 
     local:
         // These local variables are not exposed to the user.
@@ -186,6 +188,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_lightSamplingEnabled, "Enable Light Sampling", true);
 
         defineParam(_outputType, "Output Type", 0);
+
+        defineParam(_latLong, "Output LatLong", false);
     }
 
 
@@ -1633,17 +1637,29 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Generate a ray from the camera
             float3 rayOrigin;
             float3 rayDirection;
-            createCameraRay(
-                _cameraWorldMatrix,
-                __inverseCameraProjectionMatrix,
-                pixelsToUV(
-                    pixelLocation
-                    + random(float2(seed.x, seed.y)),
-                    float2(_formatWidth, _formatHeight)
-                ),
-                rayOrigin,
-                rayDirection
+            const float2 uvCoordinates = pixelsToUV(
+                pixelLocation + random(float2(seed.x, seed.y)),
+                float2(_formatWidth, _formatHeight)
             );
+            if (_latLong)
+            {
+                createLatLongCameraRay(
+                    _cameraWorldMatrix,
+                    uvCoordinates,
+                    rayOrigin,
+                    rayDirection
+                );
+            }
+            else
+            {
+                createCameraRay(
+                    _cameraWorldMatrix,
+                    __inverseCameraProjectionMatrix,
+                    uvCoordinates,
+                    rayOrigin,
+                    rayDirection
+                );
+            }
 
             // Determine the colour of the ray
             resultPixel += marchRay(

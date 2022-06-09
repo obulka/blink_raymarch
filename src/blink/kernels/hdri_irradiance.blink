@@ -61,7 +61,7 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
 
     /**
      * Compute the irradiance of a pixel.
-     * 
+     *
      * @arg pos: The x, and y location we are currently processing.
      */
     void process(int2 pos)
@@ -86,8 +86,8 @@ kernel HDRIrradiance : ImageComputationKernel<ePixelWise>
                 const float3 tangent = sphericalUnitVectorToCartesion(float2(theta, phi));
                 const float3 sampleDirection = (
                     tangent.x * tangentRight
-                    + tangent.y * tangentUp
-                    + tangent.z * direction
+                    + tangent.z * tangentUp
+                    + tangent.y * direction
                 );
 
                 irradiance += readHDRIValue(sampleDirection) * cos(phi) * sin(phi);

@@ -723,8 +723,8 @@ inline float3 sphericalUnitVectorToCartesion(const float2 &angles)
     const float sinPhi = sin(angles.y);
     return float3(
         cos(angles.x) * sinPhi,
-        sin(angles.x) * sinPhi,
-        cos(angles.y)
+        cos(angles.y),
+        sin(angles.x) * sinPhi
     );
 }
 
@@ -831,8 +831,8 @@ inline float2 cartesionUnitVectorToSpherical(
 inline float2 cartesionUnitVectorToSpherical(const float3 &rayDirection)
 {
     return normalizeAngles(float2(
-        atan2(rayDirection.y, rayDirection.x),
-        acos(rayDirection.z)
+        atan2(rayDirection.z, rayDirection.x),
+        acos(rayDirection.y)
     ));
 }
 
