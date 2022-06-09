@@ -1058,12 +1058,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int lightType = (int) lightProperty.w;
         int absLightType = abs(lightType);
 
-        if (absLightType == 2)
+        if (absLightType == 0)
         {
             // Ambient light, simply return the intensity.
             intensity = float2(light.w, 1);
         }
-        else if (absLightType == 3)
+        else if (absLightType == 1)
         {
             intensity = float2(
                 1.0f,
@@ -1214,7 +1214,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             SampleType(lights) light = lights(selectedLight, 0);
             const int lightType = abs((int) lightProperties(selectedLight, 0, 3));
 
-            if (lightType < 2)
+            if (lightType > 1)
             {
                 getLightData(
                     pointOnSurface,

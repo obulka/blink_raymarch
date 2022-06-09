@@ -144,7 +144,7 @@ inline void getLightData(
         float3 &lightDirection,
         float3 &lightNormal)
 {
-    if (lightType == 0)
+    if (lightType == 2)
     {
         // directional
         directionalLightData(
@@ -156,7 +156,7 @@ inline void getLightData(
             solidAngle
         );
     }
-    else if (lightType == 1)
+    else if (lightType == 3)
     {
         // point
         pointLightData(
