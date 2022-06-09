@@ -11,8 +11,9 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <split size="1663" stretch="1"/>
             <splitter orientation="2">
                 <split size="782"/>
-                <dock id="" activePageId="Viewer.1">
+                <dock id="" activePageId="Viewer.2">
                     <page id="Viewer.1"/>
+                    <page id="Viewer.2"/>
                 </dock>
                 <split size="550"/>
                 <dock id="" activePageId="DAG.1" focus="true">
@@ -1884,6 +1885,7 @@ Group {
  addUserKnob {3 variance_range l "variance range"}
  variance_range 2
  addUserKnob {4 output_type l output t "The AOV type to output.\n\nThe stats AOV has the average number of steps in the red channel, the average number of bounces in the green channel, and the total number of paths that have been traced for a pixel in the blue channel." M {Beauty Position Normal Depth Stats "" "" "" "" "" ""}}
+ addUserKnob {41 format T format_.format}
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
 }
@@ -2533,9 +2535,10 @@ push $N5b94750
  }
 push $N598db00
  Reformat {
+  format {{{parent.format_.format}}}
   name Reformat2
   xpos -1021
-  ypos -1503
+  ypos -1510
  }
 set N5ca82e0 [stack 0]
  Input {
@@ -2597,9 +2600,9 @@ push $N5ccc920
  Constant {
   inputs 0
   channels {rgba.red rgba.green rgba.blue -rgba.alpha}
-  name Constant1
+  name format_
   xpos 1958
-  ypos -746
+  ypos -747
  }
  Noise {
   output {rgba.red -rgba.green -rgba.blue -rgba.alpha}
@@ -2673,15 +2676,16 @@ push $N5ccc920
   "PathMarchKernel_Output Type" {{parent.output_type}}
   rebuild_finalise ""
   name BlinkPathMarcher
-  selected true
   xpos 1661
   ypos -462
  }
  Reformat {
+  format {{{parent.format_.format}}}
   name Reformat1
   xpos 1661
-  ypos -400
+  ypos -401
  }
+set N7141850 [stack 0]
  Dot {
   name Dot11
   xpos 1695
@@ -2757,6 +2761,13 @@ push $N5d5b010
   name Output1
   xpos 1666
   ypos -29
+ }
+push $N7141850
+ Viewer {
+  frame_range 1-400
+  name Viewer1
+  xpos 1999
+  ypos -383
  }
 end_group
 set N594ccf0 [stack 0]
