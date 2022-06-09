@@ -174,7 +174,7 @@ inline float geometryFactor(
 {
     return fabs(
         dot(surfaceNormal, incidentDirection)
-    ) / distance / distance;
+    ) / (1.0f + distance * distance);
 }
 
 
