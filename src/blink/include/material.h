@@ -158,10 +158,25 @@ float reflectionCoefficient(
 /**
  *
  */
-inline float balanceHeuristic(const float pdf0, const float pdf1)
+inline float4 emissiveTerm(const float4 &emittance)
 {
-    return pdf0 / (pdf0 + pdf1);
+    return emittance * emittance.w;
 }
+
+
+/**
+ *
+ */
+inline float geometryFactor(
+        const float3 &incidentDirection,
+        const float3 &surfaceNormal,
+        const float distance)
+{
+    return fabs(
+        dot(surfaceNormal, incidentDirection)
+    ) / distance / distance;
+}
+
 
 
 /**
@@ -419,7 +434,7 @@ inline float sampleDiffuse(
 
     const float probabilityOverPi = diffuseProbability / PI;
 
-    lightPDF = probabilityOverPi * dot(lightDirection, surfaceNormal);
+    lightPDF = probabilityOverPi * saturate(dot(lightDirection, surfaceNormal));
     return probabilityOverPi * dot(diffuseDirection, surfaceNormal);
 }
 

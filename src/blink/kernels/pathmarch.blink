@@ -1137,10 +1137,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The light intensity.
      */
-    float4 sampleLight(
+    inline float4 sampleLight(
             const float3 &lightDirection,
             const float &distanceToLight,
-            float3 &rayOrigin,
+            float3 rayOrigin,
             float3 &lightNormal)
     {
         float4 diffusivity;
@@ -1154,7 +1154,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float pixelFootprint = _hitTolerance;
 
         while (
-            distanceTravelled < distanceToLight * 2.0f
+            distanceTravelled <= distanceToLight * 2.0f
             && iterations < _maxRaySteps / 2
         ) {
             const float2 result = getMinDistanceToObjectInScene(
@@ -1170,14 +1170,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             if (stepDistance < pixelFootprint)
             {
-                if (emittance.w > 0.0f)
-                {
+                // if (emittance.w > 0.0f)
+                // {
                     lightNormal = estimateSurfaceNormal(
-                        rayOrigin - lightDirection * pixelFootprint,
+                        rayOrigin,
                         pixelFootprint
                     );
                     return emissiveTerm(emittance);
-                }
+                // }
                 return float4(0);
             }
 
@@ -1354,12 +1354,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
             {
-                // The actual position on the surface we hit
-                const float3 surfacePosition = origin - direction * pixelFootprint;
-
                 // The normal to the surface at that position
                 float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
-                    surfacePosition,
+                    origin,
                     pixelFootprint
                 );
 
@@ -1374,7 +1371,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     {
                         return earlyExitAOVs(
                             _outputType,
-                            surfacePosition,
+                            origin,
                             surfaceNormal,
                             distanceTravelled,
                             firstObjectId
@@ -1446,9 +1443,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 if (
                     _lightSamplingEnabled
-                    && lightPDF > pixelFootprint
-                    && materialLightPDF > pixelFootprint
-                    && emissiveIndices[selectedLight - _lightTextureWidth] + 1 != result.y
+                    && lightPDF > _hitTolerance
+                    && materialLightPDF > _hitTolerance
                 ) {
                     float4 lightEmissiveColour;
                     if (selectedLight < _lightTextureWidth)
@@ -1464,22 +1460,22 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
                     else
                     {
-                        float3 surfacePosition = offsetPoint(
-                            origin,
-                            surfaceNormal,
-                            reflectionOffset
-                        );
                         lightEmissiveColour = sampleLight(
                             lightDirection,
                             distanceToLight,
-                            surfacePosition,
+                            offsetPoint(
+                                origin,
+                                surfaceNormal,
+                                reflectionOffset
+                            ),
                             lightNormal
                         );
                     }
 
                     const float lightGeometryFactor = geometryFactor(
                         lightDirection,
-                        lightNormal
+                        lightNormal,
+                        distanceToLight
                     );
 
                     rayColour += (
@@ -1495,12 +1491,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
                 }
 
-                throughput *= (
-                    materialBRDF
-                    * fabs(dot(bounceDirection, surfaceNormal))
-                    / materialPDF
-                );
-
                 // TODO don't assume this object is a sphere
                 const float radius = dimensions(result.y - 1, 0, 0);
                 const float visibleSurfaceArea = 2 * PI * radius * radius;
@@ -1509,9 +1499,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     materialEmissiveColour
                     * throughput
                     * balanceHeuristic(
-                        materialPDF * geometryFactor(direction, surfaceNormal),
+                        materialPDF,
                         sampleLightsPDF(numLights, visibleSurfaceArea)
                     )
+                );
+
+                throughput *= (
+                    materialBRDF
+                    * fabs(dot(bounceDirection, surfaceNormal))
+                    / materialPDF
                 );
 
                 // Exit if we have reached the bounce limit
@@ -1521,7 +1517,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 if (
                     ++bounces >= __bouncesPerRay
                     || exitProbability <= rng
-                    || materialEmissiveColour.w > 0.0f
                 ) {
                     return finalAOVs(
                         _outputType,
@@ -1543,6 +1538,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Reset the pixel footprint so multiple reflections don't
                 // reduce precision
                 pixelFootprint = _hitTolerance;
+
             }
 
             lastStepDistance = signedStepDistance;

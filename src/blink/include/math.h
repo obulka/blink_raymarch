@@ -773,7 +773,7 @@ inline float getAngleAndAxisBetweenVectors(
         const float3 &vector1,
         float3 &axis)
 {
-    axis = cross(vector0, vector1);
+    axis = normalize(cross(vector0, vector1));
     return acos(dot(vector0, vector1));
 }
 
@@ -789,6 +789,11 @@ inline float3 alignWithDirection(
         alignDirection,
         rotationAxis
     );
+
+    if (angle == 0.0f)
+    {
+        return unalignedAxis;
+    }
 
     float3x3 rotationMatrix;
     axisAngleRotationMatrix(rotationAxis, angle, rotationMatrix);
@@ -959,4 +964,13 @@ inline float adaptiveSamples(
         minPaths,
         maxPaths
     );
+}
+
+
+/**
+ *
+ */
+inline float balanceHeuristic(const float pdf0, const float pdf1)
+{
+    return pdf0 / (pdf0 + pdf1);
 }

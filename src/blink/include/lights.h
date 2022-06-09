@@ -88,26 +88,6 @@ inline void pointLightData(
 /**
  *
  */
-inline float4 emissiveTerm(const float4 &emittance)
-{
-    return emittance * emittance.w;
-}
-
-
-/**
- *
- */
-inline float geometryFactor(const float3 &incidentDirection, const float3 &surfaceNormal)
-{
-    return fabs(
-        dot(surfaceNormal, incidentDirection)
-    ) / dot2(incidentDirection);
-}
-
-
-/**
- *
- */
 inline float sampleLightsPDF(const float numLights, const float visibleSurfaceArea)
 {
     if (visibleSurfaceArea == 0.0f)
