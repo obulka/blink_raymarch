@@ -470,7 +470,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Node has Children, push it to the stack for later
                 // processing when we have all its children
                 // parentStack.push()
-                // TODO not all this needs to be in the stack (maybe)
                 parentStack[parentStackLength][0] = numChildren;
                 parentStack[parentStackLength][1] = transformedRay.x;
                 parentStack[parentStackLength][2] = transformedRay.y;
@@ -811,7 +810,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Node has Children, push it to the stack for later
                 // processing when we have all its children
                 // parentStack.push()
-                // TODO not all this needs to be in the stack (maybe)
                 parentStack[parentStackLength][0] = numChildren;
                 parentStack[parentStackLength][1] = transformedRay.x;
                 parentStack[parentStackLength][2] = transformedRay.y;
@@ -1185,7 +1183,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         lightNormal = -lightDirection;
 
-        return readHDRIValue(lightDirection); // TODO add absorption
+        return readHDRIValue(lightDirection);
     }
 
 
@@ -1403,6 +1401,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
                 }
 
+                const float4 absorptionColour = float4(
+                    nestedDielectrics[numNestedDielectrics][0],
+                    nestedDielectrics[numNestedDielectrics][1],
+                    nestedDielectrics[numNestedDielectrics][2],
+                    nestedDielectrics[numNestedDielectrics][3]
+                );
+
                 // Material sampling
                 float4 materialBRDF;
                 float4 lightBRDF;
@@ -1475,11 +1480,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         );
                     }
 
-
                     rayColour += (
                         lightEmissiveColour
                         * throughput
                         * lightBRDF
+                        * exp(-absorptionColour * distanceToLight)
                         * lightGeometryFactor
                         * saturate(dot(surfaceNormal, lightDirection))
                         * balanceHeuristic(
@@ -1496,6 +1501,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 rayColour += (
                     materialEmissiveColour
                     * throughput
+                    * exp(-absorptionColour * distanceTravelledThroughMaterial)
                     * balanceHeuristic(
                         materialPDF,
                         sampleLightsPDF(numLights, visibleSurfaceArea)

@@ -359,8 +359,8 @@ inline float sampleTransmissive(
     }
     else
     {
-        // We are not exiting the material we are in, so push
-        // the next refractive index to the stack
+        // We are not exiting the material we are in, we are entering
+        // a new one, so push the next refractive index to the stack
         numNestedDielectrics++;
         nestedDielectrics[numNestedDielectrics][0] = transmittance.x;
         nestedDielectrics[numNestedDielectrics][1] = transmittance.y;
