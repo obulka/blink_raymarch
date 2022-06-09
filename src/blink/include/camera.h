@@ -110,4 +110,8 @@ void createLatLongCameraRay(
 {
     positionFromWorldMatrix(cameraWorldMatrix, rayOrigin);
     rayDirection = sphericalUnitVectorToCartesion(uvPositionToAngles(uvPosition));
+
+    float3x3 cameraRotation;
+    rotationFromWorldMatrix(cameraWorldMatrix, cameraRotation);
+    rayDirection = matmul(cameraRotation, rayDirection);
 }

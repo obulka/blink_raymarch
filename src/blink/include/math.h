@@ -952,6 +952,26 @@ inline void positionFromWorldMatrix(const float4x4 &worldMatrix, float3 &positio
 
 
 /**
+ * Get the rotation component of a world matrix.
+ *
+ * @arg worldMatrix: The world matrix.
+ * @arg rotation: The location to store the rotation.
+ */
+inline void rotationFromWorldMatrix(const float4x4 &worldMatrix, float3x3 &rotationMatrix)
+{
+    rotationMatrix[0][0] = worldMatrix[0][0];
+    rotationMatrix[0][1] = worldMatrix[0][1];
+    rotationMatrix[0][2] = worldMatrix[0][2];
+    rotationMatrix[1][0] = worldMatrix[1][0];
+    rotationMatrix[1][1] = worldMatrix[1][1];
+    rotationMatrix[1][2] = worldMatrix[1][2];
+    rotationMatrix[2][0] = worldMatrix[2][0];
+    rotationMatrix[2][1] = worldMatrix[2][1];
+    rotationMatrix[2][2] = worldMatrix[2][2];
+}
+
+
+/**
  *
  */
 inline float adaptiveSamples(
