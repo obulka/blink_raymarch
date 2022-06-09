@@ -1087,8 +1087,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 offset
             );
 
-            const float normalFactor = dot(surfaceNormal, lightDirection);
-
             float shadowIntensityAtPosition;
             if (lightType < 0)
             {
@@ -1108,9 +1106,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
             }
 
-            intensity = saturate(
-                normalFactor * float2(intensityAtPosition, shadowIntensityAtPosition)
-            );
+            intensity = float2(intensityAtPosition, shadowIntensityAtPosition);
         }
 
         return emissiveTerm(
@@ -1170,14 +1166,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             if (stepDistance < pixelFootprint)
             {
-                // if (emittance.w > 0.0f)
-                // {
+                if (emittance.w > 0.0f)
+                {
                     lightNormal = estimateSurfaceNormal(
                         rayOrigin,
                         pixelFootprint
                     );
                     return emissiveTerm(emittance);
-                // }
+                }
                 return float4(0);
             }
 
@@ -1447,6 +1443,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     && materialLightPDF > _hitTolerance
                 ) {
                     float4 lightEmissiveColour;
+                    float lightGeometryFactor;
                     if (selectedLight < _lightTextureWidth)
                     {
                         lightEmissiveColour = sampleArtificialLight(
@@ -1457,6 +1454,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             distanceToLight,
                             selectedLight
                         );
+                        lightGeometryFactor = 1.0f;
                     }
                     else
                     {
@@ -1470,13 +1468,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             ),
                             lightNormal
                         );
+                        lightGeometryFactor = geometryFactor(
+                            lightDirection,
+                            lightNormal,
+                            distanceToLight
+                        );
                     }
 
-                    const float lightGeometryFactor = geometryFactor(
-                        lightDirection,
-                        lightNormal,
-                        distanceToLight
-                    );
 
                     rayColour += (
                         lightEmissiveColour

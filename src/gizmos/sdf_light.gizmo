@@ -11,9 +11,10 @@ Gizmo {
  addUserKnob {7 dimension_z l "z direction" t "The z direction of the light." R -1 1}
  addUserKnob {7 intensity t "The intensity of the light." R 0 10}
  intensity 1
- addUserKnob {7 falloff t "The power of the light's intensity falloff. Four is physically accurate." R 0 5}
+ addUserKnob {7 falloff t "The power of the light's intensity falloff. Two is physically accurate." R 0 5}
  addUserKnob {18 colour t "The colour of the light."}
  colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." +DISABLED R 1 100}
  shadow_hardness 10
  addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
@@ -111,7 +112,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set N693a550 [stack 0]
+set N41324300 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -133,7 +134,7 @@ set N693a550 [stack 0]
    xpos 34
    ypos -6
   }
-set N694dd50 [stack 0]
+set Nb58f6ac0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -144,7 +145,7 @@ set N694dd50 [stack 0]
    xpos -98
    ypos 336
   }
-push $N693a550
+push $N41324300
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -173,7 +174,7 @@ push $N693a550
    xpos 158
    ypos 167
   }
-push $N694dd50
+push $Nb58f6ac0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
