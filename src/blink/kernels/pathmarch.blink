@@ -1323,6 +1323,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float pixelFootprint = _hitTolerance;
 
+        float previousMaterialPDF = 1.0f;
+
         // March the ray
         while (
             distanceTravelled < _maxRayDistance
@@ -1508,14 +1510,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 // TODO don't assume this object is a sphere
                 const float radius = dimensions(result.y - 1, 0, 0);
-                const float visibleSurfaceArea = 2 * PI * radius * radius;
+                const float visibleSurfaceArea = 2.0f * PI * radius * radius;
 
                 rayColour += (
                     materialEmissiveColour
                     * throughput
                     * exp(-absorptionColour * distanceTravelledThroughMaterial)
                     * balanceHeuristic(
-                        materialPDF,
+                        previousMaterialPDF,
                         sampleLightsPDF(numLights, visibleSurfaceArea)
                     )
                 );
@@ -1542,6 +1544,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         rayColour
                     );
                 }
+
+                previousMaterialPDF = materialPDF;
 
                 direction = bounceDirection;
 
