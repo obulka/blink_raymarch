@@ -95,6 +95,81 @@ void createCameraRay(
 
 
 /**
+ * Generate a ray out of a camera.
+ *
+ * @arg cameraWorldMatrix: The camera matrix.
+ * @arg inverseProjectionMatrix: The inverse of the projection matrix.
+ * @arg uvPosition: The UV position in the resulting image.
+ * @arg rayOrigin: Will store the origin of the ray.
+ * @arg rayDirection: Will store the direction of the ray.
+ */
+void createCameraRay(
+        const float4x4 &cameraWorldMatrix,
+        const float4x4 &inverseProjectionMatrix,
+        const float2 &uvPosition,
+        const float &aperture,
+        const float &focalDistance,
+        const float3 &seed,
+        float3 &rayOrigin,
+        float3 &rayDirection)
+{
+    createCameraRay(
+        cameraWorldMatrix,
+        inverseProjectionMatrix,
+        uvPosition,
+        rayOrigin,
+        rayDirection
+    );
+
+    const float4 cameraForward4 = matmul(
+        cameraWorldMatrix,
+        float4(0, 0, -1, 0)
+    );
+    const float3 cameraForward = float3(
+        cameraForward4.x,
+        cameraForward4.y,
+        cameraForward4.z
+    );
+    const float4 cameraRight4 = matmul(
+        cameraWorldMatrix,
+        float4(1, 0, 0, 0)
+    );
+    const float3 cameraRight = float3(
+        cameraRight4.x,
+        cameraRight4.y,
+        cameraRight4.z
+    );
+    const float4 cameraUp4 = matmul(
+        cameraWorldMatrix,
+        float4(0, 1, 0, 0)
+    );
+    const float3 cameraUp = float3(
+        cameraUp4.x,
+        cameraUp4.y,
+        cameraUp4.z
+    );
+
+    const float3 focalPlanePoint = rayOrigin + cameraForward * focalDistance;
+    const float3 focalPlaneNormal = -cameraForward;
+
+    const float focalPointDistance = (
+        (dot(focalPlaneNormal, focalPlanePoint) - dot(rayOrigin, focalPlaneNormal))
+        / dot(rayDirection, focalPlaneNormal)
+    );
+    const float3 focalPoint = rayOrigin + focalPointDistance * rayDirection;
+
+    const float2 pointInUnitCircle = uniformPointInUnitCircle(seed);
+    const float2 offset = pointInUnitCircle.x * aperture * float2(
+        cos(pointInUnitCircle.y),
+        sin(pointInUnitCircle.y)
+    );
+
+    rayOrigin += cameraRight * offset.x + cameraUp * offset.y;
+    rayDirection = normalize(focalPoint - rayOrigin);
+}
+
+
+/**
  * Generate a LatLong ray out of a camera.
  *
  * @arg cameraWorldMatrix: The camera matrix.

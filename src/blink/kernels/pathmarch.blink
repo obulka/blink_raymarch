@@ -94,6 +94,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _nearPlane;
         float _farPlane;
         float4x4 _cameraWorldMatrix;
+        float _focalDistance;
+        bool _depthOfFieldEnabled;
 
         // Image params
         float _formatWidth;
@@ -129,6 +131,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // These local variables are not exposed to the user.
 
         float4x4 __inverseCameraProjectionMatrix;
+        float __aperture;
 
         int __bouncesPerRay;
 
@@ -162,6 +165,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 0, 0, 0, 1
             )
         );
+        defineParam(_focalDistance, "Focal Distance", 4.0f);
+        defineParam(_depthOfFieldEnabled, "Enable Depth Of Field", true);
 
         // Image params
         defineParam(_formatHeight, "Screen Height", 2160.0f);
@@ -210,6 +215,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             _farPlane
         );
         __inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();
+
+        __aperture = _horizontalAperture / 1000.0f;
 
         __hdriPixelSize = float2(
             hdri.bounds.width() / (2 * PI),
@@ -1645,6 +1652,19 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 createLatLongCameraRay(
                     _cameraWorldMatrix,
                     uvCoordinates,
+                    rayOrigin,
+                    rayDirection
+                );
+            }
+            else if (_depthOfFieldEnabled)
+            {
+                createCameraRay(
+                    _cameraWorldMatrix,
+                    __inverseCameraProjectionMatrix,
+                    uvCoordinates,
+                    __aperture,
+                    _focalDistance,
+                    seed,
                     rayOrigin,
                     rayDirection
                 );

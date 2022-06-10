@@ -113,6 +113,15 @@ float3 uniformDirectionInHemisphere(const float3 &axis, const float3 &seed)
 /**
  *
  */
+inline float2 uniformPointInUnitCircle(const float3 &seed)
+{
+    return float2(sqrt(random(seed.x)), 2.0f * PI * random(seed.y));
+}
+
+
+/**
+ *
+ */
 float3 cosineDirectionInZHemisphere(const float3 &seed)
 {
     const float uniform = random(seed.x);
