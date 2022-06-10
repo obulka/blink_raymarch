@@ -16,7 +16,7 @@
  *
  * @returns: The equivalent field of view.
  */
-inline float fieldOfView(const float focalLength)
+inline float fieldOfView(const float &focalLength)
 {
     return 2 * atan(1 / focalLength);
 }
@@ -30,9 +30,18 @@ inline float fieldOfView(const float focalLength)
  *
  * @returns: The aspect ratio.
  */
-inline float aspectRatio(const float height_, const float width_)
+inline float aspectRatio(const float &height_, const float &width_)
 {
     return height_ / width_;
+}
+
+
+/**
+ *
+ */
+inline float fStopToAperture(const float &fStop, const float &focalLength)
+{
+    return focalLength / fStop / 1000.0f;
 }
 
 
@@ -48,11 +57,11 @@ inline float aspectRatio(const float height_, const float width_)
  * @returns: The camera's projection matrix.
  */
 float4x4 projectionMatrix(
-        const float focalLength,
-        const float horizontalAperture,
-        const float aspect,
-        const float nearPlane,
-        const float farPlane)
+        const float &focalLength,
+        const float &horizontalAperture,
+        const float &aspect,
+        const float &nearPlane,
+        const float &farPlane)
 {
     float farMinusNear = farPlane - nearPlane;
     return float4x4(

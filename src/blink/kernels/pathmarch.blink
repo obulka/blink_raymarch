@@ -95,6 +95,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _farPlane;
         float4x4 _cameraWorldMatrix;
         float _focalDistance;
+        float _fStop;
         bool _depthOfFieldEnabled;
 
         // Image params
@@ -166,6 +167,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             )
         );
         defineParam(_focalDistance, "Focal Distance", 4.0f);
+        defineParam(_fStop, "fstop", 16.0f);
         defineParam(_depthOfFieldEnabled, "Enable Depth Of Field", true);
 
         // Image params
@@ -216,7 +218,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         );
         __inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();
 
-        __aperture = _horizontalAperture / 1000.0f;
+        __aperture = fStopToAperture(_fStop, _focalLength);
 
         __hdriPixelSize = float2(
             hdri.bounds.width() / (2 * PI),
