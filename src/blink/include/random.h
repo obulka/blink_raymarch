@@ -24,6 +24,20 @@ inline uint wangHash(uint seed)
 
 
 /**
+ *
+ */
+inline int wangHash(int seed)
+{
+    seed = int(seed ^ 61) ^ int(seed >> 16);
+    seed *= 9;
+    seed = seed ^ (seed >> 4);
+    seed *= int(0x27d4eb2d);
+    seed = seed ^ (seed >> 15);
+    return seed;
+}
+
+
+/**
  * Get a random value on the interval [0, 1].
  *
  * @arg seed: The random seed.

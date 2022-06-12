@@ -594,3 +594,48 @@ inline float sampleMaterial(
 
     return pdf;
 }
+
+
+/**
+ *
+ */
+void useNoiseOnMaterial(
+        const int noiseOptions,
+        const float noiseValue,
+        float4 &diffusivity,
+        float4 &specularity,
+        float4 &transmittance,
+        float4 &emittance,
+        float4 &surface)
+{
+    if (noiseOptions & 4)
+    {
+        diffusivity.x *= noiseValue;
+        diffusivity.y *= noiseValue;
+        diffusivity.z *= noiseValue;
+    }
+    if (noiseOptions & 8)
+    {
+        specularity.w *= noiseValue;
+    }
+    if (noiseOptions & 16)
+    {
+        transmittance.w *= noiseValue;
+    }
+    if (noiseOptions & 32)
+    {
+        emittance.w *= noiseValue;
+    }
+    if (noiseOptions & 64)
+    {
+        surface.x = (surface.x - 1.0f) * noiseValue + 1.0f;
+    }
+    if (noiseOptions & 128)
+    {
+        surface.w *= noiseValue;
+    }
+    if (noiseOptions & 256)
+    {
+        diffusivity.w *= noiseValue;
+    }
+}

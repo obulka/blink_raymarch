@@ -1,0 +1,83 @@
+Gizmo {
+ inputs 0
+ knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
+ tile_color 0xffffffff
+ addUserKnob {20 User l "SDF Primitive"}
+ addUserKnob {7 size R 1 1000}
+ size 1
+ addUserKnob {4 type M {fBm turbulence}}
+ addUserKnob {13 translation}
+ addUserKnob {3 octaves}
+ octaves 1
+ addUserKnob {7 lacunarity R 1 10}
+ lacunarity 5
+ addUserKnob {7 gain}
+ gain 0.5
+ addUserKnob {7 gamma}
+ gamma 0.5
+ addUserKnob {26 ""}
+ addUserKnob {6 diffuse +STARTLINE}
+ addUserKnob {6 specular -STARTLINE}
+ addUserKnob {6 transmission -STARTLINE}
+ addUserKnob {6 emission -STARTLINE}
+ addUserKnob {6 specular_roughness l "specular roughness" +STARTLINE}
+ addUserKnob {6 transmission_roughness l "transmission roughness" -STARTLINE}
+ addUserKnob {6 refractive_index l "refractive index" +STARTLINE}
+ addUserKnob {26 div0 l "" +STARTLINE}
+ addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
+}
+add_layer {sdf_noise_params0 sdf_noise_params0.options sdf_noise_params0.x sdf_noise_params0.y sdf_noise_params0.z}
+ Constant {
+  inputs 0
+  channels sdf_noise_params0
+  color {{"(parent.specular_roughness << 8) | (parent.transmission_roughness << 7) | (parent.refractive_index << 6) | (parent.emission << 5) | (parent.transmission << 4) | (parent.specular << 3) | (parent.diffuse << 2) | (parent.type << 1) | 1"} {parent.translation.x} {parent.translation.y} {parent.translation.z}}
+  format "1 1 0 0 1 1 1 1x1"
+  name noise_params0
+  xpos 841
+  ypos 447
+ }
+ Dot {
+  name Dot3
+  xpos 875
+  ypos 646
+ }
+add_layer {sdf_noise_params1 sdf_noise_params1.octaves sdf_noise_params1.lacunarity sdf_noise_params1.gain sdf_noise_params1.gamma}
+ Constant {
+  inputs 0
+  channels sdf_noise_params1
+  color {{parent.octaves} {parent.lacunarity} {parent.gain} {parent.gamma}}
+  format "1 1 0 0 1 1 1 1x1"
+  name noise_params1
+  xpos 966
+  ypos 447
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy8
+  xpos 966
+  ypos 714
+ }
+add_layer {sdf_noise_params2 sdf_noise_params2.size}
+ Constant {
+  inputs 0
+  channels sdf_noise_params2
+  color {{parent.size} 0 0 0}
+  format "1 1 0 0 1 1 1 1x1"
+  name noise_params2
+  xpos 1082
+  ypos 449
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 1082
+  ypos 714
+ }
+ Output {
+  name Output1
+  xpos 1082
+  ypos 826
+ }
+end_group

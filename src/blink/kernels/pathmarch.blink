@@ -11,6 +11,7 @@
 #include "math.h"
 #include "colour.h"
 #include "random.h"
+#include "noise.h"
 #include "conversion.h"
 #include "aovs.h"
 #include "lights.h"
@@ -69,6 +70,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     // reflection.x, transmission.y, emission.z, roughness.w
     Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;
 
+    // noise options.x translation.yzw
+    Image<eRead, eAccessRandom, eEdgeNone> noiseParams0;
+
+    // octaves.x, lacunarity.y, gain.z, gamma.w
+    Image<eRead, eAccessRandom, eEdgeNone> noiseParams1;
+
+    // size.x
+    Image<eRead, eAccessRandom, eEdgeNone> noiseParams2;
 
     // the input lights direction/position.xyz intensity.w
     Image<eRead, eAccessRandom, eEdgeNone> lights;
@@ -233,6 +242,53 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    float getNoiseValue(const int index, const float3 &position, int &noiseOptions)
+    {
+        noiseOptions = (int) noiseParams0(index, 0, 0);
+        if ((noiseOptions & 1) == 0)
+        {
+            return -1.0f;
+        }
+
+        const float3 translation = float3(
+            noiseParams0(index, 0, 1),
+            noiseParams0(index, 0, 2),
+            noiseParams0(index, 0, 3)
+        );
+
+        const int octaves = noiseParams1(index, 0, 0);
+        const float lacunarity = noiseParams1(index, 0, 1);
+        const float gain = noiseParams1(index, 0, 2);
+        const float gamma = noiseParams1(index, 0, 3);
+        const float size = noiseParams2(index, 0, 0);
+
+        const float3 noisePosition = worldToLocal(index, position + translation);
+
+        if (noiseOptions & 2)
+        {
+            return fractalBrownianMotionNoise(
+                octaves,
+                lacunarity,
+                size,
+                gain,
+                gamma,
+                noisePosition
+            );
+        }
+        else
+        {
+            return turbulanceNoise(
+                octaves,
+                lacunarity,
+                size,
+                gain,
+                gamma,
+                noisePosition
+            );
+        }
+    }
+
+
     /**
      * Get the value of hdri the ray would hit at infinite distance
      *
@@ -259,15 +315,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    float3 getObjectPosition(const int index)
+    float3 worldToLocal(const int objectIndex, const float3 &worldPosition)
     {
-        float3 transformedPosition = float3(0);
-        for (int j=0; j <= index; j++)
+        float3 localPosition = worldPosition;
+        for (int j=0; j <= objectIndex; j++)
         {
             SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
             const float numChildren = shapeProperty.z;
 
-            if (j + numChildren < index)
+            if (j + numChildren < objectIndex)
             {
                 j += numChildren;
                 continue;
@@ -285,8 +341,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float blendStrength = shapeProperty.w;
 
             // Use parent transform to position child
-            transformedPosition = transformRay(
-                transformedPosition,
+            localPosition = transformRay(
+                localPosition,
                 float3(position.x, position.y, position.z),
                 float3(rotation.x, rotation.y, rotation.z),
                 modifications,
@@ -295,7 +351,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        return -transformedPosition;
+        return localPosition;
+    }
+
+
+    float3 getObjectPosition(const int objectIndex)
+    {
+        return -worldToLocal(objectIndex, float3(0));
     }
 
 
@@ -308,7 +370,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The minimum distance to an object in the scene.
      */
-    float getMinDistanceToObjectInScene(const float3 &rayOrigin, const float &pixelFootprint)
+    float getMinDistanceToObjectInScene(const float3 &rayOrigin, const float pixelFootprint)
     {
         float distance = _maxRayDistance;
 
@@ -513,7 +575,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float2 getMinDistanceToObjectInScene(
             const float3 &rayOrigin,
-            const float &pixelFootprint,
+            const float pixelFootprint,
             float4 &diffusivity,
             float4 &specularity,
             float4 &transmittance,
@@ -869,7 +931,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The normalized surface normal.
      */
-    float3 estimateSurfaceNormal(const float3 &point, const float &pixelFootprint)
+    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint)
     {
         return normalize(
             __offset0 * getMinDistanceToObjectInScene(
@@ -966,7 +1028,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float computeShadow(
             const float3 &rayDirection,
-            const float &distanceToShadePoint,
+            const float distanceToShadePoint,
             float3 &rayOrigin)
     {
         float distanceTravelled = 0;
@@ -1052,10 +1114,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     float4 sampleArtificialLight(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
-            const float &offset,
+            const float offset,
             const float3 &lightDirection,
-            const float &distanceToLight,
-            const int &selectedLight)
+            const float distanceToLight,
+            const int selectedLight)
     {
         // Read the light properties
         SampleType(lights) light = lights(selectedLight, 0);
@@ -1145,7 +1207,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     inline float4 sampleLight(
             const float3 &lightDirection,
-            const float &distanceToLight,
+            const float distanceToLight,
             float3 rayOrigin,
             float3 &lightNormal)
     {
@@ -1362,6 +1424,21 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
             {
+                int noiseOptions;
+                const float noiseValue = getNoiseValue(result.y - 1, origin, noiseOptions);
+                if (noiseValue >= 0.0f)
+                {
+                    useNoiseOnMaterial(
+                        noiseOptions,
+                        noiseValue,
+                        diffusivity,
+                        specularity,
+                        transmittance,
+                        emittance,
+                        surface
+                    );
+                }
+
                 // The normal to the surface at that position
                 float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
                     origin,
@@ -1392,7 +1469,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     (2.0f * pixelFootprint + stepDistance)
                     * _shadowBias
                 );
-
 
                 float lightPDF = 0.0f;
                 float3 lightDirection = surfaceNormal;

@@ -8,10 +8,10 @@ Gizmo {
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
  dimension_x 0.5
- addUserKnob {7 dimension_y l iterations t "The number of iterations to compute, the higher this is the slower it will be to compute, but the more detail the fractal will have." +HIDDEN R 1 30}
- dimension_y 12
- addUserKnob {7 dimension_z l "min square radius" t "The minimum square radius to use when spherically folding." +HIDDEN R 0.001 1}
- dimension_z 0.001
+ addUserKnob {7 dimension_y l "tube radius" t "The radius of the tube that makes the link." +HIDDEN R 0 5}
+ dimension_y 0.5
+ addUserKnob {7 dimension_z l height t "The height (y-axis) to elongate the torus." +HIDDEN R 0 10}
+ dimension_z 0.3
  addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold. Higher values will result in a denser fractal." +HIDDEN R 0.01 2}
  dimension_w 0.8
  addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
@@ -42,7 +42,7 @@ Gizmo {
  blend_strength 0.125
  addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +DISABLED +STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
+ addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
 }
  Input {
   inputs 0
@@ -212,7 +212,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set Nad1e990 [stack 0]
+set N7d043f10 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -234,7 +234,7 @@ set Nad1e990 [stack 0]
    xpos 34
    ypos -6
   }
-set Nad32190 [stack 0]
+set N24ee26d0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -245,7 +245,7 @@ set Nad32190 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nad1e990
+push $N7d043f10
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -274,7 +274,7 @@ push $Nad1e990
    xpos 158
    ypos 167
   }
-push $Nad32190
+push $N24ee26d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -367,7 +367,7 @@ push $Nad32190
    xpos 192
    ypos -2
   }
-set Nadde330 [stack 0]
+set N2335fca0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -389,7 +389,7 @@ set Nadde330 [stack 0]
    xpos 34
    ypos -6
   }
-set Nadf1b30 [stack 0]
+set N8090acd0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -400,7 +400,7 @@ set Nadf1b30 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nadde330
+push $N2335fca0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -429,7 +429,7 @@ push $Nadde330
    xpos 158
    ypos 167
   }
-push $Nadf1b30
+push $N8090acd0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
