@@ -36,7 +36,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessPoint, eEdgeNone> variance;
 
     // the hdri in latlong format
-    Image<eRead, eAccessRandom, eEdgeClamped> hdri;
+    Image<eRead, eAccessRandom, eEdgeNone> hdri;
 
 
     // the shape positons.xyz, scale.w
@@ -317,10 +317,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 hdri.bounds.height() - (__hdriPixelSize.y * angles.y)
             ),
             float2(0),
-            float2(hdri.bounds.width(), hdri.bounds.height()) - 1.0f
+            float2(hdri.bounds.width(), hdri.bounds.height())
         );
 
-        return bilinear(hdri, indices.x, indices.y);
+        return hdri(indices.x, indices.y);
     }
 
 
