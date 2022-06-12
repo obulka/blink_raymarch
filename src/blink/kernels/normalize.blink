@@ -1,0 +1,59 @@
+#include "math.h"
+
+
+kernel Normalize : ImageComputationKernel<ePixelWise>
+{
+    Image<eRead, eAccessPoint, eEdgeNone> src; // the input image
+    Image<eRead, eAccessRandom, eEdgeConstant> minMax; // the input image
+    Image<eWrite> dst; // the output image
+
+
+    param:
+        int _normalizationMethod;
+        bool _clampToStdDev;
+
+    /**
+     * In define(), parameters can be given labels and default values.
+     */
+    void define()
+    {
+        defineParam(_normalizationMethod, "Normalization Method", 0);
+        defineParam(_clampToStdDev, "Clamp To Standard Deviation", false);
+    }
+
+
+    void process()
+    {
+        float minValue = minMax(0, 0, 0);
+        float maxValue = minMax(0, 0, 1);
+        const float meanValue = minMax(0, 0, 2);
+        const float standardDeviationValue = minMax(0, 0, 3);
+
+        float4 srcValue;
+        if (_clampToStdDev)
+        {
+            srcValue = clamp(src(), -standardDeviationValue, standardDeviationValue);
+            minValue = clamp(minValue, -standardDeviationValue, standardDeviationValue);
+            maxValue = clamp(maxValue, -standardDeviationValue, standardDeviationValue);
+        }
+        else
+        {
+            srcValue = src();
+        }
+
+        float4 output;
+
+        if (_normalizationMethod == 0 && minValue != maxValue)
+        {
+            dst() = (srcValue - minValue) / (maxValue - minValue);
+        }
+        else if (_normalizationMethod == 1 && standardDeviationValue != 0.0f)
+        {
+            dst() = (srcValue - meanValue) / standardDeviationValue;
+        }
+        else
+        {
+            dst() = 0.0f;
+        }
+    }
+};

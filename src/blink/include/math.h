@@ -204,6 +204,51 @@ inline int3 clamp_(const int3 value, const int3 lower, const int3 upper)
 
 
 /**
+ * Clamp vector components between float values.
+ *
+ * @arg value: The value to clamp.
+ * @arg lower: The lower bound to clamp to.
+ * @arg upper: The upper bound to clamp to.
+ *
+ * @returns: The clamped value.
+ */
+inline float2 clamp(const float2 &value, const float lower, const float upper)
+{
+    return clamp(value, float2(lower), float2(upper));
+}
+
+
+/**
+ * Clamp vector components between float values.
+ *
+ * @arg value: The value to clamp.
+ * @arg lower: The lower bound to clamp to.
+ * @arg upper: The upper bound to clamp to.
+ *
+ * @returns: The clamped value.
+ */
+inline float3 clamp(const float3 &value, const float lower, const float upper)
+{
+    return clamp(value, float3(lower), float3(upper));
+}
+
+
+/**
+ * Clamp vector components between float values.
+ *
+ * @arg value: The value to clamp.
+ * @arg lower: The lower bound to clamp to.
+ * @arg upper: The upper bound to clamp to.
+ *
+ * @returns: The clamped value.
+ */
+inline float4 clamp(const float4 &value, const float lower, const float upper)
+{
+    return clamp(value, float4(lower), float4(upper));
+}
+
+
+/**
  * Custom round for int3 because the builtin round fails to compile for
  * int3.
  *

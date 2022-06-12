@@ -1,0 +1,73 @@
+#include "math.h"
+
+
+kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
+{
+    Image<eRead, eAccessRandom, eEdgeNone> src; // the input image
+    Image<eWrite> dst; // the output image
+
+
+    local:
+        float __numSamples;
+
+
+    /**
+     * The init() function is run before any calls to process().
+     * Local variables can be initialized here.
+     */
+    void init()
+    {
+        __numSamples = 3.0f * src.bounds.width() * src.bounds.height();
+    }
+
+
+    void process(int2 pos)
+    {
+        if (length(float2(pos.x, pos.y)) > 0)
+        {
+            dst() = 0;
+            return;
+        }
+
+        float minValue = FLT_MAX;
+        float maxValue = -FLT_MAX;
+        float mean = 0.0f;
+
+        for (int y=src.bounds.y1; y < src.bounds.y2; y++)
+        {
+            for (int x=src.bounds.x1; x < src.bounds.x2; x++)
+            {
+                const float3 pixelValue = float3(
+                    src(x, y, 0),
+                    src(x, y, 1),
+                    src(x, y, 2)
+                );
+
+                minValue = min(minValue, minComponent(pixelValue));
+                maxValue = max(maxValue, maxComponent(pixelValue));
+
+                mean += sumComponent(pixelValue) / __numSamples;
+            }
+        }
+
+        float standardDeviation = 0.0f;
+
+        for (int y=src.bounds.y1; y < src.bounds.y2; y++)
+        {
+            for (int x=src.bounds.x1; x < src.bounds.x2; x++)
+            {
+                const float3 pixelValue = float3(
+                    src(x, y, 0),
+                    src(x, y, 1),
+                    src(x, y, 2)
+                );
+
+                const float3 difference = pixelValue - mean;
+
+                standardDeviation += sumComponent(difference * difference) / __numSamples;
+            }
+        }
+
+        dst() = float4(minValue, maxValue, mean, sqrt(standardDeviation));
+    }
+};
