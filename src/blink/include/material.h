@@ -186,11 +186,13 @@ inline void getReflectivityData(
         const float3 &direction,
         const float3 &surfaceNormal,
         const float objectId,
-        const float nestedDielectrics[MAX_NESTED_DIELECTRICS][6],
+        const float nestedDielectrics[MAX_NESTED_DIELECTRICS][7],
         const int numNestedDielectrics,
         const float surfaceRefractiveIndex,
+        const float surfaceScatteringProbability,
         const float incidentRefractiveIndex,
         float &refractedRefractiveIndex,
+        float &refractedScatteringProbability,
         float &specularProbability,
         float &refractionProbability)
 {
@@ -199,10 +201,13 @@ inline void getReflectivityData(
         // We are exiting the material we are in, get the
         // last refractive index from the top of the stack
         refractedRefractiveIndex = nestedDielectrics[numNestedDielectrics - 1][5];
+        refractedScatteringProbability = nestedDielectrics[numNestedDielectrics - 1][6];
     }
     else
     {
+        // Otherwise we will be entering a new material
         refractedRefractiveIndex = surfaceRefractiveIndex;
+        refractedScatteringProbability = surfaceScatteringProbability;
     }
 
     // Compute the refraction values
@@ -335,15 +340,17 @@ inline float sampleTransmissive(
         const float4 &transmittance,
         const float refractionProbability,
         const float refractedRefractiveIndex,
+        const float refractedScatteringProbability,
         const float objectId,
         const float distanceToLight,
         float4 &emissiveColour,
         float4 &materialBRDF,
         float4 &lightBRDF,
         float &lightPDF,
-        float nestedDielectrics[MAX_NESTED_DIELECTRICS][6],
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][7],
         int &numNestedDielectrics,
         float &incidentRefractiveIndex,
+        float &scatteringProbability,
         float &distanceTravelledThroughMaterial)
 {
     const float4 absorptionColour = float4(
@@ -355,6 +362,7 @@ inline float sampleTransmissive(
 
     // We are passing through the surface, so update the refractive index
     incidentRefractiveIndex = refractedRefractiveIndex;
+    scatteringProbability = refractedScatteringProbability;
     if (nestedDielectrics[numNestedDielectrics][4] == objectId)
     {
         // We are exiting the material we are in, get the
@@ -372,6 +380,7 @@ inline float sampleTransmissive(
         nestedDielectrics[numNestedDielectrics][3] = transmittance.w;
         nestedDielectrics[numNestedDielectrics][4] = objectId;
         nestedDielectrics[numNestedDielectrics][5] = refractedRefractiveIndex;
+        nestedDielectrics[numNestedDielectrics][6] = refractedScatteringProbability;
     }
 
     materialBRDF = exp(-absorptionColour * distanceTravelledThroughMaterial);
@@ -456,6 +465,7 @@ inline float sampleMaterial(
         const float transmissionOffset,
         const float4 &transmittance,
         const float surfaceRefractiveIndex,
+        const float surfaceScatteringProbability,
         const float transmissiveRoughness,
         const float4 &specularity,
         const float specularRoughness,
@@ -467,9 +477,10 @@ inline float sampleMaterial(
         float4 &lightBRDF,
         float3 &outgoingDirection,
         float3 &position,
-        float nestedDielectrics[MAX_NESTED_DIELECTRICS][6],
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][7],
         int &numNestedDielectrics,
         float &incidentRefractiveIndex,
+        float &scatteringProbability,
         float &distanceTravelledThroughMaterial,
         float &lightPDF)
 {
@@ -482,6 +493,7 @@ inline float sampleMaterial(
     const float rng = random(random(seed.x) + random(seed.y) + random(seed.z));
 
     float refractedRefractiveIndex;
+    float refractedScatteringProbability;
     float specularProbability = specularity.w;
     float refractionProbability = transmittance.w;
 
@@ -494,8 +506,10 @@ inline float sampleMaterial(
             nestedDielectrics,
             numNestedDielectrics,
             surfaceRefractiveIndex,
+            surfaceScatteringProbability,
             incidentRefractiveIndex,
             refractedRefractiveIndex,
+            refractedScatteringProbability,
             specularProbability,
             refractionProbability
         );
@@ -559,6 +573,7 @@ inline float sampleMaterial(
             transmittance,
             refractionProbability,
             refractedRefractiveIndex,
+            refractedScatteringProbability,
             objectId,
             distanceToLight,
             emissiveColour,
@@ -568,6 +583,7 @@ inline float sampleMaterial(
             nestedDielectrics,
             numNestedDielectrics,
             incidentRefractiveIndex,
+            scatteringProbability,
             distanceTravelledThroughMaterial
         );
     }

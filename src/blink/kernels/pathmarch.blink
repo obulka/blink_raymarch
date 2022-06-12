@@ -128,6 +128,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Scene params
         float _refractiveIndex;
+        float _scatteringProbability;
         float4 _absorptionColour;
 
         // Shape Textures
@@ -200,6 +201,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Scene params
         defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
+        defineParam(_scatteringProbability, "Scattering Probability", 0.0f);
         defineParam(_absorptionColour, "brdf Colour", float4(1));
 
         // Shape Counts
@@ -1416,11 +1418,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         const int numLights = _lightTextureWidth + numEmissive + _usePrecomputedIrradiance;
 
         float refractiveIndex = _refractiveIndex;
+        float scatteringProbability = _scatteringProbability;
 
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][
             4   // Absorption colour of object
             + 1 // Id of the dielectric we are currently in
             + 1 // Refractive index of that object
+            + 1 // Scattering probability
         ];
         nestedDielectrics[0][0] = _absorptionColour.x;
         nestedDielectrics[0][1] = _absorptionColour.y;
@@ -1428,6 +1432,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         nestedDielectrics[0][3] = _absorptionColour.w;
         nestedDielectrics[0][4] = -1;
         nestedDielectrics[0][5] = refractiveIndex;
+        nestedDielectrics[0][6] = scatteringProbability;
         int numNestedDielectrics = 0;
 
         float4 rayColour = float4(0);
@@ -1587,6 +1592,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     transmissionOffset,
                     transmittance,
                     surface.x,
+                    surface.z,
                     surface.w,
                     specularity,
                     diffusivity.w,
@@ -1601,6 +1607,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     nestedDielectrics,
                     numNestedDielectrics,
                     refractiveIndex,
+                    scatteringProbability,
                     distanceTravelledThroughMaterial,
                     materialLightPDF
                 );
