@@ -32,9 +32,12 @@ kernel Normalize : ImageComputationKernel<ePixelWise>
         float4 srcValue;
         if (_clampToStdDev)
         {
-            srcValue = clamp(src(), -standardDeviationValue, standardDeviationValue);
-            minValue = clamp(minValue, -standardDeviationValue, standardDeviationValue);
-            maxValue = clamp(maxValue, -standardDeviationValue, standardDeviationValue);
+            const float lowerBound = meanValue - standardDeviationValue;
+            const float upperBound = meanValue + standardDeviationValue;
+
+            srcValue = clamp(src(), lowerBound, upperBound);
+            minValue = clamp(minValue, lowerBound, upperBound);
+            maxValue = clamp(maxValue, lowerBound, upperBound);
         }
         else
         {

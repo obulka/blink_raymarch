@@ -1244,6 +1244,22 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         rayOrigin,
                         pixelFootprint
                     );
+
+                    int noiseOptions;
+                    const float noiseValue = getNoiseValue(
+                        result.y - 1,
+                        rayOrigin + lightDirection * stepDistance,
+                        noiseOptions
+                    );
+                    if (noiseValue >= 0.0f)
+                    {
+                        useNoiseOnEmittance(
+                            noiseOptions,
+                            noiseValue,
+                            emittance
+                        );
+                    }
+
                     return emissiveTerm(emittance);
                 }
                 return float4(0);

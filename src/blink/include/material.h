@@ -639,3 +639,18 @@ void useNoiseOnMaterial(
         diffusivity.w *= noiseValue;
     }
 }
+
+
+/**
+ *
+ */
+void useNoiseOnEmittance(
+        const int noiseOptions,
+        const float noiseValue,
+        float4 &emittance)
+{
+    if (noiseOptions & 32)
+    {
+        emittance.w *= noiseValue;
+    }
+}
