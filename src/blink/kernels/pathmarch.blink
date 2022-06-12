@@ -1497,6 +1497,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Step the ray forwards
             origin += direction * stepDistance;
 
+            const float rng = random(random(seed.x) + random(seed.y + random(seed.z)));
+
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
             {
@@ -1691,12 +1693,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 // Exit if we have reached the bounce limit
                 // or with a random chance
-                const float exitProbability = max(throughput.x, throughput.y, throughput.z);
-                const float rng = random(random(seed.x) + seed.y);
-                if (
-                    ++bounces >= __bouncesPerRay
-                    || exitProbability <= rng
-                ) {
+                const float exitProbability = max(
+                    throughput.x,
+                    throughput.y,
+                    throughput.z
+                );
+                if (++bounces >= __bouncesPerRay || exitProbability <= rng)
+                {
                     return finalAOVs(
                         _outputType,
                         iterations,
@@ -1713,14 +1716,19 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Account for the lost intensity from the early exits
                 throughput /= exitProbability;
 
-                // Update the random seed
-                seed = random(seed + rng + fabs(origin + direction));
-
                 // Reset the pixel footprint so multiple reflections don't
                 // reduce precision
                 pixelFootprint = _hitTolerance;
-
             }
+            else if (scatteringProbability / stepDistance > rng)
+            {
+                // Do scattering
+                origin -= direction * stepDistance * random(3.2212f * seed + rng + 33.43f);
+                direction = randomUnitVector(4.543256f * seed + rng + 12.43f);
+            }
+
+            // Update the random seed
+            seed = 77.134233f * random(seed + rng + fabs(origin + direction));
 
             lastStepDistance = signedStepDistance;
             iterations++;
@@ -1791,7 +1799,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     void process(int2 pos)
     {
         SampleType(noise) noisePixel = noise();
-        float3 seed = random(float3(noisePixel.x, noisePixel.y, noisePixel.z));
+        float3 seed = 43.67f * random(float3(noisePixel.x, noisePixel.y, noisePixel.z));
 
         const float4 variancePixel = variance();
 
@@ -1811,8 +1819,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         for (int path=1; path <= numPaths; path++)
         {
-            seed = length(seed) * random(seed * path);
-
             // Generate a ray from the camera
             float3 rayOrigin;
             float3 rayDirection;
@@ -1861,6 +1867,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 numEmissive,
                 seed
             );
+
+            seed = 53.1231f * random(seed * path);
         }
 
         const uint objectId = resultPixel.w / numPaths;
