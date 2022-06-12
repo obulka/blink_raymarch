@@ -317,7 +317,11 @@ inline void transmissiveBounce(
 
     // Offset the point so that it doesn't get trapped on
     // surface.
-    position = offsetPoint(position, -surfaceNormal, offset);
+    position = offsetPoint(
+        position,
+        -surfaceNormal + refractedDirection,
+        offset
+    );
 }
 
 

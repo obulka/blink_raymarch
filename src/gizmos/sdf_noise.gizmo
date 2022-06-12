@@ -1,25 +1,29 @@
 Gizmo {
  inputs 0
- knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
  tile_color 0xffffffff
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {7 size R 1 1000}
- size 1
+ size 10
  addUserKnob {4 type M {fBm turbulence}}
+ type turbulence
  addUserKnob {13 translation}
  addUserKnob {3 octaves}
- octaves 1
+ octaves 3
  addUserKnob {7 lacunarity R 1 10}
- lacunarity 5
+ lacunarity 2
  addUserKnob {7 gain}
  gain 0.5
  addUserKnob {7 gamma}
  gamma 0.5
  addUserKnob {26 ""}
  addUserKnob {6 diffuse +STARTLINE}
+ diffuse true
  addUserKnob {6 specular -STARTLINE}
+ specular true
  addUserKnob {6 transmission -STARTLINE}
+ transmission true
  addUserKnob {6 emission -STARTLINE}
+ emission true
  addUserKnob {6 specular_roughness l "specular roughness" +STARTLINE}
  addUserKnob {6 transmission_roughness l "transmission roughness" -STARTLINE}
  addUserKnob {6 refractive_index l "refractive index" +STARTLINE}
