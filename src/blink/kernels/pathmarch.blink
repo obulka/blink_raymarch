@@ -242,9 +242,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    float getNoiseValue(const int index, const float3 &position)
+    float getNoiseValue(const int index, const float3 &position, int &noiseOptions)
     {
-        const int noiseOptions = noiseParams0(index, 0, 0);
+        noiseOptions = (int) noiseParams0(index, 0, 0);
         if ((noiseOptions & 1) == 0)
         {
             return -1.0f;
@@ -1424,10 +1424,19 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
             {
-                const float noiseValue = getNoiseValue(result.y - 1, origin);
+                int noiseOptions;
+                const float noiseValue = getNoiseValue(result.y - 1, origin, noiseOptions);
                 if (noiseValue >= 0.0f)
                 {
-                    specularity *= noiseValue;
+                    useNoiseOnMaterial(
+                        noiseOptions,
+                        noiseValue,
+                        diffusivity,
+                        specularity,
+                        transmittance,
+                        emittance,
+                        surface
+                    );
                 }
 
                 // The normal to the surface at that position
