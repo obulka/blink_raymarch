@@ -16,6 +16,28 @@
  * @arg lightDirection: Will store the direction to the light.
  * @arg distanceToLight: Will store the distance to the light.
  */
+inline void irradianceLightData(
+        const float3 &surfaceNormal,
+        const float maxRayDistance,
+        float3 &lightDirection,
+        float3 &lightNormal,
+        float &distanceToLight,
+        float &visibleSurfaceArea)
+{
+    visibleSurfaceArea = 1.0f;
+    lightNormal = -surfaceNormal;
+    lightDirection = surfaceNormal;
+    distanceToLight = maxRayDistance;
+}
+
+
+/**
+ * Get the direction, and distance of a spherical light.
+ *
+ * @arg direction: The direction the light is travelling.
+ * @arg lightDirection: Will store the direction to the light.
+ * @arg distanceToLight: Will store the distance to the light.
+ */
 inline void sphericalLightData(
         const float3 &seed,
         const float3 &pointOnSurface,

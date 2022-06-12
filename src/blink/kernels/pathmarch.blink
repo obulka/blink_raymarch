@@ -1308,10 +1308,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         lightNormal = -lightDirection;
 
-        if (_usePrecomputedIrradiance)
-        {
-            return readIrradianceValue(lightDirection);
-        }
         return readHDRIValue(lightDirection);
     }
 
@@ -1322,6 +1318,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     float sampleLightData(
             const float3 &seed,
             const float3 &pointOnSurface,
+            const float3 &surfaceNormal,
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numLights,
             float3 &lightDirection,
@@ -1353,6 +1350,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     lightNormal
                 );
             }
+        }
+        else if (selectedLight == _lightTextureWidth && _usePrecomputedIrradiance)
+        {
+            irradianceLightData(
+                surfaceNormal,
+                _maxRayDistance,
+                lightDirection,
+                lightNormal,
+                distanceToLight,
+                visibleSurfaceArea
+            );
         }
         else
         {
@@ -1397,7 +1405,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int numEmissive,
             float3 &seed)
     {
-        const int numLights = _lightTextureWidth + numEmissive;
+        const int numLights = _lightTextureWidth + numEmissive + _usePrecomputedIrradiance;
 
         float refractiveIndex = _refractiveIndex;
 
@@ -1538,6 +1546,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     lightPDF = sampleLightData(
                         seed,
                         origin,
+                        surfaceNormal,
                         emissiveIndices,
                         numLights,
                         lightDirection,
@@ -1605,6 +1614,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             distanceToLight,
                             selectedLight
                         );
+                        lightGeometryFactor = 1.0f;
+                    }
+                    else if (selectedLight == _lightTextureWidth && _usePrecomputedIrradiance)
+                    {
+                        lightEmissiveColour = readIrradianceValue(lightDirection);
                         lightGeometryFactor = 1.0f;
                     }
                     else
@@ -1716,20 +1730,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             nestedDielectrics[numNestedDielectrics][3]
         );
 
-        float4 imageBasedLighting;
-        if (_usePrecomputedIrradiance && bounces > 0)
-        {
-            imageBasedLighting = readIrradianceValue(direction);
-        }
-        else
-        {
-            imageBasedLighting = readHDRIValue(direction);
-        }
-
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
-        rayColour += throughput * imageBasedLighting * exp(
+        rayColour += throughput * readHDRIValue(direction) * exp(
             -absorptionColour * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
             )
