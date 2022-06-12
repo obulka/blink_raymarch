@@ -35,7 +35,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessPoint, eEdgeNone> src;
     Image<eRead, eAccessPoint, eEdgeNone> variance;
 
-    // the hdribox in latlong format
+    // the hdri in latlong format
     Image<eRead, eAccessRandom, eEdgeClamped> hdri;
 
 
@@ -89,6 +89,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     // shadow hardness.x
     Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;
 
+    // the precomputed irradiance of the hdri
+    Image<eRead, eAccessRandom, eEdgeClamped> irradiance;
+
 
     // the output image
     Image<eWrite> dst;
@@ -112,6 +115,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _formatHeight;
 
         float _hdriOffsetAngle;
+        bool _usePrecomputedIrradiance;
 
         // Ray params
         int _minPathsPerPixel;
@@ -146,7 +150,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int __bouncesPerRay;
 
         float2 __hdriPixelSize;
-        float2 __hdriLightPixelSize;
+        float2 __irradiancePixelSize;
         float __hdriOffsetRadians;
 
         float3 __offset0;
@@ -183,6 +187,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_formatHeight, "Screen Height", 2160.0f);
         defineParam(_formatWidth, "Screen Width", 3840.0f);
         defineParam(_hdriOffsetAngle, "HDRI Offset Angle", 0.0f);
+        defineParam(_usePrecomputedIrradiance, "Use Precomputed Irradiance", true);
 
         // Ray params
         defineParam(_minPathsPerPixel, "Min Paths Per Pixel", 1);
@@ -232,6 +237,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         __hdriPixelSize = float2(
             hdri.bounds.width() / (2 * PI),
             hdri.bounds.height() / PI
+        );
+        __irradiancePixelSize = float2(
+            irradiance.bounds.width() / (2 * PI),
+            irradiance.bounds.height() / PI
         );
         __hdriOffsetRadians = _hdriOffsetAngle * PI / 180.0f;
 
@@ -312,6 +321,32 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         );
 
         return bilinear(hdri, indices.x, indices.y);
+    }
+
+
+    /**
+     * Get the value of irradiance the hdri would provide in a direction
+     *
+     * @arg rayDirection: The direction of the ray.
+     *
+     * @returns: The colour of the pixel in the direction of the ray.
+     */
+    float4 readIrradianceValue(float3 rayDirection)
+    {
+        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);
+
+        // Should be able to say image access is eEdgeClamped and not do this
+        // but I see nan pixels sooo... :(
+        const float2 indices = clamp(
+            float2(
+                __irradiancePixelSize.x * angles.x,
+                irradiance.bounds.height() - (__irradiancePixelSize.y * angles.y)
+            ),
+            float2(0),
+            float2(irradiance.bounds.width(), irradiance.bounds.height()) - 1.0f
+        );
+
+        return bilinear(irradiance, indices.x, indices.y);
     }
 
 
@@ -1273,6 +1308,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         lightNormal = -lightDirection;
 
+        if (_usePrecomputedIrradiance)
+        {
+            return readIrradianceValue(lightDirection);
+        }
         return readHDRIValue(lightDirection);
     }
 
@@ -1677,10 +1716,20 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             nestedDielectrics[numNestedDielectrics][3]
         );
 
+        float4 imageBasedLighting;
+        if (_usePrecomputedIrradiance && bounces > 0)
+        {
+            imageBasedLighting = readIrradianceValue(direction);
+        }
+        else
+        {
+            imageBasedLighting = readHDRIValue(direction);
+        }
+
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
-        rayColour += throughput * readHDRIValue(direction) * exp(
+        rayColour += throughput * imageBasedLighting * exp(
             -absorptionColour * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
             )
