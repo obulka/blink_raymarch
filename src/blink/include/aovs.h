@@ -8,22 +8,34 @@
 // Functions for returning AOVs
 //
 
+#define BEAUTY_AOV 0
+#define WORLD_POSITION_AOV 1
+#define LOCAL_POSITION_AOV 2
+#define NORMAL_AOV 3
+#define DEPTH_AOV 4
+#define STATS_AOV 5
+
 
 /**
  *
  */
 inline float4 earlyExitAOVs(
         const int aovType,
-        const float3 &position,
+        const float3 &worldPosition,
+        const float3 &localPosition,
         const float3 &normal,
         const float depth,
         const float objectId)
 {
-    if (aovType == 1)
+    if (aovType == WORLD_POSITION_AOV)
     {
-        return float4(position.x, position.y, position.z, objectId);
+        return float4(worldPosition.x, worldPosition.y, worldPosition.z, objectId);
     }
-    if (aovType == 2)
+    if (aovType == LOCAL_POSITION_AOV)
+    {
+        return float4(localPosition.x, localPosition.y, localPosition.z, objectId);
+    }
+    if (aovType == NORMAL_AOV)
     {
         return float4(normal.x, normal.y, normal.z, objectId);
     }
@@ -41,7 +53,7 @@ inline float4 finalAOVs(
         const float objectId,
         const float4 &rayColour)
 {
-    if (aovType == 4)
+    if (aovType == STATS_AOV)
     {
         return float4(iterations, bounces, 0, objectId);
     }
@@ -58,7 +70,7 @@ inline float4 rayMissAOVs(
         const float bounces,
         const float objectId)
 {
-    if (aovType == 4)
+    if (aovType == STATS_AOV)
     {
         return float4(iterations, bounces, 0, objectId);
     }

@@ -1440,21 +1440,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
             {
-                int noiseOptions;
-                const float noiseValue = getNoiseValue(result.y - 1, origin, noiseOptions);
-                if (noiseValue >= 0.0f)
-                {
-                    useNoiseOnMaterial(
-                        noiseOptions,
-                        noiseValue,
-                        diffusivity,
-                        specularity,
-                        transmittance,
-                        emittance,
-                        surface
-                    );
-                }
-
                 // The normal to the surface at that position
                 float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
                     origin,
@@ -1468,16 +1453,32 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     firstObjectId = result.y;
 
                     // Early exit for the various AOVs that are not 'scene'
-                    if (_outputType > 0 && _outputType < 4)
+                    if (_outputType > BEAUTY_AOV && _outputType < STATS_AOV)
                     {
                         return earlyExitAOVs(
                             _outputType,
                             origin,
+                            worldToLocal(firstObjectId - 1, origin),
                             surfaceNormal,
                             distanceTravelled,
                             firstObjectId
                         );
                     }
+                }
+
+                int noiseOptions;
+                const float noiseValue = getNoiseValue(result.y - 1, origin, noiseOptions);
+                if (noiseValue >= 0.0f)
+                {
+                    useNoiseOnMaterial(
+                        noiseOptions,
+                        noiseValue,
+                        diffusivity,
+                        specularity,
+                        transmittance,
+                        emittance,
+                        surface
+                    );
                 }
 
                 const float reflectionOffset = pixelFootprint * _shadowBias;
@@ -1658,8 +1659,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         // If we are not computing the scene value and we have missed all
-        // objects, return black.
-        if (_outputType > 0)
+        // objects, return an appropriate colour.
+        if (_outputType > BEAUTY_AOV)
         {
             return rayMissAOVs(
                 _outputType,
@@ -1794,7 +1795,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         dst() = (resultPixel + numPrecomputedPaths * src()) / (numPaths + numPrecomputedPaths);
 
-        if (_outputType == 4)
+        if (_outputType == STATS_AOV)
         {
             dst(2) = numPaths + numPrecomputedPaths;
         }
