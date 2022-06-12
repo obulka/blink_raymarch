@@ -380,22 +380,22 @@ float fractalBrownianMotionNoise(
     float output = 0.0f;
     float denom = 0.0f;
     float frequency = lacunarity;
-    float amplitude = size;
+    float amplitude = gain;
 
     for (int i = 0; i < octaves; i++)
     {
-        output += (amplitude * perlinSimplexNoise(position * frequency));
+        output += amplitude * perlinSimplexNoise(position * frequency / size);
         denom += amplitude;
 
         frequency *= lacunarity;
-        amplitude *= size;
+        amplitude *= gain;
     }
 
     if (denom == 0.0f || gamma == 0.0f)
     {
         return 1.0f;
     }
-    return pow(gain * output / denom, 1.0f / gamma);
+    return pow(output / denom, 1.0f / gamma);
 }
 
 
@@ -418,22 +418,22 @@ float fractalBrownianMotionNoise(
     float output = 0.0f;
     float denom = 0.0f;
     float frequency = lacunarity;
-    float amplitude = size;
+    float amplitude = gain;
 
     for (int i = 0; i < octaves; i++)
     {
-        output += (amplitude * perlinSimplexNoise(position * frequency));
+        output += amplitude * perlinSimplexNoise(position * frequency / size);
         denom += amplitude;
 
         frequency *= lacunarity;
-        amplitude *= size;
+        amplitude *= gain;
     }
 
     if (denom == 0.0f || gamma == 0.0f)
     {
         return 1.0f;
     }
-    return pow(gain * output / denom, 1.0f / gamma);
+    return pow(output / denom, 1.0f / gamma);
 }
 
 
@@ -456,22 +456,22 @@ float fractalBrownianMotionNoise(
     float output = 0.0f;
     float denom = 0.0f;
     float frequency = lacunarity;
-    float amplitude = size;
+    float amplitude = gain;
 
     for (int i = 0; i < octaves; i++)
     {
-        output += (amplitude * perlinSimplexNoise(position * frequency));
+        output += amplitude * perlinSimplexNoise(position * frequency / size);
         denom += amplitude;
 
         frequency *= lacunarity;
-        amplitude *= size;
+        amplitude *= gain;
     }
 
     if (denom == 0.0f || gamma == 0.0f)
     {
         return 1.0f;
     }
-    return pow(gain * output / denom, 1.0f / gamma);
+    return pow(output / denom, 1.0f / gamma);
 }
 
 
@@ -494,22 +494,22 @@ float turbulanceNoise(
     float output = 0.0f;
     float denom = 0.0f;
     float frequency = lacunarity;
-    float amplitude = size;
+    float amplitude = gain;
 
     for (int i = 0; i < octaves; i++)
     {
-        output += fabs(amplitude * perlinSimplexNoise(position * frequency));
+        output += fabs(amplitude * perlinSimplexNoise(position * frequency / size));
         denom += amplitude;
 
         frequency *= lacunarity;
-        amplitude *= size;
+        amplitude *= gain;
     }
 
     if (denom == 0.0f || gamma == 0.0f)
     {
         return 1.0f;
     }
-    return pow(gain * output / denom, 1.0f / gamma);
+    return pow(output / denom, 1.0f / gamma);
 }
 
 
@@ -532,22 +532,22 @@ float turbulanceNoise(
     float output = 0.0f;
     float denom = 0.0f;
     float frequency = lacunarity;
-    float amplitude = size;
+    float amplitude = gain;
 
     for (int i = 0; i < octaves; i++)
     {
-        output += fabs(amplitude * perlinSimplexNoise(position * frequency));
+        output += fabs(amplitude * perlinSimplexNoise(position * frequency / size));
         denom += amplitude;
 
         frequency *= lacunarity;
-        amplitude *= size;
+        amplitude *= gain;
     }
 
     if (denom == 0.0f || gamma == 0.0f)
     {
         return 1.0f;
     }
-    return pow(gain * output / denom, 1.0f / gamma);
+    return pow(output / denom, 1.0f / gamma);
 }
 
 
@@ -570,20 +570,20 @@ float turbulanceNoise(
     float output = 0.0f;
     float denom = 0.0f;
     float frequency = lacunarity;
-    float amplitude = size;
+    float amplitude = gain;
 
     for (int i = 0; i < octaves; i++)
     {
-        output += fabs(amplitude * perlinSimplexNoise(position * frequency));
+        output += fabs(amplitude * perlinSimplexNoise(position * frequency / size));
         denom += amplitude;
 
         frequency *= lacunarity;
-        amplitude *= size;
+        amplitude *= gain;
     }
 
     if (denom == 0.0f || gamma == 0.0f)
     {
         return 1.0f;
     }
-    return pow(gain * output / denom, 1.0f / gamma);
+    return pow(output / denom, 1.0f / gamma);
 }

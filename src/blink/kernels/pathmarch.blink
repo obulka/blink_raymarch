@@ -299,7 +299,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         if (noiseOptions & 512)
         {
-            noiseValue = pow(gain, 1.0f / gamma) - noiseValue;
+            noiseValue = 1.0f - noiseValue;
         }
 
         return noiseValue;

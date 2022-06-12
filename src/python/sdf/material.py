@@ -19,8 +19,6 @@ from .utils import rgb_to_hex
 class SDFMaterial(KnobManager):
     """Knob manager for primitive shapes in signed distance fields."""
 
-    specular_knob_name = "specular"
-    transmission_knob_name = "transmission"
     colour_knob_name = "colour"
 
     _knob_changed_callbacks = KnobChangedCallbacks(KnobManager._knob_changed_callbacks)
@@ -30,21 +28,3 @@ class SDFMaterial(KnobManager):
     def _colour_changed(self):
         """Change the node colour to match the object for easier ID."""
         self._node.knob("tile_color").setValue(rgb_to_hex(self._knob.value()))
-
-    @_knob_changed_callbacks.register(specular_knob_name)
-    def _specular_changed(self):
-        """Ensure that specular + transmission <= 1"""
-        specular = self._knob.value()
-        transmission_knob = self._node.knob(self.transmission_knob_name)
-
-        if specular + transmission_knob.value() > 1.:
-            transmission_knob.setValue(1. - specular)
-
-    @_knob_changed_callbacks.register(transmission_knob_name)
-    def _transmission_changed(self):
-        """Ensure that specular + transmission <= 1"""
-        transmission = self._knob.value()
-        specular_knob = self._node.knob(self.specular_knob_name)
-
-        if transmission + specular_knob.value() > 1.:
-            specular_knob.setValue(1. - transmission)
