@@ -317,10 +317,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 hdri.bounds.height() - (__hdriPixelSize.y * angles.y)
             ),
             float2(0),
-            float2(hdri.bounds.width(), hdri.bounds.height())
+            float2(hdri.bounds.width(), hdri.bounds.height()) - 1.0f
         );
 
-        return hdri(indices.x, indices.y);
+        return bilinear(hdri, indices.x, indices.y);
     }
 
 
@@ -1618,7 +1618,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
                     else if (selectedLight == _lightTextureWidth && _usePrecomputedIrradiance)
                     {
-                        lightEmissiveColour = readIrradianceValue(lightDirection);
+                        lightEmissiveColour = readIrradianceValue(lightDirection) / 2.0f;
                         lightGeometryFactor = 1.0f;
                     }
                     else
@@ -1730,10 +1730,16 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             nestedDielectrics[numNestedDielectrics][3]
         );
 
+        float4 imageBasedLighting = readHDRIValue(direction);;
+        if (_lightSamplingEnabled && _usePrecomputedIrradiance && bounces > 0)
+        {
+            imageBasedLighting /= 2.0f;
+        }
+
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
-        rayColour += throughput * readHDRIValue(direction) * exp(
+        rayColour += throughput * imageBasedLighting * exp(
             -absorptionColour * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
             )
