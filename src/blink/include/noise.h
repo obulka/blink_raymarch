@@ -164,10 +164,15 @@ float perlinSimplexNoise(const float2 &seed)
     // For the 2D case, the simplex shape is an equilateral triangle.
     // Determine which simplex we are in.
     int i1, j1;  // Offsets for second (middle) corner of simplex in (i,j) coords
-    if (x0 > y0) {   // lower triangle, XY order: (0,0)->(1,0)->(1,1)
+    if (x0 > y0)
+    {   
+        // lower triangle, XY order: (0,0)->(1,0)->(1,1)
         i1 = 1;
         j1 = 0;
-    } else {   // upper triangle, YX order: (0,0)->(0,1)->(1,1)
+    }
+    else
+    {   
+        // upper triangle, YX order: (0,0)->(0,1)->(1,1)
         i1 = 0;
         j1 = 1;
     }
@@ -188,27 +193,36 @@ float perlinSimplexNoise(const float2 &seed)
 
     // Calculate the contribution from the first corner
     float t0 = 0.5f - x0*x0 - y0*y0;
-    if (t0 < 0.0f) {
+    if (t0 < 0.0f)
+    {
         n0 = 0.0f;
-    } else {
+    }
+    else
+    {
         t0 *= t0;
         n0 = t0 * t0 * grad(gi0, x0, y0);
     }
 
     // Calculate the contribution from the second corner
     float t1 = 0.5f - x1*x1 - y1*y1;
-    if (t1 < 0.0f) {
+    if (t1 < 0.0f)
+    {
         n1 = 0.0f;
-    } else {
+    }
+    else
+    {
         t1 *= t1;
         n1 = t1 * t1 * grad(gi1, x1, y1);
     }
 
     // Calculate the contribution from the third corner
     float t2 = 0.5f - x2*x2 - y2*y2;
-    if (t2 < 0.0f) {
+    if (t2 < 0.0f)
+    {
         n2 = 0.0f;
-    } else {
+    }
+    else
+    {
         t2 *= t2;
         n2 = t2 * t2 * grad(gi2, x2, y2);
     }
@@ -249,20 +263,33 @@ float perlinSimplexNoise(const float3 &seed)
     // Determine which simplex we are in.
     int i1, j1, k1; // Offsets for second corner of simplex in (i,j,k) coords
     int i2, j2, k2; // Offsets for third corner of simplex in (i,j,k) coords
-    if (x0 >= y0) {
-        if (y0 >= z0) {
+    if (x0 >= y0)
+    {
+        if (y0 >= z0)
+        {
             i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 1; k2 = 0; // X Y Z order
-        } else if (x0 >= z0) {
+        }
+        else if (x0 >= z0)
+        {
             i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 0; k2 = 1; // X Z Y order
-        } else {
+        }
+        else
+        {
             i1 = 0; j1 = 0; k1 = 1; i2 = 1; j2 = 0; k2 = 1; // Z X Y order
         }
-    } else { // x0<y0
-        if (y0 < z0) {
+    }
+    else
+    { // x0<y0
+        if (y0 < z0)
+        {
             i1 = 0; j1 = 0; k1 = 1; i2 = 0; j2 = 1; k2 = 1; // Z Y X order
-        } else if (x0 < z0) {
+        }
+        else if (x0 < z0)
+        {
             i1 = 0; j1 = 1; k1 = 0; i2 = 0; j2 = 1; k2 = 1; // Y Z X order
-        } else {
+        }
+        else
+        {
             i1 = 0; j1 = 1; k1 = 0; i2 = 1; j2 = 1; k2 = 0; // Y X Z order
         }
     }
@@ -289,30 +316,42 @@ float perlinSimplexNoise(const float3 &seed)
 
     // Calculate the contribution from the four corners
     float t0 = 0.6f - x0*x0 - y0*y0 - z0*z0;
-    if (t0 < 0) {
+    if (t0 < 0)
+    {
         n0 = 0.0;
-    } else {
+    }
+    else
+    {
         t0 *= t0;
         n0 = t0 * t0 * grad(gi0, x0, y0, z0);
     }
     float t1 = 0.6f - x1*x1 - y1*y1 - z1*z1;
-    if (t1 < 0) {
+    if (t1 < 0)
+    {
         n1 = 0.0;
-    } else {
+    }
+    else
+    {
         t1 *= t1;
         n1 = t1 * t1 * grad(gi1, x1, y1, z1);
     }
     float t2 = 0.6f - x2*x2 - y2*y2 - z2*z2;
-    if (t2 < 0) {
+    if (t2 < 0)
+    {
         n2 = 0.0;
-    } else {
+    }
+    else
+    {
         t2 *= t2;
         n2 = t2 * t2 * grad(gi2, x2, y2, z2);
     }
     float t3 = 0.6f - x3*x3 - y3*y3 - z3*z3;
-    if (t3 < 0) {
+    if (t3 < 0)
+    {
         n3 = 0.0;
-    } else {
+    }
+    else
+    {
         t3 *= t3;
         n3 = t3 * t3 * grad(gi3, x3, y3, z3);
     }
@@ -343,7 +382,8 @@ float fractalBrownianMotionNoise(
     float frequency = lacunarity;
     float amplitude = size;
 
-    for (int i = 0; i < octaves; i++) {
+    for (int i = 0; i < octaves; i++)
+    {
         output += (amplitude * perlinSimplexNoise(position * frequency));
         denom += amplitude;
 
@@ -351,6 +391,10 @@ float fractalBrownianMotionNoise(
         amplitude *= size;
     }
 
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
     return pow(gain * output / denom, 1.0f / gamma);
 }
 
@@ -376,7 +420,8 @@ float fractalBrownianMotionNoise(
     float frequency = lacunarity;
     float amplitude = size;
 
-    for (int i = 0; i < octaves; i++) {
+    for (int i = 0; i < octaves; i++)
+    {
         output += (amplitude * perlinSimplexNoise(position * frequency));
         denom += amplitude;
 
@@ -384,6 +429,10 @@ float fractalBrownianMotionNoise(
         amplitude *= size;
     }
 
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
     return pow(gain * output / denom, 1.0f / gamma);
 }
 
@@ -409,7 +458,8 @@ float fractalBrownianMotionNoise(
     float frequency = lacunarity;
     float amplitude = size;
 
-    for (int i = 0; i < octaves; i++) {
+    for (int i = 0; i < octaves; i++)
+    {
         output += (amplitude * perlinSimplexNoise(position * frequency));
         denom += amplitude;
 
@@ -417,6 +467,10 @@ float fractalBrownianMotionNoise(
         amplitude *= size;
     }
 
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
     return pow(gain * output / denom, 1.0f / gamma);
 }
 
@@ -442,7 +496,8 @@ float turbulanceNoise(
     float frequency = lacunarity;
     float amplitude = size;
 
-    for (int i = 0; i < octaves; i++) {
+    for (int i = 0; i < octaves; i++)
+    {
         output += fabs(amplitude * perlinSimplexNoise(position * frequency));
         denom += amplitude;
 
@@ -450,6 +505,10 @@ float turbulanceNoise(
         amplitude *= size;
     }
 
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
     return pow(gain * output / denom, 1.0f / gamma);
 }
 
@@ -475,7 +534,8 @@ float turbulanceNoise(
     float frequency = lacunarity;
     float amplitude = size;
 
-    for (int i = 0; i < octaves; i++) {
+    for (int i = 0; i < octaves; i++)
+    {
         output += fabs(amplitude * perlinSimplexNoise(position * frequency));
         denom += amplitude;
 
@@ -483,6 +543,10 @@ float turbulanceNoise(
         amplitude *= size;
     }
 
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
     return pow(gain * output / denom, 1.0f / gamma);
 }
 
@@ -508,7 +572,8 @@ float turbulanceNoise(
     float frequency = lacunarity;
     float amplitude = size;
 
-    for (int i = 0; i < octaves; i++) {
+    for (int i = 0; i < octaves; i++)
+    {
         output += fabs(amplitude * perlinSimplexNoise(position * frequency));
         denom += amplitude;
 
@@ -516,5 +581,9 @@ float turbulanceNoise(
         amplitude *= size;
     }
 
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
     return pow(gain * output / denom, 1.0f / gamma);
 }
