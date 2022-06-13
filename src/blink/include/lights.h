@@ -13,29 +13,29 @@
 /**
  *
  */
-void sampleEquiAngular(
-        const float u,
+void sampleEquiangularPDF(
+        const float uniform,
         const float maxDistance,
         const float3 &rayOrigin,
         const float3 &rayDirection,
-        const float3 &lightPos,
-        float &dist,
+        const float3 &lightPosition,
+        float &distance,
         float &pdf)
 {
     // get coord of closest point to light along (infinite) ray
-    float delta = dot(lightPos - rayOrigin, rayDirection);
+    const float delta = dot(lightPosition - rayOrigin, rayDirection);
 
     // get distance this point is from light
-    float D = length(rayOrigin + delta * rayDirection - lightPos);
+    const float D = length(rayOrigin + delta * rayDirection - lightPosition);
 
     // get angle of endpoints
-    float thetaA = atan2(0.0 - delta, D);
-    float thetaB = atan2(maxDistance - delta, D);
+    const float thetaA = atan2(-delta, D);
+    const float thetaB = atan2(maxDistance - delta, D);
 
     // take sample
-    float t = D * tan(mix(thetaA, thetaB, u));
+    const float t = D * tan(mix(thetaA, thetaB, uniform));
 
-    dist = delta + t;
+    distance = delta + t;
 
     pdf = D / ((thetaB - thetaA) * (D * D + t * t));
 }

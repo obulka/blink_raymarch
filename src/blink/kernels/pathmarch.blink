@@ -130,6 +130,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _refractiveIndex;
         float _scatteringProbability;
         float4 _absorptionColour;
+        int _equiangularSamples;
 
         // Shape Textures
         int _objectTextureWidth;
@@ -203,6 +204,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
         defineParam(_scatteringProbability, "Scattering Probability", 0.0f);
         defineParam(_absorptionColour, "brdf Colour", float4(1));
+        defineParam(_equiangularSamples, "Equi-Angular Samples", 5);
 
         // Shape Counts
         defineParam(_objectTextureWidth, "Object Texture Width", 0);
@@ -1412,10 +1414,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     float4 sampleLight(
-            const float seed,
             const float4 &throughput,
             const float4 &lightBRDF,
-            const float4 &absorptionColour,
             const float distanceToLight,
             const float3 &surfaceNormal,
             const float3 &position,
@@ -1423,7 +1423,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float lightPDF,
             const float materialPDF,
             const float offset,
-            const float scatteringProbability,
             const int selectedLight,
             float3 &lightNormal)
     {
@@ -1469,7 +1468,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             lightEmissiveColour
             * throughput
             * lightBRDF
-            * exp(-absorptionColour * distanceToLight * scatteringProbability)
             * lightGeometryFactor
             * saturate(dot(surfaceNormal, lightDirection))
             * balanceHeuristic(
@@ -1477,6 +1475,89 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 materialPDF * lightGeometryFactor
             ) / lightPDF
         );
+    }
+
+
+    /**
+     *
+     */
+    float4 sampleEquiangular(
+            const float3 &seed,
+            const float4 &throughput,
+            const float3 &intersectionPosition,
+            const float3 &rayOrigin,
+            const float3 &rayDirection,
+            const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
+            const int numLights,
+            const float distanceSinceLastBounce,
+            const float4 &absorptionColour,
+            const float scatteringProbability)
+    {
+        float3 surfaceNormal = randomUnitVector(seed * 43.73f);
+        float3 lightDirection = surfaceNormal;
+        float3 lightNormal = -surfaceNormal;
+        float distanceToLight = 0.0f;
+        int selectedLight;
+
+        const float lightPDF = sampleLightData(
+            seed * 33.12f,
+            intersectionPosition,
+            surfaceNormal,
+            emissiveIndices,
+            numLights,
+            lightDirection,
+            lightNormal,
+            distanceToLight,
+            selectedLight
+        );
+        const float3 lightPosition = intersectionPosition + lightDirection * distanceToLight;
+
+        const float offset = random(random(seed.z) + random(seed.y + random(seed.x)));
+
+        float4 scatteredColour = float4(0);
+        for (int step=0; step < _equiangularSamples; step++)
+        {
+            const float uniform = (step + offset) / (float) _equiangularSamples;
+
+            float equiangularDistance;
+            float equiangularPDF;
+            sampleEquiangularPDF(
+                uniform,
+                distanceSinceLastBounce,
+                rayOrigin,
+                rayDirection,
+                lightPosition,
+                equiangularDistance,
+                equiangularPDF
+            );
+            equiangularPDF *= _equiangularSamples;
+
+            const float3 particlePosition = rayOrigin + equiangularDistance * rayDirection;
+            const float3 particleToLight = lightPosition - particlePosition;
+            distanceToLight = length(particleToLight);
+            lightDirection = normalize(particleToLight);
+            const float4 lightBRDF = exp(
+                -absorptionColour
+                * (distanceToLight + equiangularDistance)
+                * scatteringProbability
+            );
+
+            scatteredColour += sampleLight(
+                throughput,
+                lightBRDF,
+                distanceToLight,
+                lightDirection,
+                particlePosition,
+                lightDirection,
+                equiangularPDF,
+                lightPDF,
+                0.0f,
+                selectedLight,
+                lightNormal
+            );
+        }
+
+        return scatteredColour;
     }
 
 
@@ -1528,11 +1609,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int bounces = 0;
 
         float distanceTravelled = 0;
+        float distanceSinceLastBounce = distanceTravelled;
         float distanceTravelledThroughMaterial = distanceTravelled;
 
         // Get the next ray
         float3 origin = rayOrigin;
         float3 direction = rayDirection;
+        float3 positionOnRay = origin;
 
         float4 diffusivity;
         float4 specularity;
@@ -1552,9 +1635,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             && iterations < _maxRaySteps
             && sumComponent(throughput) > _hitTolerance
         ) {
+            positionOnRay = origin + distanceSinceLastBounce * direction;
+
             // Get the closest distance to an object
             const float2 result = getMinDistanceToObjectInScene(
-                origin,
+                positionOnRay,
                 pixelFootprint,
                 diffusivity,
                 specularity,
@@ -1573,20 +1658,19 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // Keep track of the distance the ray has travelled
             distanceTravelled += stepDistance;
+            distanceSinceLastBounce += stepDistance;
             distanceTravelledThroughMaterial += stepDistance;
 
             pixelFootprint += _hitTolerance * stepDistance;
 
-            // Step the ray forwards
-            origin += direction * stepDistance;
-
-
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
             {
+                float3 intersectionPosition = positionOnRay + stepDistance * direction;
+
                 // The normal to the surface at that position
                 float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
-                    origin,
+                    intersectionPosition,
                     pixelFootprint
                 );
 
@@ -1601,8 +1685,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     {
                         return earlyExitAOVs(
                             _outputType,
-                            origin,
-                            worldToLocal(firstObjectId - 1, origin),
+                            intersectionPosition,
+                            worldToLocal(firstObjectId - 1, intersectionPosition),
                             surfaceNormal,
                             distanceTravelled,
                             firstObjectId
@@ -1611,7 +1695,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
 
                 int noiseOptions;
-                const float noiseValue = getNoiseValue(result.y - 1, origin, noiseOptions);
+                const float noiseValue = getNoiseValue(
+                    result.y - 1,
+                    intersectionPosition,
+                    noiseOptions
+                );
                 if (noiseValue >= 0.0f)
                 {
                     useNoiseOnMaterial(
@@ -1639,10 +1727,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 if (_lightSamplingEnabled && numLights > 0)
                 {
-                    // Light Sampling
+                    // Get data for light sampling
                     lightPDF = sampleLightData(
                         seed,
-                        origin,
+                        intersectionPosition,
                         surfaceNormal,
                         emissiveIndices,
                         numLights,
@@ -1660,7 +1748,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     nestedDielectrics[numNestedDielectrics][3]
                 );
 
-                // Material sampling
+                // Get material data for material and light sampling
                 float4 materialBRDF;
                 float4 lightBRDF;
                 float4 materialEmissiveColour;
@@ -1687,7 +1775,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     materialBRDF,
                     lightBRDF,
                     bounceDirection,
-                    origin,
+                    intersectionPosition,
                     nestedDielectrics,
                     numNestedDielectrics,
                     refractiveIndex,
@@ -1701,29 +1789,28 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     && lightPDF > _hitTolerance
                     && materialLightPDF > _hitTolerance
                 ) {
+                    // Perform MIS light sampling
                     sampledIrradiance = (
                         selectedLight == _lightTextureWidth
                         && _usePrecomputedIrradiance
                     );
 
                     rayColour += sampleLight(
-                        seed.y,
                         throughput,
                         lightBRDF,
-                        absorptionColour,
                         distanceToLight,
                         surfaceNormal,
-                        origin,
+                        intersectionPosition,
                         lightDirection,
                         lightPDF,
                         materialLightPDF,
                         reflectionOffset,
-                        scatteringProbability,
                         selectedLight,
                         lightNormal
                     );
                 }
 
+                // Perform MIS material sampling
                 // TODO don't assume this object is a sphere
                 const float radius = dimensions(result.y - 1, 0, 0);
                 const float visibleSurfaceArea = 2.0f * PI * radius * radius;
@@ -1742,16 +1829,33 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     )
                 );
 
+                if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLights > 0)
+                {
+                    // Perform Equi-Angular Sampling
+                    rayColour += sampleEquiangular(
+                        seed,
+                        throughput,
+                        intersectionPosition,
+                        origin,
+                        direction,
+                        emissiveIndices,
+                        numLights,
+                        distanceSinceLastBounce,
+                        absorptionColour,
+                        scatteringProbability
+                    );
+                }
+
                 throughput *= (
                     materialBRDF
                     * fabs(dot(bounceDirection, surfaceNormal))
                     / materialPDF
                 );
 
-                const float rng = random(random(seed.x) + random(seed.y + random(seed.z)));
 
                 // Exit if we have reached the bounce limit
                 // or with a random chance
+                const float rng = random(random(seed.x) + random(seed.y + random(seed.z)));
                 const float exitProbability = max(
                     throughput.x,
                     throughput.y,
@@ -1768,9 +1872,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
                 }
 
+                // Prepare the variables for the next march
                 previousMaterialPDF = materialPDF;
 
+                distanceSinceLastBounce = 0.0f;
+
                 direction = bounceDirection;
+                origin = intersectionPosition;
 
                 // Account for the lost intensity from the early exits
                 throughput /= exitProbability;
@@ -1780,7 +1888,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 pixelFootprint = _hitTolerance;
 
                 // Update the random seed
-                seed = 77.134f * random(seed + rng + fabs(origin + direction));
+                seed = 77.134f * random(seed + rng + fabs(intersectionPosition + direction));
             }
 
             lastStepDistance = signedStepDistance;
@@ -1816,6 +1924,23 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
             )
         );
+
+        if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLights > 0)
+        {
+            // Perform Equi-Angular Sampling
+            rayColour += sampleEquiangular(
+                seed,
+                throughput,
+                positionOnRay,
+                origin,
+                direction,
+                emissiveIndices,
+                numLights,
+                distanceSinceLastBounce,
+                absorptionColour,
+                scatteringProbability
+            );
+        }
 
         rayColour.w = (bounces > 0) * firstObjectId;
         return rayColour;
