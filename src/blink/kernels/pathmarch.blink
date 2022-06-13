@@ -304,7 +304,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             noiseValue = 1.0f - noiseValue;
         }
 
-        return noiseValue;
+        const float whitePoint = noiseParams2(index, 0, 1);
+
+        return whitePoint > 0.0f ? saturate(noiseValue / whitePoint) : 1.0f;
     }
 
 
