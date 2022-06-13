@@ -299,14 +299,24 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
+
+        const float whitePoint = noiseParams2(index, 0, 1);
+        const float blackPoint = noiseParams2(index, 0, 2);
+        const float lift = noiseParams2(index, 0, 3);
+
+        if (whitePoint != blackPoint)
+        {
+            noiseValue = saturate((noiseValue - blackPoint) / (whitePoint - blackPoint));
+        }
+
+        noiseValue = saturate(noiseValue * (1.0f - lift) + lift);
+
         if (noiseOptions & 512)
         {
             noiseValue = 1.0f - noiseValue;
         }
 
-        const float whitePoint = noiseParams2(index, 0, 1);
-
-        return whitePoint > 0.0f ? saturate(noiseValue / whitePoint) : 1.0f;
+        return noiseValue;
     }
 
 
