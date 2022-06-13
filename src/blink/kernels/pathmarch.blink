@@ -1427,11 +1427,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int selectedLight,
             float3 &lightNormal)
     {
-        if (scatteringProbability * distanceToLight > random(seed))
-        {
-            return float4(0);
-        }
-
         float4 lightEmissiveColour;
         float lightGeometryFactor;
         if (selectedLight < _lightTextureWidth)
@@ -1474,7 +1469,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             lightEmissiveColour
             * throughput
             * lightBRDF
-            * exp(-absorptionColour * distanceToLight)
+            * exp(-absorptionColour * distanceToLight * scatteringProbability)
             * lightGeometryFactor
             * saturate(dot(surfaceNormal, lightDirection))
             * balanceHeuristic(
@@ -1585,7 +1580,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Step the ray forwards
             origin += direction * stepDistance;
 
-            const float rng = random(random(seed.x) + random(seed.y + random(seed.z)));
 
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
@@ -1737,7 +1731,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 rayColour += (
                     materialEmissiveColour
                     * throughput
-                    * exp(-absorptionColour * distanceTravelledThroughMaterial)
+                    * exp(
+                        -absorptionColour
+                        * distanceTravelledThroughMaterial
+                        * scatteringProbability
+                    )
                     * balanceHeuristic(
                         previousMaterialPDF,
                         sampleLightsPDF(numLights, visibleSurfaceArea)
@@ -1749,6 +1747,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     * fabs(dot(bounceDirection, surfaceNormal))
                     / materialPDF
                 );
+
+                const float rng = random(random(seed.x) + random(seed.y + random(seed.z)));
 
                 // Exit if we have reached the bounce limit
                 // or with a random chance
@@ -1778,54 +1778,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Reset the pixel footprint so multiple reflections don't
                 // reduce precision
                 pixelFootprint = _hitTolerance;
+
+                // Update the random seed
+                seed = 77.134f * random(seed + rng + fabs(origin + direction));
             }
-            else if (scatteringProbability * stepDistance > rng)
-            {
-                // Do scattering
-                origin -= direction * stepDistance * random(3.221f * seed + rng + 33.43f);
-                direction = randomUnitVector(4.543f * seed + rng + 12.43f);
-
-                if (_lightSamplingEnabled && numLights > 0)
-                {
-                    float lightPDF = 0.0f;
-                    float3 lightDirection = direction;
-                    float3 lightNormal = -direction;
-                    float distanceToLight = 0.0f;
-                    int selectedLight;
-
-                    // Light Sampling
-                    lightPDF = sampleLightData(
-                        seed,
-                        origin,
-                        direction,
-                        emissiveIndices,
-                        numLights,
-                        lightDirection,
-                        lightNormal,
-                        distanceToLight,
-                        selectedLight
-                    );
-                    rayColour += sampleLight(
-                        seed.z,
-                        throughput,
-                        float4(1),
-                        float4(0),
-                        distanceToLight,
-                        lightDirection,
-                        origin,
-                        lightDirection,
-                        lightPDF,
-                        0.0f,
-                        0.0f,
-                        scatteringProbability,
-                        selectedLight,
-                        lightNormal
-                    );
-                }
-            }
-
-            // Update the random seed
-            seed = 77.134f * random(seed + rng + fabs(origin + direction));
 
             lastStepDistance = signedStepDistance;
             iterations++;
@@ -1856,7 +1812,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
         rayColour += throughput * imageLighting * exp(
-            -absorptionColour * (
+            -absorptionColour * scatteringProbability * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
             )
         );

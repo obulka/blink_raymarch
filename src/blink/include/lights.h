@@ -9,6 +9,38 @@
 //
 
 
+
+/**
+ *
+ */
+void sampleEquiAngular(
+        const float u,
+        const float maxDistance,
+        const float3 &rayOrigin,
+        const float3 &rayDirection,
+        const float3 &lightPos,
+        float &dist,
+        float &pdf)
+{
+    // get coord of closest point to light along (infinite) ray
+    float delta = dot(lightPos - rayOrigin, rayDirection);
+
+    // get distance this point is from light
+    float D = length(rayOrigin + delta * rayDirection - lightPos);
+
+    // get angle of endpoints
+    float thetaA = atan2(0.0 - delta, D);
+    float thetaB = atan2(maxDistance - delta, D);
+
+    // take sample
+    float t = D * tan(mix(thetaA, thetaB, u));
+
+    dist = delta + t;
+
+    pdf = D / ((thetaB - thetaA) * (D * D + t * t));
+}
+
+
 /**
  * Get the direction, and distance of a spherical light.
  *

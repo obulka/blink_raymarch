@@ -981,6 +981,55 @@ inline float4 blend(const float4 &value0, const float4 &value1, const float weig
 
 
 /**
+ * Blend linearly between two values.
+ *
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg weight: The blend weight, 1 will return value0, and 0 will
+ *     return value1.
+ *
+ * @returns: The blended value.
+ */
+inline float mix(const float value0, const float value1, const float weight)
+{
+    return (1.0f - weight) * value0 + weight * value1;
+}
+
+
+/**
+ * Blend linearly between two values.
+ *
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg weight: The blend weight, 1 will return value0, and 0 will
+ *     return value1.
+ *
+ * @returns: The blended value.
+ */
+inline float3 mix(const float3 &value0, const float3 &value1, const float weight)
+{
+    return (1.0f - weight) * value0 + weight * value1;
+}
+
+
+/**
+ * Blend linearly between two values.
+ *
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg weight: The blend weight, 1 will return value0, and 0 will
+ *     return value1.
+ *
+ * @returns: The blended value.
+ */
+inline float4 mix(const float4 &value0, const float4 &value1, const float weight)
+{
+    return (1.0f - weight) * value0 + weight * value1;
+}
+
+
+
+/**
  * Get the position component of a world matrix.
  *
  * @arg worldMatrix: The world matrix.

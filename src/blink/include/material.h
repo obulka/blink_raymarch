@@ -362,7 +362,6 @@ inline float sampleTransmissive(
 
     // We are passing through the surface, so update the refractive index
     incidentRefractiveIndex = refractedRefractiveIndex;
-    scatteringProbability = refractedScatteringProbability;
     if (nestedDielectrics[numNestedDielectrics][4] == objectId)
     {
         // We are exiting the material we are in, get the
@@ -383,9 +382,14 @@ inline float sampleTransmissive(
         nestedDielectrics[numNestedDielectrics][6] = refractedScatteringProbability;
     }
 
-    materialBRDF = exp(-absorptionColour * distanceTravelledThroughMaterial);
+    materialBRDF = exp(
+        -absorptionColour
+        * distanceTravelledThroughMaterial
+        * scatteringProbability
+    );
+    lightBRDF = exp(-absorptionColour * distanceToLight * scatteringProbability);
 
-    lightBRDF = exp(-absorptionColour * distanceToLight);
+    scatteringProbability = refractedScatteringProbability;
 
     // Update the colour of the ray
     emissiveColour = emissiveTerm(emittance);
