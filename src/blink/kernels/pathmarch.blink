@@ -1411,6 +1411,80 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    float4 sampleLight(
+            const float seed,
+            const float4 &throughput,
+            const float4 &lightBRDF,
+            const float4 &absorptionColour,
+            const float distanceToLight,
+            const float3 &surfaceNormal,
+            const float3 &position,
+            const float3 &lightDirection,
+            const float lightPDF,
+            const float materialPDF,
+            const float offset,
+            const float scatteringProbability,
+            const int selectedLight,
+            float3 &lightNormal)
+    {
+        if (scatteringProbability * distanceToLight > random(seed))
+        {
+            return float4(0);
+        }
+
+        float4 lightEmissiveColour;
+        float lightGeometryFactor;
+        if (selectedLight < _lightTextureWidth)
+        {
+            lightEmissiveColour = sampleArtificialLight(
+                position,
+                surfaceNormal,
+                offset,
+                lightDirection,
+                distanceToLight,
+                selectedLight
+            );
+            lightGeometryFactor = 1.0f;
+        }
+        else if (selectedLight == _lightTextureWidth && _usePrecomputedIrradiance)
+        {
+            lightEmissiveColour = readIrradianceValue(lightDirection);
+            lightGeometryFactor = 1.0f;
+        }
+        else
+        {
+            lightEmissiveColour = sampleLight(
+                lightDirection,
+                distanceToLight,
+                offsetPoint(
+                    position,
+                    surfaceNormal,
+                    offset
+                ),
+                lightNormal
+            );
+            lightGeometryFactor = geometryFactor(
+                lightDirection,
+                lightNormal,
+                distanceToLight
+            );
+        }
+
+        return (
+            lightEmissiveColour
+            * throughput
+            * lightBRDF
+            * exp(-absorptionColour * distanceToLight)
+            * lightGeometryFactor
+            * saturate(dot(surfaceNormal, lightDirection))
+            * balanceHeuristic(
+                lightPDF,
+                materialPDF * lightGeometryFactor
+            ) / lightPDF
+        );
+    }
+
+
     /**
      * March a ray through the scene.
      *
@@ -1633,56 +1707,26 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     && lightPDF > _hitTolerance
                     && materialLightPDF > _hitTolerance
                 ) {
-                    float4 lightEmissiveColour;
-                    float lightGeometryFactor;
-                    if (selectedLight < _lightTextureWidth)
-                    {
-                        lightEmissiveColour = sampleArtificialLight(
-                            origin,
-                            surfaceNormal,
-                            reflectionOffset,
-                            lightDirection,
-                            distanceToLight,
-                            selectedLight
-                        );
-                        lightGeometryFactor = 1.0f;
-                    }
-                    else if (selectedLight == _lightTextureWidth && _usePrecomputedIrradiance)
-                    {
-                        lightEmissiveColour = readIrradianceValue(lightDirection);
-                        lightGeometryFactor = 1.0f;
-                        sampledIrradiance = true;
-                    }
-                    else
-                    {
-                        lightEmissiveColour = sampleLight(
-                            lightDirection,
-                            distanceToLight,
-                            offsetPoint(
-                                origin,
-                                surfaceNormal,
-                                reflectionOffset
-                            ),
-                            lightNormal
-                        );
-                        lightGeometryFactor = geometryFactor(
-                            lightDirection,
-                            lightNormal,
-                            distanceToLight
-                        );
-                    }
+                    sampledIrradiance = (
+                        selectedLight == _lightTextureWidth
+                        && _usePrecomputedIrradiance
+                    );
 
-                    rayColour += (
-                        lightEmissiveColour
-                        * throughput
-                        * lightBRDF
-                        * exp(-absorptionColour * distanceToLight)
-                        * lightGeometryFactor
-                        * saturate(dot(surfaceNormal, lightDirection))
-                        * balanceHeuristic(
-                            lightPDF,
-                            materialLightPDF * lightGeometryFactor
-                        ) / lightPDF
+                    rayColour += sampleLight(
+                        seed.y,
+                        throughput,
+                        lightBRDF,
+                        absorptionColour,
+                        distanceToLight,
+                        surfaceNormal,
+                        origin,
+                        lightDirection,
+                        lightPDF,
+                        materialLightPDF,
+                        reflectionOffset,
+                        scatteringProbability,
+                        selectedLight,
+                        lightNormal
                     );
                 }
 
@@ -1740,6 +1784,44 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Do scattering
                 origin -= direction * stepDistance * random(3.221f * seed + rng + 33.43f);
                 direction = randomUnitVector(4.543f * seed + rng + 12.43f);
+
+                if (_lightSamplingEnabled && numLights > 0)
+                {
+                    float lightPDF = 0.0f;
+                    float3 lightDirection = direction;
+                    float3 lightNormal = -direction;
+                    float distanceToLight = 0.0f;
+                    int selectedLight;
+
+                    // Light Sampling
+                    lightPDF = sampleLightData(
+                        seed,
+                        origin,
+                        direction,
+                        emissiveIndices,
+                        numLights,
+                        lightDirection,
+                        lightNormal,
+                        distanceToLight,
+                        selectedLight
+                    );
+                    rayColour += sampleLight(
+                        seed.z,
+                        throughput,
+                        float4(1),
+                        float4(0),
+                        distanceToLight,
+                        lightDirection,
+                        origin,
+                        lightDirection,
+                        lightPDF,
+                        0.0f,
+                        0.0f,
+                        scatteringProbability,
+                        selectedLight,
+                        lightNormal
+                    );
+                }
             }
 
             // Update the random seed
