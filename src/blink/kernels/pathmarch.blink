@@ -1542,7 +1542,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 * scatteringProbability
             );
 
-            scatteredColour += sampleLight(
+            scatteredColour += scatteringProbability * sampleLight(
                 throughput,
                 lightBRDF,
                 distanceToLight,
@@ -1754,6 +1754,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 float4 materialEmissiveColour;
                 float3 bounceDirection;
                 float materialLightPDF;
+                float nextScatteringProbability = scatteringProbability;
                 const float materialPDF = sampleMaterial(
                     seed,
                     surfaceNormal,
@@ -1779,7 +1780,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     nestedDielectrics,
                     numNestedDielectrics,
                     refractiveIndex,
-                    scatteringProbability,
+                    nextScatteringProbability,
                     distanceTravelledThroughMaterial,
                     materialLightPDF
                 );
@@ -1818,11 +1819,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 rayColour += (
                     materialEmissiveColour
                     * throughput
-                    * exp(
-                        -absorptionColour
-                        * distanceTravelledThroughMaterial
-                        * scatteringProbability
-                    )
                     * balanceHeuristic(
                         previousMaterialPDF,
                         sampleLightsPDF(numLights, visibleSurfaceArea)
@@ -1880,6 +1876,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 direction = bounceDirection;
                 origin = intersectionPosition;
 
+                scatteringProbability = nextScatteringProbability;
+
                 // Account for the lost intensity from the early exits
                 throughput /= exitProbability;
 
@@ -1936,7 +1934,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 direction,
                 emissiveIndices,
                 numLights,
-                distanceSinceLastBounce,
+                distanceSinceLastBounce + _maxRayDistance - distanceTravelled,
                 absorptionColour,
                 scatteringProbability
             );

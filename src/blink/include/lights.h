@@ -169,7 +169,7 @@ inline float lightIntensity(
         const float falloff,
         const float distanceToLight)
 {
-    return intensity / pow(1.0f + distanceToLight, falloff);
+    return intensity / pow(distanceToLight, falloff);
 }
 
 
