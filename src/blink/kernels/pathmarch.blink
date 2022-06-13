@@ -1463,6 +1463,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float previousMaterialPDF = 1.0f;
 
+        bool sampledIrradiance = false;
+
         // March the ray
         while (
             distanceTravelled < _maxRayDistance
@@ -1635,8 +1637,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     }
                     else if (selectedLight == _lightTextureWidth && _usePrecomputedIrradiance)
                     {
-                        lightEmissiveColour = readIrradianceValue(lightDirection) / 2.0f;
+                        lightEmissiveColour = readIrradianceValue(lightDirection);
                         lightGeometryFactor = 1.0f;
+                        sampledIrradiance = true;
                     }
                     else
                     {
@@ -1720,15 +1723,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // reduce precision
                 pixelFootprint = _hitTolerance;
             }
-            else if (scatteringProbability / stepDistance > rng)
+            else if (scatteringProbability * stepDistance > rng)
             {
                 // Do scattering
-                origin -= direction * stepDistance * random(3.2212f * seed + rng + 33.43f);
-                direction = randomUnitVector(4.543256f * seed + rng + 12.43f);
+                origin -= direction * stepDistance * random(3.221f * seed + rng + 33.43f);
+                direction = randomUnitVector(4.543f * seed + rng + 12.43f);
             }
 
             // Update the random seed
-            seed = 77.134233f * random(seed + rng + fabs(origin + direction));
+            seed = 77.134f * random(seed + rng + fabs(origin + direction));
 
             lastStepDistance = signedStepDistance;
             iterations++;
@@ -1753,16 +1756,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             nestedDielectrics[numNestedDielectrics][3]
         );
 
-        float4 imageBasedLighting = readHDRIValue(direction);;
-        if (_lightSamplingEnabled && _usePrecomputedIrradiance && bounces > 0)
-        {
-            imageBasedLighting /= 2.0f;
-        }
+        const float4 imageLighting = sampledIrradiance ? float4(0) : readHDRIValue(direction);
 
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
-        rayColour += throughput * imageBasedLighting * exp(
+        rayColour += throughput * imageLighting * exp(
             -absorptionColour * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
             )
