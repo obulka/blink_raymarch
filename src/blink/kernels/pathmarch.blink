@@ -639,7 +639,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             float4 &specularity,
             float4 &transmittance,
             float4 &emittance,
-            float4 &surface)
+            float4 &surface,
+            bool &doRefraction)
     {
         float distance = _maxRayDistance;
         float id = 0.0f;
@@ -757,6 +758,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     surface = blendedSurface;
 
                     id = objectId;
+
+                    doRefraction = modifications & 131072;
                 }
 
                 // This was tagged as a boundary object, skip its children
@@ -903,6 +906,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             surface = blendedSurface;
 
                             id = objectId;
+
+                            doRefraction = parentModifications & 131072;
                         }
                     }
 
@@ -936,6 +941,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     surface = blendedSurface;
 
                     id = objectId;
+
+                    doRefraction = modifications & 131072;
                 }
             }
             else
@@ -1265,6 +1272,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      * @returns: The light intensity.
      */
     inline float4 sampleLight(
+            const float3 &seed,
             const float3 &lightDirection,
             const float distanceToLight,
             float3 rayOrigin,
@@ -1284,6 +1292,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             distanceTravelled <= distanceToLight * 2.0f
             && iterations < _maxRaySteps / 2
         ) {
+            bool doRefraction = true;
             const float2 result = getMinDistanceToObjectInScene(
                 rayOrigin,
                 pixelFootprint,
@@ -1291,9 +1300,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 specularity,
                 transmittance,
                 emittance,
-                surface
+                surface,
+                doRefraction
             );
-            const float stepDistance = fabs(result.x);
+            float stepDistance = fabs(result.x);
 
             if (stepDistance < pixelFootprint)
             {
@@ -1321,7 +1331,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                     return emissiveTerm(emittance);
                 }
-                return float4(0);
+                else if (transmittance.w > 0.0f && !doRefraction)
+                {
+                    pixelFootprint = _hitTolerance;
+                    stepDistance *= 2.0f;
+                }
+                else
+                {
+                    return float4(0);
+                }
             }
 
             rayOrigin += lightDirection * stepDistance;
@@ -1414,6 +1432,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     float4 sampleLight(
+            const float3 &seed,
             const float4 &throughput,
             const float4 &lightBRDF,
             const float distanceToLight,
@@ -1446,6 +1465,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         else
         {
             lightEmissiveColour = sampleLight(
+                seed,
                 lightDirection,
                 distanceToLight,
                 offsetPoint(
@@ -1540,6 +1560,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             scatteredColour += scatteringProbability * sampleLight(
+                seed * 7.972f,
                 throughput,
                 lightBRDF,
                 distanceToLight,
@@ -1635,6 +1656,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             positionOnRay = origin + distanceSinceLastBounce * direction;
 
             // Get the closest distance to an object
+            bool doRefraction = true;
             const float2 result = getMinDistanceToObjectInScene(
                 positionOnRay,
                 pixelFootprint,
@@ -1642,7 +1664,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 specularity,
                 transmittance,
                 emittance,
-                surface
+                surface,
+                doRefraction
             );
 
             // Keep the signed distance so we know whether or not we are
@@ -1761,6 +1784,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     reflectionOffset,
                     transmissionOffset,
                     transmittance,
+                    doRefraction,
                     surface.x,
                     surface.z,
                     surface.w,
@@ -1794,6 +1818,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
 
                     rayColour += sampleLight(
+                        seed * 3.6912f,
                         throughput,
                         lightBRDF,
                         distanceToLight,

@@ -305,16 +305,24 @@ inline void transmissiveBounce(
         const float offset,
         const float incidentRefractiveIndex,
         const float refractedRefractiveIndex,
+        const bool doRefraction,
         float3 &idealRefractedDirection,
         float3 &refractedDirection,
         float3 &position)
 {
-    idealRefractedDirection = refractRayThroughSurface(
-        incidentDirection,
-        surfaceNormal,
-        incidentRefractiveIndex,
-        refractedRefractiveIndex
-    );
+    if (doRefraction)
+    {
+        idealRefractedDirection = refractRayThroughSurface(
+            incidentDirection,
+            surfaceNormal,
+            incidentRefractiveIndex,
+            refractedRefractiveIndex
+        );
+    }
+    else
+    {
+        idealRefractedDirection = incidentDirection;
+    }
 
     refractedDirection = normalize(
         blend(-diffuseDirection, idealRefractedDirection, roughness)
@@ -468,6 +476,7 @@ inline float sampleMaterial(
         const float reflectionOffset,
         const float transmissionOffset,
         const float4 &transmittance,
+        const bool doRefraction,
         const float surfaceRefractiveIndex,
         const float surfaceScatteringProbability,
         const float transmissiveRoughness,
@@ -518,6 +527,11 @@ inline float sampleMaterial(
             refractionProbability
         );
     }
+    if (!doRefraction)
+    {
+        specularProbability = specularity.w;
+        refractionProbability = transmittance.w;
+    }
 
     float pdf;
 
@@ -565,6 +579,7 @@ inline float sampleMaterial(
             transmissionOffset,
             incidentRefractiveIndex,
             refractedRefractiveIndex,
+            doRefraction,
             idealRefractedDirection,
             outgoingDirection,
             position
