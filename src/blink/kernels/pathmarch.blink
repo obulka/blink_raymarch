@@ -1427,7 +1427,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             float3 &lightNormal)
     {
         float4 lightEmissiveColour;
-        float lightGeometryFactor;
+        float lightGeometryFactor = 1.0f;
         if (selectedLight < _lightTextureWidth)
         {
             lightEmissiveColour = sampleArtificialLight(
@@ -1438,12 +1438,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 distanceToLight,
                 selectedLight
             );
-            lightGeometryFactor = 1.0f;
         }
         else if (selectedLight == _lightTextureWidth && _usePrecomputedIrradiance)
         {
             lightEmissiveColour = readIrradianceValue(lightDirection);
-            lightGeometryFactor = 1.0f;
         }
         else
         {
@@ -1469,7 +1467,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             * throughput
             * lightBRDF
             * lightGeometryFactor
-            * saturate(dot(surfaceNormal, lightDirection))
             * balanceHeuristic(
                 lightPDF,
                 materialPDF * lightGeometryFactor

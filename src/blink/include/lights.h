@@ -37,7 +37,14 @@ void sampleEquiangularPDF(
 
     distance = delta + t;
 
-    pdf = D / ((thetaB - thetaA) * (D * D + t * t));
+    if (thetaA != thetaB)
+    {
+        pdf = D / ((thetaB - thetaA) * (D * D + t * t));
+    }
+    else
+    {
+        pdf = 1.0f;
+    }
 }
 
 
