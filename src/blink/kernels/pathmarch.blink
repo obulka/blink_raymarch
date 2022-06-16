@@ -1290,7 +1290,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         while (
             distanceTravelled <= distanceToLight * 2.0f
-            && iterations < _maxRaySteps / 2
+            && iterations++ < _maxRaySteps / 2
         ) {
             bool doRefraction = true;
             const float2 result = getMinDistanceToObjectInScene(
@@ -1303,7 +1303,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 surface,
                 doRefraction
             );
-            float stepDistance = fabs(result.x);
+            const float stepDistance = fabs(result.x);
+
+            rayOrigin += lightDirection * stepDistance;
+            distanceTravelled += stepDistance;
+            pixelFootprint += stepDistance * _hitTolerance;
 
             if (stepDistance < pixelFootprint)
             {
@@ -1333,19 +1337,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
                 else if (transmittance.w > 0.0f && !doRefraction)
                 {
-                    pixelFootprint = _hitTolerance;
-                    stepDistance *= 2.0f;
+                    rayOrigin += lightDirection * 2.0f * stepDistance;
                 }
                 else
                 {
                     return float4(0);
                 }
             }
-
-            rayOrigin += lightDirection * stepDistance;
-            distanceTravelled += stepDistance;
-            pixelFootprint += stepDistance * _hitTolerance;
-            iterations++;
         }
 
         lightNormal = -lightDirection;
