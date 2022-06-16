@@ -1864,12 +1864,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
                 }
 
-                throughput *= (
-                    materialBRDF
-                    * fabs(dot(bounceDirection, surfaceNormal))
-                    / materialPDF
-                );
-
+                throughput *= materialBRDF / materialPDF;
 
                 // Exit if we have reached the bounce limit
                 // or with a random chance

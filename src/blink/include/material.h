@@ -563,6 +563,7 @@ inline float sampleMaterial(
             lightBRDF,
             lightPDF
         );
+        materialBRDF *= fabs(dot(outgoingDirection, surfaceNormal));
     }
     // Maybe refract the ray
     else if (
@@ -605,6 +606,11 @@ inline float sampleMaterial(
             scatteringProbability,
             distanceTravelledThroughMaterial
         );
+
+        if (doRefraction)
+        {
+            materialBRDF *= fabs(dot(outgoingDirection, surfaceNormal));
+        }
     }
     // Otherwise diffuse the light
     else
@@ -629,6 +635,7 @@ inline float sampleMaterial(
             lightBRDF,
             lightPDF
         );
+        materialBRDF *= fabs(dot(outgoingDirection, surfaceNormal));
     }
 
     return pdf;
