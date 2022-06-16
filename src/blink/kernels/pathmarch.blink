@@ -1508,7 +1508,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int numLights,
             const float distanceSinceLastBounce,
             const float4 &absorptionColour,
-            const float scatteringProbability)
+            const int objectIndex,
+            float &scatteringProbability)
     {
         float3 surfaceNormal = randomUnitVector(seed * 43.73f);
         float3 lightDirection = surfaceNormal;
@@ -1532,6 +1533,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         const float offset = random(random(seed.z) + random(seed.y + random(seed.x)));
 
         float4 scatteredColour = float4(0);
+        float adjustedScatteringProbability = 0.0f;
         for (int step=0; step < _equiangularSamples; step++)
         {
             const float uniform = (step + offset) / (float) _equiangularSamples;
@@ -1553,13 +1555,26 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 particleToLight = lightPosition - particlePosition;
             distanceToLight = length(particleToLight);
             lightDirection = normalize(particleToLight);
+
+            int noiseOptions;
+            float noiseValue = getNoiseValue(
+                objectIndex,
+                particlePosition,
+                noiseOptions
+            );
+            if (noiseValue < 0.0f || !(noiseOptions & 1024))
+            {
+                noiseValue = 1.0f;
+            }
+
             const float4 lightBRDF = exp(
                 -absorptionColour
                 * (distanceToLight + equiangularDistance)
                 * scatteringProbability
+                * noiseValue
             );
 
-            scatteredColour += scatteringProbability * sampleLight(
+            scatteredColour += scatteringProbability * noiseValue * sampleLight(
                 seed * 7.972f,
                 throughput,
                 lightBRDF,
@@ -1573,8 +1588,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 selectedLight,
                 lightNormal
             );
+
+            adjustedScatteringProbability += scatteringProbability * noiseValue;
         }
 
+        scatteringProbability = adjustedScatteringProbability;
         return scatteredColour;
     }
 
@@ -1767,6 +1785,25 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     nestedDielectrics[numNestedDielectrics][2],
                     nestedDielectrics[numNestedDielectrics][3]
                 );
+                if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLights > 0)
+                {
+                    const int objectIndex = nestedDielectrics[numNestedDielectrics][4] - 1;
+
+                    // Perform Equi-Angular Sampling
+                    rayColour += sampleEquiangular(
+                        seed,
+                        throughput,
+                        intersectionPosition,
+                        origin,
+                        direction,
+                        emissiveIndices,
+                        numLights,
+                        distanceSinceLastBounce,
+                        absorptionColour,
+                        objectIndex < 0 ? _objectTextureWidth : objectIndex,
+                        scatteringProbability
+                    );
+                }
 
                 // Get material data for material and light sampling
                 float4 materialBRDF;
@@ -1774,7 +1811,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 float4 materialEmissiveColour;
                 float3 bounceDirection;
                 float materialLightPDF;
-                float nextScatteringProbability = scatteringProbability;
                 const float materialPDF = sampleMaterial(
                     seed,
                     surfaceNormal,
@@ -1801,7 +1837,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     nestedDielectrics,
                     numNestedDielectrics,
                     refractiveIndex,
-                    nextScatteringProbability,
+                    scatteringProbability,
                     distanceTravelledThroughMaterial,
                     materialLightPDF
                 );
@@ -1847,23 +1883,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     )
                 );
 
-                if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLights > 0)
-                {
-                    // Perform Equi-Angular Sampling
-                    rayColour += sampleEquiangular(
-                        seed,
-                        throughput,
-                        intersectionPosition,
-                        origin,
-                        direction,
-                        emissiveIndices,
-                        numLights,
-                        distanceSinceLastBounce,
-                        absorptionColour,
-                        scatteringProbability
-                    );
-                }
-
                 throughput *= materialBRDF / materialPDF;
 
                 // Exit if we have reached the bounce limit
@@ -1892,8 +1911,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 direction = bounceDirection;
                 origin = intersectionPosition;
-
-                scatteringProbability = nextScatteringProbability;
 
                 // Account for the lost intensity from the early exits
                 throughput /= exitProbability;
@@ -1953,6 +1970,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 numLights,
                 distanceSinceLastBounce + _maxRayDistance - distanceTravelled,
                 absorptionColour,
+                _objectTextureWidth,
                 scatteringProbability
             );
         }
