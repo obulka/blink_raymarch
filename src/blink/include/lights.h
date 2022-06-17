@@ -57,7 +57,6 @@ void sampleEquiangularPDF(
  */
 inline void irradianceLightData(
         const float3 &surfaceNormal,
-        const float maxRayDistance,
         float3 &lightDirection,
         float3 &lightNormal,
         float &distanceToLight,
@@ -66,7 +65,7 @@ inline void irradianceLightData(
     visibleSurfaceArea = 1.0f;
     lightNormal = -surfaceNormal;
     lightDirection = surfaceNormal;
-    distanceToLight = maxRayDistance;
+    distanceToLight = 1.0f;
 }
 
 

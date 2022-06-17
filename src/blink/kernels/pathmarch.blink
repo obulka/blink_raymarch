@@ -1395,7 +1395,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         {
             irradianceLightData(
                 surfaceNormal,
-                _maxRayDistance,
                 lightDirection,
                 lightNormal,
                 distanceToLight,
@@ -1406,7 +1405,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         {
             // Selected one of the emissive objects
 
-            const int objectIndex = emissiveIndices[selectedLight - _lightTextureWidth];
+            const int objectIndex = emissiveIndices[
+                selectedLight
+                - _lightTextureWidth
+                - _usePrecomputedIrradiance
+            ];
 
             const float3 position = getObjectPosition(objectIndex);
 
@@ -1618,7 +1621,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][
             4   // Absorption colour of object
-            + 1 // Id of the dielectric we are currently in
+            + 1 // ID of the dielectric we are currently in
             + 1 // Refractive index of that object
             + 1 // Scattering probability
         ];
@@ -1755,6 +1758,33 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     * _shadowBias
                 );
 
+                const float4 absorptionColour = float4(
+                    nestedDielectrics[numNestedDielectrics][0],
+                    nestedDielectrics[numNestedDielectrics][1],
+                    nestedDielectrics[numNestedDielectrics][2],
+                    nestedDielectrics[numNestedDielectrics][3]
+                );
+
+                if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLights > 0)
+                {
+                    const int objectIndex = nestedDielectrics[numNestedDielectrics][4] - 1;
+
+                    // Perform Equi-Angular Sampling
+                    rayColour += sampleEquiangular(
+                        seed,
+                        throughput,
+                        intersectionPosition,
+                        origin,
+                        direction,
+                        emissiveIndices,
+                        numLights,
+                        distanceSinceLastBounce,
+                        absorptionColour,
+                        objectIndex < 0 ? _objectTextureWidth : objectIndex,
+                        scatteringProbability
+                    );
+                }
+
                 float lightPDF = 0.0f;
                 float3 lightDirection = surfaceNormal;
                 float3 lightNormal = -surfaceNormal;
@@ -1774,32 +1804,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         lightNormal,
                         distanceToLight,
                         selectedLight
-                    );
-                }
-
-                const float4 absorptionColour = float4(
-                    nestedDielectrics[numNestedDielectrics][0],
-                    nestedDielectrics[numNestedDielectrics][1],
-                    nestedDielectrics[numNestedDielectrics][2],
-                    nestedDielectrics[numNestedDielectrics][3]
-                );
-                if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLights > 0)
-                {
-                    const int objectIndex = nestedDielectrics[numNestedDielectrics][4] - 1;
-
-                    // Perform Equi-Angular Sampling
-                    rayColour += sampleEquiangular(
-                        seed,
-                        throughput,
-                        intersectionPosition,
-                        origin,
-                        direction,
-                        emissiveIndices,
-                        numLights,
-                        distanceSinceLastBounce,
-                        absorptionColour,
-                        objectIndex < 0 ? _objectTextureWidth : objectIndex,
-                        scatteringProbability
                     );
                 }
 

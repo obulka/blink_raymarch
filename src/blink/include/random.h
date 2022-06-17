@@ -94,7 +94,7 @@ float3 randomUnitVector(const float3 &seed)
     const float r = sqrt(1.0f - z * z);
     const float x = r * cos(a);
     const float y = r * sin(a);
-    return float3(x, y, z);
+    return normalize(float3(x, y, z));
 }
 
 
