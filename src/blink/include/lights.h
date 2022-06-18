@@ -13,14 +13,13 @@
 /**
  *
  */
-void sampleEquiangularPDF(
+float sampleEquiangularPDF(
         const float uniform,
         const float maxDistance,
         const float3 &rayOrigin,
         const float3 &rayDirection,
         const float3 &lightPosition,
-        float &distance,
-        float &pdf)
+        float &distance)
 {
     // get coord of closest point to light along (infinite) ray
     const float delta = dot(lightPosition - rayOrigin, rayDirection);
@@ -39,12 +38,10 @@ void sampleEquiangularPDF(
 
     if (thetaA != thetaB)
     {
-        pdf = D / ((thetaB - thetaA) * (D * D + t * t));
+        return D / ((thetaB - thetaA) * (D * D + t * t));
     }
-    else
-    {
-        pdf = 1.0f;
-    }
+
+    return 1.0f;
 }
 
 

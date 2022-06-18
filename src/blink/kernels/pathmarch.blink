@@ -1535,22 +1535,19 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float4 scatteredColour = float4(0);
         float adjustedScatteringProbability = 0.0f;
-        for (int step=0; step < _equiangularSamples; step++)
+        for (int step=1; step <= _equiangularSamples; step++)
         {
             const float uniform = (step + offset) / (float) _equiangularSamples;
 
             float equiangularDistance;
-            float equiangularPDF;
-            sampleEquiangularPDF(
+            float equiangularPDF = _equiangularSamples * sampleEquiangularPDF(
                 uniform,
                 distanceSinceLastBounce,
                 rayOrigin,
                 rayDirection,
                 lightPosition,
-                equiangularDistance,
-                equiangularPDF
+                equiangularDistance
             );
-            equiangularPDF *= _equiangularSamples;
 
             const float3 particlePosition = rayOrigin + equiangularDistance * rayDirection;
             const float3 particleToLight = lightPosition - particlePosition;
