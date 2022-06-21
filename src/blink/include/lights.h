@@ -27,6 +27,12 @@ float sampleEquiangularPDF(
     // get distance this point is from light
     const float D = length(rayOrigin + delta * rayDirection - lightPosition);
 
+    if (D == 0.0f)
+    {
+        distance = 0.0f;
+        return 1.0f;
+    }
+
     // get angle of endpoints
     const float thetaA = atan2(-delta, D);
     const float thetaB = atan2(maxDistance - delta, D);

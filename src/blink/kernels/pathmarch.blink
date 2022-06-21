@@ -1552,7 +1552,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 particlePosition = rayOrigin + equiangularDistance * rayDirection;
             const float3 particleToLight = lightPosition - particlePosition;
             distanceToLight = length(particleToLight);
-            lightDirection = normalize(particleToLight);
+            
+            if (distanceToLight > 0.0f)
+            {
+                lightDirection = normalize(particleToLight);
+            }
 
             int noiseOptions;
             float noiseValue = getNoiseValue(
