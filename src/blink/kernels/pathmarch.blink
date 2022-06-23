@@ -1552,7 +1552,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         const float offset = random(random(seed.z) + random(seed.y + random(seed.x)));
 
         float4 scatteredColour = float4(0);
-        float adjustedScatteringProbability = 0.0f;
+        float adjustedScatteringProbability = scatteringProbability;
         for (int step=1; step <= _equiangularSamples; step++)
         {
             const float uniform = (step + offset) / (float) _equiangularSamples;
@@ -1610,10 +1610,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightNormal
             );
 
-            adjustedScatteringProbability += scatteringProbability * noiseValue;
+            adjustedScatteringProbability *= noiseValue;
         }
 
-        scatteringProbability = 0.0f;
+        scatteringProbability = adjustedScatteringProbability;
         return scatteredColour;
     }
 
