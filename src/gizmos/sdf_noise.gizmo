@@ -3,38 +3,43 @@ Gizmo {
  tile_color 0xffffffff
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {7 size R 1 1000}
- size 10
+ size 3
  addUserKnob {4 type M {fBm turbulence}}
  type turbulence
  addUserKnob {13 translation}
+ translation {2.3 -0.6 -0.1}
  addUserKnob {3 octaves}
- octaves 3
+ octaves 10
  addUserKnob {7 lacunarity R 1 10}
- lacunarity 2
+ lacunarity 6.35
  addUserKnob {7 gain}
  gain 0.5
  addUserKnob {7 gamma}
  gamma 0.5
+ addUserKnob {7 black_point l "black point"}
+ addUserKnob {7 white_point l "white point"}
+ white_point 1
+ addUserKnob {7 lift}
+ addUserKnob {6 invert +STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {6 diffuse +STARTLINE}
  diffuse true
  addUserKnob {6 specular -STARTLINE}
- specular true
  addUserKnob {6 transmission -STARTLINE}
- transmission true
  addUserKnob {6 emission -STARTLINE}
- emission true
  addUserKnob {6 specular_roughness l "specular roughness" +STARTLINE}
  addUserKnob {6 transmission_roughness l "transmission roughness" -STARTLINE}
  addUserKnob {6 refractive_index l "refractive index" +STARTLINE}
+ addUserKnob {6 scattering +STARTLINE}
+ scattering true
  addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
+ addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
 }
 add_layer {sdf_noise_params0 sdf_noise_params0.options sdf_noise_params0.x sdf_noise_params0.y sdf_noise_params0.z}
  Constant {
   inputs 0
   channels sdf_noise_params0
-  color {{"(parent.specular_roughness << 8) | (parent.transmission_roughness << 7) | (parent.refractive_index << 6) | (parent.emission << 5) | (parent.transmission << 4) | (parent.specular << 3) | (parent.diffuse << 2) | (parent.type << 1) | 1"} {parent.translation.x} {parent.translation.y} {parent.translation.z}}
+  color {{"(parent.scattering << 10) | (parent.invert << 9) | (parent.specular_roughness << 8) | (parent.transmission_roughness << 7) | (parent.refractive_index << 6) | (parent.emission << 5) | (parent.transmission << 4) | (parent.specular << 3) | (parent.diffuse << 2) | (parent.type << 1) | 1"} {parent.translation.x} {parent.translation.y} {parent.translation.z}}
   format "1 1 0 0 1 1 1 1x1"
   name noise_params0
   xpos 841
@@ -62,11 +67,11 @@ add_layer {sdf_noise_params1 sdf_noise_params1.octaves sdf_noise_params1.lacunar
   xpos 966
   ypos 714
  }
-add_layer {sdf_noise_params2 sdf_noise_params2.size}
+add_layer {sdf_noise_params2 sdf_noise_params2.size sdf_noise_params2.white_point sdf_noise_params2.black_point sdf_noise_params2.lift}
  Constant {
   inputs 0
   channels sdf_noise_params2
-  color {{parent.size} 0 0 0}
+  color {{parent.size} {parent.white_point} {parent.black_point} {parent.lift}}
   format "1 1 0 0 1 1 1 1x1"
   name noise_params2
   xpos 1082

@@ -1,19 +1,18 @@
 Gizmo {
- inputs 5
+ inputs 6
  knobChanged "__import__('sdf.path_march', fromlist='PathMarch').PathMarch().handle_knob_changed()"
  addUserKnob {20 User l "Ray March"}
  addUserKnob {3 min_paths_per_pixel l "min paths per pixel"}
- min_paths_per_pixel 1
  addUserKnob {3 max_paths_per_pixel l "max paths per pixel"}
- max_paths_per_pixel 5
+ max_paths_per_pixel 1
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
- hit_tolerance 0.0001
+ hit_tolerance 0.001
  addUserKnob {3 max_bounces l "max bounces" t "Limits the number of times the rays can intersect an object per subpixel."}
- max_bounces 8
+ max_bounces 5
  addUserKnob {7 ray_distance l "max ray distance" t "Each ray, once spawned is only allowed to travel this distance before it is culled." R 10 10000}
  ray_distance 100
  addUserKnob {3 max_ray_steps l "max ray steps" t "Limit the number of steps a ray can be marched before it is culled. Shadow rays are given half this number of steps."}
- max_ray_steps 5000
+ max_ray_steps 1000
  addUserKnob {7 shadow_bias l "shadow bias" R 1 5}
  shadow_bias 1
  addUserKnob {13 seeds t "The seeds used to generate per-pixel noise."}
@@ -22,29 +21,40 @@ Gizmo {
  use_light_sampling true
  addUserKnob {6 enable_dof l "enable dof" t "Enable the use of depth of field." +STARTLINE}
  addUserKnob {26 ""}
+ addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material that the camera is in."}
+ absorption_colour {1 1 1}
+ addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the medium that the camera is currently in." R 1 4}
  refractive_index 1
- addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material that the camera is in."}
- absorption_colour {0 0 0}
- addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 scattering_probability l "scattering probability"}
+ addUserKnob {3 equiangular_samples l "equi-angular samples"}
+ equiangular_samples 25
  addUserKnob {26 ""}
  addUserKnob {7 hdri_offset_angle l "hdri offset angle" t "Rotate the hdri image by this amount around the y-axis." R 0 360}
+ addUserKnob {6 use_precomputed_irradiance l "use precomputed irradiance" +STARTLINE}
+ addUserKnob {7 hdri_lighting_scale l "hdri lighting scale" R 0.1 1}
+ hdri_lighting_scale 0.25
+ addUserKnob {3 hdri_irradiance_samples l "hdri irradiance samples"}
+ hdri_irradiance_samples 100
+ addUserKnob {7 hdri_lighting_blur l "hdri lighting blur" R 0 10}
+ hdri_lighting_blur 10
  addUserKnob {26 ""}
  addUserKnob {3 variance_range l "variance range"}
  variance_range 1
- addUserKnob {4 output_type l output t "The AOV type to output.\n\nThe stats AOV has the average number of steps in the red channel, the average number of bounces in the green channel, and the total number of paths that have been traced for a pixel in the blue channel." M {Beauty Position Normal Depth Stats "" "" "" "" "" ""}}
+ addUserKnob {26 ""}
+ addUserKnob {4 output_type l output t "The AOV type to output.\n\nThe stats AOV has the average number of steps in the red channel, the average number of bounces in the green channel, and the total number of paths that have been traced for a pixel in the blue channel." M {Beauty "World Position" "Local Position" Normal Depth Stats "" "" "" "" "" "" "" ""}}
  addUserKnob {41 format T format_.format}
  addUserKnob {6 latlong l LatLong t "Output a LatLong." +STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
+ addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
 }
  BackdropNode {
   inputs 0
   name Lights
   xpos -1030
   ypos -1631
-  bdwidth 386
-  bdheight 854
+  bdwidth 410
+  bdheight 851
  }
  BackdropNode {
   inputs 0
@@ -54,48 +64,172 @@ Gizmo {
   bdwidth 1932
   bdheight 849
  }
+ Input {
+  inputs 0
+  name camera
+  xpos 1354
+  ypos -1581
+  number 1
+ }
+ Camera {
+  projection_mode {{"\[expression \[value the_cam]projection_mode(\[value the_frame])]"}}
+  focal {{"\[expression \[value the_cam]focal(\[value the_frame])]"}}
+  haperture {{"\[expression \[value the_cam]haperture(\[value the_frame])]"}}
+  vaperture {{"\[expression \[value the_cam]vaperture(\[value the_frame])]"}}
+  near {{"\[expression \[value the_cam]near(\[value the_frame])]"}}
+  far {{"\[expression \[value the_cam]far(\[value the_frame])]"}}
+  win_translate {{"\[expression \[value the_cam]win_translate.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_translate.v(\[value the_frame])]"}}
+  win_scale {{"\[expression \[value the_cam]win_scale.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_scale.v(\[value the_frame])]"}}
+  winroll {{"\[expression \[value the_cam]winroll(\[value the_frame])]"}}
+  focal_point {{"\[expression \[value the_cam]focal_point(\[value the_frame])]"}}
+  fstop {{"\[expression \[value the_cam]fstop(\[value the_frame])]"}}
+  name DummyCam
+  help "DummyCam by Adrian Pueyo\n\nCamera that apart from the matrices also grabs all the \"Projection\" values from the upstream camera that it's connected to. Turns into a default Camera if no Camera connected. Can also be used inside of groups and gizmos, as many levels deep as you want :D All using live and super fast TCL.\n\nUpdated v1.1: Now grabs the correct frame too (thanks Erwan Leroy for the idea).\n\nUpdated v1.3: Now accepts Nuke13's Camera3\n\nadrianpueyo.com, 2019-2021"
+  onCreate "n = nuke.thisNode()\nfor k in \[\"projection_mode\",\"focal\",\"haperture\",\"vaperture\",\"near\",\"far\",\"win_translate\",\"win_scale\",\"winroll\",\"focal_point\",\"fstop\"]:\n    n\[k].setFlag(0x0000000010000000)"
+  xpos 1364
+  ypos -1473
+  addUserKnob {20 DummyCam l Defaults}
+  addUserKnob {43 the_cam +INVISIBLE}
+  the_cam "\[\n#DummyCam v1.3 - Updated 5 May 2021.\nset starting_point \"this.input0\"\nset default \"this.d_\"\n\n# If cam has no inputs, return the default.\nif \{\[exists \$starting_point]\} \{\n    set x \[node \$starting_point]\n\} \{ \n    return \$default\n\}\n\nset finished 0\nwhile \{\$finished != 1\} \{\n\n    # First look for a Cam or Input or topnode.\n    while \{\[class \$x] != \"Camera3\" && \[class \$x] != \"Camera2\" && \[class \$x] != \"Camera\" && \[class \$x] != \"Input\" && \$x != \[topnode \$x]\} \{\n        set x \[node \$x.input0]\n    \}\n\n    # Then, check if node is a cam (and return), and otherwise, if it's an input, see if the parent exists and move to it.\n    if \{\[class \$x]==\"Camera3\"||\[class \$x]==\"Camera2\"||\[class \$x]==\"Camera\"\} \{\n        set x \[append x \".\"]\n        return \$x\n    \} \{ \n        if \{ \[class \$x]==\"Input\" \} \{ \n            set inp \"\$x.parent.input\"\n            set inputNum \[value \$x.number]\n            set inp \[append inp \$inputNum]\n            if \{ \[exists \$inp] \} \{\n                set x \[node \$inp]\n            \} \{ \n                set finished 1\n            \}\n        \} \{ \n            set finished 1\n        \}\n    \}\n\}\nreturn \$default\n]"
+  addUserKnob {43 the_frame +INVISIBLE}
+  the_frame "\[\nset the_camera \[string trimright \[value the_cam] .]\nif \{\[exists \$the_camera]\} \{\n    return \[value \$the_camera.frame]\n\} \{ \n    return \[frame]\n\}\n]"
+  addUserKnob {4 d_projection_mode l projection M {perspective orthographic uv spherical ""}}
+  addUserKnob {7 d_focal l "focal length" R 0 100}
+  d_focal 50
+  addUserKnob {7 d_haperture l "horiz aperture" R 0 50}
+  d_haperture 24.576
+  addUserKnob {7 d_vaperture l "vert aperture" R 0 50}
+  d_vaperture 18.672
+  addUserKnob {7 d_near l near R 0 10}
+  d_near 0.1
+  addUserKnob {7 d_far l far R 0 10000}
+  d_far 10000
+  addUserKnob {30 d_win_translate l "window translate"}
+  addUserKnob {30 d_win_scale l "window scale"}
+  d_win_scale {1 1}
+  addUserKnob {7 d_winroll l "window roll" R 0 45}
+  addUserKnob {7 d_focal_point l "focal distance" R 0 10}
+  d_focal_point 2
+  addUserKnob {7 d_fstop l fstop R 0 30}
+  d_fstop 16
+  addUserKnob {26 version l " " t "Updated 5 May 2021" T "<span style=\"color:#666\"><br/><b>DummyCam v1.3</b> - <a href=\"http://www.adrianpueyo.com\" style=\"color:#666;text-decoration: none;\">adrianpueyo.com</a>, 2019-2021</span>"}
+ }
+ Constant {
+  inputs 0
+  format "2 1 0 0 2 1 1 lights"
+  name Constant3
+  xpos 1531
+  ypos -1557
+ }
+ Input {
+  inputs 0
+  name hdri
+  xpos 1661
+  ypos -1585
+  number 2
+ }
+ Merge2 {
+  inputs 2
+  name Merge1
+  xpos 1661
+  ypos -1533
+ }
+ Reformat {
+  type scale
+  format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+  black_outside true
+  name Reformat5
+  xpos 1661
+  ypos -1510
+ }
+ Dot {
+  name hdri_dot
+  xpos 1695
+  ypos -1484
+ }
+set N1b031290 [stack 0]
+ Reformat {
+  type scale
+  scale {{"floor(min(parent.hdri_dot.height, parent.hdri_dot.width) * parent.hdri_lighting_scale) > 0 ? parent.hdri_lighting_scale : 1"}}
+  resize fill
+  name Reformat
+  xpos 1766
+  ypos -1488
+ }
+ Blur {
+  size {{parent.hdri_lighting_blur}}
+  name Blur2
+  xpos 1766
+  ypos -1462
+ }
+ BlinkScript {
+  kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/hdri_irradiance.blink
+  recompileCount 123
+  ProgramGroup 1
+  KernelDescription "2 \"HDRIrradiance\" iterate pixelWise b6fe72538f3dbd7884a14fb1011ef4825fa74b73f7af466a4f5e515697872221 2 \"hdri\" Read Random \"dst\" Write Point 1 \"Samples\" Int 2 ZAAAADIAAAA= 1 \"_samples\" 2 1 3 \"__hdriPixelSize\" Float 2 1 AAAAAAAAAAA= \"__up\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__sampleStep\" Float 2 1 AAAAAAAAAAA="
+  kernelSource "#include \"math.h\"\n\n\nkernel HDRIrradiance : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> hdri; // the input image\n    Image<eWrite> dst; // the output image\n\n    param:\n        int2 _samples;\n\n    local:\n        float2 __hdriPixelSize;\n        float3 __up;\n        float2 __sampleStep;\n\n\n    /**\n     * In define(), parameters can be given labels and default values.\n     */\n    void define()\n    \{\n        defineParam(_samples, \"Samples\", int2(100, 50));\n    \}\n\n\n    /**\n     * The init() function is run before any calls to process().\n     * Local variables can be initialized here.\n     */\n    void init()\n    \{\n        __hdriPixelSize = float2(hdri.bounds.width() / (2.0f * PI), hdri.bounds.height() / PI);\n        __up = float3(0, 1, 0);\n\n        __sampleStep = float2(\n            2.0f * PI / (float) _samples.x,\n            PI / (2.0f * (float) _samples.y)\n        );\n    \}\n\n\n    /**\n     * Get the value of hdri the ray would hit at infinite distance\n     *\n     * @arg rayDirection: The direction of the ray.\n     *\n     * @returns: The colour of the pixel in the direction of the ray.\n     */\n    float4 readHDRIValue(float3 rayDirection)\n    \{\n        const float2 angles = cartesionUnitVectorToSpherical(rayDirection);\n\n        // Why does bilinear give nans? :(\n        return hdri(\n            round(__hdriPixelSize.x * angles.x) - 1,\n            round(hdri.bounds.height() - (__hdriPixelSize.y * angles.y)) - 1\n        );\n    \}\n\n\n    /**\n     * Compute the irradiance of a pixel.\n     *\n     * @arg pos: The x, and y location we are currently processing.\n     */\n    void process(int2 pos)\n    \{\n        const float2 uvPosition = pixelsToUV(\n            float2(pos.x, pos.y),\n            float2(hdri.bounds.width(), hdri.bounds.height())\n        );\n        const float3 direction = sphericalUnitVectorToCartesion(\n            uvPositionToAngles(uvPosition)\n        );\n\n        const float3 tangentRight = normalize(cross(__up, direction));\n        const float3 tangentUp = normalize(cross(direction, tangentRight));\n\n        float4 irradiance = float4(0);\n\n        for (float theta = 0.0f; theta < 2.0f * PI; theta += __sampleStep.x)\n        \{\n            for (float phi = PI / 2.0f; phi > 0.0f; phi -= __sampleStep.y)\n            \{\n                const float3 tangent = sphericalUnitVectorToCartesion(float2(theta, phi));\n                const float3 sampleDirection = (\n                    tangent.x * tangentRight\n                    + tangent.z * tangentUp\n                    + tangent.y * direction\n                );\n\n                irradiance += readHDRIValue(sampleDirection) * cos(phi) * sin(phi);\n            \}\n        \}\n\n        dst() = PI * irradiance / (float) (_samples.x * _samples.y);\n    \}\n\};\n"
+  rebuild ""
+  HDRIrradiance_Samples {{parent.hdri_irradiance_samples} {parent.hdri_irradiance_samples/2}}
+  rebuild_finalise ""
+  name HDRIrradiance
+  xpos 1766
+  ypos -1422
+ }
+ Reformat {
+  type scale
+  format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+  black_outside true
+  name Reformat3
+  xpos 1766
+  ypos -1382
+ }
+ Dot {
+  name Dot33
+  xpos 1800
+  ypos -555
+ }
  Constant {
   inputs 0
   format "1 1 0 0 1 1 1 1x1"
   name Constant4
-  xpos -1666
-  ypos -1577
+  xpos -1536
+  ypos -1702
  }
  Dot {
   name Dot7
   xpos -1502
   ypos -1549
  }
-set N2eb97440 [stack 0]
+set Nd0704a60 [stack 0]
  Dot {
   name Dot25
-  xpos -921
+  xpos -1011
   ypos -1549
  }
-set N2eb9b520 [stack 0]
+set Nd205ce10 [stack 0]
  Dot {
   name Dot15
-  xpos -921
+  xpos -1011
   ypos -1441
  }
-push $N2eb9b520
+push $Nd205ce10
  Input {
   inputs 0
   name lights
-  xpos -806
-  ypos -1571
+  xpos -948
+  ypos -1598
   number 4
  }
  Merge2 {
   inputs 2
   name light_merge
-  xpos -806
+  xpos -948
   ypos -1500
  }
  Group {
   inputs 2
   name light_input_protection
-  xpos -806
+  xpos -948
   ypos -1445
   disable {{"width > 1"}}
   addUserKnob {20 User}
@@ -123,7 +257,7 @@ push $N2eb9b520
    xpos 192
    ypos -2
   }
-set N2b8063f0 [stack 0]
+set Nb7b46d0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -145,7 +279,7 @@ set N2b8063f0 [stack 0]
    xpos 34
    ypos -6
   }
-set N77ed60f0 [stack 0]
+set Ndbd101c0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -156,7 +290,7 @@ set N77ed60f0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N2b8063f0
+push $Nb7b46d0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -185,7 +319,7 @@ push $N2b8063f0
    xpos 158
    ypos 167
   }
-push $N77ed60f0
+push $Ndbd101c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -249,81 +383,99 @@ push $N77ed60f0
  end_group
  Dot {
   name light_dot
-  xpos -772
+  xpos -914
   ypos -1307
  }
-set N2bfd2cd0 [stack 0]
+set Nd9a60ec0 [stack 0]
 add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
  Shuffle {
   in sdf_light_properties1
   blue green
   alpha green
   name light_props1
-  xpos -990
+  xpos -948
   ypos -1038
  }
  Dot {
   name Dot22
-  xpos -956
+  xpos -914
   ypos -864
  }
-push $N2bfd2cd0
+push $Nd9a60ec0
 add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
  Shuffle {
   in sdf_light_properties
   name light_props
-  xpos -871
+  xpos -838
   ypos -1038
  }
  Dot {
   name Dot23
-  xpos -837
+  xpos -804
   ypos -862
  }
-push $N2bfd2cd0
+push $Nd9a60ec0
 add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
  Shuffle {
   in sdf_light
   name light
-  xpos -755
+  xpos -731
   ypos -1038
  }
  Dot {
   name Dot24
-  xpos -721
+  xpos -697
   ypos -860
  }
-push $N2eb9b520
+push $Nd205ce10
  Dot {
   name Dot16
-  xpos 51
+  xpos -569
   ypos -1549
  }
-set N72da7960 [stack 0]
+set Nd9f57130 [stack 0]
  Dot {
-  name Dot1
-  xpos 51
-  ypos -1440
+  name Dot36
+  xpos 843
+  ypos -1549
  }
-push $N72da7960
+ Input {
+  inputs 0
+  name noise
+  xpos 909
+  ypos -1590
+  number 5
+ }
+ Merge2 {
+  inputs 2
+  name noise_merge
+  xpos 909
+  ypos -1510
+ }
+push $Nd9f57130
  Input {
   inputs 0
   name scene
-  xpos 129
-  ypos -1575
+  xpos -503
+  ypos -1590
  }
  Merge2 {
   inputs 2
   name object_merge
-  xpos 129
+  xpos -503
   ypos -1510
  }
+ Dot {
+  name Dot37
+  xpos -469
+  ypos -1441
+ }
+set N17fbada0 [stack 0]
  Group {
   inputs 2
-  name object_input_protection
-  xpos 129
-  ypos -1444
-  disable {{"width > 1"}}
+  name noise_sdf_merge
+  xpos 909
+  ypos -1445
   addUserKnob {20 User}
   addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
  }
@@ -349,7 +501,7 @@ push $N72da7960
    xpos 192
    ypos -2
   }
-set N7544a960 [stack 0]
+set Nd8bd5430 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -371,7 +523,7 @@ set N7544a960 [stack 0]
    xpos 34
    ypos -6
   }
-set N312ef330 [stack 0]
+set N8ec3b3c0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -382,7 +534,7 @@ set N312ef330 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7544a960
+push $Nd8bd5430
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -411,7 +563,214 @@ push $N7544a960
    xpos 158
    ypos 167
   }
-push $N312ef330
+push $N8ec3b3c0
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Dot {
+  name Dot35
+  xpos 943
+  ypos -1225
+ }
+set N8e6284f0 [stack 0]
+add_layer {sdf_noise_params2 sdf_noise_params2.size sdf_noise_params2.white_point sdf_noise_params2.black_point sdf_noise_params2.lift}
+ Shuffle {
+  in sdf_noise_params2
+  name noise_params2
+  xpos 1199
+  ypos -1025
+ }
+ Dot {
+  name Dot28
+  xpos 1233
+  ypos -853
+ }
+push $N8e6284f0
+add_layer {sdf_noise_params1 sdf_noise_params1.octaves sdf_noise_params1.lacunarity sdf_noise_params1.gain sdf_noise_params1.gamma}
+ Shuffle {
+  in sdf_noise_params1
+  name noise_params1
+  xpos 1060
+  ypos -1022
+ }
+ Dot {
+  name Dot26
+  xpos 1094
+  ypos -850
+ }
+push $N8e6284f0
+add_layer {sdf_noise_params0 sdf_noise_params0.options sdf_noise_params0.x sdf_noise_params0.y sdf_noise_params0.z}
+ Shuffle {
+  in sdf_noise_params0
+  name noise_params0
+  xpos 909
+  ypos -1023
+ }
+ Dot {
+  name Dot27
+  xpos 943
+  ypos -847
+ }
+set Nd9b54880 [stack 0]
+push $Nd9f57130
+ Dot {
+  name Dot1
+  xpos -569
+  ypos -1381
+ }
+push $N17fbada0
+ Group {
+  inputs 2
+  name object_input_protection
+  xpos -503
+  ypos -1385
+  disable {{"width > 1"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set N1257d590 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set Nd89c36e0 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $N1257d590
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $Nd89c36e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -475,224 +834,161 @@ push $N312ef330
  end_group
  Dot {
   name obj_dot
-  xpos 163
+  xpos -469
   ypos -1315
  }
-set N31cbfeb0 [stack 0]
-add_layer {sdf_noise_params2 sdf_noise_params2.size}
- Shuffle {
-  in sdf_noise_params2
-  name noise_params2
-  xpos 1118
-  ypos -1025
- }
- Dot {
-  name Dot28
-  xpos 1152
-  ypos -853
- }
-push $N31cbfeb0
-add_layer {sdf_noise_params1 sdf_noise_params1.octaves sdf_noise_params1.lacunarity sdf_noise_params1.gain sdf_noise_params1.gamma}
- Shuffle {
-  in sdf_noise_params1
-  name noise_params1
-  xpos 979
-  ypos -1022
- }
- Dot {
-  name Dot26
-  xpos 1013
-  ypos -850
- }
-push $N31cbfeb0
-add_layer {sdf_noise_params0 sdf_noise_params0.options sdf_noise_params0.x sdf_noise_params0.y sdf_noise_params0.z}
- Shuffle {
-  in sdf_noise_params0
-  name noise_params0
-  xpos 828
-  ypos -1023
- }
- Dot {
-  name Dot27
-  xpos 862
-  ypos -847
- }
-push $N31cbfeb0
+set N8f3ab760 [stack 0]
 add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surface.emission sdf_surface.roughness}
  Shuffle {
   in sdf_surface
   name surface
-  xpos -164
+  xpos -83
   ypos -1033
  }
  Dot {
   name Dot2
-  xpos -130
+  xpos -49
   ypos -862
  }
-push $N31cbfeb0
+push $N8f3ab760
 add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elongation_y sdf_shape_mods_1.elongation_z sdf_shape_mods_1.edge_radius}
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
-  xpos 211
+  xpos 292
   ypos -1027
  }
  Dot {
   name Dot12
-  xpos 245
+  xpos 326
   ypos -862
  }
-push $N31cbfeb0
+push $N8f3ab760
 add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetion_y sdf_shape_mods_0.repetion_z sdf_shape_mods_0.repetion_w}
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
-  xpos 72
+  xpos 153
   ypos -1028
  }
  Dot {
   name Dot3
-  xpos 106
+  xpos 187
   ypos -861
  }
-push $N31cbfeb0
+push $N8f3ab760
 add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.num_children sdf_shape.blend_strength}
  Shuffle {
   in sdf_shape
   name shape
-  xpos -39
+  xpos 42
   ypos -1032
  }
  Dot {
   name Dot4
-  xpos -5
+  xpos 76
   ypos -860
  }
-push $N31cbfeb0
+push $N8f3ab760
 add_layer {sdf_emm_colour sdf_emm_colour.r sdf_emm_colour.g sdf_emm_colour.b sdf_emm_colour.x}
  Shuffle {
   in sdf_emm_colour
   name emm_colour
-  xpos -271
+  xpos -190
   ypos -1033
  }
  Dot {
   name Dot20
-  xpos -237
+  xpos -156
   ypos -864
  }
-push $N31cbfeb0
+push $N8f3ab760
 add_layer {sdf_trans_colour sdf_trans_colour.r sdf_trans_colour.g sdf_trans_colour.b sdf_trans_colour.x}
  Shuffle {
   in sdf_trans_colour
   name trans_colour
-  xpos -368
+  xpos -287
   ypos -1036
  }
  Dot {
   name Dot19
-  xpos -334
+  xpos -253
   ypos -863
  }
-push $N31cbfeb0
+push $N8f3ab760
 add_layer {sdf_spec_colour sdf_spec_colour.r sdf_spec_colour.g sdf_spec_colour.b sdf_spec_colour.x}
  Shuffle {
   in sdf_spec_colour
   name spec_colour
-  xpos -468
+  xpos -387
   ypos -1035
  }
  Dot {
   name Dot18
-  xpos -434
+  xpos -353
   ypos -862
  }
-push $N31cbfeb0
+push $N8f3ab760
 add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_b sdf_colour.colour_a}
  Shuffle {
   in sdf_colour
   name diff_colour
-  xpos -584
+  xpos -503
   ypos -1036
  }
  Dot {
   name Dot5
-  xpos -550
+  xpos -469
   ypos -863
  }
-push $N31cbfeb0
+push $N8f3ab760
 add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y sdf_dimensions.dimension_z sdf_dimensions.dimension_w}
  Shuffle {
   in sdf_dimensions
   name dimensions
-  xpos 658
+  xpos 739
   ypos -1026
  }
  Dot {
   name Dot10
-  xpos 692
+  xpos 773
   ypos -854
  }
-push $N31cbfeb0
+push $N8f3ab760
 add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sdf_rotation_wall_thickness.rotation_y sdf_rotation_wall_thickness.rotation_z sdf_rotation_wall_thickness.wall_thickness}
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
-  xpos 507
+  xpos 588
   ypos -1027
  }
  Dot {
   name Dot9
-  xpos 541
+  xpos 622
   ypos -851
  }
-push $N31cbfeb0
+push $N8f3ab760
 add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.position_y sdf_position_scale.position_z sdf_position_scale.uniform_scale}
  Shuffle {
   in sdf_position_scale
   name position_scale
-  xpos 365
+  xpos 446
   ypos -1026
  }
  Dot {
   name Dot6
-  xpos 399
+  xpos 480
   ypos -856
  }
- Constant {
-  inputs 0
-  format "2 1 0 0 2 1 1 lights"
-  name Constant3
-  xpos 1532
-  ypos -1547
- }
- Input {
-  inputs 0
-  name hdri
-  xpos 1661
-  ypos -1575
-  number 2
- }
- Merge2 {
-  inputs 2
-  name Merge1
-  xpos 1661
-  ypos -1523
- }
- Dot {
-  name hdri_dot
-  xpos 1695
-  ypos -1474
- }
-push $N2eb97440
+push $N1b031290
+push $Nd0704a60
  Reformat {
   format {{{parent.format_.format}}}
   name Reformat2
   xpos -1536
-  ypos -1510
+  ypos -1503
  }
-set N2bcbc500 [stack 0]
+set Nc76a370 [stack 0]
  Input {
   inputs 0
   name previous
@@ -702,7 +998,7 @@ set N2bcbc500 [stack 0]
  }
  Merge2 {
   inputs 2
-  name object_merge1
+  name previous_merge
   xpos -1364
   ypos -1503
  }
@@ -711,50 +1007,50 @@ set N2bcbc500 [stack 0]
   xpos -1330
   ypos -1385
  }
-set N2c09e7a0 [stack 0]
+set Na11423c0 [stack 0]
 add_layer {variance variance.red variance.green variance.blue variance.num_paths}
  Shuffle {
   in variance
   name Shuffle1
-  xpos -1433
-  ypos -1389
+  xpos -1364
+  ypos -1331
  }
- Dot {
-  name Dot17
-  xpos -1399
-  ypos -1310
- }
-push $N2bcbc500
+push $Nc76a370
  Invert {
   channels rgb
   name Invert2
   xpos -1536
-  ypos -1456
+  ypos -1305
  }
  Switch {
   inputs 2
   which {{"\[exists parent.input3]"}}
   name Switch2
-  xpos -1536
-  ypos -1267
+  xpos -1364
+  ypos -1305
  }
  Dot {
   name Dot13
-  xpos -1502
+  xpos -1330
   ypos -451
  }
-push $N2c09e7a0
+push $Na11423c0
+ Dot {
+  name Dot34
+  xpos -1227
+  ypos -1385
+ }
  Dot {
   name Dot21
-  xpos -1330
-  ypos -588
+  xpos -1227
+  ypos -598
  }
  Constant {
   inputs 0
   channels {rgba.red rgba.green rgba.blue -rgba.alpha}
   name format_
-  xpos 1958
-  ypos -747
+  xpos 1894
+  ypos -636
  }
  Noise {
   output {rgba.red -rgba.green -rgba.blue -rgba.alpha}
@@ -764,8 +1060,8 @@ push $N2c09e7a0
   lacunarity 1.6
   center {512 389}
   name Noise1
-  xpos 1958
-  ypos -650
+  xpos 1894
+  ypos -562
  }
  Noise {
   output {-rgba.red rgba.green -rgba.blue -rgba.alpha}
@@ -774,8 +1070,8 @@ push $N2c09e7a0
   zoffset {{parent.seeds.y}}
   center {512 389}
   name Noise2
-  xpos 1958
-  ypos -597
+  xpos 1894
+  ypos -536
  }
  Noise {
   output {-rgba.red -rgba.green rgba.blue -rgba.alpha}
@@ -785,21 +1081,21 @@ push $N2c09e7a0
   lacunarity 2.14
   center {512 389}
   name Noise3
-  xpos 1958
-  ypos -539
+  xpos 1894
+  ypos -510
  }
  Dot {
   name resolution_dot
-  xpos 1992
+  xpos 1928
   ypos -451
  }
  BlinkScript {
-  inputs 21
+  inputs 22
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/pathmarch.blink
-  recompileCount 2604
+  recompileCount 2859
   ProgramGroup 1
-  KernelDescription "2 \"PathMarchKernel\" iterate pixelWise c276d24a13fc02bd5440d981256d225e330423ffdf20434bf30f43854a914afe 22 \"noise\" Read Point \"src\" Read Point \"variance\" Read Point \"hdri\" Read Random \"positions\" Read Random \"rotations\" Read Random \"dimensions\" Read Random \"diffusivities\" Read Random \"specularities\" Read Random \"transmittances\" Read Random \"emittances\" Read Random \"shapeProperties\" Read Random \"shapeModParameters0\" Read Random \"shapeModParameters1\" Read Random \"surfaceProperties\" Read Random \"noiseParams0\" Read Random \"noiseParams1\" Read Random \"noiseParams2\" Read Random \"lights\" Read Random \"lightProperties\" Read Random \"lightProperties1\" Read Random \"dst\" Write Point 25 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Focal Distance\" Float 1 AACAQA== \"fstop\" Float 1 AACAQQ== \"Enable Depth Of Field\" Bool 1 AQ== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"HDRI Offset Angle\" Float 1 AAAAAA== \"Min Paths Per Pixel\" Int 1 AQAAAA== \"Max Paths Per Pixel\" Int 1 AQAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AAB6RA== \"Max Ray Steps\" Int 1 gAAAAA== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 AACAPw== \"Index of Refraction\" Float 1 AACAPw== \"brdf Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== \"Object Texture Width\" Int 1 AAAAAA== \"Light Texture Width\" Int 1 AAAAAA== \"Enable Light Sampling\" Bool 1 AQ== \"Output Type\" Int 1 AAAAAA== \"Output LatLong\" Bool 1 AA== 25 \"_focalLength\" 1 1 \"_horizontalAperture\" 1 1 \"_nearPlane\" 1 1 \"_farPlane\" 1 1 \"_cameraWorldMatrix\" 16 1 \"_focalDistance\" 1 1 \"_fStop\" 1 1 \"_depthOfFieldEnabled\" 1 1 \"_formatWidth\" 1 1 \"_formatHeight\" 1 1 \"_hdriOffsetAngle\" 1 1 \"_minPathsPerPixel\" 1 1 \"_maxPathsPerPixel\" 1 1 \"_maxBounces\" 1 1 \"_maxRayDistance\" 1 1 \"_maxRaySteps\" 1 1 \"_hitTolerance\" 1 1 \"_shadowBias\" 1 1 \"_refractiveIndex\" 1 1 \"_absorptionColour\" 4 1 \"_objectTextureWidth\" 1 1 \"_lightTextureWidth\" 1 1 \"_lightSamplingEnabled\" 1 1 \"_outputType\" 1 1 \"_latLong\" 1 1 10 \"__inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"__aperture\" Float 1 1 AAAAAA== \"__bouncesPerRay\" Int 1 1 AAAAAA== \"__hdriPixelSize\" Float 2 1 AAAAAAAAAAA= \"__hdriLightPixelSize\" Float 2 1 AAAAAAAAAAA= \"__hdriOffsetRadians\" Float 1 1 AAAAAA== \"__offset0\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset1\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset2\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset3\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA=="
-  kernelSource "// Copyright 2022 by Owen Bulka.\n// All rights reserved.\n// This file is released under the \"MIT License Agreement\".\n// Please see the LICENSE.md file that should have been included as part\n// of this package.\n\n//\n// BlinkScript Ray Marcher\n//\n\n#include \"math.h\"\n#include \"colour.h\"\n#include \"random.h\"\n#include \"noise.h\"\n#include \"conversion.h\"\n#include \"aovs.h\"\n#include \"lights.h\"\n#include \"material.h\"\n#include \"camera.h\"\n#include \"objectInteraction.h\"\n#include \"sdfModifications.h\"\n#include \"sdfs.h\"\n\n\n// Increase this if you want more than MAX_CHILD_DEPTH direct children\n#define MAX_CHILD_DEPTH 64\n#define MAX_MIS_EMISSIVE_SHAPES 64\n\n\nkernel PathMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    // the input which specifies the format, process is called once per pixel\n    // in this image, which also provides random seeds\n    Image<eRead, eAccessPoint, eEdgeNone> noise;\n    Image<eRead, eAccessPoint, eEdgeNone> src;\n    Image<eRead, eAccessPoint, eEdgeNone> variance;\n\n    // the hdribox in latlong format\n    Image<eRead, eAccessRandom, eEdgeClamped> hdri;\n\n\n    // the shape positons.xyz, scale.w\n    Image<eRead, eAccessRandom, eEdgeNone> positions;\n\n    // the shape rotations.xyz, wall thickness.w\n    Image<eRead, eAccessRandom, eEdgeNone> rotations;\n\n    // the shape dimensions.xyzw (some shapes may not use all channels)\n    Image<eRead, eAccessRandom, eEdgeNone> dimensions;\n\n    // the shape diffusivities.xyz, specular roughness.w\n    Image<eRead, eAccessRandom, eEdgeNone> diffusivities;\n\n    Image<eRead, eAccessRandom, eEdgeNone> specularities;\n\n    Image<eRead, eAccessRandom, eEdgeNone> transmittances;\n\n    Image<eRead, eAccessRandom, eEdgeNone> emittances;\n\n\n    // shape type.x, operation.y, numChildren.z, blend strength.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;\n\n    // repetition params.xyzw\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters0;\n\n    // elongation.xyz edgeRadius.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters1;\n\n    // reflection.x, transmission.y, emission.z, roughness.w\n    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;\n\n    // noise options.x translation.yzw\n    Image<eRead, eAccessRandom, eEdgeNone> noiseParams0;\n\n    // octaves.x, lacunarity.y, gain.z, gamma.w\n    Image<eRead, eAccessRandom, eEdgeNone> noiseParams1;\n\n    // size.x\n    Image<eRead, eAccessRandom, eEdgeNone> noiseParams2;\n\n    // the input lights direction/position.xyz intensity.w\n    Image<eRead, eAccessRandom, eEdgeNone> lights;\n\n    // colour.xyz, type.w\n    // w in \[0, 1) = directional, \[1, inf) = point\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties;\n\n    // shadow hardness.x\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;\n\n\n    // the output image\n    Image<eWrite> dst;\n\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float _focalLength;\n        float _horizontalAperture;\n        float _nearPlane;\n        float _farPlane;\n        float4x4 _cameraWorldMatrix;\n        float _focalDistance;\n        float _fStop;\n        bool _depthOfFieldEnabled;\n\n        // Image params\n        float _formatWidth;\n        float _formatHeight;\n\n        float _hdriOffsetAngle;\n\n        // Ray params\n        int _minPathsPerPixel;\n        int _maxPathsPerPixel;\n        int _maxBounces;\n        float _maxRayDistance;\n        int _maxRaySteps;\n        float _hitTolerance;\n        float _shadowBias;\n\n        // Scene params\n        float _refractiveIndex;\n        float4 _absorptionColour;\n\n        // Shape Textures\n        int _objectTextureWidth;\n        int _lightTextureWidth;\n\n        bool _lightSamplingEnabled;\n\n        int _outputType;\n\n        bool _latLong;\n\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float4x4 __inverseCameraProjectionMatrix;\n        float __aperture;\n\n        int __bouncesPerRay;\n\n        float2 __hdriPixelSize;\n        float2 __hdriLightPixelSize;\n        float __hdriOffsetRadians;\n\n        float3 __offset0;\n        float3 __offset1;\n        float3 __offset2;\n        float3 __offset3;\n\n\n    /**\n     * In define(), parameters can be given labels and default values.\n     */\n    void define()\n    \{\n        // Camera params\n        defineParam(_focalLength, \"Focal Length\", 50.0f);\n        defineParam(_horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(_nearPlane, \"Near Plane\", 0.1f);\n        defineParam(_farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            _cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n        defineParam(_focalDistance, \"Focal Distance\", 4.0f);\n        defineParam(_fStop, \"fstop\", 16.0f);\n        defineParam(_depthOfFieldEnabled, \"Enable Depth Of Field\", true);\n\n        // Image params\n        defineParam(_formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(_formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(_hdriOffsetAngle, \"HDRI Offset Angle\", 0.0f);\n\n        // Ray params\n        defineParam(_minPathsPerPixel, \"Min Paths Per Pixel\", 1);\n        defineParam(_maxPathsPerPixel, \"Max Paths Per Pixel\", 1);\n        defineParam(_maxRayDistance, \"Max Ray Distance\", 1000.0f);\n        defineParam(_maxRaySteps, \"Max Ray Steps\", 128);\n        defineParam(_maxBounces, \"Max Bounces\", 1);\n        defineParam(_hitTolerance, \"Hit Tolerance\", 0.001f);\n        defineParam(_shadowBias, \"Shadow Bias\", 1.0f);\n\n        // Scene params\n        defineParam(_refractiveIndex, \"Index of Refraction\", 1.0f);\n        defineParam(_absorptionColour, \"brdf Colour\", float4(1));\n\n        // Shape Counts\n        defineParam(_objectTextureWidth, \"Object Texture Width\", 0);\n        defineParam(_lightTextureWidth, \"Light Texture Width\", 0);\n\n        defineParam(_lightSamplingEnabled, \"Enable Light Sampling\", true);\n\n        defineParam(_outputType, \"Output Type\", 0);\n\n        defineParam(_latLong, \"Output LatLong\", false);\n    \}\n\n\n    /**\n     * The init() function is run before any calls to process().\n     * Local variables can be initialized here.\n     */\n    void init()\n    \{\n        __bouncesPerRay = _maxBounces <= 0 ? 1 : _maxBounces;\n\n        float aspect = aspectRatio(_formatHeight, _formatWidth);\n        float4x4 cameraProjectionMatrix = projectionMatrix(\n            _focalLength,\n            _horizontalAperture,\n            aspect,\n            _nearPlane,\n            _farPlane\n        );\n        __inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();\n\n        __aperture = fStopToAperture(_fStop, _focalLength);\n\n        __hdriPixelSize = float2(\n            hdri.bounds.width() / (2 * PI),\n            hdri.bounds.height() / PI\n        );\n        __hdriOffsetRadians = _hdriOffsetAngle * PI / 180.0f;\n\n        __offset0 = 0.5773f * float3(1, -1, -1);\n        __offset1 = 0.5773f * float3(-1, -1, 1);\n        __offset2 = 0.5773f * float3(-1, 1, -1);\n        __offset3 = 0.5773f * float3(1, 1, 1);\n    \}\n\n\n    float getNoiseValue(const int index, const float3 &position, int &noiseOptions)\n    \{\n        noiseOptions = (int) noiseParams0(index, 0, 0);\n        if ((noiseOptions & 1) == 0)\n        \{\n            return -1.0f;\n        \}\n\n        const float3 translation = float3(\n            noiseParams0(index, 0, 1),\n            noiseParams0(index, 0, 2),\n            noiseParams0(index, 0, 3)\n        );\n\n        const int octaves = noiseParams1(index, 0, 0);\n        const float lacunarity = noiseParams1(index, 0, 1);\n        const float gain = noiseParams1(index, 0, 2);\n        const float gamma = noiseParams1(index, 0, 3);\n        const float size = noiseParams2(index, 0, 0);\n\n        const float3 noisePosition = worldToLocal(index, position + translation);\n\n        if (noiseOptions & 2)\n        \{\n            return fractalBrownianMotionNoise(\n                octaves,\n                lacunarity,\n                size,\n                gain,\n                gamma,\n                noisePosition\n            );\n        \}\n        else\n        \{\n            return turbulanceNoise(\n                octaves,\n                lacunarity,\n                size,\n                gain,\n                gamma,\n                noisePosition\n            );\n        \}\n    \}\n\n\n    /**\n     * Get the value of hdri the ray would hit at infinite distance\n     *\n     * @arg rayDirection: The direction of the ray.\n     *\n     * @returns: The colour of the pixel in the direction of the ray.\n     */\n    float4 readHDRIValue(float3 rayDirection)\n    \{\n        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);\n\n        // Should be able to say image access is eEdgeClamped and not do this\n        // but I see nan pixels sooo... :(\n        const float2 indices = clamp(\n            float2(\n                __hdriPixelSize.x * angles.x,\n                hdri.bounds.height() - (__hdriPixelSize.y * angles.y)\n            ),\n            float2(0),\n            float2(hdri.bounds.width(), hdri.bounds.height()) - 1.0f\n        );\n\n        return bilinear(hdri, indices.x, indices.y);\n    \}\n\n\n    float3 worldToLocal(const int objectIndex, const float3 &worldPosition)\n    \{\n        float3 localPosition = worldPosition;\n        for (int j=0; j <= objectIndex; j++)\n        \{\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            const float numChildren = shapeProperty.z;\n\n            if (j + numChildren < objectIndex)\n            \{\n                j += numChildren;\n                continue;\n            \}\n\n            // Read in the shape properties\n            const SampleType(positions) position = positions(j, 0);\n            const SampleType(rotations) rotation = rotations(j, 0);\n            const SampleType(dimensions) dimension = dimensions(j, 0);\n            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n\n            const float scale = position.w;\n            const int modifications = (int) shapeProperty.y;\n            const float blendStrength = shapeProperty.w;\n\n            // Use parent transform to position child\n            localPosition = transformRay(\n                localPosition,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n        \}\n\n        return localPosition;\n    \}\n\n\n    float3 getObjectPosition(const int objectIndex)\n    \{\n        return -worldToLocal(objectIndex, float3(0));\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     *\n     * @arg rayOrigin: The origin position of the ray.\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     *\n     * @returns: The minimum distance to an object in the scene.\n     */\n    float getMinDistanceToObjectInScene(const float3 &rayOrigin, const float pixelFootprint)\n    \{\n        float distance = _maxRayDistance;\n\n        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour\n        // roughness, specular colour, specular, transmissive colour, transmission,\n        // emissive colour, emission, refractive index, objectId, blendStrength\n        float parentStack\[MAX_CHILD_DEPTH]\[\n            1   // numChildren\n            + 3 // transformedRay\n            + 1 // scale\n            + 1 // mods\n            + 1 // nextDistance\n            + 1 // blendStrength\n        ];\n        int parentStackLength = 0;\n\n        for (int j=0; j < _objectTextureWidth; j++)\n        \{\n            // Read in the shape properties\n            SampleType(positions) position = positions(j, 0);\n            SampleType(rotations) rotation = rotations(j, 0);\n            SampleType(dimensions) dimension = dimensions(j, 0);\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n\n            float scale = position.w;\n\n            const int modifications = (int) shapeProperty.y;\n            float numChildren = shapeProperty.z;\n            const float blendStrength = shapeProperty.w;\n\n            int stackLastIndex = parentStackLength - 1;\n\n            // Position relative to the parent if we have any\n            float3 parentTransformedRay = rayOrigin;\n            if (parentStackLength > 0)\n            \{\n                parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                scale *= parentStack\[stackLastIndex]\[4];\n            \}\n\n            // Use parent transform to position child\n            const float3 transformedRay = transformRay(\n                parentTransformedRay,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n\n            // Get distance to this child\n            float nextDistance = getModifiedDistance(\n                transformedRay,\n                (int) shapeProperty.x,\n                dimension,\n                scale,\n                modifications,\n                modParameters1.w,\n                rotation.w\n            );\n\n            // Track which object was hit for the alpha channel\n            float objectId = (float) j + 1.0f;\n\n            // If this is a bounding volume, we can skip its children\n            // if we aren't close to, or inside it\n            if (\n                modifications & 4096\n                && numChildren > 0\n                && nextDistance > _hitTolerance + pixelFootprint\n            ) \{\n                // Update the min distance if this bounding volume is closest.\n                // Otherwise we could step through it, or if every object in\n                // the scene is inside it, we would not step forward at all\n                if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n                \}\n\n                // This was tagged as a boundary object, skip its children\n                // since we arent close to hitting it\n                j += numChildren;\n\n                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                \{\n                    parentStack\[parentIndex]\[0] -= numChildren + 1.0f;\n                \}\n\n                // If there are no parents, or still children of the parent\n                // we do not need to compute anything further for this loop\n                if (parentStackLength <= 0 || parentStack\[stackLastIndex]\[0] > 0.0f)\n                \{\n                    continue;\n                \}\n\n                // pop stack\n                // we know that there will be no more children if we did not continue\n                numChildren = 0.0f;\n                nextDistance = parentStack\[stackLastIndex]\[6];\n                stackLastIndex--;\n                parentStackLength--;\n            \}\n\n            if (numChildren <= 0.0f)\n            \{\n                // No Children left, compute interactions with parent\n                if (parentStackLength > 0)\n                \{\n                    // Process this object, along with all parents that do not\n                    // have any more children, removing them from the stack,\n                    // but descend all the way down the stack, without removing\n                    // the objects that still have children\n                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)\n                    \{\n                        const int parentModifications = (int) parentStack\[stackIndex]\[5];\n\n                        // Do not need to interact with bounding volumes.\n                        // They are in the stack for relative positioning\n                        // if they weren't then we would have to manually move\n                        // the bounding box to follow the children\n                        if (!(parentModifications & 4096))\n                        \{\n                            const float parentNextDistance = parentStack\[stackIndex]\[6];\n                            const float parentBlendStrength = parentStack\[stackIndex]\[7];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentBlendStrength\n                            );\n                        \}\n\n                        // Update the global min distance (and surface/colour)\n                        if (fabs(nextDistance) < fabs(distance))\n                        \{\n                            distance = nextDistance;\n                        \}\n                    \}\n\n                    do\n                    \{\n                        // Decrement the number of children each parent has\n                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                        \{\n                            parentStack\[parentIndex]\[0] -= 1.0f;\n                        \}\n\n                        // Get the number of children still remaining for the parent\n                        // If there are still children, we can break out of this loop\n                        // to process the rest of them before the parent itself\n                        numChildren = parentStack\[stackLastIndex]\[0];\n                    \}\n                    while (numChildren <= 0.0f && --stackLastIndex >= 0);\n\n                    parentStackLength = stackLastIndex + 1;\n                \}\n                // No parents to interact with, simply check the distance\n                else if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n                \}\n            \}\n            else\n            \{\n                // Node has Children, push it to the stack for later\n                // processing when we have all its children\n                // parentStack.push()\n                parentStack\[parentStackLength]\[0] = numChildren;\n                parentStack\[parentStackLength]\[1] = transformedRay.x;\n                parentStack\[parentStackLength]\[2] = transformedRay.y;\n                parentStack\[parentStackLength]\[3] = transformedRay.z;\n                parentStack\[parentStackLength]\[4] = scale;\n                parentStack\[parentStackLength]\[5] = (float) modifications;\n                parentStack\[parentStackLength]\[6] = nextDistance;\n                parentStack\[parentStackLength]\[7] = blendStrength;\n                parentStackLength++;\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     *\n     * @arg rayOrigin: The origin position of the ray.\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     * @arg colour: Location to store the colour of the hit object.\n     * @arg surface: Location to store the surface properties of the hit\n     *     object.\n     *\n     * @returns: The minimum distance to an object in the scene, and the\n     *     unique identifier of the object.\n     */\n    float2 getMinDistanceToObjectInScene(\n            const float3 &rayOrigin,\n            const float pixelFootprint,\n            float4 &diffusivity,\n            float4 &specularity,\n            float4 &transmittance,\n            float4 &emittance,\n            float4 &surface)\n    \{\n        float distance = _maxRayDistance;\n        float id = 0.0f;\n\n        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour\n        // roughness, specular colour, specular, transmissive colour, transmission,\n        // emissive colour, emission, refractive index, objectId, blendStrength\n        float parentStack\[MAX_CHILD_DEPTH]\[\n            1   // numChildren\n            + 3 // transformedRay\n            + 1 // scale\n            + 1 // mods\n            + 1 // nextDistance\n            + 3 // diffuse colour\n            + 1 // roughness\n            + 3 // specular colour\n            + 1 // specular\n            + 3 // transmissive colour\n            + 1 // transmission\n            + 3 // emissive colour\n            + 1 // emission\n            + 3 // unused for now\n            + 1 // refractive index\n            + 1 // objectId\n            + 1 // blendStrength\n        ];\n        int parentStackLength = 0;\n\n        for (int j=0; j < _objectTextureWidth; j++)\n        \{\n            // Read in the shape properties\n            SampleType(positions) position = positions(j, 0);\n            SampleType(rotations) rotation = rotations(j, 0);\n            SampleType(dimensions) dimension = dimensions(j, 0);\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n            SampleType(diffusivities) diffuseColour = diffusivities(j, 0);\n            SampleType(specularities) specularColour = specularities(j, 0);\n            SampleType(transmittances) transmissiveColour = transmittances(j, 0);\n            SampleType(emittances) emissiveColour = emittances(j, 0);\n            SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);\n\n            const int modifications = ((int) shapeProperty.y) | ((int) surfaceProperty.y);\n            float scale = position.w;\n\n            const float blendStrength = shapeProperty.w;\n            float numChildren = shapeProperty.z;\n\n            int stackLastIndex = parentStackLength - 1;\n\n            float4 blendedDiffuseColour = diffuseColour;\n            float4 blendedSpecularColour = specularColour;\n            float4 blendedTransmissiveColour = transmissiveColour;\n            float4 blendedEmissiveColour = emissiveColour;\n            float4 blendedSurface = surfaceProperty;\n\n            // Position relative to the parent if we have any\n            float3 parentTransformedRay = rayOrigin;\n            if (parentStackLength > 0)\n            \{\n                parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                scale *= parentStack\[stackLastIndex]\[4];\n            \}\n\n            // Use parent transform to position child\n            const float3 transformedRay = transformRay(\n                parentTransformedRay,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n\n            // Get distance to this child\n            float nextDistance = getModifiedDistance(\n                transformedRay,\n                (int) shapeProperty.x,\n                dimension,\n                scale,\n                modifications,\n                modParameters1.w,\n                rotation.w,\n                blendedDiffuseColour,\n                blendedSpecularColour,\n                blendedTransmissiveColour,\n                blendedEmissiveColour\n            );\n\n            // Track which object was hit for the alpha channel\n            float objectId = (float) j + 1.0f;\n\n            // If this is a bounding volume, we can skip its children\n            // if we aren't close to, or inside it\n            if (\n                modifications & 4096\n                && numChildren > 0\n                && nextDistance > _hitTolerance + pixelFootprint\n            ) \{\n                // Update the min distance if this bounding volume is closest.\n                // Otherwise we could step through it, or if every object in\n                // the scene is inside it, we would not step forward at all\n                if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n\n                    diffusivity = blendedDiffuseColour;\n                    specularity = blendedSpecularColour;\n                    transmittance = blendedTransmissiveColour;\n                    emittance = blendedEmissiveColour;\n\n                    surface = blendedSurface;\n\n                    id = objectId;\n                \}\n\n                // This was tagged as a boundary object, skip its children\n                // since we arent close to hitting it\n                j += numChildren;\n\n                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                \{\n                    parentStack\[parentIndex]\[0] -= numChildren + 1.0f;\n                \}\n\n                // If there are no parents, or still children of the parent\n                // we do not need to compute anything further for this loop\n                if (parentStackLength <= 0 || parentStack\[stackLastIndex]\[0] > 0.0f)\n                \{\n                    continue;\n                \}\n\n                // pop stack\n                // we know that there will be no more children if we did not continue\n                numChildren = 0.0f;\n                nextDistance = parentStack\[stackLastIndex]\[6];\n                blendedDiffuseColour = float4(\n                    parentStack\[stackLastIndex]\[7],\n                    parentStack\[stackLastIndex]\[8],\n                    parentStack\[stackLastIndex]\[9],\n                    parentStack\[stackLastIndex]\[10]\n                );\n                blendedSpecularColour = float4(\n                    parentStack\[stackLastIndex]\[11],\n                    parentStack\[stackLastIndex]\[12],\n                    parentStack\[stackLastIndex]\[13],\n                    parentStack\[stackLastIndex]\[14]\n                );\n                blendedTransmissiveColour = float4(\n                    parentStack\[stackLastIndex]\[15],\n                    parentStack\[stackLastIndex]\[16],\n                    parentStack\[stackLastIndex]\[17],\n                    parentStack\[stackLastIndex]\[18]\n                );\n                blendedEmissiveColour = float4(\n                    parentStack\[stackLastIndex]\[19],\n                    parentStack\[stackLastIndex]\[20],\n                    parentStack\[stackLastIndex]\[21],\n                    parentStack\[stackLastIndex]\[22]\n                );\n                blendedSurface = surfaceProperty;\n                blendedSurface = float4(\n                    parentStack\[stackLastIndex]\[23],\n                    parentStack\[stackLastIndex]\[24],\n                    parentStack\[stackLastIndex]\[25],\n                    parentStack\[stackLastIndex]\[26]\n                );\n                objectId = parentStack\[stackLastIndex]\[27];\n                stackLastIndex--;\n                parentStackLength--;\n            \}\n\n            if (numChildren <= 0.0f)\n            \{\n                // No Children left, compute interactions with parent\n                if (parentStackLength > 0)\n                \{\n                    // Process this object, along with all parents that do not\n                    // have any more children, removing them from the stack,\n                    // but descend all the way down the stack, without removing\n                    // the objects that still have children\n                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)\n                    \{\n                        const int parentModifications = (int) parentStack\[stackIndex]\[5];\n\n                        // Do not need to interact with bounding volumes.\n                        // They are in the stack for relative positioning\n                        // if they weren't then we would have to manually move\n                        // the bounding box to follow the children\n                        if (!(parentModifications & 4096))\n                        \{\n                            const float parentNextDistance = parentStack\[stackIndex]\[6];\n                            const float4 parentDiffuseColour = float4(\n                                parentStack\[stackIndex]\[7],\n                                parentStack\[stackIndex]\[8],\n                                parentStack\[stackIndex]\[9],\n                                parentStack\[stackIndex]\[10]\n                            );\n                            const float4 parentSpecularColour = float4(\n                                parentStack\[stackIndex]\[11],\n                                parentStack\[stackIndex]\[12],\n                                parentStack\[stackIndex]\[13],\n                                parentStack\[stackIndex]\[14]\n                            );\n                            const float4 parentTransmissiveColour = float4(\n                                parentStack\[stackIndex]\[15],\n                                parentStack\[stackIndex]\[16],\n                                parentStack\[stackIndex]\[17],\n                                parentStack\[stackIndex]\[18]\n                            );\n                            const float4 parentEmissiveColour = float4(\n                                parentStack\[stackIndex]\[19],\n                                parentStack\[stackIndex]\[20],\n                                parentStack\[stackIndex]\[21],\n                                parentStack\[stackIndex]\[22]\n                            );\n                            const float4 parentSurfaceProperty = float4(\n                                parentStack\[stackIndex]\[23],\n                                parentStack\[stackIndex]\[24],\n                                parentStack\[stackIndex]\[25],\n                                parentStack\[stackIndex]\[26]\n                            );\n                            if (fabs(nextDistance) > fabs(parentNextDistance))\n                            \{\n                                objectId = parentStack\[stackIndex]\[27];\n                            \}\n                            const float parentBlendStrength = parentStack\[stackIndex]\[28];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentDiffuseColour,\n                                blendedDiffuseColour,\n                                parentSpecularColour,\n                                blendedSpecularColour,\n                                parentTransmissiveColour,\n                                blendedTransmissiveColour,\n                                parentEmissiveColour,\n                                blendedEmissiveColour,\n                                parentSurfaceProperty,\n                                blendedSurface,\n                                parentBlendStrength\n                            );\n                        \}\n\n                        // Update the global min distance (and surface/colour)\n                        if (fabs(nextDistance) < fabs(distance))\n                        \{\n                            distance = nextDistance;\n\n                            diffusivity = blendedDiffuseColour;\n                            specularity = blendedSpecularColour;\n                            transmittance = blendedTransmissiveColour;\n                            emittance = blendedEmissiveColour;\n\n                            surface = blendedSurface;\n\n                            id = objectId;\n                        \}\n                    \}\n\n                    do\n                    \{\n                        // Decrement the number of children each parent has\n                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                        \{\n                            parentStack\[parentIndex]\[0] -= 1.0f;\n                        \}\n\n                        // Get the number of children still remaining for the parent\n                        // If there are still children, we can break out of this loop\n                        // to process the rest of them before the parent itself\n                        numChildren = parentStack\[stackLastIndex]\[0];\n                    \}\n                    while (numChildren <= 0.0f && --stackLastIndex >= 0);\n\n                    parentStackLength = stackLastIndex + 1;\n                \}\n                // No parents to interact with, simply check the distance\n                else if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n\n                    diffusivity = blendedDiffuseColour;\n                    specularity = blendedSpecularColour;\n                    transmittance = blendedTransmissiveColour;\n                    emittance = blendedEmissiveColour;\n\n                    surface = blendedSurface;\n\n                    id = objectId;\n                \}\n            \}\n            else\n            \{\n                // Node has Children, push it to the stack for later\n                // processing when we have all its children\n                // parentStack.push()\n                parentStack\[parentStackLength]\[0] = numChildren;\n                parentStack\[parentStackLength]\[1] = transformedRay.x;\n                parentStack\[parentStackLength]\[2] = transformedRay.y;\n                parentStack\[parentStackLength]\[3] = transformedRay.z;\n                parentStack\[parentStackLength]\[4] = scale;\n                parentStack\[parentStackLength]\[5] = (float) modifications;\n                parentStack\[parentStackLength]\[6] = nextDistance;\n                parentStack\[parentStackLength]\[7] = blendedDiffuseColour.x;\n                parentStack\[parentStackLength]\[8] = blendedDiffuseColour.y;\n                parentStack\[parentStackLength]\[9] = blendedDiffuseColour.z;\n                parentStack\[parentStackLength]\[10] = blendedDiffuseColour.w;\n                parentStack\[parentStackLength]\[11] = blendedSpecularColour.x;\n                parentStack\[parentStackLength]\[12] = blendedSpecularColour.y;\n                parentStack\[parentStackLength]\[13] = blendedSpecularColour.z;\n                parentStack\[parentStackLength]\[14] = blendedSpecularColour.w;\n                parentStack\[parentStackLength]\[15] = blendedTransmissiveColour.x;\n                parentStack\[parentStackLength]\[16] = blendedTransmissiveColour.y;\n                parentStack\[parentStackLength]\[17] = blendedTransmissiveColour.z;\n                parentStack\[parentStackLength]\[18] = blendedTransmissiveColour.w;\n                parentStack\[parentStackLength]\[19] = blendedEmissiveColour.x;\n                parentStack\[parentStackLength]\[20] = blendedEmissiveColour.y;\n                parentStack\[parentStackLength]\[21] = blendedEmissiveColour.z;\n                parentStack\[parentStackLength]\[22] = blendedEmissiveColour.w;\n                parentStack\[parentStackLength]\[23] = blendedSurface.x;\n                parentStack\[parentStackLength]\[24] = blendedSurface.y;\n                parentStack\[parentStackLength]\[25] = blendedSurface.z;\n                parentStack\[parentStackLength]\[26] = blendedSurface.w;\n                parentStack\[parentStackLength]\[27] = objectId;\n                parentStack\[parentStackLength]\[28] = blendStrength;\n                parentStackLength++;\n            \}\n        \}\n\n        return float2(distance, id);\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     *\n     * @returns: The normalized surface normal.\n     */\n    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint)\n    \{\n        return normalize(\n            __offset0 * getMinDistanceToObjectInScene(\n                point + __offset0 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset1 * getMinDistanceToObjectInScene(\n                point + __offset1 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset2 * getMinDistanceToObjectInScene(\n                point + __offset2 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset3 * getMinDistanceToObjectInScene(\n                point + __offset3 * _hitTolerance,\n                pixelFootprint\n            )\n        );\n    \}\n\n\n    /**\n     * Compute a soft shadow value.\n     *\n     * @arg rayDirection: The direction of the shadow ray.\n     * @arg distanceToShadePoint: The maximum distance to check for\n     *     a shadow casting object.\n     * @arg softness: The softness of the shadow.\n     * @arg rayOrigin: The origin of the ray.\n     * @arg colour: Will store the colour of the object which casts the\n     *     shadow.\n     * @arg surface: Will store the surface properties of the object\n     *     which casts the shadow.\n     *\n     * @returns: The intenstity of shadow.\n     */\n    inline float computeSoftShadow(\n            const float3 &rayDirection,\n            const float distanceToShadePoint,\n            const float softness,\n            float3 &rayOrigin)\n    \{\n        float distanceTravelled = 0;\n        float shadowIntensity = 1.0f;\n        float lastStepDistance = FLT_MAX;\n\n        int iterations = 0;\n        float pixelFootprint = _hitTolerance;\n        while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)\n        \{\n            const float stepDistance = fabs(\n                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint)\n            );\n            const float stepDistanceSquared = stepDistance * stepDistance;\n            float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);\n            shadowIntensity = min(\n                shadowIntensity,\n                softness * sqrt(stepDistanceSquared - softOffset * softOffset)\n                / max(0.0f, distanceTravelled - softOffset)\n            );\n\n            if (stepDistance < pixelFootprint)\n            \{\n                shadowIntensity = saturate(shadowIntensity);\n                return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);\n            \}\n\n            lastStepDistance = stepDistance;\n            rayOrigin += rayDirection * stepDistance;\n            distanceTravelled += stepDistance;\n            pixelFootprint += stepDistance * _hitTolerance;\n            iterations++;\n        \}\n\n        shadowIntensity = saturate(shadowIntensity);\n        return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);\n    \}\n\n\n    /**\n     * Compute a shadow value.\n     *\n     * @arg rayDirection: The direction of the shadow ray.\n     * @arg distanceToShadePoint: The maximum distance to check for\n     *     a shadow casting object.\n     * @arg rayOrigin: The origin of the ray.\n     * @arg colour: Will store the colour of the object which casts the\n     *     shadow.\n     * @arg surface: Will store the surface properties of the object\n     *     which casts the shadow.\n     *\n     * @returns: The intenstity of shadow.\n     */\n    float computeShadow(\n            const float3 &rayDirection,\n            const float distanceToShadePoint,\n            float3 &rayOrigin)\n    \{\n        float distanceTravelled = 0;\n        int iterations = 0;\n        float pixelFootprint = _hitTolerance;\n        while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)\n        \{\n            const float stepDistance = fabs(\n                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint)\n            );\n\n            if (stepDistance < pixelFootprint)\n            \{\n                return 0;\n            \}\n\n            rayOrigin += rayDirection * stepDistance;\n            distanceTravelled += stepDistance;\n            pixelFootprint += stepDistance * _hitTolerance;\n            iterations++;\n        \}\n\n        return 1;\n    \}\n\n\n    /**\n     * Compute the ambient occlusion.\n     *\n     * @arg rayDirection: The direction of the shadow ray.\n     * @arg rayOrigin: The origin of the ray.\n     * @arg amount: The amount to scale the occlusion value by.\n     * @arg iterations: The number of iterations to refine the\n     *     occlusion.\n     * @arg colour: Will store the colour of the final occluding object.\n     * @arg surface: Will store the surface properties of the final\n     *     occluding object.\n     *\n     * @returns: The occlusion.\n     */\n    inline float computeAmbientOcclusion(\n            const float3 &rayDirection,\n            const float3 &rayOrigin,\n            const float amount,\n            const int iterations)\n    \{\n        float occlusion = 0.0f;\n        float occlusionScaleFactor = 1.0f;\n        for(int iteration=0; iteration < iterations; iteration++)\n        \{\n            const float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;\n            const float distanceToClosestObject = fabs(\n                getMinDistanceToObjectInScene(\n                    rayOrigin + stepDistance * rayDirection,\n                    _hitTolerance\n                )\n            );\n            occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;\n            occlusionScaleFactor *= 0.95;\n        \}\n\n        return (\n            amount\n            * saturate(0.5f + 0.5f * rayDirection.y)  // ambient\n            * saturate(1.0f - 1.5f * occlusion)       // occlusion\n        );\n    \}\n\n\n    /**\n     * Compute the combined intensity of all lights on the surface of an\n     * object.\n     *\n     * @arg pointOnSurface: The point on the surface to compute the\n     *     light intensity at.\n     * @arg surfaceNormal: The normal direction to the surface.\n     * @arg surfaceColour: The colour of the object.\n     * @arg surface: The surface properties of the object.\n     * @arg lightColour: Will store the light colour.\n     *\n     * @returns: The light intensity.\n     */\n    float4 sampleArtificialLight(\n            const float3 &pointOnSurface,\n            const float3 &surfaceNormal,\n            const float offset,\n            const float3 &lightDirection,\n            const float distanceToLight,\n            const int selectedLight)\n    \{\n        // Read the light properties\n        SampleType(lights) light = lights(selectedLight, 0);\n        SampleType(lightProperties) lightProperty = lightProperties(selectedLight, 0);\n        SampleType(lightProperties1) lightProperty1 = lightProperties1(selectedLight, 0);\n\n        float2 intensity;\n\n        int lightType = (int) lightProperty.w;\n        int absLightType = abs(lightType);\n\n        if (absLightType == 0)\n        \{\n            // Ambient light, simply return the intensity.\n            intensity = float2(light.w, 1);\n        \}\n        else if (absLightType == 1)\n        \{\n            intensity = float2(\n                1.0f,\n                computeAmbientOcclusion(\n                    surfaceNormal,\n                    pointOnSurface,\n                    light.w,\n                    (int) light.x\n                )\n            );\n        \}\n        else\n        \{\n            float intensityAtPosition = lightIntensity(\n                light.w,\n                lightProperty1.y,\n                distanceToLight\n            );\n            float3 surfaceOffset = offsetPoint(\n                pointOnSurface,\n                surfaceNormal,\n                offset\n            );\n\n            float shadowIntensityAtPosition;\n            if (lightType < 0)\n            \{\n                shadowIntensityAtPosition = computeSoftShadow(\n                    lightDirection,\n                    distanceToLight,\n                    lightProperty1.x,\n                    surfaceOffset\n                );\n            \}\n            else\n            \{\n                shadowIntensityAtPosition = computeShadow(\n                    lightDirection,\n                    distanceToLight,\n                    surfaceOffset\n                );\n            \}\n\n            intensity = float2(intensityAtPosition, shadowIntensityAtPosition);\n        \}\n\n        return emissiveTerm(\n            float4(\n                lightProperty.x,\n                lightProperty.y,\n                lightProperty.z,\n                intensity.x * intensity.y\n            )\n        );\n    \}\n\n\n    /**\n     * Compute the combined intensity of all lights on the surface of an\n     * object.\n     *\n     * @arg pointOnSurface: The point on the surface to compute the\n     *     light intensity at.\n     * @arg surfaceNormal: The normal direction to the surface.\n     * @arg surfaceColour: The colour of the object.\n     * @arg surface: The surface properties of the object.\n     * @arg lightColour: Will store the light colour.\n     *\n     * @returns: The light intensity.\n     */\n    inline float4 sampleLight(\n            const float3 &lightDirection,\n            const float distanceToLight,\n            float3 rayOrigin,\n            float3 &lightNormal)\n    \{\n        float4 diffusivity;\n        float4 specularity;\n        float4 transmittance;\n        float4 emittance;\n        float4 surface;\n\n        float distanceTravelled = 0;\n        int iterations = 0;\n        float pixelFootprint = _hitTolerance;\n\n        while (\n            distanceTravelled <= distanceToLight * 2.0f\n            && iterations < _maxRaySteps / 2\n        ) \{\n            const float2 result = getMinDistanceToObjectInScene(\n                rayOrigin,\n                pixelFootprint,\n                diffusivity,\n                specularity,\n                transmittance,\n                emittance,\n                surface\n            );\n            const float stepDistance = fabs(result.x);\n\n            if (stepDistance < pixelFootprint)\n            \{\n                if (emittance.w > 0.0f)\n                \{\n                    lightNormal = estimateSurfaceNormal(\n                        rayOrigin,\n                        pixelFootprint\n                    );\n                    return emissiveTerm(emittance);\n                \}\n                return float4(0);\n            \}\n\n            rayOrigin += lightDirection * stepDistance;\n            distanceTravelled += stepDistance;\n            pixelFootprint += stepDistance * _hitTolerance;\n            iterations++;\n        \}\n\n        lightNormal = -lightDirection;\n\n        return readHDRIValue(lightDirection);\n    \}\n\n\n    /**\n     *\n     */\n    float sampleLightData(\n            const float3 &seed,\n            const float3 &pointOnSurface,\n            const int emissiveIndices\[MAX_MIS_EMISSIVE_SHAPES],\n            const int numLights,\n            float3 &lightDirection,\n            float3 &lightNormal,\n            float &distanceToLight,\n            int &selectedLight)\n    \{\n        const float rng = random(random(seed.x + seed.y) + random(seed.z));\n        selectedLight = max(0, (int) floor(rng * (numLights - _hitTolerance)));\n\n        float visibleSurfaceArea = 1.0f;\n\n        if (selectedLight < _lightTextureWidth)\n        \{\n            // Selected a 'fake' light eg. point, directional, ambient\n            SampleType(lights) light = lights(selectedLight, 0);\n            const int lightType = abs((int) lightProperties(selectedLight, 0, 3));\n\n            if (lightType > 1)\n            \{\n                getLightData(\n                    pointOnSurface,\n                    float3(light.x, light.y, light.z),\n                    lightType,\n                    _maxRayDistance,\n                    distanceToLight,\n                    visibleSurfaceArea,\n                    lightDirection,\n                    lightNormal\n                );\n            \}\n        \}\n        else\n        \{\n            // Selected one of the emissive objects\n\n            const int objectIndex = emissiveIndices\[selectedLight - _lightTextureWidth];\n\n            const float3 position = getObjectPosition(objectIndex);\n\n            // TODO don't assume it's a sphere\n            const float radius = dimensions(objectIndex, 0, 0);\n\n            sphericalLightData(\n                seed,\n                pointOnSurface,\n                position,\n                radius,\n                lightDirection,\n                lightNormal,\n                distanceToLight,\n                visibleSurfaceArea\n            );\n        \}\n\n        return sampleLightsPDF(numLights, visibleSurfaceArea);\n    \}\n\n\n    /**\n     * March a ray through the scene.\n     *\n     * @arg rayOrigin: The origin of the ray.\n     * @arg rayDirection: The direction of the ray.\n     * @arg seed: A random value to use as the seed for roughness.\n     *\n     * @returns: The ray colour.\n     */\n    float4 marchRay(\n            const float3 &rayOrigin,\n            const float3 &rayDirection,\n            const int emissiveIndices\[MAX_MIS_EMISSIVE_SHAPES],\n            const int numEmissive,\n            float3 &seed)\n    \{\n        const int numLights = _lightTextureWidth + numEmissive;\n\n        float refractiveIndex = _refractiveIndex;\n\n        float nestedDielectrics\[MAX_NESTED_DIELECTRICS]\[\n            4   // Absorption colour of object\n            + 1 // Id of the dielectric we are currently in\n            + 1 // Refractive index of that object\n        ];\n        nestedDielectrics\[0]\[0] = _absorptionColour.x;\n        nestedDielectrics\[0]\[1] = _absorptionColour.y;\n        nestedDielectrics\[0]\[2] = _absorptionColour.z;\n        nestedDielectrics\[0]\[3] = _absorptionColour.w;\n        nestedDielectrics\[0]\[4] = -1;\n        nestedDielectrics\[0]\[5] = refractiveIndex;\n        int numNestedDielectrics = 0;\n\n        float4 rayColour = float4(0);\n        float4 throughput = float4(1);\n\n        float lastStepDistance = 1.0f;\n\n        float firstObjectId = 0.0f;\n        float lastRefractedId = -1.0f;\n\n        int iterations = 0;\n        int bounces = 0;\n\n        float distanceTravelled = 0;\n        float distanceTravelledThroughMaterial = distanceTravelled;\n\n        // Get the next ray\n        float3 origin = rayOrigin;\n        float3 direction = rayDirection;\n\n        float4 diffusivity;\n        float4 specularity;\n        float4 transmittance;\n        float4 emittance;\n        float4 surface;\n\n        float pixelFootprint = _hitTolerance;\n\n        float previousMaterialPDF = 1.0f;\n\n        // March the ray\n        while (\n            distanceTravelled < _maxRayDistance\n            && iterations < _maxRaySteps\n            && sumComponent(throughput) > _hitTolerance\n        ) \{\n            // Get the closest distance to an object\n            const float2 result = getMinDistanceToObjectInScene(\n                origin,\n                pixelFootprint,\n                diffusivity,\n                specularity,\n                transmittance,\n                emittance,\n                surface\n            );\n\n            // Keep the signed distance so we know whether or not we are\n            // inside the object\n            const float signedStepDistance = result.x;\n\n            // Get the absolute value, the true shortest distance to a\n            // surface\n            const float stepDistance = fabs(signedStepDistance);\n\n            // Keep track of the distance the ray has travelled\n            distanceTravelled += stepDistance;\n            distanceTravelledThroughMaterial += stepDistance;\n\n            pixelFootprint += _hitTolerance * stepDistance;\n\n            // Step the ray forwards\n            origin += direction * stepDistance;\n\n            // Have we hit the nearest object?\n            if (stepDistance < pixelFootprint)\n            \{\n                int noiseOptions;\n                const float noiseValue = getNoiseValue(result.y - 1, origin, noiseOptions);\n                if (noiseValue >= 0.0f)\n                \{\n                    useNoiseOnMaterial(\n                        noiseOptions,\n                        noiseValue,\n                        diffusivity,\n                        specularity,\n                        transmittance,\n                        emittance,\n                        surface\n                    );\n                \}\n\n                // The normal to the surface at that position\n                float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(\n                    origin,\n                    pixelFootprint\n                );\n\n                if (bounces == 0)\n                \{\n                    // Keep the ID of the first object hit, so we can\n                    // store it in the alpha channel\n                    firstObjectId = result.y;\n\n                    // Early exit for the various AOVs that are not 'scene'\n                    if (_outputType > 0 && _outputType < 4)\n                    \{\n                        return earlyExitAOVs(\n                            _outputType,\n                            origin,\n                            surfaceNormal,\n                            distanceTravelled,\n                            firstObjectId\n                        );\n                    \}\n                \}\n\n                const float reflectionOffset = pixelFootprint * _shadowBias;\n                const float transmissionOffset = (\n                    (2.0f * pixelFootprint + stepDistance)\n                    * _shadowBias\n                );\n\n                float lightPDF = 0.0f;\n                float3 lightDirection = surfaceNormal;\n                float3 lightNormal = -surfaceNormal;\n                float distanceToLight = 0.0f;\n                int selectedLight;\n\n                if (_lightSamplingEnabled && numLights > 0)\n                \{\n                    // Light Sampling\n                    lightPDF = sampleLightData(\n                        seed,\n                        origin,\n                        emissiveIndices,\n                        numLights,\n                        lightDirection,\n                        lightNormal,\n                        distanceToLight,\n                        selectedLight\n                    );\n                \}\n\n                const float4 absorptionColour = float4(\n                    nestedDielectrics\[numNestedDielectrics]\[0],\n                    nestedDielectrics\[numNestedDielectrics]\[1],\n                    nestedDielectrics\[numNestedDielectrics]\[2],\n                    nestedDielectrics\[numNestedDielectrics]\[3]\n                );\n\n                // Material sampling\n                float4 materialBRDF;\n                float4 lightBRDF;\n                float4 materialEmissiveColour;\n                float3 bounceDirection;\n                float materialLightPDF;\n                const float materialPDF = sampleMaterial(\n                    seed,\n                    surfaceNormal,\n                    direction,\n                    lightDirection,\n                    diffusivity,\n                    reflectionOffset,\n                    transmissionOffset,\n                    transmittance,\n                    surface.x,\n                    surface.w,\n                    specularity,\n                    diffusivity.w,\n                    emittance,\n                    result.y,\n                    distanceToLight,\n                    materialEmissiveColour,\n                    materialBRDF,\n                    lightBRDF,\n                    bounceDirection,\n                    origin,\n                    nestedDielectrics,\n                    numNestedDielectrics,\n                    refractiveIndex,\n                    distanceTravelledThroughMaterial,\n                    materialLightPDF\n                );\n\n                if (\n                    _lightSamplingEnabled\n                    && lightPDF > _hitTolerance\n                    && materialLightPDF > _hitTolerance\n                ) \{\n                    float4 lightEmissiveColour;\n                    float lightGeometryFactor;\n                    if (selectedLight < _lightTextureWidth)\n                    \{\n                        lightEmissiveColour = sampleArtificialLight(\n                            origin,\n                            surfaceNormal,\n                            reflectionOffset,\n                            lightDirection,\n                            distanceToLight,\n                            selectedLight\n                        );\n                        lightGeometryFactor = 1.0f;\n                    \}\n                    else\n                    \{\n                        lightEmissiveColour = sampleLight(\n                            lightDirection,\n                            distanceToLight,\n                            offsetPoint(\n                                origin,\n                                surfaceNormal,\n                                reflectionOffset\n                            ),\n                            lightNormal\n                        );\n                        lightGeometryFactor = geometryFactor(\n                            lightDirection,\n                            lightNormal,\n                            distanceToLight\n                        );\n                    \}\n\n                    rayColour += (\n                        lightEmissiveColour\n                        * throughput\n                        * lightBRDF\n                        * exp(-absorptionColour * distanceToLight)\n                        * lightGeometryFactor\n                        * saturate(dot(surfaceNormal, lightDirection))\n                        * balanceHeuristic(\n                            lightPDF,\n                            materialLightPDF * lightGeometryFactor\n                        ) / lightPDF\n                    );\n                \}\n\n                // TODO don't assume this object is a sphere\n                const float radius = dimensions(result.y - 1, 0, 0);\n                const float visibleSurfaceArea = 2.0f * PI * radius * radius;\n\n                rayColour += (\n                    materialEmissiveColour\n                    * throughput\n                    * exp(-absorptionColour * distanceTravelledThroughMaterial)\n                    * balanceHeuristic(\n                        previousMaterialPDF,\n                        sampleLightsPDF(numLights, visibleSurfaceArea)\n                    )\n                );\n\n                throughput *= (\n                    materialBRDF\n                    * fabs(dot(bounceDirection, surfaceNormal))\n                    / materialPDF\n                );\n\n                // Exit if we have reached the bounce limit\n                // or with a random chance\n                const float exitProbability = max(throughput.x, throughput.y, throughput.z);\n                const float rng = random(random(seed.x) + seed.y);\n                if (\n                    ++bounces >= __bouncesPerRay\n                    || exitProbability <= rng\n                ) \{\n                    return finalAOVs(\n                        _outputType,\n                        iterations,\n                        bounces,\n                        firstObjectId,\n                        rayColour\n                    );\n                \}\n\n                previousMaterialPDF = materialPDF;\n\n                direction = bounceDirection;\n\n                // Account for the lost intensity from the early exits\n                throughput /= exitProbability;\n\n                // Update the random seed\n                seed = random(seed + rng + fabs(origin + direction));\n\n                // Reset the pixel footprint so multiple reflections don't\n                // reduce precision\n                pixelFootprint = _hitTolerance;\n\n            \}\n\n            lastStepDistance = signedStepDistance;\n            iterations++;\n        \}\n\n        // If we are not computing the scene value and we have missed all\n        // objects, return black.\n        if (_outputType > 0)\n        \{\n            return rayMissAOVs(\n                _outputType,\n                iterations,\n                bounces,\n                firstObjectId\n            );\n        \}\n\n        const float4 absorptionColour = float4(\n            nestedDielectrics\[numNestedDielectrics]\[0],\n            nestedDielectrics\[numNestedDielectrics]\[1],\n            nestedDielectrics\[numNestedDielectrics]\[2],\n            nestedDielectrics\[numNestedDielectrics]\[3]\n        );\n\n        // Read the hdri value in the direction the ray was last travelling\n        // and absorb an amount of light proportional to the distance travelled\n        // through the last material\n        rayColour += throughput * readHDRIValue(direction) * exp(\n            -absorptionColour * (\n                distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled\n            )\n        );\n\n        rayColour.w = (bounces > 0) * firstObjectId;\n        return rayColour;\n    \}\n\n\n    /**\n     *\n     */\n    int getEmissiveIndices(int emissiveIndices\[MAX_MIS_EMISSIVE_SHAPES])\n    \{\n        int currentIndex = 0;\n        for (int j=0; j < min(_objectTextureWidth, MAX_MIS_EMISSIVE_SHAPES); j++)\n        \{\n            if (emittances(j, 0, 3) > 0.0f)\n            \{\n                emissiveIndices\[currentIndex++] = j;\n            \}\n        \}\n\n        return currentIndex;\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value.\n     *\n     * @arg pos: The x, and y location we are currently processing.\n     */\n    void process(int2 pos)\n    \{\n        SampleType(noise) noisePixel = noise();\n        float3 seed = random(float3(noisePixel.x, noisePixel.y, noisePixel.z));\n\n        const float4 variancePixel = variance();\n\n        const float numPaths = adaptiveSamples(\n            _minPathsPerPixel,\n            _maxPathsPerPixel,\n            float3(variancePixel.x, variancePixel.y, variancePixel.z)\n        );\n\n        float4 resultPixel = float4(0);\n\n        float2 pixelLocation = float2(pos.x, pos.y);\n\n        int emissiveMISOptions\[MAX_MIS_EMISSIVE_SHAPES];\n\n        const int numEmissive = getEmissiveIndices(emissiveMISOptions);\n\n        for (int path=1; path <= numPaths; path++)\n        \{\n            seed = length(seed) * random(seed * path);\n\n            // Generate a ray from the camera\n            float3 rayOrigin;\n            float3 rayDirection;\n            const float2 uvCoordinates = pixelsToUV(\n                pixelLocation + random(float2(seed.x, seed.y)),\n                float2(_formatWidth, _formatHeight)\n            );\n            if (_latLong)\n            \{\n                createLatLongCameraRay(\n                    _cameraWorldMatrix,\n                    uvCoordinates,\n                    rayOrigin,\n                    rayDirection\n                );\n            \}\n            else if (_depthOfFieldEnabled)\n            \{\n                createCameraRay(\n                    _cameraWorldMatrix,\n                    __inverseCameraProjectionMatrix,\n                    uvCoordinates,\n                    __aperture,\n                    _focalDistance,\n                    seed,\n                    rayOrigin,\n                    rayDirection\n                );\n            \}\n            else\n            \{\n                createCameraRay(\n                    _cameraWorldMatrix,\n                    __inverseCameraProjectionMatrix,\n                    uvCoordinates,\n                    rayOrigin,\n                    rayDirection\n                );\n            \}\n\n            // Determine the colour of the ray\n            resultPixel += marchRay(\n                rayOrigin,\n                rayDirection,\n                emissiveMISOptions,\n                numEmissive,\n                seed\n            );\n        \}\n\n        const uint objectId = resultPixel.w / numPaths;\n\n        const float numPrecomputedPaths = variancePixel.w;\n\n        dst() = (resultPixel + numPrecomputedPaths * src()) / (numPaths + numPrecomputedPaths);\n\n        if (_outputType == 4)\n        \{\n            dst(2) = numPaths + numPrecomputedPaths;\n        \}\n\n        dst(3) = encodeTwoValuesInUint(objectId, numPaths + numPrecomputedPaths);\n    \}\n\};\n"
+  KernelDescription "2 \"PathMarchKernel\" iterate pixelWise 764084fff52a90727230e8445b6af286a618a6569fac9768be40c0d09130ab89 23 \"noise\" Read Point \"src\" Read Point \"variance\" Read Point \"hdri\" Read Random \"positions\" Read Random \"rotations\" Read Random \"dimensions\" Read Random \"diffusivities\" Read Random \"specularities\" Read Random \"transmittances\" Read Random \"emittances\" Read Random \"shapeProperties\" Read Random \"shapeModParameters0\" Read Random \"shapeModParameters1\" Read Random \"surfaceProperties\" Read Random \"noiseParams0\" Read Random \"noiseParams1\" Read Random \"noiseParams2\" Read Random \"lights\" Read Random \"lightProperties\" Read Random \"lightProperties1\" Read Random \"irradiance\" Read Random \"dst\" Write Point 28 \"Focal Length\" Float 1 AABIQg== \"Horizontal Aperture\" Float 1 ppvEQQ== \"Near Plane\" Float 1 zczMPQ== \"Far Plane\" Float 1 AEAcRg== \"Camera World Matrix\" Float 16 AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPw== \"Focal Distance\" Float 1 AACAQA== \"fstop\" Float 1 AACAQQ== \"Enable Depth Of Field\" Bool 1 AQ== \"Screen Width\" Float 1 AABwRQ== \"Screen Height\" Float 1 AAAHRQ== \"HDRI Offset Angle\" Float 1 AAAAAA== \"Use Precomputed Irradiance\" Bool 1 AQ== \"Min Paths Per Pixel\" Int 1 AQAAAA== \"Max Paths Per Pixel\" Int 1 AQAAAA== \"Max Bounces\" Int 1 AQAAAA== \"Max Ray Distance\" Float 1 AAB6RA== \"Max Ray Steps\" Int 1 gAAAAA== \"Hit Tolerance\" Float 1 bxKDOg== \"Shadow Bias\" Float 1 AACAPw== \"Index of Refraction\" Float 1 AACAPw== \"Scattering Probability\" Float 1 AAAAAA== \"brdf Colour\" Float 4 AACAPwAAgD8AAIA/AACAPw== \"Equi-Angular Samples\" Int 1 BQAAAA== \"Object Texture Width\" Int 1 AAAAAA== \"Light Texture Width\" Int 1 AAAAAA== \"Enable Light Sampling\" Bool 1 AQ== \"Output Type\" Int 1 AAAAAA== \"Output LatLong\" Bool 1 AA== 28 \"_focalLength\" 1 1 \"_horizontalAperture\" 1 1 \"_nearPlane\" 1 1 \"_farPlane\" 1 1 \"_cameraWorldMatrix\" 16 1 \"_focalDistance\" 1 1 \"_fStop\" 1 1 \"_depthOfFieldEnabled\" 1 1 \"_formatWidth\" 1 1 \"_formatHeight\" 1 1 \"_hdriOffsetAngle\" 1 1 \"_usePrecomputedIrradiance\" 1 1 \"_minPathsPerPixel\" 1 1 \"_maxPathsPerPixel\" 1 1 \"_maxBounces\" 1 1 \"_maxRayDistance\" 1 1 \"_maxRaySteps\" 1 1 \"_hitTolerance\" 1 1 \"_shadowBias\" 1 1 \"_refractiveIndex\" 1 1 \"_scatteringProbability\" 1 1 \"_absorptionColour\" 4 1 \"_equiangularSamples\" 1 1 \"_objectTextureWidth\" 1 1 \"_lightTextureWidth\" 1 1 \"_lightSamplingEnabled\" 1 1 \"_outputType\" 1 1 \"_latLong\" 1 1 10 \"__inverseCameraProjectionMatrix\" Float 16 1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"__aperture\" Float 1 1 AAAAAA== \"__bouncesPerRay\" Int 1 1 AAAAAA== \"__hdriPixelSize\" Float 2 1 AAAAAAAAAAA= \"__irradiancePixelSize\" Float 2 1 AAAAAAAAAAA= \"__hdriOffsetRadians\" Float 1 1 AAAAAA== \"__offset0\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset1\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset2\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA== \"__offset3\" Float 3 1 AAAAAAAAAAAAAAAAAAAAAA=="
+  kernelSource "// Copyright 2022 by Owen Bulka.\n// All rights reserved.\n// This file is released under the \"MIT License Agreement\".\n// Please see the LICENSE.md file that should have been included as part\n// of this package.\n\n//\n// BlinkScript Ray Marcher\n//\n\n#include \"math.h\"\n#include \"colour.h\"\n#include \"random.h\"\n#include \"noise.h\"\n#include \"conversion.h\"\n#include \"aovs.h\"\n#include \"lights.h\"\n#include \"material.h\"\n#include \"camera.h\"\n#include \"objectInteraction.h\"\n#include \"sdfModifications.h\"\n#include \"sdfs.h\"\n\n\n// Increase this if you want more than MAX_CHILD_DEPTH direct children\n#define MAX_CHILD_DEPTH 64\n#define MAX_MIS_EMISSIVE_SHAPES 64\n\n\nkernel PathMarchKernel : ImageComputationKernel<ePixelWise>\n\{\n    // the input which specifies the format, process is called once per pixel\n    // in this image, which also provides random seeds\n    Image<eRead, eAccessPoint, eEdgeNone> noise;\n    Image<eRead, eAccessPoint, eEdgeNone> src;\n    Image<eRead, eAccessPoint, eEdgeNone> variance;\n\n    // the hdri in latlong format\n    Image<eRead, eAccessRandom, eEdgeNone> hdri;\n\n\n    // the shape positons.xyz, scale.w\n    Image<eRead, eAccessRandom, eEdgeNone> positions;\n\n    // the shape rotations.xyz, wall thickness.w\n    Image<eRead, eAccessRandom, eEdgeNone> rotations;\n\n    // the shape dimensions.xyzw (some shapes may not use all channels)\n    Image<eRead, eAccessRandom, eEdgeNone> dimensions;\n\n    // the shape diffusivities.xyz, specular roughness.w\n    Image<eRead, eAccessRandom, eEdgeNone> diffusivities;\n\n    Image<eRead, eAccessRandom, eEdgeNone> specularities;\n\n    Image<eRead, eAccessRandom, eEdgeNone> transmittances;\n\n    Image<eRead, eAccessRandom, eEdgeNone> emittances;\n\n\n    // shape type.x, operation.y, numChildren.z, blend strength.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;\n\n    // repetition params.xyzw\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters0;\n\n    // elongation.xyz edgeRadius.w\n    Image<eRead, eAccessRandom, eEdgeNone> shapeModParameters1;\n\n    // reflection.x, transmission.y, emission.z, roughness.w\n    Image<eRead, eAccessRandom, eEdgeNone> surfaceProperties;\n\n    // noise options.x translation.yzw\n    Image<eRead, eAccessRandom, eEdgeNone> noiseParams0;\n\n    // octaves.x, lacunarity.y, gain.z, gamma.w\n    Image<eRead, eAccessRandom, eEdgeNone> noiseParams1;\n\n    // size.x\n    Image<eRead, eAccessRandom, eEdgeNone> noiseParams2;\n\n    // the input lights direction/position.xyz intensity.w\n    Image<eRead, eAccessRandom, eEdgeNone> lights;\n\n    // colour.xyz, type.w\n    // w in \[0, 1) = directional, \[1, inf) = point\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties;\n\n    // shadow hardness.x\n    Image<eRead, eAccessRandom, eEdgeNone> lightProperties1;\n\n    // the precomputed irradiance of the hdri\n    Image<eRead, eAccessRandom, eEdgeClamped> irradiance;\n\n\n    // the output image\n    Image<eWrite> dst;\n\n\n    param:\n        // These parameters are made available to the user.\n\n        // Camera params\n        float _focalLength;\n        float _horizontalAperture;\n        float _nearPlane;\n        float _farPlane;\n        float4x4 _cameraWorldMatrix;\n        float _focalDistance;\n        float _fStop;\n        bool _depthOfFieldEnabled;\n\n        // Image params\n        float _formatWidth;\n        float _formatHeight;\n\n        float _hdriOffsetAngle;\n        bool _usePrecomputedIrradiance;\n\n        // Ray params\n        int _minPathsPerPixel;\n        int _maxPathsPerPixel;\n        int _maxBounces;\n        float _maxRayDistance;\n        int _maxRaySteps;\n        float _hitTolerance;\n        float _shadowBias;\n\n        // Scene params\n        float _refractiveIndex;\n        float _scatteringProbability;\n        float4 _absorptionColour;\n        int _equiangularSamples;\n\n        // Shape Textures\n        int _objectTextureWidth;\n        int _lightTextureWidth;\n\n        bool _lightSamplingEnabled;\n\n        int _outputType;\n\n        bool _latLong;\n\n\n    local:\n        // These local variables are not exposed to the user.\n\n        float4x4 __inverseCameraProjectionMatrix;\n        float __aperture;\n\n        int __bouncesPerRay;\n\n        float2 __hdriPixelSize;\n        float2 __irradiancePixelSize;\n        float __hdriOffsetRadians;\n\n        float3 __offset0;\n        float3 __offset1;\n        float3 __offset2;\n        float3 __offset3;\n\n\n    /**\n     * In define(), parameters can be given labels and default values.\n     */\n    void define()\n    \{\n        // Camera params\n        defineParam(_focalLength, \"Focal Length\", 50.0f);\n        defineParam(_horizontalAperture, \"Horizontal Aperture\", 24.576f);\n        defineParam(_nearPlane, \"Near Plane\", 0.1f);\n        defineParam(_farPlane, \"Far Plane\", 10000.0f);\n        defineParam(\n            _cameraWorldMatrix,\n            \"Camera World Matrix\",\n            float4x4(\n                1, 0, 0, 0,\n                0, 1, 0, 0,\n                0, 0, 1, 0,\n                0, 0, 0, 1\n            )\n        );\n        defineParam(_focalDistance, \"Focal Distance\", 4.0f);\n        defineParam(_fStop, \"fstop\", 16.0f);\n        defineParam(_depthOfFieldEnabled, \"Enable Depth Of Field\", true);\n\n        // Image params\n        defineParam(_formatHeight, \"Screen Height\", 2160.0f);\n        defineParam(_formatWidth, \"Screen Width\", 3840.0f);\n        defineParam(_hdriOffsetAngle, \"HDRI Offset Angle\", 0.0f);\n        defineParam(_usePrecomputedIrradiance, \"Use Precomputed Irradiance\", true);\n\n        // Ray params\n        defineParam(_minPathsPerPixel, \"Min Paths Per Pixel\", 1);\n        defineParam(_maxPathsPerPixel, \"Max Paths Per Pixel\", 1);\n        defineParam(_maxRayDistance, \"Max Ray Distance\", 1000.0f);\n        defineParam(_maxRaySteps, \"Max Ray Steps\", 128);\n        defineParam(_maxBounces, \"Max Bounces\", 1);\n        defineParam(_hitTolerance, \"Hit Tolerance\", 0.001f);\n        defineParam(_shadowBias, \"Shadow Bias\", 1.0f);\n\n        // Scene params\n        defineParam(_refractiveIndex, \"Index of Refraction\", 1.0f);\n        defineParam(_scatteringProbability, \"Scattering Probability\", 0.0f);\n        defineParam(_absorptionColour, \"brdf Colour\", float4(1));\n        defineParam(_equiangularSamples, \"Equi-Angular Samples\", 5);\n\n        // Shape Counts\n        defineParam(_objectTextureWidth, \"Object Texture Width\", 0);\n        defineParam(_lightTextureWidth, \"Light Texture Width\", 0);\n\n        defineParam(_lightSamplingEnabled, \"Enable Light Sampling\", true);\n\n        defineParam(_outputType, \"Output Type\", 0);\n\n        defineParam(_latLong, \"Output LatLong\", false);\n    \}\n\n\n    /**\n     * The init() function is run before any calls to process().\n     * Local variables can be initialized here.\n     */\n    void init()\n    \{\n        __bouncesPerRay = _maxBounces <= 0 ? 1 : _maxBounces;\n\n        float aspect = aspectRatio(_formatHeight, _formatWidth);\n        float4x4 cameraProjectionMatrix = projectionMatrix(\n            _focalLength,\n            _horizontalAperture,\n            aspect,\n            _nearPlane,\n            _farPlane\n        );\n        __inverseCameraProjectionMatrix = cameraProjectionMatrix.invert();\n\n        __aperture = fStopToAperture(_fStop, _focalLength);\n\n        __hdriPixelSize = float2(\n            hdri.bounds.width() / (2 * PI),\n            hdri.bounds.height() / PI\n        );\n        __irradiancePixelSize = float2(\n            irradiance.bounds.width() / (2 * PI),\n            irradiance.bounds.height() / PI\n        );\n        __hdriOffsetRadians = _hdriOffsetAngle * PI / 180.0f;\n\n        __offset0 = 0.5773f * float3(1, -1, -1);\n        __offset1 = 0.5773f * float3(-1, -1, 1);\n        __offset2 = 0.5773f * float3(-1, 1, -1);\n        __offset3 = 0.5773f * float3(1, 1, 1);\n    \}\n\n\n    float getNoiseValue(const int index, const float3 &position, int &noiseOptions)\n    \{\n        noiseOptions = (int) noiseParams0(index, 0, 0);\n        if ((noiseOptions & 1) == 0)\n        \{\n            return -1.0f;\n        \}\n\n        const float3 translation = float3(\n            noiseParams0(index, 0, 1),\n            noiseParams0(index, 0, 2),\n            noiseParams0(index, 0, 3)\n        );\n\n        const int octaves = noiseParams1(index, 0, 0);\n        const float lacunarity = noiseParams1(index, 0, 1);\n        const float gain = noiseParams1(index, 0, 2);\n        const float gamma = noiseParams1(index, 0, 3);\n        const float size = noiseParams2(index, 0, 0);\n\n        const float3 noisePosition = worldToLocal(index, position + translation);\n\n        float noiseValue;\n        if (noiseOptions & 2)\n        \{\n            noiseValue = fractalBrownianMotionNoise(\n                octaves,\n                lacunarity,\n                size,\n                gain,\n                gamma,\n                noisePosition\n            );\n        \}\n        else\n        \{\n            noiseValue = turbulanceNoise(\n                octaves,\n                lacunarity,\n                size,\n                gain,\n                gamma,\n                noisePosition\n            );\n        \}\n\n\n        const float whitePoint = noiseParams2(index, 0, 1);\n        const float blackPoint = noiseParams2(index, 0, 2);\n        const float lift = noiseParams2(index, 0, 3);\n\n        if (whitePoint != blackPoint)\n        \{\n            noiseValue = saturate((noiseValue - blackPoint) / (whitePoint - blackPoint));\n        \}\n\n        noiseValue = saturate(noiseValue * (1.0f - lift) + lift);\n\n        if (noiseOptions & 512)\n        \{\n            noiseValue = 1.0f - noiseValue;\n        \}\n\n        return noiseValue;\n    \}\n\n\n    /**\n     * Get the value of hdri the ray would hit at infinite distance\n     *\n     * @arg rayDirection: The direction of the ray.\n     *\n     * @returns: The colour of the pixel in the direction of the ray.\n     */\n    float4 readHDRIValue(float3 rayDirection)\n    \{\n        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);\n\n        // Should be able to say image access is eEdgeClamped and not do this\n        // but I see nan pixels sooo... :(\n        const float2 indices = clamp(\n            float2(\n                __hdriPixelSize.x * angles.x,\n                hdri.bounds.height() - (__hdriPixelSize.y * angles.y)\n            ),\n            float2(0),\n            float2(hdri.bounds.width(), hdri.bounds.height()) - 1.0f\n        );\n\n        return bilinear(hdri, indices.x, indices.y);\n    \}\n\n\n    /**\n     * Get the value of irradiance the hdri would provide in a direction\n     *\n     * @arg rayDirection: The direction of the ray.\n     *\n     * @returns: The colour of the pixel in the direction of the ray.\n     */\n    float4 readIrradianceValue(float3 rayDirection)\n    \{\n        const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);\n\n        // Should be able to say image access is eEdgeClamped and not do this\n        // but I see nan pixels sooo... :(\n        const float2 indices = clamp(\n            float2(\n                __irradiancePixelSize.x * angles.x,\n                irradiance.bounds.height() - (__irradiancePixelSize.y * angles.y)\n            ),\n            float2(0),\n            float2(irradiance.bounds.width(), irradiance.bounds.height()) - 1.0f\n        );\n\n        return bilinear(irradiance, indices.x, indices.y);\n    \}\n\n\n    float3 worldToLocal(const int objectIndex, const float3 &worldPosition)\n    \{\n        float3 localPosition = worldPosition;\n        for (int j=0; j <= objectIndex; j++)\n        \{\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            const float numChildren = shapeProperty.z;\n\n            if (j + numChildren < objectIndex)\n            \{\n                j += numChildren;\n                continue;\n            \}\n\n            // Read in the shape properties\n            const SampleType(positions) position = positions(j, 0);\n            const SampleType(rotations) rotation = rotations(j, 0);\n            const SampleType(dimensions) dimension = dimensions(j, 0);\n            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n\n            const float scale = position.w;\n            const int modifications = (int) shapeProperty.y;\n            const float blendStrength = shapeProperty.w;\n\n            // Use parent transform to position child\n            localPosition = transformRay(\n                localPosition,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n        \}\n\n        return localPosition;\n    \}\n\n\n    float3 getObjectPosition(const int objectIndex)\n    \{\n        return -worldToLocal(objectIndex, float3(0));\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     *\n     * @arg rayOrigin: The origin position of the ray.\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     *\n     * @returns: The minimum distance to an object in the scene.\n     */\n    float getMinDistanceToObjectInScene(const float3 &rayOrigin, const float pixelFootprint)\n    \{\n        float distance = _maxRayDistance;\n\n        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour\n        // roughness, specular colour, specular, transmissive colour, transmission,\n        // emissive colour, emission, refractive index, objectId, blendStrength\n        float parentStack\[MAX_CHILD_DEPTH]\[\n            1   // numChildren\n            + 3 // transformedRay\n            + 1 // scale\n            + 1 // mods\n            + 1 // nextDistance\n            + 1 // blendStrength\n        ];\n        int parentStackLength = 0;\n\n        for (int j=0; j < _objectTextureWidth; j++)\n        \{\n            // Read in the shape properties\n            SampleType(positions) position = positions(j, 0);\n            SampleType(rotations) rotation = rotations(j, 0);\n            SampleType(dimensions) dimension = dimensions(j, 0);\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n\n            float scale = position.w;\n\n            const int modifications = (int) shapeProperty.y;\n            float numChildren = shapeProperty.z;\n            const float blendStrength = shapeProperty.w;\n\n            int stackLastIndex = parentStackLength - 1;\n\n            // Position relative to the parent if we have any\n            float3 parentTransformedRay = rayOrigin;\n            if (parentStackLength > 0)\n            \{\n                parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                scale *= parentStack\[stackLastIndex]\[4];\n            \}\n\n            // Use parent transform to position child\n            const float3 transformedRay = transformRay(\n                parentTransformedRay,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n\n            // Get distance to this child\n            float nextDistance = getModifiedDistance(\n                transformedRay,\n                (int) shapeProperty.x,\n                dimension,\n                scale,\n                modifications,\n                modParameters1.w,\n                rotation.w\n            );\n\n            // Track which object was hit for the alpha channel\n            float objectId = (float) j + 1.0f;\n\n            // If this is a bounding volume, we can skip its children\n            // if we aren't close to, or inside it\n            if (\n                modifications & 4096\n                && numChildren > 0\n                && nextDistance > _hitTolerance + pixelFootprint\n            ) \{\n                // Update the min distance if this bounding volume is closest.\n                // Otherwise we could step through it, or if every object in\n                // the scene is inside it, we would not step forward at all\n                if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n                \}\n\n                // This was tagged as a boundary object, skip its children\n                // since we arent close to hitting it\n                j += numChildren;\n\n                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                \{\n                    parentStack\[parentIndex]\[0] -= numChildren + 1.0f;\n                \}\n\n                // If there are no parents, or still children of the parent\n                // we do not need to compute anything further for this loop\n                if (parentStackLength <= 0 || parentStack\[stackLastIndex]\[0] > 0.0f)\n                \{\n                    continue;\n                \}\n\n                // pop stack\n                // we know that there will be no more children if we did not continue\n                numChildren = 0.0f;\n                nextDistance = parentStack\[stackLastIndex]\[6];\n                stackLastIndex--;\n                parentStackLength--;\n            \}\n\n            if (numChildren <= 0.0f)\n            \{\n                // No Children left, compute interactions with parent\n                if (parentStackLength > 0)\n                \{\n                    // Process this object, along with all parents that do not\n                    // have any more children, removing them from the stack,\n                    // but descend all the way down the stack, without removing\n                    // the objects that still have children\n                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)\n                    \{\n                        const int parentModifications = (int) parentStack\[stackIndex]\[5];\n\n                        // Do not need to interact with bounding volumes.\n                        // They are in the stack for relative positioning\n                        // if they weren't then we would have to manually move\n                        // the bounding box to follow the children\n                        if (!(parentModifications & 4096))\n                        \{\n                            const float parentNextDistance = parentStack\[stackIndex]\[6];\n                            const float parentBlendStrength = parentStack\[stackIndex]\[7];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentBlendStrength\n                            );\n                        \}\n\n                        // Update the global min distance (and surface/colour)\n                        if (fabs(nextDistance) < fabs(distance))\n                        \{\n                            distance = nextDistance;\n                        \}\n                    \}\n\n                    do\n                    \{\n                        // Decrement the number of children each parent has\n                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                        \{\n                            parentStack\[parentIndex]\[0] -= 1.0f;\n                        \}\n\n                        // Get the number of children still remaining for the parent\n                        // If there are still children, we can break out of this loop\n                        // to process the rest of them before the parent itself\n                        numChildren = parentStack\[stackLastIndex]\[0];\n                    \}\n                    while (numChildren <= 0.0f && --stackLastIndex >= 0);\n\n                    parentStackLength = stackLastIndex + 1;\n                \}\n                // No parents to interact with, simply check the distance\n                else if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n                \}\n            \}\n            else\n            \{\n                // Node has Children, push it to the stack for later\n                // processing when we have all its children\n                // parentStack.push()\n                parentStack\[parentStackLength]\[0] = numChildren;\n                parentStack\[parentStackLength]\[1] = transformedRay.x;\n                parentStack\[parentStackLength]\[2] = transformedRay.y;\n                parentStack\[parentStackLength]\[3] = transformedRay.z;\n                parentStack\[parentStackLength]\[4] = scale;\n                parentStack\[parentStackLength]\[5] = (float) modifications;\n                parentStack\[parentStackLength]\[6] = nextDistance;\n                parentStack\[parentStackLength]\[7] = blendStrength;\n                parentStackLength++;\n            \}\n        \}\n\n        return distance;\n    \}\n\n\n    /**\n     * Compute the minimum distance to an object in the scene\n     *\n     * @arg rayOrigin: The origin position of the ray.\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     * @arg colour: Location to store the colour of the hit object.\n     * @arg surface: Location to store the surface properties of the hit\n     *     object.\n     *\n     * @returns: The minimum distance to an object in the scene, and the\n     *     unique identifier of the object.\n     */\n    float2 getMinDistanceToObjectInScene(\n            const float3 &rayOrigin,\n            const float pixelFootprint,\n            float4 &diffusivity,\n            float4 &specularity,\n            float4 &transmittance,\n            float4 &emittance,\n            float4 &surface,\n            bool &doRefraction)\n    \{\n        float distance = _maxRayDistance;\n        float id = 0.0f;\n\n        // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour\n        // roughness, specular colour, specular, transmissive colour, transmission,\n        // emissive colour, emission, refractive index, objectId, blendStrength\n        float parentStack\[MAX_CHILD_DEPTH]\[\n            1   // numChildren\n            + 3 // transformedRay\n            + 1 // scale\n            + 1 // mods\n            + 1 // nextDistance\n            + 3 // diffuse colour\n            + 1 // roughness\n            + 3 // specular colour\n            + 1 // specular\n            + 3 // transmissive colour\n            + 1 // transmission\n            + 3 // emissive colour\n            + 1 // emission\n            + 3 // unused for now\n            + 1 // refractive index\n            + 1 // objectId\n            + 1 // blendStrength\n        ];\n        int parentStackLength = 0;\n\n        for (int j=0; j < _objectTextureWidth; j++)\n        \{\n            // Read in the shape properties\n            SampleType(positions) position = positions(j, 0);\n            SampleType(rotations) rotation = rotations(j, 0);\n            SampleType(dimensions) dimension = dimensions(j, 0);\n            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);\n            SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);\n            SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);\n            SampleType(diffusivities) diffuseColour = diffusivities(j, 0);\n            SampleType(specularities) specularColour = specularities(j, 0);\n            SampleType(transmittances) transmissiveColour = transmittances(j, 0);\n            SampleType(emittances) emissiveColour = emittances(j, 0);\n            SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);\n\n            const int modifications = ((int) shapeProperty.y) | ((int) surfaceProperty.y);\n            float scale = position.w;\n\n            const float blendStrength = shapeProperty.w;\n            float numChildren = shapeProperty.z;\n\n            int stackLastIndex = parentStackLength - 1;\n\n            float4 blendedDiffuseColour = diffuseColour;\n            float4 blendedSpecularColour = specularColour;\n            float4 blendedTransmissiveColour = transmissiveColour;\n            float4 blendedEmissiveColour = emissiveColour;\n            float4 blendedSurface = surfaceProperty;\n\n            // Position relative to the parent if we have any\n            float3 parentTransformedRay = rayOrigin;\n            if (parentStackLength > 0)\n            \{\n                parentTransformedRay.x = parentStack\[stackLastIndex]\[1];\n                parentTransformedRay.y = parentStack\[stackLastIndex]\[2];\n                parentTransformedRay.z = parentStack\[stackLastIndex]\[3];\n                scale *= parentStack\[stackLastIndex]\[4];\n            \}\n\n            // Use parent transform to position child\n            const float3 transformedRay = transformRay(\n                parentTransformedRay,\n                float3(position.x, position.y, position.z),\n                float3(rotation.x, rotation.y, rotation.z),\n                modifications,\n                modParameters0,\n                modParameters1\n            );\n\n            // Get distance to this child\n            float nextDistance = getModifiedDistance(\n                transformedRay,\n                (int) shapeProperty.x,\n                dimension,\n                scale,\n                modifications,\n                modParameters1.w,\n                rotation.w,\n                blendedDiffuseColour,\n                blendedSpecularColour,\n                blendedTransmissiveColour,\n                blendedEmissiveColour\n            );\n\n            // Track which object was hit for the alpha channel\n            float objectId = (float) j + 1.0f;\n\n            // If this is a bounding volume, we can skip its children\n            // if we aren't close to, or inside it\n            if (\n                modifications & 4096\n                && numChildren > 0\n                && nextDistance > _hitTolerance + pixelFootprint\n            ) \{\n                // Update the min distance if this bounding volume is closest.\n                // Otherwise we could step through it, or if every object in\n                // the scene is inside it, we would not step forward at all\n                if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n\n                    diffusivity = blendedDiffuseColour;\n                    specularity = blendedSpecularColour;\n                    transmittance = blendedTransmissiveColour;\n                    emittance = blendedEmissiveColour;\n\n                    surface = blendedSurface;\n\n                    id = objectId;\n\n                    doRefraction = modifications & 131072;\n                \}\n\n                // This was tagged as a boundary object, skip its children\n                // since we arent close to hitting it\n                j += numChildren;\n\n                for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                \{\n                    parentStack\[parentIndex]\[0] -= numChildren + 1.0f;\n                \}\n\n                // If there are no parents, or still children of the parent\n                // we do not need to compute anything further for this loop\n                if (parentStackLength <= 0 || parentStack\[stackLastIndex]\[0] > 0.0f)\n                \{\n                    continue;\n                \}\n\n                // pop stack\n                // we know that there will be no more children if we did not continue\n                numChildren = 0.0f;\n                nextDistance = parentStack\[stackLastIndex]\[6];\n                blendedDiffuseColour = float4(\n                    parentStack\[stackLastIndex]\[7],\n                    parentStack\[stackLastIndex]\[8],\n                    parentStack\[stackLastIndex]\[9],\n                    parentStack\[stackLastIndex]\[10]\n                );\n                blendedSpecularColour = float4(\n                    parentStack\[stackLastIndex]\[11],\n                    parentStack\[stackLastIndex]\[12],\n                    parentStack\[stackLastIndex]\[13],\n                    parentStack\[stackLastIndex]\[14]\n                );\n                blendedTransmissiveColour = float4(\n                    parentStack\[stackLastIndex]\[15],\n                    parentStack\[stackLastIndex]\[16],\n                    parentStack\[stackLastIndex]\[17],\n                    parentStack\[stackLastIndex]\[18]\n                );\n                blendedEmissiveColour = float4(\n                    parentStack\[stackLastIndex]\[19],\n                    parentStack\[stackLastIndex]\[20],\n                    parentStack\[stackLastIndex]\[21],\n                    parentStack\[stackLastIndex]\[22]\n                );\n                blendedSurface = surfaceProperty;\n                blendedSurface = float4(\n                    parentStack\[stackLastIndex]\[23],\n                    parentStack\[stackLastIndex]\[24],\n                    parentStack\[stackLastIndex]\[25],\n                    parentStack\[stackLastIndex]\[26]\n                );\n                objectId = parentStack\[stackLastIndex]\[27];\n                stackLastIndex--;\n                parentStackLength--;\n            \}\n\n            if (numChildren <= 0.0f)\n            \{\n                // No Children left, compute interactions with parent\n                if (parentStackLength > 0)\n                \{\n                    // Process this object, along with all parents that do not\n                    // have any more children, removing them from the stack,\n                    // but descend all the way down the stack, without removing\n                    // the objects that still have children\n                    for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)\n                    \{\n                        const int parentModifications = (int) parentStack\[stackIndex]\[5];\n\n                        // Do not need to interact with bounding volumes.\n                        // They are in the stack for relative positioning\n                        // if they weren't then we would have to manually move\n                        // the bounding box to follow the children\n                        if (!(parentModifications & 4096))\n                        \{\n                            const float parentNextDistance = parentStack\[stackIndex]\[6];\n                            const float4 parentDiffuseColour = float4(\n                                parentStack\[stackIndex]\[7],\n                                parentStack\[stackIndex]\[8],\n                                parentStack\[stackIndex]\[9],\n                                parentStack\[stackIndex]\[10]\n                            );\n                            const float4 parentSpecularColour = float4(\n                                parentStack\[stackIndex]\[11],\n                                parentStack\[stackIndex]\[12],\n                                parentStack\[stackIndex]\[13],\n                                parentStack\[stackIndex]\[14]\n                            );\n                            const float4 parentTransmissiveColour = float4(\n                                parentStack\[stackIndex]\[15],\n                                parentStack\[stackIndex]\[16],\n                                parentStack\[stackIndex]\[17],\n                                parentStack\[stackIndex]\[18]\n                            );\n                            const float4 parentEmissiveColour = float4(\n                                parentStack\[stackIndex]\[19],\n                                parentStack\[stackIndex]\[20],\n                                parentStack\[stackIndex]\[21],\n                                parentStack\[stackIndex]\[22]\n                            );\n                            const float4 parentSurfaceProperty = float4(\n                                parentStack\[stackIndex]\[23],\n                                parentStack\[stackIndex]\[24],\n                                parentStack\[stackIndex]\[25],\n                                parentStack\[stackIndex]\[26]\n                            );\n                            if (fabs(nextDistance) > fabs(parentNextDistance))\n                            \{\n                                objectId = parentStack\[stackIndex]\[27];\n                            \}\n                            const float parentBlendStrength = parentStack\[stackIndex]\[28];\n\n                            // Compute interaction between parent and this child\n                            nextDistance = performChildInteraction(\n                                parentModifications,\n                                parentNextDistance,\n                                nextDistance,\n                                parentDiffuseColour,\n                                blendedDiffuseColour,\n                                parentSpecularColour,\n                                blendedSpecularColour,\n                                parentTransmissiveColour,\n                                blendedTransmissiveColour,\n                                parentEmissiveColour,\n                                blendedEmissiveColour,\n                                parentSurfaceProperty,\n                                blendedSurface,\n                                parentBlendStrength\n                            );\n                        \}\n\n                        // Update the global min distance (and surface/colour)\n                        if (fabs(nextDistance) < fabs(distance))\n                        \{\n                            distance = nextDistance;\n\n                            diffusivity = blendedDiffuseColour;\n                            specularity = blendedSpecularColour;\n                            transmittance = blendedTransmissiveColour;\n                            emittance = blendedEmissiveColour;\n\n                            surface = blendedSurface;\n\n                            id = objectId;\n\n                            doRefraction = parentModifications & 131072;\n                        \}\n                    \}\n\n                    do\n                    \{\n                        // Decrement the number of children each parent has\n                        for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)\n                        \{\n                            parentStack\[parentIndex]\[0] -= 1.0f;\n                        \}\n\n                        // Get the number of children still remaining for the parent\n                        // If there are still children, we can break out of this loop\n                        // to process the rest of them before the parent itself\n                        numChildren = parentStack\[stackLastIndex]\[0];\n                    \}\n                    while (numChildren <= 0.0f && --stackLastIndex >= 0);\n\n                    parentStackLength = stackLastIndex + 1;\n                \}\n                // No parents to interact with, simply check the distance\n                else if (fabs(nextDistance) < fabs(distance))\n                \{\n                    distance = nextDistance;\n\n                    diffusivity = blendedDiffuseColour;\n                    specularity = blendedSpecularColour;\n                    transmittance = blendedTransmissiveColour;\n                    emittance = blendedEmissiveColour;\n\n                    surface = blendedSurface;\n\n                    id = objectId;\n\n                    doRefraction = modifications & 131072;\n                \}\n            \}\n            else\n            \{\n                // Node has Children, push it to the stack for later\n                // processing when we have all its children\n                // parentStack.push()\n                parentStack\[parentStackLength]\[0] = numChildren;\n                parentStack\[parentStackLength]\[1] = transformedRay.x;\n                parentStack\[parentStackLength]\[2] = transformedRay.y;\n                parentStack\[parentStackLength]\[3] = transformedRay.z;\n                parentStack\[parentStackLength]\[4] = scale;\n                parentStack\[parentStackLength]\[5] = (float) modifications;\n                parentStack\[parentStackLength]\[6] = nextDistance;\n                parentStack\[parentStackLength]\[7] = blendedDiffuseColour.x;\n                parentStack\[parentStackLength]\[8] = blendedDiffuseColour.y;\n                parentStack\[parentStackLength]\[9] = blendedDiffuseColour.z;\n                parentStack\[parentStackLength]\[10] = blendedDiffuseColour.w;\n                parentStack\[parentStackLength]\[11] = blendedSpecularColour.x;\n                parentStack\[parentStackLength]\[12] = blendedSpecularColour.y;\n                parentStack\[parentStackLength]\[13] = blendedSpecularColour.z;\n                parentStack\[parentStackLength]\[14] = blendedSpecularColour.w;\n                parentStack\[parentStackLength]\[15] = blendedTransmissiveColour.x;\n                parentStack\[parentStackLength]\[16] = blendedTransmissiveColour.y;\n                parentStack\[parentStackLength]\[17] = blendedTransmissiveColour.z;\n                parentStack\[parentStackLength]\[18] = blendedTransmissiveColour.w;\n                parentStack\[parentStackLength]\[19] = blendedEmissiveColour.x;\n                parentStack\[parentStackLength]\[20] = blendedEmissiveColour.y;\n                parentStack\[parentStackLength]\[21] = blendedEmissiveColour.z;\n                parentStack\[parentStackLength]\[22] = blendedEmissiveColour.w;\n                parentStack\[parentStackLength]\[23] = blendedSurface.x;\n                parentStack\[parentStackLength]\[24] = blendedSurface.y;\n                parentStack\[parentStackLength]\[25] = blendedSurface.z;\n                parentStack\[parentStackLength]\[26] = blendedSurface.w;\n                parentStack\[parentStackLength]\[27] = objectId;\n                parentStack\[parentStackLength]\[28] = blendStrength;\n                parentStackLength++;\n            \}\n        \}\n\n        return float2(distance, id);\n    \}\n\n\n    /**\n     * Estimate the surface normal at the closest point on the closest\n     * object to a point\n     *\n     * @arg point: The point near which to get the surface normal\n     * @arg pixelFootprint: A value proportional to the amount of world\n     *     space that fills a pixel, like the distance from camera.\n     *\n     * @returns: The normalized surface normal.\n     */\n    float3 estimateSurfaceNormal(const float3 &point, const float pixelFootprint)\n    \{\n        return normalize(\n            __offset0 * getMinDistanceToObjectInScene(\n                point + __offset0 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset1 * getMinDistanceToObjectInScene(\n                point + __offset1 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset2 * getMinDistanceToObjectInScene(\n                point + __offset2 * _hitTolerance,\n                pixelFootprint\n            )\n            + __offset3 * getMinDistanceToObjectInScene(\n                point + __offset3 * _hitTolerance,\n                pixelFootprint\n            )\n        );\n    \}\n\n\n    /**\n     * Compute a soft shadow value.\n     *\n     * @arg rayDirection: The direction of the shadow ray.\n     * @arg distanceToShadePoint: The maximum distance to check for\n     *     a shadow casting object.\n     * @arg softness: The softness of the shadow.\n     * @arg rayOrigin: The origin of the ray.\n     * @arg colour: Will store the colour of the object which casts the\n     *     shadow.\n     * @arg surface: Will store the surface properties of the object\n     *     which casts the shadow.\n     *\n     * @returns: The intenstity of shadow.\n     */\n    inline float computeSoftShadow(\n            const float3 &rayDirection,\n            const float distanceToShadePoint,\n            const float softness,\n            float3 &rayOrigin)\n    \{\n        float distanceTravelled = 0;\n        float shadowIntensity = 1.0f;\n        float lastStepDistance = FLT_MAX;\n\n        int iterations = 0;\n        float pixelFootprint = _hitTolerance;\n        while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)\n        \{\n            const float stepDistance = fabs(\n                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint)\n            );\n            const float stepDistanceSquared = stepDistance * stepDistance;\n            float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);\n            shadowIntensity = min(\n                shadowIntensity,\n                softness * sqrt(stepDistanceSquared - softOffset * softOffset)\n                / max(0.0f, distanceTravelled - softOffset)\n            );\n\n            if (stepDistance < pixelFootprint)\n            \{\n                shadowIntensity = saturate(shadowIntensity);\n                return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);\n            \}\n\n            lastStepDistance = stepDistance;\n            rayOrigin += rayDirection * stepDistance;\n            distanceTravelled += stepDistance;\n            pixelFootprint += stepDistance * _hitTolerance;\n            iterations++;\n        \}\n\n        shadowIntensity = saturate(shadowIntensity);\n        return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);\n    \}\n\n\n    /**\n     * Compute a shadow value.\n     *\n     * @arg rayDirection: The direction of the shadow ray.\n     * @arg distanceToShadePoint: The maximum distance to check for\n     *     a shadow casting object.\n     * @arg rayOrigin: The origin of the ray.\n     * @arg colour: Will store the colour of the object which casts the\n     *     shadow.\n     * @arg surface: Will store the surface properties of the object\n     *     which casts the shadow.\n     *\n     * @returns: The intenstity of shadow.\n     */\n    float computeShadow(\n            const float3 &rayDirection,\n            const float distanceToShadePoint,\n            float3 &rayOrigin)\n    \{\n        float distanceTravelled = 0;\n        int iterations = 0;\n        float pixelFootprint = _hitTolerance;\n        while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)\n        \{\n            const float stepDistance = fabs(\n                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint)\n            );\n\n            if (stepDistance < pixelFootprint)\n            \{\n                return 0;\n            \}\n\n            rayOrigin += rayDirection * stepDistance;\n            distanceTravelled += stepDistance;\n            pixelFootprint += stepDistance * _hitTolerance;\n            iterations++;\n        \}\n\n        return 1;\n    \}\n\n\n    /**\n     * Compute the ambient occlusion.\n     *\n     * @arg rayDirection: The direction of the shadow ray.\n     * @arg rayOrigin: The origin of the ray.\n     * @arg amount: The amount to scale the occlusion value by.\n     * @arg iterations: The number of iterations to refine the\n     *     occlusion.\n     * @arg colour: Will store the colour of the final occluding object.\n     * @arg surface: Will store the surface properties of the final\n     *     occluding object.\n     *\n     * @returns: The occlusion.\n     */\n    inline float computeAmbientOcclusion(\n            const float3 &rayDirection,\n            const float3 &rayOrigin,\n            const float amount,\n            const int iterations)\n    \{\n        float occlusion = 0.0f;\n        float occlusionScaleFactor = 1.0f;\n        for(int iteration=0; iteration < iterations; iteration++)\n        \{\n            const float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;\n            const float distanceToClosestObject = fabs(\n                getMinDistanceToObjectInScene(\n                    rayOrigin + stepDistance * rayDirection,\n                    _hitTolerance\n                )\n            );\n            occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;\n            occlusionScaleFactor *= 0.95;\n        \}\n\n        return (\n            amount\n            * saturate(0.5f + 0.5f * rayDirection.y)  // ambient\n            * saturate(1.0f - 1.5f * occlusion)       // occlusion\n        );\n    \}\n\n\n    /**\n     * Compute the combined intensity of all lights on the surface of an\n     * object.\n     *\n     * @arg pointOnSurface: The point on the surface to compute the\n     *     light intensity at.\n     * @arg surfaceNormal: The normal direction to the surface.\n     * @arg surfaceColour: The colour of the object.\n     * @arg surface: The surface properties of the object.\n     * @arg lightColour: Will store the light colour.\n     *\n     * @returns: The light intensity.\n     */\n    float4 sampleArtificialLight(\n            const float3 &pointOnSurface,\n            const float3 &surfaceNormal,\n            const float offset,\n            const float3 &lightDirection,\n            const float distanceToLight,\n            const int selectedLight)\n    \{\n        // Read the light properties\n        SampleType(lights) light = lights(selectedLight, 0);\n        SampleType(lightProperties) lightProperty = lightProperties(selectedLight, 0);\n        SampleType(lightProperties1) lightProperty1 = lightProperties1(selectedLight, 0);\n\n        float2 intensity;\n\n        int lightType = (int) lightProperty.w;\n        int absLightType = abs(lightType);\n\n        if (absLightType == 0)\n        \{\n            // Ambient light, simply return the intensity.\n            intensity = float2(light.w, 1);\n        \}\n        else if (absLightType == 1)\n        \{\n            intensity = float2(\n                1.0f,\n                computeAmbientOcclusion(\n                    surfaceNormal,\n                    pointOnSurface,\n                    light.w,\n                    (int) light.x\n                )\n            );\n        \}\n        else\n        \{\n            float intensityAtPosition = lightIntensity(\n                light.w,\n                lightProperty1.y,\n                distanceToLight\n            );\n            float3 surfaceOffset = offsetPoint(\n                pointOnSurface,\n                surfaceNormal,\n                offset\n            );\n\n            float shadowIntensityAtPosition;\n            if (lightType < 0)\n            \{\n                shadowIntensityAtPosition = computeSoftShadow(\n                    lightDirection,\n                    distanceToLight,\n                    lightProperty1.x,\n                    surfaceOffset\n                );\n            \}\n            else\n            \{\n                shadowIntensityAtPosition = computeShadow(\n                    lightDirection,\n                    distanceToLight,\n                    surfaceOffset\n                );\n            \}\n\n            intensity = float2(intensityAtPosition, shadowIntensityAtPosition);\n        \}\n\n        return emissiveTerm(\n            float4(\n                lightProperty.x,\n                lightProperty.y,\n                lightProperty.z,\n                intensity.x * intensity.y\n            )\n        );\n    \}\n\n\n    /**\n     * Compute the combined intensity of all lights on the surface of an\n     * object.\n     *\n     * @arg pointOnSurface: The point on the surface to compute the\n     *     light intensity at.\n     * @arg surfaceNormal: The normal direction to the surface.\n     * @arg surfaceColour: The colour of the object.\n     * @arg surface: The surface properties of the object.\n     * @arg lightColour: Will store the light colour.\n     *\n     * @returns: The light intensity.\n     */\n    inline float4 sampleLight(\n            const float3 &seed,\n            const float3 &lightDirection,\n            const float distanceToLight,\n            float3 rayOrigin,\n            float3 &lightNormal)\n    \{\n        float4 diffusivity;\n        float4 specularity;\n        float4 transmittance;\n        float4 emittance;\n        float4 surface;\n\n        float distanceTravelled = 0;\n        int iterations = 0;\n        float pixelFootprint = _hitTolerance;\n\n        while (\n            distanceTravelled <= distanceToLight * 2.0f\n            && iterations++ < _maxRaySteps / 2\n        ) \{\n            bool doRefraction = true;\n            const float2 result = getMinDistanceToObjectInScene(\n                rayOrigin,\n                pixelFootprint,\n                diffusivity,\n                specularity,\n                transmittance,\n                emittance,\n                surface,\n                doRefraction\n            );\n            const float stepDistance = fabs(result.x);\n\n            rayOrigin += lightDirection * stepDistance;\n            distanceTravelled += stepDistance;\n            pixelFootprint += stepDistance * _hitTolerance;\n\n            if (stepDistance < pixelFootprint)\n            \{\n                if (emittance.w > 0.0f)\n                \{\n                    lightNormal = estimateSurfaceNormal(\n                        rayOrigin,\n                        pixelFootprint\n                    );\n\n                    int noiseOptions;\n                    const float noiseValue = getNoiseValue(\n                        result.y - 1,\n                        rayOrigin + lightDirection * stepDistance,\n                        noiseOptions\n                    );\n                    if (noiseValue >= 0.0f)\n                    \{\n                        useNoiseOnEmittance(\n                            noiseOptions,\n                            noiseValue,\n                            emittance\n                        );\n                    \}\n\n                    return emissiveTerm(emittance);\n                \}\n                else if (transmittance.w > 0.0f && !doRefraction)\n                \{\n                    rayOrigin += lightDirection * 2.0f * stepDistance;\n                \}\n                else\n                \{\n                    return float4(0);\n                \}\n            \}\n        \}\n\n        lightNormal = -lightDirection;\n\n        return readHDRIValue(lightDirection);\n    \}\n\n\n    /**\n     *\n     */\n    float sampleLightData(\n            const float3 &seed,\n            const float3 &pointOnSurface,\n            const float3 &surfaceNormal,\n            const int emissiveIndices\[MAX_MIS_EMISSIVE_SHAPES],\n            const int numLights,\n            const bool usePrecomputedIrradiance,\n            float3 &lightDirection,\n            float3 &lightNormal,\n            float &distanceToLight,\n            int &selectedLight)\n    \{\n        const float rng = random(random(seed.x + seed.y) + random(seed.z));\n        selectedLight = max(0, (int) floor(rng * (numLights - _hitTolerance)));\n\n        float visibleSurfaceArea = 1.0f;\n\n        if (selectedLight < _lightTextureWidth)\n        \{\n            // Selected a 'fake' light eg. point, directional, ambient\n            SampleType(lights) light = lights(selectedLight, 0);\n            const int lightType = abs((int) lightProperties(selectedLight, 0, 3));\n\n            if (lightType > 1)\n            \{\n                getLightData(\n                    pointOnSurface,\n                    float3(light.x, light.y, light.z),\n                    lightType,\n                    _maxRayDistance,\n                    distanceToLight,\n                    visibleSurfaceArea,\n                    lightDirection,\n                    lightNormal\n                );\n            \}\n        \}\n        else if (selectedLight == _lightTextureWidth && usePrecomputedIrradiance)\n        \{\n            irradianceLightData(\n                surfaceNormal,\n                lightDirection,\n                lightNormal,\n                distanceToLight,\n                visibleSurfaceArea\n            );\n        \}\n        else\n        \{\n            // Selected one of the emissive objects\n\n            const int objectIndex = emissiveIndices\[\n                selectedLight\n                - _lightTextureWidth\n                - usePrecomputedIrradiance\n            ];\n\n            const float3 position = getObjectPosition(objectIndex);\n\n            // TODO don't assume it's a sphere\n            const float radius = dimensions(objectIndex, 0, 0);\n\n            sphericalLightData(\n                seed,\n                pointOnSurface,\n                position,\n                radius,\n                lightDirection,\n                lightNormal,\n                distanceToLight,\n                visibleSurfaceArea\n            );\n        \}\n\n        return sampleLightsPDF(numLights, visibleSurfaceArea);\n    \}\n\n\n    float4 sampleLight(\n            const float3 &seed,\n            const float4 &throughput,\n            const float4 &lightBRDF,\n            const float distanceToLight,\n            const float3 &surfaceNormal,\n            const float3 &position,\n            const float3 &lightDirection,\n            const float lightPDF,\n            const float materialPDF,\n            const float offset,\n            const int selectedLight,\n            const bool usePrecomputedIrradiance,\n            float3 &lightNormal)\n    \{\n        float4 lightEmissiveColour;\n        float lightGeometryFactor = 1.0f;\n        if (selectedLight < _lightTextureWidth)\n        \{\n            lightEmissiveColour = sampleArtificialLight(\n                position,\n                surfaceNormal,\n                offset,\n                lightDirection,\n                distanceToLight,\n                selectedLight\n            );\n        \}\n        else if (selectedLight == _lightTextureWidth && usePrecomputedIrradiance)\n        \{\n            lightEmissiveColour = readIrradianceValue(lightDirection);\n        \}\n        else\n        \{\n            lightEmissiveColour = sampleLight(\n                seed,\n                lightDirection,\n                distanceToLight,\n                offsetPoint(\n                    position,\n                    surfaceNormal,\n                    offset\n                ),\n                lightNormal\n            );\n            lightGeometryFactor = geometryFactor(\n                lightDirection,\n                lightNormal,\n                distanceToLight\n            );\n        \}\n\n        return (\n            lightEmissiveColour\n            * throughput\n            * lightBRDF\n            * lightGeometryFactor\n            * balanceHeuristic(\n                lightPDF,\n                materialPDF * lightGeometryFactor\n            ) / lightPDF\n        );\n    \}\n\n\n    /**\n     *\n     */\n    float4 sampleEquiangular(\n            const float3 &seed,\n            const float4 &throughput,\n            const float3 &intersectionPosition,\n            const float3 &rayOrigin,\n            const float3 &rayDirection,\n            const int emissiveIndices\[MAX_MIS_EMISSIVE_SHAPES],\n            const int numLights,\n            const float distanceSinceLastBounce,\n            const float4 &absorptionColour,\n            const int objectIndex,\n            float &scatteringProbability)\n    \{\n        float3 surfaceNormal = randomUnitVector(seed * 43.73f);\n        float3 lightDirection = surfaceNormal;\n        float3 lightNormal = -surfaceNormal;\n        float distanceToLight = 0.0f;\n        int selectedLight;\n\n        const float lightPDF = sampleLightData(\n            seed * 33.12f,\n            intersectionPosition,\n            surfaceNormal,\n            emissiveIndices,\n            numLights,\n            false,\n            lightDirection,\n            lightNormal,\n            distanceToLight,\n            selectedLight\n        );\n        const float3 lightPosition = intersectionPosition + lightDirection * distanceToLight;\n\n        const float offset = random(random(seed.z) + random(seed.y + random(seed.x)));\n\n        float4 scatteredColour = float4(0);\n        float adjustedScatteringProbability = 0.0f;\n        for (int step=1; step <= _equiangularSamples; step++)\n        \{\n            const float uniform = (step + offset) / (float) _equiangularSamples;\n\n            float equiangularDistance;\n            float equiangularPDF = _equiangularSamples * sampleEquiangularPDF(\n                uniform,\n                distanceSinceLastBounce,\n                rayOrigin,\n                rayDirection,\n                lightPosition,\n                equiangularDistance\n            );\n\n            const float3 particlePosition = rayOrigin + equiangularDistance * rayDirection;\n            const float3 particleToLight = lightPosition - particlePosition;\n            distanceToLight = length(particleToLight);\n            \n            if (distanceToLight > 0.0f)\n            \{\n                lightDirection = normalize(particleToLight);\n            \}\n\n            int noiseOptions;\n            float noiseValue = getNoiseValue(\n                objectIndex,\n                particlePosition,\n                noiseOptions\n            );\n            if (noiseValue < 0.0f || !(noiseOptions & 1024))\n            \{\n                noiseValue = 1.0f;\n            \}\n\n            const float4 lightBRDF = exp(\n                -absorptionColour\n                * (distanceToLight + equiangularDistance)\n                * scatteringProbability\n                * noiseValue\n            );\n\n            scatteredColour += scatteringProbability * noiseValue * sampleLight(\n                seed * 7.972f,\n                throughput,\n                lightBRDF,\n                distanceToLight,\n                lightDirection,\n                particlePosition,\n                lightDirection,\n                equiangularPDF,\n                lightPDF,\n                0.0f,\n                selectedLight,\n                false,\n                lightNormal\n            );\n\n            adjustedScatteringProbability += scatteringProbability * noiseValue;\n        \}\n\n        scatteringProbability = 0.0f;\n        return scatteredColour;\n    \}\n\n\n    /**\n     * March a ray through the scene.\n     *\n     * @arg rayOrigin: The origin of the ray.\n     * @arg rayDirection: The direction of the ray.\n     * @arg seed: A random value to use as the seed for roughness.\n     *\n     * @returns: The ray colour.\n     */\n    float4 marchRay(\n            const float3 &rayOrigin,\n            const float3 &rayDirection,\n            const int emissiveIndices\[MAX_MIS_EMISSIVE_SHAPES],\n            const int numEmissive,\n            float3 &seed)\n    \{\n        const int numLightsForEquiangular = _lightTextureWidth + numEmissive;\n        const int numLights = numLightsForEquiangular + _usePrecomputedIrradiance;\n\n        float refractiveIndex = _refractiveIndex;\n        float scatteringProbability = _scatteringProbability;\n\n        float nestedDielectrics\[MAX_NESTED_DIELECTRICS]\[\n            4   // Absorption colour of object\n            + 1 // ID of the dielectric we are currently in\n            + 1 // Refractive index of that object\n            + 1 // Scattering probability\n        ];\n        nestedDielectrics\[0]\[0] = _absorptionColour.x;\n        nestedDielectrics\[0]\[1] = _absorptionColour.y;\n        nestedDielectrics\[0]\[2] = _absorptionColour.z;\n        nestedDielectrics\[0]\[3] = _absorptionColour.w;\n        nestedDielectrics\[0]\[4] = -1;\n        nestedDielectrics\[0]\[5] = refractiveIndex;\n        nestedDielectrics\[0]\[6] = scatteringProbability;\n        int numNestedDielectrics = 0;\n\n        float4 rayColour = float4(0);\n        float4 throughput = float4(1);\n\n        float lastStepDistance = 1.0f;\n\n        float firstObjectId = 0.0f;\n        float lastRefractedId = -1.0f;\n\n        int iterations = 0;\n        int bounces = 0;\n\n        float distanceTravelled = 0;\n        float distanceSinceLastBounce = distanceTravelled;\n        float distanceTravelledThroughMaterial = distanceTravelled;\n\n        // Get the next ray\n        float3 origin = rayOrigin;\n        float3 direction = rayDirection;\n        float3 positionOnRay = origin;\n\n        float4 diffusivity;\n        float4 specularity;\n        float4 transmittance;\n        float4 emittance;\n        float4 surface;\n\n        float pixelFootprint = _hitTolerance;\n\n        float previousMaterialPDF = 1.0f;\n\n        bool sampledIrradiance = false;\n\n        // March the ray\n        while (\n            distanceTravelled < _maxRayDistance\n            && iterations < _maxRaySteps\n            && sumComponent(throughput) > _hitTolerance\n        ) \{\n            positionOnRay = origin + distanceSinceLastBounce * direction;\n\n            // Get the closest distance to an object\n            bool doRefraction = true;\n            const float2 result = getMinDistanceToObjectInScene(\n                positionOnRay,\n                pixelFootprint,\n                diffusivity,\n                specularity,\n                transmittance,\n                emittance,\n                surface,\n                doRefraction\n            );\n\n            // Keep the signed distance so we know whether or not we are\n            // inside the object\n            const float signedStepDistance = result.x;\n\n            // Get the absolute value, the true shortest distance to a\n            // surface\n            const float stepDistance = fabs(signedStepDistance);\n\n            // Keep track of the distance the ray has travelled\n            distanceTravelled += stepDistance;\n            distanceSinceLastBounce += stepDistance;\n            distanceTravelledThroughMaterial += stepDistance;\n\n            pixelFootprint += _hitTolerance * stepDistance;\n\n            // Have we hit the nearest object?\n            if (stepDistance < pixelFootprint)\n            \{\n                float3 intersectionPosition = positionOnRay + stepDistance * direction;\n\n                // The normal to the surface at that position\n                float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(\n                    intersectionPosition,\n                    pixelFootprint\n                );\n\n                if (bounces == 0)\n                \{\n                    // Keep the ID of the first object hit, so we can\n                    // store it in the alpha channel\n                    firstObjectId = result.y;\n\n                    // Early exit for the various AOVs that are not 'beauty'\n                    if (_outputType > BEAUTY_AOV && _outputType < STATS_AOV)\n                    \{\n                        return earlyExitAOVs(\n                            _outputType,\n                            intersectionPosition,\n                            worldToLocal(firstObjectId - 1, intersectionPosition),\n                            surfaceNormal,\n                            distanceTravelled,\n                            firstObjectId\n                        );\n                    \}\n                \}\n\n                int noiseOptions;\n                const float noiseValue = getNoiseValue(\n                    result.y - 1,\n                    intersectionPosition,\n                    noiseOptions\n                );\n                if (noiseValue >= 0.0f)\n                \{\n                    useNoiseOnMaterial(\n                        noiseOptions,\n                        noiseValue,\n                        diffusivity,\n                        specularity,\n                        transmittance,\n                        emittance,\n                        surface\n                    );\n                \}\n\n                const float reflectionOffset = pixelFootprint * _shadowBias;\n                const float transmissionOffset = (\n                    (2.0f * pixelFootprint + stepDistance)\n                    * _shadowBias\n                );\n\n                const float4 absorptionColour = float4(\n                    nestedDielectrics\[numNestedDielectrics]\[0],\n                    nestedDielectrics\[numNestedDielectrics]\[1],\n                    nestedDielectrics\[numNestedDielectrics]\[2],\n                    nestedDielectrics\[numNestedDielectrics]\[3]\n                );\n\n                if (\n                    _equiangularSamples > 0\n                    && scatteringProbability > 0.0f\n                    && numLightsForEquiangular > 0\n                ) \{\n                    int objectIndex = nestedDielectrics\[numNestedDielectrics]\[4] - 1;\n                    if (objectIndex < 0)\n                    \{\n                        // blink cannot handle single pixel images in versions < 12.1\n                        // so we have a weird dummy pixel when nothing is passed\n                        // to the scene\n                        objectIndex = _objectTextureWidth == 0 ? 1 : _objectTextureWidth;\n                    \}\n\n                    // Perform Equi-Angular Sampling\n                    rayColour += sampleEquiangular(\n                        seed,\n                        throughput,\n                        intersectionPosition,\n                        origin,\n                        direction,\n                        emissiveIndices,\n                        numLightsForEquiangular,\n                        distanceSinceLastBounce,\n                        absorptionColour,\n                        objectIndex,\n                        scatteringProbability\n                    );\n                \}\n\n                float lightPDF = 0.0f;\n                float3 lightDirection = surfaceNormal;\n                float3 lightNormal = -surfaceNormal;\n                float distanceToLight = 0.0f;\n                int selectedLight;\n\n                if (_lightSamplingEnabled && numLights > 0)\n                \{\n                    // Get data for light sampling\n                    lightPDF = sampleLightData(\n                        seed,\n                        intersectionPosition,\n                        surfaceNormal,\n                        emissiveIndices,\n                        numLights,\n                        _usePrecomputedIrradiance,\n                        lightDirection,\n                        lightNormal,\n                        distanceToLight,\n                        selectedLight\n                    );\n                \}\n\n                // Get material data for material and light sampling\n                float4 materialBRDF;\n                float4 lightBRDF;\n                float4 materialEmissiveColour;\n                float3 bounceDirection;\n                float materialLightPDF;\n                const float materialPDF = sampleMaterial(\n                    seed,\n                    surfaceNormal,\n                    direction,\n                    lightDirection,\n                    diffusivity,\n                    reflectionOffset,\n                    transmissionOffset,\n                    transmittance,\n                    doRefraction,\n                    surface.x,\n                    surface.z,\n                    surface.w,\n                    specularity,\n                    diffusivity.w,\n                    emittance,\n                    result.y,\n                    distanceToLight,\n                    materialEmissiveColour,\n                    materialBRDF,\n                    lightBRDF,\n                    bounceDirection,\n                    intersectionPosition,\n                    nestedDielectrics,\n                    numNestedDielectrics,\n                    refractiveIndex,\n                    scatteringProbability,\n                    distanceTravelledThroughMaterial,\n                    materialLightPDF\n                );\n\n                if (\n                    _lightSamplingEnabled\n                    && lightPDF > _hitTolerance\n                    && materialLightPDF > _hitTolerance\n                ) \{\n                    // Perform MIS light sampling\n                    sampledIrradiance = (\n                        selectedLight == _lightTextureWidth\n                        && _usePrecomputedIrradiance\n                    );\n\n                    rayColour += sampleLight(\n                        seed * 3.6912f,\n                        throughput,\n                        lightBRDF,\n                        distanceToLight,\n                        surfaceNormal,\n                        intersectionPosition,\n                        lightDirection,\n                        lightPDF,\n                        materialLightPDF,\n                        reflectionOffset,\n                        selectedLight,\n                        _usePrecomputedIrradiance,\n                        lightNormal\n                    );\n                \}\n\n                // Perform MIS material sampling\n                // TODO don't assume this object is a sphere\n                const float radius = dimensions(result.y - 1, 0, 0);\n                const float visibleSurfaceArea = 2.0f * PI * radius * radius;\n\n                rayColour += (\n                    materialEmissiveColour\n                    * throughput\n                    * balanceHeuristic(\n                        previousMaterialPDF,\n                        sampleLightsPDF(numLights, visibleSurfaceArea)\n                    )\n                );\n\n                throughput *= materialBRDF / materialPDF;\n\n                // Exit if we have reached the bounce limit\n                // or with a random chance\n                const float rng = random(random(seed.x) + random(seed.y + random(seed.z)));\n                const float exitProbability = max(\n                    throughput.x,\n                    throughput.y,\n                    throughput.z\n                );\n                if (++bounces >= __bouncesPerRay || exitProbability <= rng)\n                \{\n                    return finalAOVs(\n                        _outputType,\n                        iterations,\n                        bounces,\n                        firstObjectId,\n                        rayColour\n                    );\n                \}\n\n                // Prepare the variables for the next march\n                previousMaterialPDF = materialPDF;\n\n                distanceSinceLastBounce = 0.0f;\n\n                direction = bounceDirection;\n                origin = intersectionPosition;\n\n                // Account for the lost intensity from the early exits\n                throughput /= exitProbability;\n\n                // Reset the pixel footprint so multiple reflections don't\n                // reduce precision\n                pixelFootprint = _hitTolerance;\n\n                // Update the random seed\n                seed = 77.134f * random(seed + rng + fabs(intersectionPosition + direction));\n            \}\n\n            lastStepDistance = signedStepDistance;\n            iterations++;\n        \}\n\n        // If we are not computing the scene value and we have missed all\n        // objects, return an appropriate colour.\n        if (_outputType > BEAUTY_AOV)\n        \{\n            return rayMissAOVs(\n                _outputType,\n                iterations,\n                bounces,\n                firstObjectId\n            );\n        \}\n\n        const float4 absorptionColour = float4(\n            nestedDielectrics\[numNestedDielectrics]\[0],\n            nestedDielectrics\[numNestedDielectrics]\[1],\n            nestedDielectrics\[numNestedDielectrics]\[2],\n            nestedDielectrics\[numNestedDielectrics]\[3]\n        );\n\n        const float4 imageLighting = sampledIrradiance ? float4(0) : readHDRIValue(direction);\n\n        // Read the hdri value in the direction the ray was last travelling\n        // and absorb an amount of light proportional to the distance travelled\n        // through the last material\n        rayColour += throughput * imageLighting * exp(\n            -absorptionColour * scatteringProbability * (\n                distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled\n            )\n        );\n\n        if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLightsForEquiangular > 0)\n        \{\n            // Perform Equi-Angular Sampling\n            rayColour += sampleEquiangular(\n                seed,\n                throughput,\n                positionOnRay,\n                origin,\n                direction,\n                emissiveIndices,\n                numLightsForEquiangular,\n                distanceSinceLastBounce + _maxRayDistance - distanceTravelled,\n                absorptionColour,\n                _objectTextureWidth == 0 ? 1 : _objectTextureWidth,\n                scatteringProbability\n            );\n        \}\n\n        rayColour.w = (bounces > 0) * firstObjectId;\n        return rayColour;\n    \}\n\n\n    /**\n     *\n     */\n    int getEmissiveIndices(int emissiveIndices\[MAX_MIS_EMISSIVE_SHAPES])\n    \{\n        int currentIndex = 0;\n        for (int j=0; j < min(_objectTextureWidth, MAX_MIS_EMISSIVE_SHAPES); j++)\n        \{\n            if (emittances(j, 0, 3) > 0.0f)\n            \{\n                emissiveIndices\[currentIndex++] = j;\n            \}\n        \}\n\n        return currentIndex;\n    \}\n\n\n    /**\n     * Compute a raymarched pixel value.\n     *\n     * @arg pos: The x, and y location we are currently processing.\n     */\n    void process(int2 pos)\n    \{\n        SampleType(noise) noisePixel = noise();\n        float3 seed = 43.67f * random(float3(noisePixel.x, noisePixel.y, noisePixel.z));\n\n        const float4 variancePixel = variance();\n\n        const float numPaths = adaptiveSamples(\n            _minPathsPerPixel,\n            _maxPathsPerPixel,\n            float3(variancePixel.x, variancePixel.y, variancePixel.z)\n        );\n\n        float4 resultPixel = float4(0);\n\n        float2 pixelLocation = float2(pos.x, pos.y);\n\n        int emissiveMISOptions\[MAX_MIS_EMISSIVE_SHAPES];\n\n        const int numEmissive = getEmissiveIndices(emissiveMISOptions);\n\n        for (int path=1; path <= numPaths; path++)\n        \{\n            // Generate a ray from the camera\n            float3 rayOrigin;\n            float3 rayDirection;\n            const float2 uvCoordinates = pixelsToUV(\n                pixelLocation + random(float2(seed.x, seed.y)),\n                float2(_formatWidth, _formatHeight)\n            );\n            if (_latLong)\n            \{\n                createLatLongCameraRay(\n                    _cameraWorldMatrix,\n                    uvCoordinates,\n                    rayOrigin,\n                    rayDirection\n                );\n            \}\n            else if (_depthOfFieldEnabled)\n            \{\n                createCameraRay(\n                    _cameraWorldMatrix,\n                    __inverseCameraProjectionMatrix,\n                    uvCoordinates,\n                    __aperture,\n                    _focalDistance,\n                    seed,\n                    rayOrigin,\n                    rayDirection\n                );\n            \}\n            else\n            \{\n                createCameraRay(\n                    _cameraWorldMatrix,\n                    __inverseCameraProjectionMatrix,\n                    uvCoordinates,\n                    rayOrigin,\n                    rayDirection\n                );\n            \}\n\n            // Determine the colour of the ray\n            resultPixel += marchRay(\n                rayOrigin,\n                rayDirection,\n                emissiveMISOptions,\n                numEmissive,\n                seed\n            );\n\n            seed = 53.1231f * random(seed * path);\n        \}\n\n        const uint objectId = resultPixel.w / numPaths;\n\n        const float numPrecomputedPaths = variancePixel.w;\n\n        dst() = (resultPixel + numPrecomputedPaths * src()) / (numPaths + numPrecomputedPaths);\n\n        if (_outputType == STATS_AOV)\n        \{\n            dst(2) = numPaths + numPrecomputedPaths;\n        \}\n\n        dst(3) = encodeTwoValuesInUint(objectId, numPaths + numPrecomputedPaths);\n    \}\n\};\n"
   rebuild ""
   "PathMarchKernel_Focal Length" {{parent.DummyCam.focal}}
   "PathMarchKernel_Horizontal Aperture" {{parent.DummyCam.haperture}}
@@ -817,6 +1113,7 @@ push $N2c09e7a0
   "PathMarchKernel_Screen Width" {{parent.resolution_dot.width}}
   "PathMarchKernel_Screen Height" {{parent.resolution_dot.height}}
   "PathMarchKernel_HDRI Offset Angle" {{parent.hdri_offset_angle}}
+  "PathMarchKernel_Use Precomputed Irradiance" {{parent.use_precomputed_irradiance}}
   "PathMarchKernel_Min Paths Per Pixel" {{parent.min_paths_per_pixel}}
   "PathMarchKernel_Max Paths Per Pixel" {{parent.max_paths_per_pixel}}
   "PathMarchKernel_Max Bounces" {{parent.max_bounces}}
@@ -825,7 +1122,9 @@ push $N2c09e7a0
   "PathMarchKernel_Hit Tolerance" {{parent.hit_tolerance}}
   "PathMarchKernel_Shadow Bias" {{parent.shadow_bias}}
   "PathMarchKernel_Index of Refraction" {{parent.refractive_index}}
+  "PathMarchKernel_Scattering Probability" {{parent.scattering_probability}}
   "PathMarchKernel_brdf Colour" {{parent.absorption_colour.r} {parent.absorption_colour.g} {parent.absorption_colour.b} 1}
+  "PathMarchKernel_Equi-Angular Samples" {{parent.equiangular_samples}}
   "PathMarchKernel_Object Texture Width" {{"parent.object_input_protection.disable ? parent.obj_dot.width : parent.scene.width == 1 ? 1 : 0"}}
   "PathMarchKernel_Light Texture Width" {{"parent.light_input_protection.disable ? parent.light_dot.width : parent.lights.width == 1 ? 1 : 0"}}
   "PathMarchKernel_Enable Light Sampling" {{parent.use_light_sampling}}
@@ -840,14 +1139,14 @@ push $N2c09e7a0
   format {{{parent.format_.format}}}
   name Reformat1
   xpos 1661
-  ypos -401
+  ypos -422
  }
  Dot {
   name Dot11
   xpos 1695
   ypos -341
  }
-set N31d66690 [stack 0]
+set N7295c000 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/decode_alpha.blink
   recompileCount 2
@@ -857,10 +1156,10 @@ set N31d66690 [stack 0]
   rebuild_finalise ""
   name BlinkScript1
   xpos 1661
-  ypos -85
+  ypos -118
  }
-set N31d6b490 [stack 0]
-push $N31d66690
+set N72960f80 [stack 0]
+push $N7295c000
  Dot {
   name Dot8
   xpos 1830
@@ -873,9 +1172,9 @@ push $N31d66690
   green2 green2
   name ShuffleCopy2
   xpos 1796
-  ypos -78
+  ypos -111
  }
-push $N31d66690
+push $N7295c000
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/variance.blink
   recompileCount 16
@@ -888,13 +1187,12 @@ push $N31d66690
   xpos 1526
   ypos -352
  }
- Shuffle {
-  alpha black
-  name kill_alpha
-  xpos 1526
-  ypos -312
+ Dot {
+  name Dot17
+  xpos 1560
+  ypos -299
  }
-set N320b0ed0 [stack 0]
+set N7290c120 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/minMax.blink
   recompileCount 6
@@ -904,33 +1202,33 @@ set N320b0ed0 [stack 0]
   rebuild_finalise ""
   name BlinkScript3
   xpos 1382
-  ypos -319
+  ypos -310
  }
  Dot {
   name Dot29
   xpos 1416
-  ypos -247
+  ypos -237
  }
-push $N320b0ed0
+push $N7290c120
  BlinkScript {
   inputs 2
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/normalize.blink
-  recompileCount 7
-  KernelDescription "2 \"Normalize\" iterate pixelWise 833c7659da52e034592015e187e3e8f6eb9ec3d231faca029c1072361e84548d 3 \"src\" Read Point \"minMax\" Read Random \"dst\" Write Point 2 \"Normalization Method\" Int 1 AAAAAA== \"Clamp To Standard Deviation\" Bool 1 AA== 2 \"_normalizationMethod\" 1 1 \"_clampToStdDev\" 1 1 1 \"minMaxconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA=="
-  kernelSource "#include \"math.h\"\n\n\nkernel Normalize : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessPoint, eEdgeNone> src; // the input image\n    Image<eRead, eAccessRandom, eEdgeConstant> minMax; // the input image\n    Image<eWrite> dst; // the output image\n\n\n    param:\n        int _normalizationMethod;\n        bool _clampToStdDev;\n\n    /**\n     * In define(), parameters can be given labels and default values.\n     */\n    void define()\n    \{\n        defineParam(_normalizationMethod, \"Normalization Method\", 0);\n        defineParam(_clampToStdDev, \"Clamp To Standard Deviation\", false);\n    \}\n\n\n    void process()\n    \{\n        float minValue = minMax(0, 0, 0);\n        float maxValue = minMax(0, 0, 1);\n        const float meanValue = minMax(0, 0, 2);\n        const float standardDeviationValue = minMax(0, 0, 3);\n\n        float4 srcValue;\n        if (_clampToStdDev)\n        \{\n            srcValue = clamp(src(), -standardDeviationValue, standardDeviationValue);\n            minValue = clamp(minValue, -standardDeviationValue, standardDeviationValue);\n            maxValue = clamp(maxValue, -standardDeviationValue, standardDeviationValue);\n        \}\n        else\n        \{\n            srcValue = src();\n        \}\n\n        float4 output;\n\n        if (_normalizationMethod == 0 && minValue != maxValue)\n        \{\n            dst() = (srcValue - minValue) / (maxValue - minValue);\n        \}\n        else if (_normalizationMethod == 1 && standardDeviationValue != 0.0f)\n        \{\n            dst() = (srcValue - meanValue) / standardDeviationValue;\n        \}\n        else\n        \{\n            dst() = 0.0f;\n        \}\n    \}\n\};\n"
+  recompileCount 9
+  KernelDescription "2 \"Normalize\" iterate pixelWise 15596707b9f9c6e32c3d165235f6d746c644e34a42e0c804e9bb86d469def536 3 \"src\" Read Point \"minMax\" Read Random \"dst\" Write Point 2 \"Normalization Method\" Int 1 AAAAAA== \"Clamp To Standard Deviation\" Bool 1 AA== 2 \"_normalizationMethod\" 1 1 \"_clampToStdDev\" 1 1 1 \"minMaxconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA=="
+  kernelSource "#include \"math.h\"\n\n\nkernel Normalize : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessPoint, eEdgeNone> src; // the input image\n    Image<eRead, eAccessRandom, eEdgeConstant> minMax; // the input image\n    Image<eWrite> dst; // the output image\n\n\n    param:\n        int _normalizationMethod;\n        bool _clampToStdDev;\n\n    /**\n     * In define(), parameters can be given labels and default values.\n     */\n    void define()\n    \{\n        defineParam(_normalizationMethod, \"Normalization Method\", 0);\n        defineParam(_clampToStdDev, \"Clamp To Standard Deviation\", false);\n    \}\n\n\n    void process()\n    \{\n        float minValue = minMax(0, 0, 0);\n        float maxValue = minMax(0, 0, 1);\n        const float meanValue = minMax(0, 0, 2);\n        const float standardDeviationValue = minMax(0, 0, 3);\n\n        float4 srcValue;\n        if (_clampToStdDev)\n        \{\n            const float lowerBound = meanValue - standardDeviationValue;\n            const float upperBound = meanValue + standardDeviationValue;\n\n            srcValue = clamp(src(), lowerBound, upperBound);\n            minValue = clamp(minValue, lowerBound, upperBound);\n            maxValue = clamp(maxValue, lowerBound, upperBound);\n        \}\n        else\n        \{\n            srcValue = src();\n        \}\n\n        float4 output;\n\n        if (_normalizationMethod == 0 && minValue != maxValue)\n        \{\n            dst() = (srcValue - minValue) / (maxValue - minValue);\n        \}\n        else if (_normalizationMethod == 1 && standardDeviationValue != 0.0f)\n        \{\n            dst() = (srcValue - meanValue) / standardDeviationValue;\n        \}\n        else\n        \{\n            dst() = 0.0f;\n        \}\n    \}\n\};\n"
   rebuild ""
   "Normalize_Normalization Method" 1
   rebuild_finalise ""
   name BlinkScript4
   xpos 1526
-  ypos -258
+  ypos -248
  }
  Dot {
   name Dot31
   xpos 1560
-  ypos -141
+  ypos -178
  }
-set N320f89e0 [stack 0]
+set N72998040 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/minMax.blink
   recompileCount 6
@@ -940,33 +1238,33 @@ set N320f89e0 [stack 0]
   rebuild_finalise ""
   name BlinkScript5
   xpos 1382
-  ypos -152
+  ypos -189
  }
  Dot {
   name Dot32
   xpos 1416
-  ypos -70
+  ypos -107
  }
-push $N320f89e0
+push $N72998040
  BlinkScript {
   inputs 2
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/normalize.blink
-  recompileCount 7
-  KernelDescription "2 \"Normalize\" iterate pixelWise 833c7659da52e034592015e187e3e8f6eb9ec3d231faca029c1072361e84548d 3 \"src\" Read Point \"minMax\" Read Random \"dst\" Write Point 2 \"Normalization Method\" Int 1 AAAAAA== \"Clamp To Standard Deviation\" Bool 1 AA== 2 \"_normalizationMethod\" 1 1 \"_clampToStdDev\" 1 1 1 \"minMaxconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA=="
-  kernelSource "#include \"math.h\"\n\n\nkernel Normalize : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessPoint, eEdgeNone> src; // the input image\n    Image<eRead, eAccessRandom, eEdgeConstant> minMax; // the input image\n    Image<eWrite> dst; // the output image\n\n\n    param:\n        int _normalizationMethod;\n        bool _clampToStdDev;\n\n    /**\n     * In define(), parameters can be given labels and default values.\n     */\n    void define()\n    \{\n        defineParam(_normalizationMethod, \"Normalization Method\", 0);\n        defineParam(_clampToStdDev, \"Clamp To Standard Deviation\", false);\n    \}\n\n\n    void process()\n    \{\n        float minValue = minMax(0, 0, 0);\n        float maxValue = minMax(0, 0, 1);\n        const float meanValue = minMax(0, 0, 2);\n        const float standardDeviationValue = minMax(0, 0, 3);\n\n        float4 srcValue;\n        if (_clampToStdDev)\n        \{\n            srcValue = clamp(src(), -standardDeviationValue, standardDeviationValue);\n            minValue = clamp(minValue, -standardDeviationValue, standardDeviationValue);\n            maxValue = clamp(maxValue, -standardDeviationValue, standardDeviationValue);\n        \}\n        else\n        \{\n            srcValue = src();\n        \}\n\n        float4 output;\n\n        if (_normalizationMethod == 0 && minValue != maxValue)\n        \{\n            dst() = (srcValue - minValue) / (maxValue - minValue);\n        \}\n        else if (_normalizationMethod == 1 && standardDeviationValue != 0.0f)\n        \{\n            dst() = (srcValue - meanValue) / standardDeviationValue;\n        \}\n        else\n        \{\n            dst() = 0.0f;\n        \}\n    \}\n\};\n"
+  recompileCount 8
+  KernelDescription "2 \"Normalize\" iterate pixelWise 15596707b9f9c6e32c3d165235f6d746c644e34a42e0c804e9bb86d469def536 3 \"src\" Read Point \"minMax\" Read Random \"dst\" Write Point 2 \"Normalization Method\" Int 1 AAAAAA== \"Clamp To Standard Deviation\" Bool 1 AA== 2 \"_normalizationMethod\" 1 1 \"_clampToStdDev\" 1 1 1 \"minMaxconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA=="
+  kernelSource "#include \"math.h\"\n\n\nkernel Normalize : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessPoint, eEdgeNone> src; // the input image\n    Image<eRead, eAccessRandom, eEdgeConstant> minMax; // the input image\n    Image<eWrite> dst; // the output image\n\n\n    param:\n        int _normalizationMethod;\n        bool _clampToStdDev;\n\n    /**\n     * In define(), parameters can be given labels and default values.\n     */\n    void define()\n    \{\n        defineParam(_normalizationMethod, \"Normalization Method\", 0);\n        defineParam(_clampToStdDev, \"Clamp To Standard Deviation\", false);\n    \}\n\n\n    void process()\n    \{\n        float minValue = minMax(0, 0, 0);\n        float maxValue = minMax(0, 0, 1);\n        const float meanValue = minMax(0, 0, 2);\n        const float standardDeviationValue = minMax(0, 0, 3);\n\n        float4 srcValue;\n        if (_clampToStdDev)\n        \{\n            const float lowerBound = meanValue - standardDeviationValue;\n            const float upperBound = meanValue + standardDeviationValue;\n\n            srcValue = clamp(src(), lowerBound, upperBound);\n            minValue = clamp(minValue, lowerBound, upperBound);\n            maxValue = clamp(maxValue, lowerBound, upperBound);\n        \}\n        else\n        \{\n            srcValue = src();\n        \}\n\n        float4 output;\n\n        if (_normalizationMethod == 0 && minValue != maxValue)\n        \{\n            dst() = (srcValue - minValue) / (maxValue - minValue);\n        \}\n        else if (_normalizationMethod == 1 && standardDeviationValue != 0.0f)\n        \{\n            dst() = (srcValue - meanValue) / standardDeviationValue;\n        \}\n        else\n        \{\n            dst() = 0.0f;\n        \}\n    \}\n\};\n"
   rebuild ""
   "Normalize_Clamp To Standard Deviation" true
   rebuild_finalise ""
   name BlinkScript6
   xpos 1526
-  ypos -81
+  ypos -118
  }
  Dot {
   name Dot30
   xpos 1560
-  ypos 61
+  ypos 11
  }
-push $N31d6b490
+push $N72960f80
  ShuffleCopy {
   inputs 2
   in rgb
@@ -982,68 +1280,28 @@ push $N31d6b490
   out variance
   name ShuffleCopy1
   xpos 1661
-  ypos 57
+  ypos 7
  }
  Copy {
   inputs 2
   channels all
   name Copy1
   xpos 1796
-  ypos 44
+  ypos -6
  }
  Output {
   name Output1
   xpos 1796
-  ypos 131
+  ypos 106
  }
- Input {
-  inputs 0
-  name camera
-  xpos 1354
-  ypos -1581
-  number 1
- }
- Camera {
-  projection_mode {{"\[expression \[value the_cam]projection_mode(\[value the_frame])]"}}
-  focal {{"\[expression \[value the_cam]focal(\[value the_frame])]"}}
-  haperture {{"\[expression \[value the_cam]haperture(\[value the_frame])]"}}
-  vaperture {{"\[expression \[value the_cam]vaperture(\[value the_frame])]"}}
-  near {{"\[expression \[value the_cam]near(\[value the_frame])]"}}
-  far {{"\[expression \[value the_cam]far(\[value the_frame])]"}}
-  win_translate {{"\[expression \[value the_cam]win_translate.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_translate.v(\[value the_frame])]"}}
-  win_scale {{"\[expression \[value the_cam]win_scale.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_scale.v(\[value the_frame])]"}}
-  winroll {{"\[expression \[value the_cam]winroll(\[value the_frame])]"}}
-  focal_point {{"\[expression \[value the_cam]focal_point(\[value the_frame])]"}}
-  fstop {{"\[expression \[value the_cam]fstop(\[value the_frame])]"}}
-  name DummyCam
-  help "DummyCam by Adrian Pueyo\n\nCamera that apart from the matrices also grabs all the \"Projection\" values from the upstream camera that it's connected to. Turns into a default Camera if no Camera connected. Can also be used inside of groups and gizmos, as many levels deep as you want :D All using live and super fast TCL.\n\nUpdated v1.1: Now grabs the correct frame too (thanks Erwan Leroy for the idea).\n\nUpdated v1.3: Now accepts Nuke13's Camera3\n\nadrianpueyo.com, 2019-2021"
-  onCreate "n = nuke.thisNode()\nfor k in \[\"projection_mode\",\"focal\",\"haperture\",\"vaperture\",\"near\",\"far\",\"win_translate\",\"win_scale\",\"winroll\",\"focal_point\",\"fstop\"]:\n    n\[k].setFlag(0x0000000010000000)"
-  xpos 1364
-  ypos -1473
-  addUserKnob {20 DummyCam l Defaults}
-  addUserKnob {43 the_cam +INVISIBLE}
-  the_cam "\[\n#DummyCam v1.3 - Updated 5 May 2021.\nset starting_point \"this.input0\"\nset default \"this.d_\"\n\n# If cam has no inputs, return the default.\nif \{\[exists \$starting_point]\} \{\n    set x \[node \$starting_point]\n\} \{ \n    return \$default\n\}\n\nset finished 0\nwhile \{\$finished != 1\} \{\n\n    # First look for a Cam or Input or topnode.\n    while \{\[class \$x] != \"Camera3\" && \[class \$x] != \"Camera2\" && \[class \$x] != \"Camera\" && \[class \$x] != \"Input\" && \$x != \[topnode \$x]\} \{\n        set x \[node \$x.input0]\n    \}\n\n    # Then, check if node is a cam (and return), and otherwise, if it's an input, see if the parent exists and move to it.\n    if \{\[class \$x]==\"Camera3\"||\[class \$x]==\"Camera2\"||\[class \$x]==\"Camera\"\} \{\n        set x \[append x \".\"]\n        return \$x\n    \} \{ \n        if \{ \[class \$x]==\"Input\" \} \{ \n            set inp \"\$x.parent.input\"\n            set inputNum \[value \$x.number]\n            set inp \[append inp \$inputNum]\n            if \{ \[exists \$inp] \} \{\n                set x \[node \$inp]\n            \} \{ \n                set finished 1\n            \}\n        \} \{ \n            set finished 1\n        \}\n    \}\n\}\nreturn \$default\n]"
-  addUserKnob {43 the_frame +INVISIBLE}
-  the_frame "\[\nset the_camera \[string trimright \[value the_cam] .]\nif \{\[exists \$the_camera]\} \{\n    return \[value \$the_camera.frame]\n\} \{ \n    return \[frame]\n\}\n]"
-  addUserKnob {4 d_projection_mode l projection M {perspective orthographic uv spherical ""}}
-  addUserKnob {7 d_focal l "focal length" R 0 100}
-  d_focal 50
-  addUserKnob {7 d_haperture l "horiz aperture" R 0 50}
-  d_haperture 24.576
-  addUserKnob {7 d_vaperture l "vert aperture" R 0 50}
-  d_vaperture 18.672
-  addUserKnob {7 d_near l near R 0 10}
-  d_near 0.1
-  addUserKnob {7 d_far l far R 0 10000}
-  d_far 10000
-  addUserKnob {30 d_win_translate l "window translate"}
-  addUserKnob {30 d_win_scale l "window scale"}
-  d_win_scale {1 1}
-  addUserKnob {7 d_winroll l "window roll" R 0 45}
-  addUserKnob {7 d_focal_point l "focal distance" R 0 10}
-  d_focal_point 2
-  addUserKnob {7 d_fstop l fstop R 0 30}
-  d_fstop 16
-  addUserKnob {26 version l " " t "Updated 5 May 2021" T "<span style=\"color:#666\"><br/><b>DummyCam v1.3</b> - <a href=\"http://www.adrianpueyo.com\" style=\"color:#666;text-decoration: none;\">adrianpueyo.com</a>, 2019-2021</span>"}
+push $Nd9b54880
+ Viewer {
+  frame_range 1-400
+  colour_sample_bbox {0 -0.5 1 0.5}
+  samplepoints {{0 -0.5}
+    }
+  name Viewer1
+  xpos 1423
+  ypos -831
  }
 end_group

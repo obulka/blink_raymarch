@@ -14,7 +14,6 @@ Gizmo {
  specular_colour {1 1 1}
  addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 specular_use_trap_colour l "use trap colour" t "Use the trap colour for specualrly reflected light." -STARTLINE}
- specular_use_trap_colour true
  addUserKnob {26 ""}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
  addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
@@ -22,9 +21,10 @@ Gizmo {
  absorption_colour {0 0 0}
  addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
- absorption_use_trap_colour true
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
+ addUserKnob {6 do_refraction l "do refraction" -STARTLINE}
+ addUserKnob {7 scattering_probability l "scattering probability"}
  addUserKnob {26 ""}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
@@ -33,7 +33,7 @@ Gizmo {
  addUserKnob {6 emission_use_trap_colour l "use trap colour" t "Use the trap colour for emitted light." -STARTLINE}
  emission_use_trap_colour true
  addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
+ addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
 }
  Input {
   inputs 0
@@ -111,7 +111,7 @@ add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surfa
  Constant {
   inputs 0
   channels sdf_surface
-  color {{parent.refractive_index} {"(parent.diffuse_use_trap_colour ? 8192 : 0)  | (parent.specular_use_trap_colour ? 16384 : 0) | (parent.absorption_use_trap_colour ? 32768 : 0) | (parent.emission_use_trap_colour ? 65536 : 0)"} 1 {parent.transmission_roughness}}
+  color {{parent.refractive_index} {"(parent.diffuse_use_trap_colour ? 8192 : 0)  | (parent.specular_use_trap_colour ? 16384 : 0) | (parent.absorption_use_trap_colour ? 32768 : 0) | (parent.emission_use_trap_colour ? 65536 : 0) | (parent.do_refraction ? 131072 : 0)"} {parent.scattering_probability} {parent.transmission_roughness}}
   format "1 1 0 0 1 1 1 1x1"
   name surface
   xpos 1011

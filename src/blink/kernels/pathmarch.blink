@@ -1361,6 +1361,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &surfaceNormal,
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numLights,
+            const bool usePrecomputedIrradiance,
             float3 &lightDirection,
             float3 &lightNormal,
             float &distanceToLight,
@@ -1391,7 +1392,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
             }
         }
-        else if (selectedLight == _lightTextureWidth && _usePrecomputedIrradiance)
+        else if (selectedLight == _lightTextureWidth && usePrecomputedIrradiance)
         {
             irradianceLightData(
                 surfaceNormal,
@@ -1408,7 +1409,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int objectIndex = emissiveIndices[
                 selectedLight
                 - _lightTextureWidth
-                - _usePrecomputedIrradiance
+                - usePrecomputedIrradiance
             ];
 
             const float3 position = getObjectPosition(objectIndex);
@@ -1444,6 +1445,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float materialPDF,
             const float offset,
             const int selectedLight,
+            const bool usePrecomputedIrradiance,
             float3 &lightNormal)
     {
         float4 lightEmissiveColour;
@@ -1459,7 +1461,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 selectedLight
             );
         }
-        else if (selectedLight == _lightTextureWidth && _usePrecomputedIrradiance)
+        else if (selectedLight == _lightTextureWidth && usePrecomputedIrradiance)
         {
             lightEmissiveColour = readIrradianceValue(lightDirection);
         }
@@ -1524,6 +1526,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             surfaceNormal,
             emissiveIndices,
             numLights,
+            false,
             lightDirection,
             lightNormal,
             distanceToLight,
@@ -1588,13 +1591,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightPDF,
                 0.0f,
                 selectedLight,
+                false,
                 lightNormal
             );
 
             adjustedScatteringProbability += scatteringProbability * noiseValue;
         }
 
-        scatteringProbability = adjustedScatteringProbability;
+        scatteringProbability = 0.0f;
         return scatteredColour;
     }
 
@@ -1615,7 +1619,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int numEmissive,
             float3 &seed)
     {
-        const int numLights = _lightTextureWidth + numEmissive + _usePrecomputedIrradiance;
+        const int numLightsForEquiangular = _lightTextureWidth + numEmissive;
+        const int numLights = numLightsForEquiangular + _usePrecomputedIrradiance;
 
         float refractiveIndex = _refractiveIndex;
         float scatteringProbability = _scatteringProbability;
@@ -1766,9 +1771,19 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     nestedDielectrics[numNestedDielectrics][3]
                 );
 
-                if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLights > 0)
-                {
-                    const int objectIndex = nestedDielectrics[numNestedDielectrics][4] - 1;
+                if (
+                    _equiangularSamples > 0
+                    && scatteringProbability > 0.0f
+                    && numLightsForEquiangular > 0
+                ) {
+                    int objectIndex = nestedDielectrics[numNestedDielectrics][4] - 1;
+                    if (objectIndex < 0)
+                    {
+                        // blink cannot handle single pixel images in versions < 12.1
+                        // so we have a weird dummy pixel when nothing is passed
+                        // to the scene
+                        objectIndex = _objectTextureWidth == 0 ? 1 : _objectTextureWidth;
+                    }
 
                     // Perform Equi-Angular Sampling
                     rayColour += sampleEquiangular(
@@ -1778,10 +1793,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         origin,
                         direction,
                         emissiveIndices,
-                        numLights,
+                        numLightsForEquiangular,
                         distanceSinceLastBounce,
                         absorptionColour,
-                        objectIndex < 0 ? _objectTextureWidth : objectIndex,
+                        objectIndex,
                         scatteringProbability
                     );
                 }
@@ -1801,6 +1816,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         surfaceNormal,
                         emissiveIndices,
                         numLights,
+                        _usePrecomputedIrradiance,
                         lightDirection,
                         lightNormal,
                         distanceToLight,
@@ -1868,6 +1884,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         materialLightPDF,
                         reflectionOffset,
                         selectedLight,
+                        _usePrecomputedIrradiance,
                         lightNormal
                     );
                 }
@@ -1960,7 +1977,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             )
         );
 
-        if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLights > 0)
+        if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLightsForEquiangular > 0)
         {
             // Perform Equi-Angular Sampling
             rayColour += sampleEquiangular(
@@ -1970,10 +1987,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 origin,
                 direction,
                 emissiveIndices,
-                numLights,
+                numLightsForEquiangular,
                 distanceSinceLastBounce + _maxRayDistance - distanceTravelled,
                 absorptionColour,
-                _objectTextureWidth,
+                _objectTextureWidth == 0 ? 1 : _objectTextureWidth,
                 scatteringProbability
             );
         }
