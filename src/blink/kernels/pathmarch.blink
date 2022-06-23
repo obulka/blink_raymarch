@@ -1510,10 +1510,25 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numLights,
             const float distanceSinceLastBounce,
-            const float4 &absorptionColour,
-            const int objectIndex,
+            const float nestedDielectrics[MAX_NESTED_DIELECTRICS][7],
+            const int &numNestedDielectrics,
             float &scatteringProbability)
     {
+        const float4 absorptionColour = float4(
+            nestedDielectrics[numNestedDielectrics][0],
+            nestedDielectrics[numNestedDielectrics][1],
+            nestedDielectrics[numNestedDielectrics][2],
+            nestedDielectrics[numNestedDielectrics][3]
+        );
+        int objectIndex = nestedDielectrics[numNestedDielectrics][4] - 1;
+        if (objectIndex < 0)
+        {
+            // blink cannot handle single pixel images in versions < 12.1
+            // so we have a weird dummy pixel when nothing is passed
+            // to the scene
+            objectIndex = _objectTextureWidth == 0 ? 1 : _objectTextureWidth;
+        }
+
         float3 surfaceNormal = randomUnitVector(seed * 43.73f);
         float3 lightDirection = surfaceNormal;
         float3 lightNormal = -surfaceNormal;
@@ -1764,27 +1779,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     * _shadowBias
                 );
 
-                const float4 absorptionColour = float4(
-                    nestedDielectrics[numNestedDielectrics][0],
-                    nestedDielectrics[numNestedDielectrics][1],
-                    nestedDielectrics[numNestedDielectrics][2],
-                    nestedDielectrics[numNestedDielectrics][3]
-                );
-
                 if (
                     _equiangularSamples > 0
                     && scatteringProbability > 0.0f
                     && numLightsForEquiangular > 0
                 ) {
-                    int objectIndex = nestedDielectrics[numNestedDielectrics][4] - 1;
-                    if (objectIndex < 0)
-                    {
-                        // blink cannot handle single pixel images in versions < 12.1
-                        // so we have a weird dummy pixel when nothing is passed
-                        // to the scene
-                        objectIndex = _objectTextureWidth == 0 ? 1 : _objectTextureWidth;
-                    }
-
                     // Perform Equi-Angular Sampling
                     rayColour += sampleEquiangular(
                         seed,
@@ -1795,8 +1794,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         emissiveIndices,
                         numLightsForEquiangular,
                         distanceSinceLastBounce,
-                        absorptionColour,
-                        objectIndex,
+                        nestedDielectrics,
+                        numNestedDielectrics,
                         scatteringProbability
                     );
                 }
@@ -1971,6 +1970,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
+        // TODO use the scattering here
         rayColour += throughput * imageLighting * exp(
             -absorptionColour * scatteringProbability * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
@@ -1989,8 +1989,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 emissiveIndices,
                 numLightsForEquiangular,
                 distanceSinceLastBounce + _maxRayDistance - distanceTravelled,
-                absorptionColour,
-                _objectTextureWidth == 0 ? 1 : _objectTextureWidth,
+                nestedDielectrics,
+                numNestedDielectrics,
                 scatteringProbability
             );
         }
