@@ -128,7 +128,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Scene params
         float _refractiveIndex;
-        float _scatteringProbability;
+        float _scatteringCoefficient;
         float4 _absorptionColour;
         int _equiangularSamples;
 
@@ -202,7 +202,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Scene params
         defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
-        defineParam(_scatteringProbability, "Scattering Probability", 0.0f);
+        defineParam(_scatteringCoefficient, "Scattering Coefficient", 0.0f);
         defineParam(_absorptionColour, "brdf Colour", float4(1));
         defineParam(_equiangularSamples, "Equi-Angular Samples", 5);
 
@@ -1512,7 +1512,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float nestedDielectrics[MAX_NESTED_DIELECTRICS][7],
             const int &numNestedDielectrics,
             float4 &throughput,
-            float &scatteringProbability)
+            float &scatteringCoefficient)
     {
         const float4 absorptionColour = float4(
             nestedDielectrics[numNestedDielectrics][0],
@@ -1589,11 +1589,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float4 lightBRDF = exp(
                 -absorptionColour
                 * (distanceToLight + equiangularDistance)
-                * scatteringProbability
+                * scatteringCoefficient
                 * noiseValue
             );
 
-            scatteredColour += scatteringProbability * noiseValue * sampleLight(
+            scatteredColour += scatteringCoefficient * noiseValue * sampleLight(
                 seed * 7.972f,
                 throughput,
                 lightBRDF,
@@ -1612,12 +1612,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             throughput *= exp(
                 -absorptionColour
                 * equiangularDistance
-                * scatteringProbability
+                * scatteringCoefficient
                 * noiseValue
             ) / lightPDF;
         }
 
-        scatteringProbability = 0.0f;
+        scatteringCoefficient = 0.0f;
         return scatteredColour;
     }
 
@@ -1642,7 +1642,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         const int numLights = numLightsForEquiangular + _usePrecomputedIrradiance;
 
         float refractiveIndex = _refractiveIndex;
-        float scatteringProbability = _scatteringProbability;
+        float scatteringCoefficient = _scatteringCoefficient;
 
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][
             4   // Absorption colour of object
@@ -1656,7 +1656,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         nestedDielectrics[0][3] = _absorptionColour.w;
         nestedDielectrics[0][4] = -1;
         nestedDielectrics[0][5] = refractiveIndex;
-        nestedDielectrics[0][6] = scatteringProbability;
+        nestedDielectrics[0][6] = scatteringCoefficient;
         int numNestedDielectrics = 0;
 
         float4 rayColour = float4(0);
@@ -1785,7 +1785,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 if (
                     _equiangularSamples > 0
-                    && scatteringProbability > 0.0f
+                    && scatteringCoefficient > 0.0f
                     && numLightsForEquiangular > 0
                 ) {
                     // Perform Equi-Angular Sampling
@@ -1800,7 +1800,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         nestedDielectrics,
                         numNestedDielectrics,
                         throughput,
-                        scatteringProbability
+                        scatteringCoefficient
                     );
                 }
 
@@ -1859,7 +1859,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     nestedDielectrics,
                     numNestedDielectrics,
                     refractiveIndex,
-                    scatteringProbability,
+                    scatteringCoefficient,
                     distanceTravelledThroughMaterial,
                     materialLightPDF
                 );
@@ -1976,12 +1976,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // through the last material
         // TODO use the scattering here
         rayColour += throughput * imageLighting * exp(
-            -absorptionColour * scatteringProbability * (
+            -absorptionColour * scatteringCoefficient * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
             )
         );
 
-        if (_equiangularSamples > 0 && scatteringProbability > 0.0f && numLightsForEquiangular > 0)
+        if (_equiangularSamples > 0 && scatteringCoefficient > 0.0f && numLightsForEquiangular > 0)
         {
             // Perform Equi-Angular Sampling
             rayColour += sampleEquiangular(
@@ -1995,7 +1995,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 nestedDielectrics,
                 numNestedDielectrics,
                 throughput,
-                scatteringProbability
+                scatteringCoefficient
             );
         }
 
