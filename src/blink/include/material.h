@@ -186,7 +186,7 @@ inline void getReflectivityData(
         const float3 &direction,
         const float3 &surfaceNormal,
         const float objectId,
-        const float nestedDielectrics[MAX_NESTED_DIELECTRICS][7],
+        const float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
         const int numNestedDielectrics,
         const float surfaceRefractiveIndex,
         const float surfaceScatteringProbability,
@@ -351,11 +351,12 @@ inline float sampleTransmissive(
         const float refractedScatteringProbability,
         const float objectId,
         const float distanceToLight,
+        const bool doRefraction,
         float4 &emissiveColour,
         float4 &materialBRDF,
         float4 &lightBRDF,
         float &lightPDF,
-        float nestedDielectrics[MAX_NESTED_DIELECTRICS][7],
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
         int &numNestedDielectrics,
         float &incidentRefractiveIndex,
         float &scatteringProbability,
@@ -388,6 +389,7 @@ inline float sampleTransmissive(
         nestedDielectrics[numNestedDielectrics][4] = objectId;
         nestedDielectrics[numNestedDielectrics][5] = refractedRefractiveIndex;
         nestedDielectrics[numNestedDielectrics][6] = refractedScatteringProbability;
+        nestedDielectrics[numNestedDielectrics][7] = doRefraction;
     }
 
     materialBRDF = exp(
@@ -490,7 +492,7 @@ inline float sampleMaterial(
         float4 &lightBRDF,
         float3 &outgoingDirection,
         float3 &position,
-        float nestedDielectrics[MAX_NESTED_DIELECTRICS][7],
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
         int &numNestedDielectrics,
         float &incidentRefractiveIndex,
         float &scatteringProbability,
@@ -596,6 +598,7 @@ inline float sampleMaterial(
             refractedScatteringProbability,
             objectId,
             distanceToLight,
+            doRefraction,
             emissiveColour,
             materialBRDF,
             lightBRDF,

@@ -1509,7 +1509,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numLights,
             const float distanceSinceLastBounce,
-            const float nestedDielectrics[MAX_NESTED_DIELECTRICS][7],
+            const float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
             const int &numNestedDielectrics,
             float4 &throughput,
             float &scatteringCoefficient)
@@ -1649,6 +1649,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             + 1 // ID of the dielectric we are currently in
             + 1 // Refractive index of that object
             + 1 // Scattering probability
+            + 1 // Do refraction
         ];
         nestedDielectrics[0][0] = _absorptionColour.x;
         nestedDielectrics[0][1] = _absorptionColour.y;
@@ -1657,6 +1658,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         nestedDielectrics[0][4] = -1;
         nestedDielectrics[0][5] = refractiveIndex;
         nestedDielectrics[0][6] = scatteringCoefficient;
+        nestedDielectrics[0][7] = false;
         int numNestedDielectrics = 0;
 
         float4 rayColour = float4(0);
