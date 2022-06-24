@@ -1503,7 +1503,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     float4 sampleEquiangular(
             const float3 &seed,
-            const float4 &throughput,
             const float3 &intersectionPosition,
             const float3 &rayOrigin,
             const float3 &rayDirection,
@@ -1512,6 +1511,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float distanceSinceLastBounce,
             const float nestedDielectrics[MAX_NESTED_DIELECTRICS][7],
             const int &numNestedDielectrics,
+            float4 &throughput,
             float &scatteringProbability)
     {
         const float4 absorptionColour = float4(
@@ -1552,7 +1552,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         const float offset = random(random(seed.z) + random(seed.y + random(seed.x)));
 
         float4 scatteredColour = float4(0);
-        float adjustedScatteringProbability = scatteringProbability;
         for (int step=1; step <= _equiangularSamples; step++)
         {
             const float uniform = (step + offset) / (float) _equiangularSamples;
@@ -1610,10 +1609,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightNormal
             );
 
-            adjustedScatteringProbability *= noiseValue;
+            throughput *= exp(
+                -absorptionColour
+                * equiangularDistance
+                * scatteringProbability
+                * noiseValue
+            ) / lightPDF;
         }
 
-        scatteringProbability = adjustedScatteringProbability;
+        scatteringProbability = 0.0f;
         return scatteredColour;
     }
 
@@ -1787,7 +1791,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     // Perform Equi-Angular Sampling
                     rayColour += sampleEquiangular(
                         seed,
-                        throughput,
                         intersectionPosition,
                         origin,
                         direction,
@@ -1796,6 +1799,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         distanceSinceLastBounce,
                         nestedDielectrics,
                         numNestedDielectrics,
+                        throughput,
                         scatteringProbability
                     );
                 }
@@ -1982,7 +1986,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Perform Equi-Angular Sampling
             rayColour += sampleEquiangular(
                 seed,
-                throughput,
                 positionOnRay,
                 origin,
                 direction,
@@ -1991,6 +1994,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 distanceSinceLastBounce + _maxRayDistance - distanceTravelled,
                 nestedDielectrics,
                 numNestedDielectrics,
+                throughput,
                 scatteringProbability
             );
         }
