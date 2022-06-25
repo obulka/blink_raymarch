@@ -10,17 +10,15 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             </dock>
             <split size="1841" stretch="1"/>
             <splitter orientation="2">
-                <split size="782"/>
+                <split size="961"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
-                <split size="550"/>
+                <split size="371"/>
                 <dock id="" activePageId="DAG.1" focus="true">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
-                    <page id="DAG.2"/>
-                    <page id="DAG.3"/>
                 </dock>
             </splitter>
             <split size="615"/>
@@ -48,108 +46,15 @@ Root {
 }
 Group {
  inputs 0
- name sdf_noise3
- tile_color 0xffffffff
- xpos -439
- ypos 7
- addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {7 size R 1 1000}
- size 3
- addUserKnob {4 type M {fBm turbulence}}
- type turbulence
- addUserKnob {13 translation}
- translation {2.3 -0.6 -0.1}
- addUserKnob {3 octaves}
- octaves 10
- addUserKnob {7 lacunarity R 1 10}
- lacunarity 6.35
- addUserKnob {7 gain}
- gain 0.5
- addUserKnob {7 gamma}
- gamma 0.5
- addUserKnob {7 black_point l "black point"}
- addUserKnob {7 white_point l "white point"}
- white_point 1
- addUserKnob {7 lift}
- addUserKnob {6 invert +STARTLINE}
- addUserKnob {26 ""}
- addUserKnob {6 diffuse +STARTLINE}
- diffuse true
- addUserKnob {6 specular -STARTLINE}
- addUserKnob {6 transmission -STARTLINE}
- addUserKnob {6 emission -STARTLINE}
- addUserKnob {6 specular_roughness l "specular roughness" +STARTLINE}
- addUserKnob {6 transmission_roughness l "transmission roughness" -STARTLINE}
- addUserKnob {6 refractive_index l "refractive index" +STARTLINE}
- addUserKnob {6 scattering +STARTLINE}
- scattering true
- addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
-}
-add_layer {sdf_noise_params0 sdf_noise_params0.options sdf_noise_params0.x sdf_noise_params0.y sdf_noise_params0.z}
- Constant {
-  inputs 0
-  channels sdf_noise_params0
-  color {{"(parent.scattering << 10) | (parent.invert << 9) | (parent.specular_roughness << 8) | (parent.transmission_roughness << 7) | (parent.refractive_index << 6) | (parent.emission << 5) | (parent.transmission << 4) | (parent.specular << 3) | (parent.diffuse << 2) | (parent.type << 1) | 1"} {parent.translation.x} {parent.translation.y} {parent.translation.z}}
-  format "1 1 0 0 1 1 1 1x1"
-  name noise_params0
-  xpos 841
-  ypos 447
- }
- Dot {
-  name Dot3
-  xpos 875
-  ypos 646
- }
-add_layer {sdf_noise_params1 sdf_noise_params1.octaves sdf_noise_params1.lacunarity sdf_noise_params1.gain sdf_noise_params1.gamma}
- Constant {
-  inputs 0
-  channels sdf_noise_params1
-  color {{parent.octaves} {parent.lacunarity} {parent.gain} {parent.gamma}}
-  format "1 1 0 0 1 1 1 1x1"
-  name noise_params1
-  xpos 966
-  ypos 447
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy8
-  xpos 966
-  ypos 714
- }
-add_layer {sdf_noise_params2 sdf_noise_params2.size sdf_noise_params2.white_point sdf_noise_params2.black_point sdf_noise_params2.lift}
- Constant {
-  inputs 0
-  channels sdf_noise_params2
-  color {{parent.size} {parent.white_point} {parent.black_point} {parent.lift}}
-  format "1 1 0 0 1 1 1 1x1"
-  name noise_params2
-  xpos 1082
-  ypos 449
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 1082
-  ypos 714
- }
- Output {
-  name Output1
-  xpos 1082
-  ypos 826
- }
-end_group
-Group {
- name sdf_material2
+ name sdf_material1
  knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
  tile_color 0xffffffff
- xpos -439
- ypos 98
+ xpos -938
+ ypos 176
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
  colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 diffuse_use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." -STARTLINE}
  diffuse_use_trap_colour true
  addUserKnob {26 ""}
@@ -157,23 +62,25 @@ Group {
  addUserKnob {7 specular_roughness l "specular roughness" t "The object's surface will scatter the specularly reflected light more the higher this value is."}
  addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
  specular_colour {1 1 1}
+ addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 specular_use_trap_colour l "use trap colour" t "Use the trap colour for specualrly reflected light." -STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
- transmission 1
  addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
  addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
- absorption_colour {2 1 0}
+ absorption_colour {0 0 0}
+ addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
  addUserKnob {6 do_refraction l "do refraction" -STARTLINE}
  addUserKnob {7 scattering_coefficient l "scattering coefficient"}
- scattering_coefficient 0.53
  addUserKnob {26 ""}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
+ emission 10
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
  emission_colour {1 0.8 0.5}
+ addUserKnob {6 emission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 emission_use_trap_colour l "use trap colour" t "Use the trap colour for emitted light." -STARTLINE}
  emission_use_trap_colour true
  addUserKnob {26 div0 l "" +STARTLINE}
@@ -281,150 +188,10 @@ add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surfa
   ypos 839
  }
 end_group
-push 0
-Group {
- inputs 0
- name sdf_material1
- knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
- tile_color 0xffffffff
- xpos -727
- ypos 153
- addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
- colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {6 diffuse_use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." -STARTLINE}
- diffuse_use_trap_colour true
- addUserKnob {26 ""}
- addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
- addUserKnob {7 specular_roughness l "specular roughness" t "The object's surface will scatter the specularly reflected light more the higher this value is."}
- addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
- specular_colour {1 1 1}
- addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {6 specular_use_trap_colour l "use trap colour" t "Use the trap colour for specualrly reflected light." -STARTLINE}
- addUserKnob {26 ""}
- addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
- addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
- addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
- absorption_colour {0 0 0}
- addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
- addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
- refractive_index 1.33
- addUserKnob {6 do_refraction l "do refraction" -STARTLINE}
- addUserKnob {7 scattering_coefficient l "scattering coefficient"}
- addUserKnob {26 ""}
- addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
- emission 10
- addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
- emission_colour {1 0.8 0.5}
- addUserKnob {6 emission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {6 emission_use_trap_colour l "use trap colour" t "Use the trap colour for emitted light." -STARTLINE}
- emission_use_trap_colour true
- addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
-}
- Input {
-  inputs 0
-  name noise
-  xpos 1146
-  ypos 441
- }
- Constant {
-  inputs 0
-  channels sdf_colour
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.specular_roughness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name diffuse_colour
-  xpos 515
-  ypos 411
- }
- Dot {
-  name Dot3
-  xpos 549
-  ypos 610
- }
- Constant {
-  inputs 0
-  channels sdf_spec_colour
-  color {{parent.specular_colour.r} {parent.specular_colour.g} {parent.specular_colour.b} {parent.specular}}
-  format "1 1 0 0 1 1 1 1x1"
-  name spec_colour
-  xpos 640
-  ypos 411
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy8
-  xpos 640
-  ypos 678
- }
- Constant {
-  inputs 0
-  channels sdf_trans_colour
-  color {{parent.absorption_colour.r} {parent.absorption_colour.g} {parent.absorption_colour.b} {parent.transmission}}
-  format "1 1 0 0 1 1 1 1x1"
-  name trans_colour
-  xpos 763
-  ypos 411
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy9
-  xpos 763
-  ypos 678
- }
- Constant {
-  inputs 0
-  channels sdf_emm_colour
-  color {{parent.emission_colour.r} {parent.emission_colour.g} {parent.emission_colour.b} {parent.emission}}
-  format "1 1 0 0 1 1 1 1x1"
-  name emm_colour
-  xpos 887
-  ypos 411
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy10
-  xpos 887
-  ypos 678
- }
- Constant {
-  inputs 0
-  channels sdf_surface
-  color {{parent.refractive_index} {"(parent.diffuse_use_trap_colour ? 8192 : 0)  | (parent.specular_use_trap_colour ? 16384 : 0) | (parent.absorption_use_trap_colour ? 32768 : 0) | (parent.emission_use_trap_colour ? 65536 : 0) | (parent.do_refraction ? 131072 : 0)"} {parent.scattering_coefficient} {parent.transmission_roughness}}
-  format "1 1 0 0 1 1 1 1x1"
-  name surface
-  xpos 1011
-  ypos 412
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy5
-  xpos 1011
-  ypos 678
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy3
-  xpos 1146
-  ypos 678
- }
- Output {
-  name Output1
-  xpos 1146
-  ypos 839
- }
-end_group
 Dot {
  name Dot13
- xpos -693
- ypos 218
+ xpos -904
+ ypos 241
 }
 push 0
 push 0
@@ -435,8 +202,8 @@ Group {
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label sphere
- xpos -604
- ypos 207
+ xpos -815
+ ypos 230
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
@@ -646,7 +413,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N5ef59b0 [stack 0]
+set N8465fe0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -668,7 +435,7 @@ set N5ef59b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N5f091b0 [stack 0]
+set N84797e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -679,7 +446,7 @@ set N5f091b0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5ef59b0
+push $N8465fe0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -708,7 +475,7 @@ push $N5ef59b0
    xpos 158
    ypos 167
   }
-push $N5f091b0
+push $N84797e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -801,7 +568,7 @@ push $N5f091b0
    xpos 192
    ypos -2
   }
-set N5fb5a40 [stack 0]
+set N8526480 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -823,7 +590,7 @@ set N5fb5a40 [stack 0]
    xpos 34
    ypos -6
   }
-set N5fc9030 [stack 0]
+set N8539c80 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -834,7 +601,7 @@ set N5fc9030 [stack 0]
    xpos -98
    ypos 336
   }
-push $N5fb5a40
+push $N8526480
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -863,7 +630,7 @@ push $N5fb5a40
    xpos 158
    ypos 167
   }
-push $N5fc9030
+push $N8539c80
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -932,14 +699,249 @@ push $N5fc9030
  }
 end_group
 Group {
+ inputs 0
+ name sdf_noise3
+ tile_color 0xffffffff
+ xpos -604
+ ypos 135
+ addUserKnob {20 User l "SDF Primitive"}
+ addUserKnob {7 size R 1 1000}
+ size 3
+ addUserKnob {4 type M {fBm turbulence}}
+ type turbulence
+ addUserKnob {13 translation}
+ translation {2.3 -0.6 -0.1}
+ addUserKnob {3 octaves}
+ octaves 2
+ addUserKnob {7 lacunarity R 1 10}
+ lacunarity 6.35
+ addUserKnob {7 gain}
+ gain 0.5
+ addUserKnob {7 gamma}
+ gamma 0.5
+ addUserKnob {7 black_point l "black point"}
+ addUserKnob {7 white_point l "white point"}
+ white_point 0.09
+ addUserKnob {7 lift}
+ addUserKnob {6 invert +STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {6 diffuse +STARTLINE}
+ addUserKnob {6 specular -STARTLINE}
+ specular true
+ addUserKnob {6 transmission -STARTLINE}
+ addUserKnob {6 emission -STARTLINE}
+ addUserKnob {6 specular_roughness l "specular roughness" +STARTLINE}
+ addUserKnob {6 transmission_roughness l "transmission roughness" -STARTLINE}
+ addUserKnob {6 refractive_index l "refractive index" +STARTLINE}
+ addUserKnob {6 scattering +STARTLINE}
+ addUserKnob {26 div0 l "" +STARTLINE}
+ addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
+}
+add_layer {sdf_noise_params0 sdf_noise_params0.options sdf_noise_params0.x sdf_noise_params0.y sdf_noise_params0.z}
+ Constant {
+  inputs 0
+  channels sdf_noise_params0
+  color {{"(parent.scattering << 10) | (parent.invert << 9) | (parent.specular_roughness << 8) | (parent.transmission_roughness << 7) | (parent.refractive_index << 6) | (parent.emission << 5) | (parent.transmission << 4) | (parent.specular << 3) | (parent.diffuse << 2) | (parent.type << 1) | 1"} {parent.translation.x} {parent.translation.y} {parent.translation.z}}
+  format "1 1 0 0 1 1 1 1x1"
+  name noise_params0
+  xpos 841
+  ypos 447
+ }
+ Dot {
+  name Dot3
+  xpos 875
+  ypos 646
+ }
+add_layer {sdf_noise_params1 sdf_noise_params1.octaves sdf_noise_params1.lacunarity sdf_noise_params1.gain sdf_noise_params1.gamma}
+ Constant {
+  inputs 0
+  channels sdf_noise_params1
+  color {{parent.octaves} {parent.lacunarity} {parent.gain} {parent.gamma}}
+  format "1 1 0 0 1 1 1 1x1"
+  name noise_params1
+  xpos 966
+  ypos 447
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy8
+  xpos 966
+  ypos 714
+ }
+add_layer {sdf_noise_params2 sdf_noise_params2.size sdf_noise_params2.white_point sdf_noise_params2.black_point sdf_noise_params2.lift}
+ Constant {
+  inputs 0
+  channels sdf_noise_params2
+  color {{parent.size} {parent.white_point} {parent.black_point} {parent.lift}}
+  format "1 1 0 0 1 1 1 1x1"
+  name noise_params2
+  xpos 1082
+  ypos 449
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 1082
+  ypos 714
+ }
+ Output {
+  name Output1
+  xpos 1082
+  ypos 826
+ }
+end_group
+Group {
+ name sdf_material2
+ knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
+ tile_color 0x338033ff
+ xpos -604
+ ypos 198
+ addUserKnob {20 User l "SDF Primitive"}
+ addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
+ colour {0.2 0.5 0.2}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {6 diffuse_use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." -STARTLINE}
+ diffuse_use_trap_colour true
+ addUserKnob {26 ""}
+ addUserKnob {7 specular t "The amount of light that is reflected off the shape's surface. This plus 'transmission' should be less than or equal to one."}
+ specular 1
+ addUserKnob {7 specular_roughness l "specular roughness" t "The object's surface will scatter the specularly reflected light more the higher this value is."}
+ addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
+ specular_colour {0.05 0.2 0.3}
+ addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {6 specular_use_trap_colour l "use trap colour" t "Use the trap colour for specualrly reflected light." -STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
+ addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
+ addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
+ absorption_colour {2 1 0}
+ addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
+ addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
+ refractive_index 1.33
+ addUserKnob {6 do_refraction l "do refraction" -STARTLINE}
+ addUserKnob {7 scattering_coefficient l "scattering coefficient"}
+ scattering_coefficient 0.53
+ addUserKnob {26 ""}
+ addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
+ addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
+ emission_colour {1 0.8 0.5}
+ addUserKnob {6 emission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {6 emission_use_trap_colour l "use trap colour" t "Use the trap colour for emitted light." -STARTLINE}
+ emission_use_trap_colour true
+ addUserKnob {26 div0 l "" +STARTLINE}
+ addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
+}
+ Input {
+  inputs 0
+  name noise
+  xpos 1146
+  ypos 441
+ }
+ Constant {
+  inputs 0
+  channels sdf_colour
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.specular_roughness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name diffuse_colour
+  xpos 515
+  ypos 411
+ }
+ Dot {
+  name Dot3
+  xpos 549
+  ypos 610
+ }
+ Constant {
+  inputs 0
+  channels sdf_spec_colour
+  color {{parent.specular_colour.r} {parent.specular_colour.g} {parent.specular_colour.b} {parent.specular}}
+  format "1 1 0 0 1 1 1 1x1"
+  name spec_colour
+  xpos 640
+  ypos 411
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy8
+  xpos 640
+  ypos 678
+ }
+ Constant {
+  inputs 0
+  channels sdf_trans_colour
+  color {{parent.absorption_colour.r} {parent.absorption_colour.g} {parent.absorption_colour.b} {parent.transmission}}
+  format "1 1 0 0 1 1 1 1x1"
+  name trans_colour
+  xpos 763
+  ypos 411
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy9
+  xpos 763
+  ypos 678
+ }
+ Constant {
+  inputs 0
+  channels sdf_emm_colour
+  color {{parent.emission_colour.r} {parent.emission_colour.g} {parent.emission_colour.b} {parent.emission}}
+  format "1 1 0 0 1 1 1 1x1"
+  name emm_colour
+  xpos 887
+  ypos 411
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy10
+  xpos 887
+  ypos 678
+ }
+ Constant {
+  inputs 0
+  channels sdf_surface
+  color {{parent.refractive_index} {"(parent.diffuse_use_trap_colour ? 8192 : 0)  | (parent.specular_use_trap_colour ? 16384 : 0) | (parent.absorption_use_trap_colour ? 32768 : 0) | (parent.emission_use_trap_colour ? 65536 : 0) | (parent.do_refraction ? 131072 : 0)"} {parent.scattering_coefficient} {parent.transmission_roughness}}
+  format "1 1 0 0 1 1 1 1x1"
+  name surface
+  xpos 1011
+  ypos 412
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy5
+  xpos 1011
+  ypos 678
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy3
+  xpos 1146
+  ypos 678
+ }
+ Output {
+  name Output1
+  xpos 1146
+  ypos 839
+ }
+end_group
+push 0
+push 0
+Group {
  inputs 3
  name sdf_primitive2
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label sphere
- xpos -439
- ypos 207
+ xpos -604
+ ypos 325
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
@@ -1142,7 +1144,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N61ca7a0 [stack 0]
+set N86a7f00 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1164,7 +1166,7 @@ set N61ca7a0 [stack 0]
    xpos 34
    ypos -6
   }
-set N61ddfa0 [stack 0]
+set N86bbf10 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1175,7 +1177,7 @@ set N61ddfa0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N61ca7a0
+push $N86a7f00
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1204,7 +1206,7 @@ push $N61ca7a0
    xpos 158
    ypos 167
   }
-push $N61ddfa0
+push $N86bbf10
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1297,7 +1299,7 @@ push $N61ddfa0
    xpos 192
    ypos -2
   }
-set N628a340 [stack 0]
+set N8767da0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1319,7 +1321,7 @@ set N628a340 [stack 0]
    xpos 34
    ypos -6
   }
-set N629db40 [stack 0]
+set N877b5a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1330,7 +1332,7 @@ set N629db40 [stack 0]
    xpos -98
    ypos 336
   }
-push $N628a340
+push $N8767da0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1359,7 +1361,7 @@ push $N628a340
    xpos 158
    ypos 167
   }
-push $N629db40
+push $N877b5a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1432,7 +1434,7 @@ Dot {
  xpos -570
  ypos 518
 }
-set N6331ca0 [stack 0]
+set N880fa00 [stack 0]
 Dot {
  name Dot3
  xpos -570
@@ -1469,7 +1471,7 @@ Dot {
  xpos -85
  ypos 341
 }
-set N6377760 [stack 0]
+set N88558e0 [stack 0]
 Dot {
  name Dot5
  xpos -85
@@ -1485,22 +1487,13 @@ Dot {
  xpos -85
  ypos 1097
 }
-Read {
+Constant {
  inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/kloppenheim_02_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
- origset true
- name Read3
- xpos 220
- ypos 78
-}
-CheckerBoard2 {
- inputs 0
- format "2048 1024 0 0 2048 1024 1 2K_LatLong"
- name CheckerBoard1
- xpos 36
- ypos 67
+ channels rgb
+ color 0.5
+ name Constant1
+ xpos 72
+ ypos 68
 }
 Reformat {
  format "2048 1024 0 0 2048 1024 1 2K_LatLong"
@@ -1515,7 +1508,7 @@ Dot {
  xpos 70
  ypos 293
 }
-set N63cc330 [stack 0]
+set N88aa2d0 [stack 0]
 Dot {
  name Dot6
  xpos 70
@@ -1627,17 +1620,269 @@ Dot {
  xpos 226
  ypos 444
 }
-Dot {
+Group {
  inputs 0
+ name sdf_light1
+ onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
+ knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
+ tile_color 0xffffffff
+ label point
+ xpos -362
+ ypos 324
+ addUserKnob {20 User l "SDF LIght"}
+ addUserKnob {4 type t "The type of light." M {ambient "ambient occlusion" directional point}}
+ type point
+ addUserKnob {7 dimension_x l "x position" t "The x position of the light." R -10 10}
+ dimension_x 1
+ addUserKnob {7 dimension_y l "y position" t "The y position of the light." R -10 10}
+ dimension_y 1
+ addUserKnob {7 dimension_z l "z position" t "The z position of the light." R -10 10}
+ dimension_z 1
+ addUserKnob {7 intensity t "The intensity of the light." R 0 10}
+ intensity 4
+ addUserKnob {7 falloff t "The power of the light's intensity falloff. Two is physically accurate." R 0 5}
+ falloff 2
+ addUserKnob {18 colour t "The colour of the light."}
+ colour {1 0.8 0.5}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." R 1 100}
+ shadow_hardness 1
+ addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
+ soften_shadows true
+ addUserKnob {26 ""}
+ addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
+}
+ Input {
+  inputs 0
+  name siblings
+  xpos 803
+  ypos 30
+ }
+ Dot {
+  name Dot1
+  xpos 837
+  ypos 488
+ }
+add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
+ Constant {
+  inputs 0
+  channels sdf_light
+  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.intensity}}
+  format "1 1 0 0 1 1 1 1x1"
+  name light
+  xpos 363
+  ypos 11
+ }
+ Dot {
+  name Dot9
+  xpos 397
+  ypos 324
+ }
+add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
+ Constant {
+  inputs 0
+  channels sdf_light_properties
+  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
+  format "1 1 0 0 1 1 1 1x1"
+  name light_props
+  xpos 501
+  ypos 11
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 501
+  ypos 380
+ }
+add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
+ Constant {
+  inputs 0
+  channels sdf_light_properties1
+  color {{parent.shadow_hardness} {parent.falloff} 0 0}
+  format "1 1 0 0 1 1 1 1x1"
+  name light_props1
+  xpos 646
+  ypos 12
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy2
+  xpos 642
+  ypos 380
+ }
+ Group {
+  inputs 2
+  name sdf_merge
+  xpos 642
+  ypos 484
+  disable {{"!(\[exists parent.input0] && !(parent.input0.disable && !\[exists parent.input0.input0]))"}}
+  addUserKnob {20 User}
+  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
+ }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 1
+   box_height 1
+   box_fixed true
+   name Reformat1
+   xpos -119
+   ypos 440
+  }
+  Input {
+   inputs 0
+   name Input2
+   xpos 158
+   ypos -28
+   number 1
+  }
+  Dot {
+   name Dot2
+   xpos 192
+   ypos -2
+  }
+set Na661820 [stack 0]
+  Dot {
+   name Dot3
+   xpos 329
+   ypos -2
+  }
+  Dot {
+   name Dot4
+   xpos 329
+   ypos 391
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+   ypos -32
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos -6
+  }
+set Na675020 [stack 0]
+  Dot {
+   name Dot6
+   xpos -98
+   ypos -6
+  }
+  Dot {
+   name Dot5
+   xpos -98
+   ypos 336
+  }
+push $Na661820
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop3
+   xpos 158
+   ypos 69
+  }
+  Crop {
+   box {0 0 {parent.Dot2.width} 1}
+   name Crop4
+   xpos 158
+   ypos 95
+  }
+  Transform {
+   translate {{parent.Dot1.width} 0}
+   center {1 0.5}
+   name Transform2
+   xpos 158
+   ypos 121
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop5
+   xpos 158
+   ypos 167
+  }
+push $Na675020
+  Crop {
+   box {0 0 {Dot1.width+Dot2.width} 1}
+   reformat true
+   crop false
+   name Crop6
+   xpos 0
+   ypos 66
+  }
+  Crop {
+   box {0 0 {parent.Dot1.width} 1}
+   name Crop7
+   xpos 0
+   ypos 92
+  }
+  Crop {
+   box {0 0 {width} {height}}
+   crop false
+   name Crop8
+   xpos 0
+   ypos 164
+  }
+  Merge2 {
+   inputs 2
+   also_merge all
+   name Merge1
+   xpos 0
+   ypos 262
+   disable {{"\[exists parent.input1] ? 0:1"}}
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1] ? 0:1"}}
+   name Switch2
+   xpos 0
+   ypos 332
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:1"}}
+   name Switch1
+   xpos 0
+   ypos 387
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
+   name Switch3
+   xpos 0
+   ypos 456
+  }
+  Dot {
+   name out_dot
+   xpos 36
+   ypos 518
+  }
+  Output {
+   name Output1
+   xpos 2
+   ypos 661
+  }
+ end_group
+ Output {
+  name Output1
+  xpos 642
+  ypos 562
+ }
+end_group
+Dot {
  name Dot14
  xpos -328
  ypos 423
 }
-set N63e4ac0 [stack 0]
+set N8913220 [stack 0]
 push 0
-push $N63cc330
-push $N6377760
-push $N6331ca0
+push $N88aa2d0
+push $N88558e0
+push $N880fa00
 Group {
  inputs 6
  name path_march
@@ -1647,13 +1892,13 @@ Group {
  addUserKnob {20 User l "Ray March"}
  addUserKnob {3 min_paths_per_pixel l "min paths per pixel"}
  addUserKnob {3 max_paths_per_pixel l "max paths per pixel"}
- max_paths_per_pixel 3
+ max_paths_per_pixel 10
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
  hit_tolerance 0.001
  addUserKnob {3 max_bounces l "max bounces" t "Limits the number of times the rays can intersect an object per subpixel."}
  max_bounces 5
  addUserKnob {7 ray_distance l "max ray distance" t "Each ray, once spawned is only allowed to travel this distance before it is culled." R 10 10000}
- ray_distance 100
+ ray_distance 200
  addUserKnob {3 max_ray_steps l "max ray steps" t "Limit the number of steps a ray can be marched before it is culled. Shadow rays are given half this number of steps."}
  max_ray_steps 1000
  addUserKnob {7 shadow_bias l "shadow bias" R 1 5}
@@ -1666,16 +1911,16 @@ Group {
  addUserKnob {26 ""}
  addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material that the camera is in."}
  absorption_colour {1 1 1}
+ addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the medium that the camera is currently in." R 1 4}
  refractive_index 1
  addUserKnob {7 scattering_coefficient l "scattering coefficient"}
- scattering_coefficient 0.11
+ scattering_coefficient 0.08
  addUserKnob {3 equiangular_samples l "equi-angular samples"}
  equiangular_samples 10
  addUserKnob {26 ""}
  addUserKnob {7 hdri_offset_angle l "hdri offset angle" t "Rotate the hdri image by this amount around the y-axis." R 0 360}
  addUserKnob {6 use_precomputed_irradiance l "use precomputed irradiance" +STARTLINE}
- use_precomputed_irradiance true
  addUserKnob {7 hdri_lighting_scale l "hdri lighting scale" R 0.1 1}
  hdri_lighting_scale 0.25
  addUserKnob {3 hdri_irradiance_samples l "hdri irradiance samples"}
@@ -1791,7 +2036,7 @@ Group {
   xpos 1695
   ypos -1484
  }
-set N6450940 [stack 0]
+set N897ef30 [stack 0]
  Reformat {
   type scale
   scale {{"floor(min(parent.hdri_dot.height, parent.hdri_dot.width) * parent.hdri_lighting_scale) > 0 ? parent.hdri_lighting_scale : 1"}}
@@ -1844,19 +2089,19 @@ set N6450940 [stack 0]
   xpos -1502
   ypos -1549
  }
-set N7823e90 [stack 0]
+set N9d52f50 [stack 0]
  Dot {
   name Dot25
   xpos -1011
   ypos -1549
  }
-set N7828d80 [stack 0]
+set N9d57e40 [stack 0]
  Dot {
   name Dot15
   xpos -1011
   ypos -1441
  }
-push $N7828d80
+push $N9d57e40
  Input {
   inputs 0
   name lights
@@ -1901,7 +2146,7 @@ push $N7828d80
    xpos 192
    ypos -2
   }
-set N7864710 [stack 0]
+set N9d93aa0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -1923,7 +2168,7 @@ set N7864710 [stack 0]
    xpos 34
    ypos -6
   }
-set N7877f10 [stack 0]
+set N9da72a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -1934,7 +2179,7 @@ set N7877f10 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7864710
+push $N9d93aa0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -1963,7 +2208,7 @@ push $N7864710
    xpos 158
    ypos 167
   }
-push $N7877f10
+push $N9da72a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2030,8 +2275,7 @@ push $N7877f10
   xpos -914
   ypos -1307
  }
-set N7906f90 [stack 0]
-add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
+set N9e36320 [stack 0]
  Shuffle {
   in sdf_light_properties1
   blue green
@@ -2045,8 +2289,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
   xpos -914
   ypos -864
  }
-push $N7906f90
-add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
+push $N9e36320
  Shuffle {
   in sdf_light_properties
   name light_props
@@ -2058,8 +2301,7 @@ add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properti
   xpos -804
   ypos -862
  }
-push $N7906f90
-add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
+push $N9e36320
  Shuffle {
   in sdf_light
   name light
@@ -2071,13 +2313,13 @@ add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_lig
   xpos -697
   ypos -860
  }
-push $N7828d80
+push $N9d57e40
  Dot {
   name Dot16
   xpos -569
   ypos -1549
  }
-set N794c010 [stack 0]
+set N9e7b5b0 [stack 0]
  Dot {
   name Dot36
   xpos 843
@@ -2096,7 +2338,7 @@ set N794c010 [stack 0]
   xpos 909
   ypos -1510
  }
-push $N794c010
+push $N9e7b5b0
  Input {
   inputs 0
   name scene
@@ -2114,7 +2356,7 @@ push $N794c010
   xpos -469
   ypos -1441
  }
-set N7980870 [stack 0]
+set N9eafe10 [stack 0]
  Group {
   inputs 2
   name noise_sdf_merge
@@ -2145,7 +2387,7 @@ set N7980870 [stack 0]
    xpos 192
    ypos -2
   }
-set N79a26b0 [stack 0]
+set N9ed2460 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2167,7 +2409,7 @@ set N79a26b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N79b5eb0 [stack 0]
+set N9ee5c60 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2178,7 +2420,7 @@ set N79b5eb0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N79a26b0
+push $N9ed2460
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2207,7 +2449,7 @@ push $N79a26b0
    xpos 158
    ypos 167
   }
-push $N79b5eb0
+push $N9ee5c60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2274,7 +2516,7 @@ push $N79b5eb0
   xpos 943
   ypos -1225
  }
-set N7a45e60 [stack 0]
+set N9f75410 [stack 0]
  Shuffle {
   in sdf_noise_params2
   name noise_params2
@@ -2286,7 +2528,7 @@ set N7a45e60 [stack 0]
   xpos 1233
   ypos -853
  }
-push $N7a45e60
+push $N9f75410
  Shuffle {
   in sdf_noise_params1
   name noise_params1
@@ -2298,7 +2540,7 @@ push $N7a45e60
   xpos 1094
   ypos -850
  }
-push $N7a45e60
+push $N9f75410
  Shuffle {
   in sdf_noise_params0
   name noise_params0
@@ -2310,14 +2552,14 @@ push $N7a45e60
   xpos 943
   ypos -847
  }
-set N7a861a0 [stack 0]
-push $N794c010
+set N9fb5000 [stack 0]
+push $N9e7b5b0
  Dot {
   name Dot1
   xpos -569
   ypos -1381
  }
-push $N7980870
+push $N9eafe10
  Group {
   inputs 2
   name object_input_protection
@@ -2349,7 +2591,7 @@ push $N7980870
    xpos 192
    ypos -2
   }
-set N7aad300 [stack 0]
+set N9fdc160 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -2371,7 +2613,7 @@ set N7aad300 [stack 0]
    xpos 34
    ypos -6
   }
-set N7ac0b00 [stack 0]
+set N9fef960 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -2382,7 +2624,7 @@ set N7ac0b00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N7aad300
+push $N9fdc160
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2411,7 +2653,7 @@ push $N7aad300
    xpos 158
    ypos 167
   }
-push $N7ac0b00
+push $N9fef960
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -2478,7 +2720,7 @@ push $N7ac0b00
   xpos -469
   ypos -1315
  }
-set N7b503c0 [stack 0]
+set Na07fa30 [stack 0]
  Shuffle {
   in sdf_surface
   name surface
@@ -2490,7 +2732,7 @@ set N7b503c0 [stack 0]
   xpos -49
   ypos -862
  }
-push $N7b503c0
+push $Na07fa30
  Shuffle {
   in sdf_shape_mods_1
   name shape_mods_1
@@ -2502,7 +2744,7 @@ push $N7b503c0
   xpos 326
   ypos -862
  }
-push $N7b503c0
+push $Na07fa30
  Shuffle {
   in sdf_shape_mods_0
   name shape_mods_0
@@ -2514,7 +2756,7 @@ push $N7b503c0
   xpos 187
   ypos -861
  }
-push $N7b503c0
+push $Na07fa30
  Shuffle {
   in sdf_shape
   name shape
@@ -2526,7 +2768,7 @@ push $N7b503c0
   xpos 76
   ypos -860
  }
-push $N7b503c0
+push $Na07fa30
  Shuffle {
   in sdf_emm_colour
   name emm_colour
@@ -2538,7 +2780,7 @@ push $N7b503c0
   xpos -156
   ypos -864
  }
-push $N7b503c0
+push $Na07fa30
  Shuffle {
   in sdf_trans_colour
   name trans_colour
@@ -2550,7 +2792,7 @@ push $N7b503c0
   xpos -253
   ypos -863
  }
-push $N7b503c0
+push $Na07fa30
  Shuffle {
   in sdf_spec_colour
   name spec_colour
@@ -2562,7 +2804,7 @@ push $N7b503c0
   xpos -353
   ypos -862
  }
-push $N7b503c0
+push $Na07fa30
  Shuffle {
   in sdf_colour
   name diff_colour
@@ -2574,7 +2816,7 @@ push $N7b503c0
   xpos -469
   ypos -863
  }
-push $N7b503c0
+push $Na07fa30
  Shuffle {
   in sdf_dimensions
   name dimensions
@@ -2586,7 +2828,7 @@ push $N7b503c0
   xpos 773
   ypos -854
  }
-push $N7b503c0
+push $Na07fa30
  Shuffle {
   in sdf_rotation_wall_thickness
   name rotation_wall_thickness
@@ -2598,7 +2840,7 @@ push $N7b503c0
   xpos 622
   ypos -851
  }
-push $N7b503c0
+push $Na07fa30
  Shuffle {
   in sdf_position_scale
   name position_scale
@@ -2610,15 +2852,15 @@ push $N7b503c0
   xpos 480
   ypos -856
  }
-push $N6450940
-push $N7823e90
+push $N897ef30
+push $N9d52f50
  Reformat {
   format {{{parent.format_.format}}}
   name Reformat2
   xpos -1536
   ypos -1503
  }
-set N7c40d80 [stack 0]
+set Na1703f0 [stack 0]
  Input {
   inputs 0
   name previous
@@ -2637,7 +2879,7 @@ set N7c40d80 [stack 0]
   xpos -1330
   ypos -1385
  }
-set N7c654e0 [stack 0]
+set Na194b50 [stack 0]
 add_layer {variance variance.red variance.green variance.blue variance.num_paths}
  Shuffle {
   in variance
@@ -2645,7 +2887,7 @@ add_layer {variance variance.red variance.green variance.blue variance.num_paths
   xpos -1364
   ypos -1331
  }
-push $N7c40d80
+push $Na1703f0
  Invert {
   channels rgb
   name Invert2
@@ -2664,7 +2906,7 @@ push $N7c40d80
   xpos -1330
   ypos -451
  }
-push $N7c654e0
+push $Na194b50
  Dot {
   name Dot34
   xpos -1227
@@ -2777,7 +3019,7 @@ push $N7c654e0
   xpos 1695
   ypos -341
  }
-set N7ceabc0 [stack 0]
+set Na21a2b0 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/decode_alpha.blink
   recompileCount 2
@@ -2789,8 +3031,8 @@ set N7ceabc0 [stack 0]
   xpos 1661
   ypos -118
  }
-set N7cefb10 [stack 0]
-push $N7ceabc0
+set Na21f200 [stack 0]
+push $Na21a2b0
  Dot {
   name Dot8
   xpos 1830
@@ -2805,7 +3047,7 @@ push $N7ceabc0
   xpos 1796
   ypos -111
  }
-push $N7ceabc0
+push $Na21a2b0
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/variance.blink
   recompileCount 16
@@ -2823,7 +3065,7 @@ push $N7ceabc0
   xpos 1560
   ypos -299
  }
-set N7d2e430 [stack 0]
+set Na25d870 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/minMax.blink
   recompileCount 6
@@ -2840,7 +3082,7 @@ set N7d2e430 [stack 0]
   xpos 1416
   ypos -237
  }
-push $N7d2e430
+push $Na25d870
  BlinkScript {
   inputs 2
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/normalize.blink
@@ -2859,7 +3101,7 @@ push $N7d2e430
   xpos 1560
   ypos -178
  }
-set N7dd57b0 [stack 0]
+set Na304240 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/minMax.blink
   recompileCount 6
@@ -2876,7 +3118,7 @@ set N7dd57b0 [stack 0]
   xpos 1416
   ypos -107
  }
-push $N7dd57b0
+push $Na304240
  BlinkScript {
   inputs 2
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/normalize.blink
@@ -2895,7 +3137,7 @@ push $N7dd57b0
   xpos 1560
   ypos 11
  }
-push $N7cefb10
+push $Na21f200
  ShuffleCopy {
   inputs 2
   in rgb
@@ -2925,7 +3167,7 @@ push $N7cefb10
   xpos 1796
   ypos 106
  }
-push $N7a861a0
+push $N9fb5000
  Viewer {
   frame_range 1-400
   colour_sample_bbox {0 -0.5 1 0.5}
@@ -2936,20 +3178,20 @@ push $N7a861a0
   ypos -831
  }
 end_group
-set N63e9940 [stack 0]
+set N89180c0 [stack 0]
 Shuffle {
  in variance
  name Shuffle1
  xpos 452
  ypos 514
 }
-push $N63e4ac0
+push $N8913220
 Dot {
  name Dot16
  xpos -328
  ypos 711
 }
-push $N63e9940
+push $N89180c0
 Grade {
  black -0.05
  white 0.51
@@ -2959,23 +3201,33 @@ Grade {
  xpos 421
  ypos 615
 }
+push $N89180c0
+Viewer {
+ frame_range 1-400
+ colour_sample_bbox {0.00390625 -0.044921875 0.005859375 -0.04296875}
+ samplepoints {{0.00390625 -0.044921875}
+   }
+ name Viewer1
+ xpos 339
+ ypos 837
+}
 Group {
  inputs 0
- name sdf_primitive4
+ name sdf_primitive3
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
  knobChanged "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_knob_changed()"
  tile_color 0xffffffff
  label sphere
- xpos -112
- ypos -42
+ xpos -817
+ ypos 383
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {4 shape t "The shape of the object." M {sphere ellipsoid "cut sphere" "hollow sphere" "death star" "solid angle" "rectangular prism" "rectangular prism frame" rhombus "triangular prism" cylinder "infinite cylinder" plane capsule cone "infinite cone" "capped cone" "rounded cone" torus "capped torus" link "hexagonal prism" octahedron mandelbulb mandelbox ""}}
  addUserKnob {7 dimension_x l radius t "The radius of the sphere." R 0 10}
- dimension_x 0.5
- addUserKnob {7 dimension_y l "y radius" t "The radius along the y-axis of the ellipsoid." +HIDDEN R 0 10}
- dimension_y 0.25
- addUserKnob {7 dimension_z l "z radius" t "The radius along the z-axis of the ellipsoid." +HIDDEN R 0 10}
- dimension_z 0.25
+ dimension_x 0.8
+ addUserKnob {7 dimension_y l "normal y" t "The y component of the normal direction of the plane." +HIDDEN}
+ dimension_y 0.01
+ addUserKnob {7 dimension_z l "normal z" t "The z component of the normal direction of the plane." +HIDDEN}
+ dimension_z 1
  addUserKnob {7 dimension_w l "folding limit" t "Clamp the position between +/- this value when performing the box fold. Higher values will result in a denser fractal." +HIDDEN R 0.01 2}
  dimension_w 0.8
  addUserKnob {7 wall_thickness l "wall thickness" t "The thickness of the walls of the shape, if the shape is hollow." +DISABLED}
@@ -3170,7 +3422,7 @@ Group {
    xpos 192
    ypos -2
   }
-set N8f0b840 [stack 0]
+set N12f487e0 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3192,7 +3444,7 @@ set N8f0b840 [stack 0]
    xpos 34
    ypos -6
   }
-set N8f1f040 [stack 0]
+set N12f5c0a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3203,7 +3455,7 @@ set N8f1f040 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8f0b840
+push $N12f487e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3232,7 +3484,7 @@ push $N8f0b840
    xpos 158
    ypos 167
   }
-push $N8f1f040
+push $N12f5c0a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3325,7 +3577,7 @@ push $N8f1f040
    xpos 192
    ypos -2
   }
-set N8fcaec0 [stack 0]
+set N13d24000 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -3347,7 +3599,7 @@ set N8fcaec0 [stack 0]
    xpos 34
    ypos -6
   }
-set N8fde6c0 [stack 0]
+set N13d378c0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -3358,7 +3610,7 @@ set N8fde6c0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N8fcaec0
+push $N13d24000
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3387,7 +3639,7 @@ push $N8fcaec0
    xpos 158
    ypos 167
   }
-push $N8fde6c0
+push $N13d378c0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -3455,263 +3707,10 @@ push $N8fde6c0
   ypos 1002
  }
 end_group
-Group {
+CheckerBoard2 {
  inputs 0
- name sdf_light1
- onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
- knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
- tile_color 0xffffffff
- label point
- xpos -362
- ypos 324
- addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type t "The type of light." M {ambient "ambient occlusion" directional point}}
- type point
- addUserKnob {7 dimension_x l "x position" t "The x position of the light." R -10 10}
- dimension_x 1
- addUserKnob {7 dimension_y l "y position" t "The y position of the light." R -10 10}
- dimension_y 1
- addUserKnob {7 dimension_z l "z position" t "The z position of the light." R -10 10}
- dimension_z 2
- addUserKnob {7 intensity t "The intensity of the light." R 0 10}
- intensity 2
- addUserKnob {7 falloff t "The power of the light's intensity falloff. Two is physically accurate." R 0 5}
- falloff 2
- addUserKnob {18 colour t "The colour of the light."}
- colour {1 0.8 0.5}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
- addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." R 1 100}
- shadow_hardness 1
- addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
- soften_shadows true
- addUserKnob {26 ""}
- addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
-}
- Input {
-  inputs 0
-  name siblings
-  xpos 803
-  ypos 30
- }
- Dot {
-  name Dot1
-  xpos 837
-  ypos 488
- }
- Constant {
-  inputs 0
-  channels sdf_light
-  color {{parent.dimension_x} {parent.dimension_y} {parent.dimension_z} {parent.intensity}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light
-  xpos 363
-  ypos 11
- }
- Dot {
-  name Dot9
-  xpos 397
-  ypos 324
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties
-  color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {"parent.soften_shadows ? -parent.type : parent.type"}}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props
-  xpos 501
-  ypos 11
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy1
-  xpos 501
-  ypos 380
- }
- Constant {
-  inputs 0
-  channels sdf_light_properties1
-  color {{parent.shadow_hardness} {parent.falloff} 0 0}
-  format "1 1 0 0 1 1 1 1x1"
-  name light_props1
-  xpos 646
-  ypos 12
- }
- Copy {
-  inputs 2
-  channels all
-  name Copy2
-  xpos 642
-  ypos 380
- }
- Group {
-  inputs 2
-  name sdf_merge
-  xpos 642
-  ypos 484
-  disable {{"!(\[exists parent.input0] && !(parent.input0.disable && !\[exists parent.input0.input0]))"}}
-  addUserKnob {20 User}
-  addUserKnob {26 warning l Warning: T "Only merge lights with lights, and primitives with primitives"}
- }
-  Reformat {
-   inputs 0
-   type "to box"
-   box_width 1
-   box_height 1
-   box_fixed true
-   name Reformat1
-   xpos -119
-   ypos 440
-  }
-  Input {
-   inputs 0
-   name Input2
-   xpos 158
-   ypos -28
-   number 1
-  }
-  Dot {
-   name Dot2
-   xpos 192
-   ypos -2
-  }
-set N83e3380 [stack 0]
-  Dot {
-   name Dot3
-   xpos 329
-   ypos -2
-  }
-  Dot {
-   name Dot4
-   xpos 329
-   ypos 391
-  }
-  Input {
-   inputs 0
-   name Input1
-   xpos 0
-   ypos -32
-  }
-  Dot {
-   name Dot1
-   xpos 34
-   ypos -6
-  }
-set N83f6b80 [stack 0]
-  Dot {
-   name Dot6
-   xpos -98
-   ypos -6
-  }
-  Dot {
-   name Dot5
-   xpos -98
-   ypos 336
-  }
-push $N83e3380
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop3
-   xpos 158
-   ypos 69
-  }
-  Crop {
-   box {0 0 {parent.Dot2.width} 1}
-   name Crop4
-   xpos 158
-   ypos 95
-  }
-  Transform {
-   translate {{parent.Dot1.width} 0}
-   center {1 0.5}
-   name Transform2
-   xpos 158
-   ypos 121
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop5
-   xpos 158
-   ypos 167
-  }
-push $N83f6b80
-  Crop {
-   box {0 0 {Dot1.width+Dot2.width} 1}
-   reformat true
-   crop false
-   name Crop6
-   xpos 0
-   ypos 66
-  }
-  Crop {
-   box {0 0 {parent.Dot1.width} 1}
-   name Crop7
-   xpos 0
-   ypos 92
-  }
-  Crop {
-   box {0 0 {width} {height}}
-   crop false
-   name Crop8
-   xpos 0
-   ypos 164
-  }
-  Merge2 {
-   inputs 2
-   also_merge all
-   name Merge1
-   xpos 0
-   ypos 262
-   disable {{"\[exists parent.input1] ? 0:1"}}
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input1] ? 0:1"}}
-   name Switch2
-   xpos 0
-   ypos 332
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:1"}}
-   name Switch1
-   xpos 0
-   ypos 387
-  }
-  Switch {
-   inputs 2
-   which {{"\[exists parent.input0] ? 0:\[exists parent.input1] ? 0:1"}}
-   name Switch3
-   xpos 0
-   ypos 456
-  }
-  Dot {
-   name out_dot
-   xpos 36
-   ypos 518
-  }
-  Output {
-   name Output1
-   xpos 2
-   ypos 661
-  }
- end_group
- Output {
-  name Output1
-  xpos 642
-  ypos 562
- }
-end_group
-push $N63e9940
-Viewer {
- frame_range 1-400
- colour_sample_bbox {0.00390625 -0.044921875 0.005859375 -0.04296875}
- samplepoints {{0.00390625 -0.044921875}
-   }
- name Viewer1
- xpos 339
- ypos 837
+ format "2048 1024 0 0 2048 1024 1 2K_LatLong"
+ name CheckerBoard1
+ xpos -16
+ ypos 67
 }
