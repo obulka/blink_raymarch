@@ -1524,7 +1524,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         if (objectIndex < 0)
         {
             // blink cannot handle single pixel images in versions < 12.1
-            // so we have a weird dummy pixel when nothing is passed
+            // so we have a weird dummy pixel when only one object is passed
             // to the scene
             objectIndex = _objectTextureWidth == 0 ? 1 : _objectTextureWidth;
         }
