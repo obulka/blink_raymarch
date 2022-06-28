@@ -121,6 +121,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int _minPathsPerPixel;
         int _maxPathsPerPixel;
         int _maxBounces;
+        int _maxLightSamplingBounces;
         float _maxRayDistance;
         int _maxRaySteps;
         float _hitTolerance;
@@ -136,8 +137,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int _objectTextureWidth;
         int _lightTextureWidth;
 
-        bool _lightSamplingEnabled;
-
         int _outputType;
 
         bool _latLong;
@@ -150,6 +149,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float __aperture;
 
         int __bouncesPerRay;
+        bool __lightSamplingEnabled;
 
         float2 __hdriPixelSize;
         float2 __irradiancePixelSize;
@@ -197,6 +197,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(_maxRaySteps, "Max Ray Steps", 128);
         defineParam(_maxBounces, "Max Bounces", 1);
+        defineParam(_maxLightSamplingBounces, "Max Light Sampling Bounces", 0);
         defineParam(_hitTolerance, "Hit Tolerance", 0.001f);
         defineParam(_shadowBias, "Shadow Bias", 1.0f);
 
@@ -209,8 +210,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // Shape Counts
         defineParam(_objectTextureWidth, "Object Texture Width", 0);
         defineParam(_lightTextureWidth, "Light Texture Width", 0);
-
-        defineParam(_lightSamplingEnabled, "Enable Light Sampling", true);
 
         defineParam(_outputType, "Output Type", 0);
 
@@ -225,6 +224,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     void init()
     {
         __bouncesPerRay = _maxBounces <= 0 ? 1 : _maxBounces;
+
+        __lightSamplingEnabled = _maxLightSamplingBounces > 0;
 
         float aspect = aspectRatio(_formatHeight, _formatWidth);
         float4x4 cameraProjectionMatrix = projectionMatrix(
@@ -355,7 +356,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The colour of the pixel in the direction of the ray.
      */
-    float4 readIrradianceValue(float3 rayDirection)
+    inline float4 readIrradianceValue(float3 rayDirection)
     {
         const float2 angles = cartesionUnitVectorToSpherical(rayDirection, __hdriOffsetRadians);
 
@@ -1177,7 +1178,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The light intensity.
      */
-    float4 sampleArtificialLight(
+    inline float4 sampleArtificialLight(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
             const float offset,
@@ -1255,100 +1256,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 intensity.x * intensity.y
             )
         );
-    }
-
-
-    /**
-     * Compute the combined intensity of all lights on the surface of an
-     * object.
-     *
-     * @arg pointOnSurface: The point on the surface to compute the
-     *     light intensity at.
-     * @arg surfaceNormal: The normal direction to the surface.
-     * @arg surfaceColour: The colour of the object.
-     * @arg surface: The surface properties of the object.
-     * @arg lightColour: Will store the light colour.
-     *
-     * @returns: The light intensity.
-     */
-    inline float4 sampleLight(
-            const float3 &seed,
-            const float3 &lightDirection,
-            const float distanceToLight,
-            float3 rayOrigin,
-            float3 &lightNormal)
-    {
-        float4 diffusivity;
-        float4 specularity;
-        float4 transmittance;
-        float4 emittance;
-        float4 surface;
-
-        float distanceTravelled = 0;
-        int iterations = 0;
-        float pixelFootprint = _hitTolerance;
-
-        while (
-            distanceTravelled <= distanceToLight * 2.0f
-            && iterations++ < _maxRaySteps / 2
-        ) {
-            bool doRefraction = true;
-            const float2 result = getMinDistanceToObjectInScene(
-                rayOrigin,
-                pixelFootprint,
-                diffusivity,
-                specularity,
-                transmittance,
-                emittance,
-                surface,
-                doRefraction
-            );
-            const float stepDistance = fabs(result.x);
-
-            rayOrigin += lightDirection * stepDistance;
-            distanceTravelled += stepDistance;
-            pixelFootprint += stepDistance * _hitTolerance;
-
-            if (stepDistance < pixelFootprint)
-            {
-                if (emittance.w > 0.0f)
-                {
-                    lightNormal = estimateSurfaceNormal(
-                        rayOrigin,
-                        pixelFootprint
-                    );
-
-                    int noiseOptions;
-                    const float noiseValue = getNoiseValue(
-                        result.y - 1,
-                        rayOrigin + lightDirection * stepDistance,
-                        noiseOptions
-                    );
-                    if (noiseValue >= 0.0f)
-                    {
-                        useNoiseOnEmittance(
-                            noiseOptions,
-                            noiseValue,
-                            emittance
-                        );
-                    }
-
-                    return emissiveTerm(emittance);
-                }
-                else if (transmittance.w > 0.0f && !doRefraction)
-                {
-                    rayOrigin += lightDirection * 2.0f * stepDistance;
-                }
-                else
-                {
-                    return float4(0);
-                }
-            }
-        }
-
-        lightNormal = -lightDirection;
-
-        return readHDRIValue(lightDirection);
     }
 
 
@@ -1433,6 +1340,282 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Compute the combined intensity of all lights on the surface of an
+     * object.
+     *
+     * @arg pointOnSurface: The point on the surface to compute the
+     *     light intensity at.
+     * @arg surfaceNormal: The normal direction to the surface.
+     * @arg surfaceColour: The colour of the object.
+     * @arg surface: The surface properties of the object.
+     * @arg lightColour: Will store the light colour.
+     *
+     * @returns: The light intensity.
+     */
+    inline float4 marchRay(
+            const float3 &rayOrigin,
+            const float3 &rayDirection,
+            const float3 &initialSeed,
+            const float maxRayDistance,
+            float3 &lightNormal)
+    {
+        float refractiveIndex = _refractiveIndex;
+        float scatteringCoefficient = _scatteringCoefficient;
+
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][
+            4   // Absorption colour of object
+            + 1 // ID of the dielectric we are currently in
+            + 1 // Refractive index of that object
+            + 1 // Scattering probability
+            + 1 // Do refraction
+        ];
+        nestedDielectrics[0][0] = _absorptionColour.x;
+        nestedDielectrics[0][1] = _absorptionColour.y;
+        nestedDielectrics[0][2] = _absorptionColour.z;
+        nestedDielectrics[0][3] = _absorptionColour.w;
+        nestedDielectrics[0][4] = -1;
+        nestedDielectrics[0][5] = refractiveIndex;
+        nestedDielectrics[0][6] = scatteringCoefficient;
+        nestedDielectrics[0][7] = false;
+        int numNestedDielectrics = 0;
+
+        float4 rayColour = float4(0);
+        float4 throughput = float4(1);
+
+        float lastStepDistance = 1.0f;
+
+        float firstObjectId = 0.0f;
+        float lastRefractedId = -1.0f;
+
+        int iterations = 0;
+        int bounces = 0;
+
+        float distanceTravelled = 0;
+        float distanceSinceLastBounce = distanceTravelled;
+        float distanceTravelledThroughMaterial = distanceTravelled;
+
+        // Get the next ray
+        float3 origin = rayOrigin;
+        float3 direction = rayDirection;
+        float3 positionOnRay = origin;
+
+        float4 diffusivity;
+        float4 specularity;
+        float4 transmittance;
+        float4 emittance;
+        float4 surface;
+
+        float pixelFootprint = _hitTolerance;
+
+        float previousMaterialPDF = 1.0f;
+
+        bool sampledIrradiance = false;
+
+        float3 seed = initialSeed;
+
+        // March the ray
+        while (
+            distanceTravelled < maxRayDistance
+            && iterations < _maxRaySteps
+            && sumComponent(throughput) > _hitTolerance
+        ) {
+            positionOnRay = origin + distanceSinceLastBounce * direction;
+
+            // Get the closest distance to an object
+            bool doRefraction = true;
+            const float2 result = getMinDistanceToObjectInScene(
+                positionOnRay,
+                pixelFootprint,
+                diffusivity,
+                specularity,
+                transmittance,
+                emittance,
+                surface,
+                doRefraction
+            );
+
+            // Keep the signed distance so we know whether or not we are
+            // inside the object
+            const float signedStepDistance = result.x;
+
+            // Get the absolute value, the true shortest distance to a
+            // surface
+            const float stepDistance = fabs(signedStepDistance);
+
+            // Keep track of the distance the ray has travelled
+            distanceTravelled += stepDistance;
+            distanceSinceLastBounce += stepDistance;
+            distanceTravelledThroughMaterial += stepDistance;
+
+            pixelFootprint += _hitTolerance * stepDistance;
+
+            // Have we hit the nearest object?
+            if (stepDistance < pixelFootprint)
+            {
+                float3 intersectionPosition = positionOnRay + stepDistance * direction;
+
+                // The normal to the surface at that position
+                float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
+                    intersectionPosition,
+                    pixelFootprint
+                );
+
+                int noiseOptions;
+                const float noiseValue = getNoiseValue(
+                    result.y - 1,
+                    intersectionPosition,
+                    noiseOptions
+                );
+                if (noiseValue >= 0.0f)
+                {
+                    useNoiseOnMaterial(
+                        noiseOptions,
+                        noiseValue,
+                        diffusivity,
+                        specularity,
+                        transmittance,
+                        emittance,
+                        surface
+                    );
+                }
+
+                const float reflectionOffset = pixelFootprint * _shadowBias;
+                const float transmissionOffset = (
+                    (2.0f * pixelFootprint + stepDistance)
+                    * _shadowBias
+                );
+
+                float lightPDF = 0.0f;
+                float3 lightDirection = surfaceNormal;
+                float3 lightNormal = -surfaceNormal;
+                float distanceToLight = 0.0f;
+                int selectedLight;
+
+                // Get material data for material and light sampling
+                float4 materialBRDF;
+                float4 lightBRDF;
+                float4 materialEmissiveColour;
+                float3 bounceDirection;
+                float materialLightPDF;
+                const float materialPDF = sampleMaterial(
+                    seed,
+                    surfaceNormal,
+                    direction,
+                    lightDirection,
+                    diffusivity,
+                    reflectionOffset,
+                    transmissionOffset,
+                    transmittance,
+                    doRefraction,
+                    surface.x,
+                    surface.z,
+                    surface.w,
+                    specularity,
+                    diffusivity.w,
+                    emittance,
+                    result.y,
+                    distanceToLight,
+                    materialEmissiveColour,
+                    materialBRDF,
+                    lightBRDF,
+                    bounceDirection,
+                    intersectionPosition,
+                    nestedDielectrics,
+                    numNestedDielectrics,
+                    refractiveIndex,
+                    scatteringCoefficient,
+                    distanceTravelledThroughMaterial,
+                    materialLightPDF
+                );
+
+                rayColour += materialEmissiveColour * throughput;
+
+                throughput *= materialBRDF / materialPDF;
+
+                // Exit if we have reached the bounce limit
+                // or with a random chance
+                const float rng = random(random(seed.x) + random(seed.y + random(seed.z)));
+                const float exitProbability = max(
+                    throughput.x,
+                    throughput.y,
+                    throughput.z
+                );
+                if (
+                    ++bounces >= _maxLightSamplingBounces
+                    || emittance.w > 0.0f
+                    || exitProbability <= rng
+                ) {
+                    return finalAOVs(
+                        _outputType,
+                        iterations,
+                        bounces,
+                        firstObjectId,
+                        rayColour
+                    );
+                }
+
+                // Prepare the variables for the next march
+                previousMaterialPDF = materialPDF;
+
+                distanceSinceLastBounce = 0.0f;
+
+                direction = bounceDirection;
+                origin = intersectionPosition;
+
+                // Account for the lost intensity from the early exits
+                throughput /= exitProbability;
+
+                // Reset the pixel footprint so multiple reflections don't
+                // reduce precision
+                pixelFootprint = _hitTolerance;
+
+                // Update the random seed
+                seed = 77.134f * random(seed + rng + fabs(intersectionPosition + direction));
+            }
+
+            lastStepDistance = signedStepDistance;
+            iterations++;
+        }
+
+        lightNormal = -direction;
+
+        // If we are not computing the scene value and we have missed all
+        // objects, return an appropriate colour.
+        if (_outputType > BEAUTY_AOV)
+        {
+            return rayMissAOVs(
+                _outputType,
+                iterations,
+                bounces,
+                firstObjectId
+            );
+        }
+
+        const float4 absorptionColour = float4(
+            nestedDielectrics[numNestedDielectrics][0],
+            nestedDielectrics[numNestedDielectrics][1],
+            nestedDielectrics[numNestedDielectrics][2],
+            nestedDielectrics[numNestedDielectrics][3]
+        );
+
+        const float4 imageLighting = sampledIrradiance ? float4(0) : readHDRIValue(direction);
+
+        // Read the hdri value in the direction the ray was last travelling
+        // and absorb an amount of light proportional to the distance travelled
+        // through the last material
+        // TODO use the scattering here
+        rayColour += throughput * imageLighting * exp(
+            -absorptionColour * scatteringCoefficient * (
+                distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
+            )
+        );
+        rayColour.w = (bounces > 0) * firstObjectId;
+
+        return rayColour;
+    }
+
+
     float4 sampleLight(
             const float3 &seed,
             const float4 &throughput,
@@ -1467,15 +1650,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
         else
         {
-            lightEmissiveColour = sampleLight(
-                seed,
-                lightDirection,
-                distanceToLight,
+            lightEmissiveColour = marchRay(
                 offsetPoint(
                     position,
                     surfaceNormal,
                     offset
                 ),
+                lightDirection,
+                seed,
+                distanceToLight * 2.0f,
                 lightNormal
             );
             lightGeometryFactor = geometryFactor(
@@ -1631,7 +1814,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The ray colour.
      */
-    float4 marchRay(
+    float4 marchPath(
             const float3 &rayOrigin,
             const float3 &rayDirection,
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
@@ -1812,7 +1995,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 float distanceToLight = 0.0f;
                 int selectedLight;
 
-                if (_lightSamplingEnabled && numLights > 0)
+                if (__lightSamplingEnabled && numLights > 0)
                 {
                     // Get data for light sampling
                     lightPDF = sampleLightData(
@@ -1867,7 +2050,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 if (
-                    _lightSamplingEnabled
+                    __lightSamplingEnabled
                     && lightPDF > _hitTolerance
                     && materialLightPDF > _hitTolerance
                 ) {
@@ -2093,7 +2276,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             }
 
             // Determine the colour of the ray
-            resultPixel += marchRay(
+            resultPixel += marchPath(
                 rayOrigin,
                 rayDirection,
                 emissiveMISOptions,
