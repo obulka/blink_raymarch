@@ -8,6 +8,9 @@
 // Matrix and vector math operations
 //
 
+#define PI_BY_TWO PI / 2.0f
+#define TWO_PI 2.0f * PI
+
 
 /**
  * Convert degrees to radians.

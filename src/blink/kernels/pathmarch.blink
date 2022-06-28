@@ -122,6 +122,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int _maxPathsPerPixel;
         int _maxBounces;
         int _maxLightSamplingBounces;
+        float _lightSamplingBias;
         float _maxRayDistance;
         int _maxRaySteps;
         float _hitTolerance;
@@ -150,6 +151,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         int __bouncesPerRay;
         bool __lightSamplingEnabled;
+        float __lightSamplingAngle;
 
         float2 __hdriPixelSize;
         float2 __irradiancePixelSize;
@@ -198,6 +200,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_maxRaySteps, "Max Ray Steps", 128);
         defineParam(_maxBounces, "Max Bounces", 1);
         defineParam(_maxLightSamplingBounces, "Max Light Sampling Bounces", 0);
+        defineParam(_lightSamplingBias, "Light Sampling Bias", 0.0f);
         defineParam(_hitTolerance, "Hit Tolerance", 0.001f);
         defineParam(_shadowBias, "Shadow Bias", 1.0f);
 
@@ -227,6 +230,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         __lightSamplingEnabled = _maxLightSamplingBounces > 0;
 
+        __lightSamplingAngle = PI_BY_TWO * (1.0f - saturate(_lightSamplingBias));
+
         float aspect = aspectRatio(_formatHeight, _formatWidth);
         float4x4 cameraProjectionMatrix = projectionMatrix(
             _focalLength,
@@ -240,14 +245,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         __aperture = fStopToAperture(_fStop, _focalLength);
 
         __hdriPixelSize = float2(
-            hdri.bounds.width() / (2 * PI),
+            hdri.bounds.width() / TWO_PI,
             hdri.bounds.height() / PI
         );
         __irradiancePixelSize = float2(
-            irradiance.bounds.width() / (2 * PI),
+            irradiance.bounds.width() / TWO_PI,
             irradiance.bounds.height() / PI
         );
-        __hdriOffsetRadians = _hdriOffsetAngle * PI / 180.0f;
+        __hdriOffsetRadians = degreesToRadians(_hdriOffsetAngle);
 
         __offset0 = 0.5773f * float3(1, -1, -1);
         __offset1 = 0.5773f * float3(-1, -1, 1);
@@ -1650,13 +1655,27 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
         else
         {
+            float3 direction;
+            if (_maxLightSamplingBounces > 1 && __lightSamplingAngle > 0.0f)
+            {
+                direction = randomDirectionInSolidAngle(
+                    lightDirection,
+                    __lightSamplingAngle,
+                    seed * 3.179f
+                );
+            }
+            else
+            {
+                direction = lightDirection;
+            }
+
             lightEmissiveColour = marchRay(
                 offsetPoint(
                     position,
                     surfaceNormal,
                     offset
                 ),
-                lightDirection,
+                direction,
                 seed,
                 distanceToLight * 2.0f,
                 lightNormal
@@ -1777,7 +1796,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             scatteredColour += scatteringCoefficient * noiseValue * sampleLight(
-                seed * 7.972f,
+                seed * step * 1.97357f,
                 throughput,
                 lightBRDF,
                 distanceToLight,
@@ -2080,7 +2099,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Perform MIS material sampling
                 // TODO don't assume this object is a sphere
                 const float radius = dimensions(result.y - 1, 0, 0);
-                const float visibleSurfaceArea = 2.0f * PI * radius * radius;
+                const float visibleSurfaceArea = TWO_PI * radius * radius;
 
                 rayColour += (
                     materialEmissiveColour
