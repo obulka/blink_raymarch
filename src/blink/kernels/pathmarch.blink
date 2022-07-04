@@ -1363,27 +1363,29 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &rayDirection,
             const float3 &initialSeed,
             const float maxRayDistance,
+            const float currentNestedDielectrics[MAX_NESTED_DIELECTRICS][8],
+            const int currentNumNestedDielectrics,
             float3 &lightNormal)
     {
-        float refractiveIndex = _refractiveIndex;
-        float scatteringCoefficient = _scatteringCoefficient;
-
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][
             4   // Absorption colour of object
             + 1 // ID of the dielectric we are currently in
             + 1 // Refractive index of that object
-            + 1 // Scattering probability
+            + 1 // Scattering coefficient
             + 1 // Do refraction
         ];
-        nestedDielectrics[0][0] = _absorptionColour.x;
-        nestedDielectrics[0][1] = _absorptionColour.y;
-        nestedDielectrics[0][2] = _absorptionColour.z;
-        nestedDielectrics[0][3] = _absorptionColour.w;
-        nestedDielectrics[0][4] = -1;
-        nestedDielectrics[0][5] = refractiveIndex;
-        nestedDielectrics[0][6] = scatteringCoefficient;
-        nestedDielectrics[0][7] = false;
-        int numNestedDielectrics = 0;
+        for (int nestedIndex=0; nestedIndex < currentNumNestedDielectrics; nestedIndex++)
+        {
+            for (int dataIndex=0; dataIndex < 8; dataIndex++)
+            {
+                nestedDielectrics[nestedIndex][dataIndex] = (
+                    currentNestedDielectrics[nestedIndex][dataIndex]
+                );
+            }
+        }
+        int numNestedDielectrics = currentNumNestedDielectrics;
+        float refractiveIndex = nestedDielectrics[numNestedDielectrics - 1][5];
+        float scatteringCoefficient = nestedDielectrics[numNestedDielectrics - 1][6];
 
         float4 rayColour = float4(0);
         float4 throughput = float4(1);
@@ -1634,6 +1636,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float offset,
             const int selectedLight,
             const bool usePrecomputedIrradiance,
+            const float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
+            const int numNestedDielectrics,
             float3 &lightNormal)
     {
         float4 lightEmissiveColour;
@@ -1678,6 +1682,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 direction,
                 seed,
                 distanceToLight * 2.0f,
+                nestedDielectrics,
+                numNestedDielectrics,
                 lightNormal
             );
             lightGeometryFactor = geometryFactor(
@@ -1712,7 +1718,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int numLights,
             const float distanceSinceLastBounce,
             const float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
-            const int &numNestedDielectrics,
+            const int numNestedDielectrics,
             float4 &throughput,
             float &scatteringCoefficient)
     {
@@ -1796,7 +1802,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             scatteredColour += scatteringCoefficient * noiseValue * sampleLight(
-                seed * step * 1.97357f,
+                seed * 1.97357f / step,
                 throughput,
                 lightBRDF,
                 distanceToLight,
@@ -1808,6 +1814,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 0.0f,
                 selectedLight,
                 false,
+                nestedDielectrics,
+                numNestedDielectrics,
                 lightNormal
             );
 
@@ -2092,6 +2100,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         reflectionOffset,
                         selectedLight,
                         _usePrecomputedIrradiance,
+                        nestedDielectrics,
+                        numNestedDielectrics,
                         lightNormal
                     );
                 }
