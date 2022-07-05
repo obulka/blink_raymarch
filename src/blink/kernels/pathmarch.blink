@@ -1374,7 +1374,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             + 1 // Scattering coefficient
             + 1 // Do refraction
         ];
-        for (int nestedIndex=0; nestedIndex < currentNumNestedDielectrics; nestedIndex++)
+        for (int nestedIndex=0; nestedIndex <= currentNumNestedDielectrics; nestedIndex++)
         {
             for (int dataIndex=0; dataIndex < 8; dataIndex++)
             {
@@ -1384,8 +1384,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             }
         }
         int numNestedDielectrics = currentNumNestedDielectrics;
-        float refractiveIndex = nestedDielectrics[numNestedDielectrics - 1][5];
-        float scatteringCoefficient = nestedDielectrics[numNestedDielectrics - 1][6];
+        float refractiveIndex = nestedDielectrics[numNestedDielectrics][5];
+        float scatteringCoefficient = nestedDielectrics[numNestedDielectrics][6];
 
         float4 rayColour = float4(0);
         float4 throughput = float4(1);
