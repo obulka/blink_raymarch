@@ -178,7 +178,7 @@ float3 randomDirectionInSolidAngle(
 
     float3x3 rotation;
     rotationMatrix(
-        angle * uniform,
+        angle * (2.0f * uniform - 1.0f),
         rotation
     );
 
