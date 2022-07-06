@@ -163,27 +163,45 @@ float3 cosineDirectionInHemisphere(const float3 &axis, const float3 &seed)
 
 
 /**
+ * Get a random direction within a solid angle oriented along the z-axis.
+ *
+ * https://math.stackexchange.com/questions/56784/generate-a-random-direction-within-a-cone
+ *
+ * @arg axis: The direction the solid angle is aligned with.
+ * @arg angle: The angle from the axis to the conical surface.
+ * @arg seed: The random seed.
+ */
+inline float3 uniformDirectionInZSolidAngle(const float angle, const float3 &seed)
+{
+    const float cosAngle = cos(angle);
+    const float z = random(seed.x) * (1.0f - cosAngle) + cosAngle;
+    const float phi = random(seed.y) * 2.0f * PI;
+
+    const float rootOneMinusZSquared = sqrt(1.0f - z * z);
+
+    return normalize(float3(
+        rootOneMinusZSquared * cos(phi),
+        rootOneMinusZSquared * sin(phi),
+        z
+    ));
+}
+
+
+/**
  * Get a random direction within a solid angle.
  *
  * @arg axis: The direction the solid angle is aligned with.
  * @arg angle: The angle from the axis to the conical surface.
  * @arg seed: The random seed.
  */
-float3 randomDirectionInSolidAngle(
+float3 uniformDirectionInSolidAngle(
         const float3 &axis,
         const float angle,
         const float3 &seed)
 {
-    const float3 uniform = random(seed);
-
-    float3x3 rotation;
-    rotationMatrix(
-        angle * (2.0f * uniform - 1.0f),
-        rotation
-    );
-
-    float3 direction;
-    matmul(rotation, axis, direction);
-
-    return normalize(direction);
+    return normalize(alignWithDirection(
+        float3(0, 0, 1),
+        axis,
+        uniformDirectionInZSolidAngle(angle, seed)
+    ));
 }

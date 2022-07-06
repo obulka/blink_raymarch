@@ -230,7 +230,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         __lightSamplingEnabled = _maxLightSamplingBounces > 0;
 
-        __lightSamplingAngle = PI_BY_TWO * (1.0f - saturate(_lightSamplingBias));
+        __lightSamplingAngle = PI * (1.0f - saturate(_lightSamplingBias));
 
         float aspect = aspectRatio(_formatHeight, _formatWidth);
         float4x4 cameraProjectionMatrix = projectionMatrix(
@@ -1662,7 +1662,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             float3 direction;
             if (_maxLightSamplingBounces > 1 && __lightSamplingAngle > 0.0f)
             {
-                direction = randomDirectionInSolidAngle(
+                direction = uniformDirectionInSolidAngle(
                     lightDirection,
                     __lightSamplingAngle,
                     seed * 3.179f
@@ -1687,7 +1687,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightNormal
             );
             lightGeometryFactor = geometryFactor(
-                lightDirection,
+                direction,
                 lightNormal,
                 distanceToLight
             );
@@ -1802,7 +1802,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             scatteredColour += scatteringCoefficient * noiseValue * sampleLight(
-                seed * 1.97357f / step,
+                seed * 1.97357f * step,
                 throughput,
                 lightBRDF,
                 distanceToLight,

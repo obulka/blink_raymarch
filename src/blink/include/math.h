@@ -515,6 +515,29 @@ inline float dot2(const float4 &vector)
 }
 
 
+inline bool vectorsAreEqual(const float2 &vector0, const float2 &vector1)
+{
+    return vector0.x == vector1.x && vector0.y == vector1.y;
+}
+
+
+inline bool vectorsAreEqual(const float3 &vector0, const float3 &vector1)
+{
+    return vector0.x == vector1.x && vector0.y == vector1.y && vector0.z == vector1.z;
+}
+
+
+inline bool vectorsAreEqual(const float4 &vector0, const float4 &vector1)
+{
+    return (
+        vector0.x == vector1.x
+        && vector0.y == vector1.y
+        && vector0.z == vector1.z
+        && vector0.w == vector1.w
+    );
+}
+
+
 /**
  * Get a rotation matrix from radian angle values.
  *
@@ -837,11 +860,6 @@ inline float3 alignWithDirection(
         alignDirection,
         rotationAxis
     );
-
-    if (angle == 0.0f)
-    {
-        return unalignedAxis;
-    }
 
     float3x3 rotationMatrix;
     axisAngleRotationMatrix(rotationAxis, angle, rotationMatrix);
