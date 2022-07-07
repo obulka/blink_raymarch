@@ -330,7 +330,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             SampleType(colours) surfaceColour = colours(j, 0);
             SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);
 
-            const int modifications = (int) shapeProperty.y;
+            const int modifications = shapeProperty.y;
             float scale = position.w;
 
             const float blendStrength = shapeProperty.w;
@@ -362,6 +362,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             // Get distance to this child
+            float4 dummyColour = float4(0);
             float nextDistance = getModifiedDistance(
                 transformedRay,
                 (int) shapeProperty.x,
@@ -371,9 +372,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 modParameters1.w,
                 rotation.w,
                 blendedColour,
-                blendedColour,
-                blendedColour,
-                blendedColour
+                dummyColour,
+                dummyColour,
+                dummyColour
             );
 
             // Track which object was hit for the alpha channel
@@ -384,7 +385,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             if (
                 modifications & 4096
                 && numChildren > 0
-                && nextDistance > hitTolerance * (pixelFootprint + 1.0f)
+                && nextDistance > hitTolerance + pixelFootprint
             ) {
                 // Update the min distance if this bounding volume is closest.
                 // Otherwise we could step through it, or if every object in
@@ -481,12 +482,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                                 nextDistance,
                                 parentSurfaceColour,
                                 blendedColour,
-                                parentSurfaceColour,
-                                blendedColour,
-                                parentSurfaceColour,
-                                blendedColour,
-                                parentSurfaceColour,
-                                blendedColour,
+                                dummyColour,
+                                dummyColour,
+                                dummyColour,
+                                dummyColour,
+                                dummyColour,
+                                dummyColour,
                                 parentSurfaceProperty,
                                 blendedSurface,
                                 parentBlendStrength
@@ -578,7 +579,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The intenstity of shadow.
      */
-    float computeSoftShadow(
+    inline float computeSoftShadow(
             const float3 &rayDirection,
             const float distanceToShadePoint,
             const float softness,
@@ -588,18 +589,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     {
         float distanceTravelled = 0;
         float shadowIntensity = 1.0f;
-        float lastStepDistance = 1000000000000000000000000.0f;
+        float lastStepDistance = FLT_MAX;
 
         int iterations = 0;
+        float pixelFootprint = hitTolerance;
         while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
         {
             const float stepDistance = fabs(
-                getMinDistanceToObjectInScene(
-                    rayOrigin,
-                    distanceTravelled,
-                    colour,
-                    surface
-                ).x
+                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint, colour, surface).x
             );
             const float stepDistanceSquared = stepDistance * stepDistance;
             float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);
@@ -609,9 +606,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 / max(0.0f, distanceTravelled - softOffset)
             );
 
-            if (stepDistance < hitTolerance * distanceTravelled)
+            if (stepDistance < pixelFootprint)
             {
-                surface.z /= pow(1.0f + distanceTravelled, 4);
                 shadowIntensity = saturate(shadowIntensity);
                 return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
             }
@@ -619,10 +615,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             lastStepDistance = stepDistance;
             rayOrigin += rayDirection * stepDistance;
             distanceTravelled += stepDistance;
+            pixelFootprint += stepDistance * hitTolerance;
             iterations++;
         }
-        colour = float4(0);
-        surface = float4(0);
 
         shadowIntensity = saturate(shadowIntensity);
         return shadowIntensity * shadowIntensity * (3.0f - 2.0f * shadowIntensity);
@@ -652,29 +647,23 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     {
         float distanceTravelled = 0;
         int iterations = 0;
+        float pixelFootprint = hitTolerance;
         while (distanceTravelled < distanceToShadePoint && iterations < maxRaySteps / 2)
         {
-            float stepDistance = fabs(
-                getMinDistanceToObjectInScene(
-                    rayOrigin,
-                    distanceTravelled,
-                    colour,
-                    surface
-                ).x
+            const float stepDistance = fabs(
+                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint, colour, surface).x
             );
 
-            if (stepDistance < hitTolerance * distanceTravelled)
+            if (stepDistance < pixelFootprint)
             {
-                surface.z /= pow(1.0f + distanceTravelled, 4);
                 return 0;
             }
 
             rayOrigin += rayDirection * stepDistance;
             distanceTravelled += stepDistance;
+            pixelFootprint += stepDistance * hitTolerance;
             iterations++;
         }
-        colour = float4(0);
-        surface = float4(0);
 
         return 1;
     }
@@ -694,7 +683,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The occlusion.
      */
-    float computeAmbientOcclusion(
+    inline float computeAmbientOcclusion(
             const float3 &rayDirection,
             const float3 &rayOrigin,
             const float amount,
@@ -706,13 +695,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float occlusionScaleFactor = 1.0f;
         for(int iteration=0; iteration < iterations; iteration++)
         {
-            float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;
-            float distanceToClosestObject = fabs(getMinDistanceToObjectInScene(
-                rayOrigin + stepDistance * rayDirection,
-                1.0f,
-                colour,
-                surface
-            ).x);
+            const float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;
+            const float distanceToClosestObject = fabs(
+                getMinDistanceToObjectInScene(
+                    rayOrigin + stepDistance * rayDirection,
+                    hitTolerance,
+                    colour,
+                    surface
+                ).x
+            );
             occlusion += (stepDistance - distanceToClosestObject) * occlusionScaleFactor;
             occlusionScaleFactor *= 0.95;
         }
@@ -753,6 +744,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const float intensity,
             const float falloff,
             const float softness,
+            const float pixelFootprint,
             float4 &hitColour,
             float4 &hitSurface)
     {
@@ -793,7 +785,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float3 surfaceOffset = offsetPoint(
             pointOnSurface,
             surfaceNormal,
-            shadowBias * hitTolerance 
+            shadowBias * pixelFootprint
         );
         lightDirection = normalize(lightDirection);
 
@@ -846,6 +838,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &surfaceNormal,
             const float4 &surfaceColour,
             const float4 &surface,
+            const float pixelFootprint,
             float4 &lightColour)
     {
         float2 lightIntensity = float2(surface.z, 0);
@@ -881,6 +874,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     light.w,
                     lightProperty1.y,
                     lightProperty1.x,
+                    pixelFootprint,
                     hitColour,
                     hitSurface
                 );
@@ -1036,6 +1030,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         float lastStepDistance = 1.0f;
 
+        float pixelFootprint = hitTolerance;
+
         float id = 0.0f;
         float depth = 0.0f;
 
@@ -1090,16 +1086,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 // Step the ray forwards
                 origin += direction * stepDistance;
 
-                // Have we hit the nearest object?
-                if (stepDistance < hitTolerance * distanceTravelled)
-                {
-                    // The actual position on the surface we hit
-                    const float3 surfacePosition = origin - direction * hitTolerance;
+                pixelFootprint += hitTolerance * stepDistance;
 
+                // Have we hit the nearest object?
+                if (stepDistance < pixelFootprint)
+                {
                     // The normal to the surface at that position
                     float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
-                        surfacePosition,
-                        distanceTravelled
+                        origin,
+                        pixelFootprint
                     );
 
                     // Roughen the surface
@@ -1126,9 +1121,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                             if (outputType == 1)
                             {
                                 return float4(
-                                    surfacePosition.x,
-                                    surfacePosition.y,
-                                    surfacePosition.z,
+                                    origin.x,
+                                    origin.y,
+                                    origin.z,
                                     encodeFloatsInUint(id, depth)
                                 );
                             }
@@ -1159,6 +1154,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         surfaceNormal,
                         colour,
                         surface,
+                        pixelFootprint,
                         lightColour
                     );
 
@@ -1212,9 +1208,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         // Offset the point so that it doesn't get trapped on
                         // surface.
                         const float3 refractedOrigin = offsetPoint(
-                            surfacePosition,
-                            refractedDirection - surfaceNormal,
-                            2.0f * hitTolerance + stepDistance
+                            origin,
+                            -surfaceNormal,
+                            (2.0f * pixelFootprint + stepDistance) * shadowBias
                         );
 
                         rays[numRays][0] = refractedOrigin.x;
@@ -1245,8 +1241,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         // surface.
                         const float3 reflectedOrigin = offsetPoint(
                             origin,
-                            reflectedDirection + surfaceNormal,
-                            hitTolerance
+                            surfaceNormal,
+                            pixelFootprint * shadowBias
                         );
 
                         rays[numRays][0] = reflectedOrigin.x;
@@ -1266,6 +1262,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     // Flag that we have collided with at least one object.
                     madeContact = true;
+                    pixelFootprint = hitTolerance;
                     break;
                 }
 

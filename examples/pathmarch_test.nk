@@ -1,5 +1,4 @@
 #! /usr/local/Nuke12.0v8/libnuke-12.0.8.so -nx
-#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/path_trace_example.png" format:"1024 778 1" chans:":rgba.red:rgba.green:rgba.blue:rgba.alpha:variance.red:variance.green:variance.blue:variance.num_paths:" framerange:"1 400" fps:"0" colorspace:"default (sRGB)" datatype:"16 bit" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 12.0 v8
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
@@ -5237,6 +5236,7 @@ Group {
  inputs 6
  name path_march2
  knobChanged "__import__('sdf.path_march', fromlist='PathMarch').PathMarch().handle_knob_changed()"
+ selected true
  xpos 286
  ypos 885
  addUserKnob {20 User l "Ray March"}
@@ -6528,24 +6528,3 @@ push $Nb3380be0
   ypos 183
  }
 end_group
-Write {
- channels all
- file /home/ob1/software/nuke/dev/raymarch/images/path_trace_example.png
- file_type png
- datatype "16 bit"
- checkHashOnRead false
- name Write1
- xpos 286
- ypos 988
-}
-Viewer {
- inputs 0
- frame 309
- frame_range 1-400
- colour_sample_bbox {-0.4609375 -0.037109375 -0.458984375 -0.03515625}
- samplepoints {{-0.4609375 -0.037109375}
-   }
- name Viewer1
- xpos 292
- ypos 1111
-}

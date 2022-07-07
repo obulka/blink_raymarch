@@ -4,7 +4,7 @@ Gizmo {
  addUserKnob {20 User l "Ray March"}
  addUserKnob {3 min_paths_per_pixel l "min paths per pixel"}
  addUserKnob {3 max_paths_per_pixel l "max paths per pixel"}
- max_paths_per_pixel 1
+ max_paths_per_pixel 50
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
  hit_tolerance 0.001
  addUserKnob {3 max_bounces l "max bounces" t "Limits the number of times the rays can intersect an object per subpixel."}
@@ -22,7 +22,7 @@ Gizmo {
  addUserKnob {3 max_light_sampling_bounces l "max light sampling bounces"}
  max_light_sampling_bounces 5
  addUserKnob {7 light_sampling_bias l "light sampling bias"}
- light_sampling_bias 0.8
+ light_sampling_bias 1
  addUserKnob {26 ""}
  addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material that the camera is in."}
  absorption_colour {1 1 1}
@@ -30,9 +30,8 @@ Gizmo {
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the medium that the camera is currently in." R 1 4}
  refractive_index 1
  addUserKnob {7 scattering_coefficient l "scattering coefficient"}
- scattering_coefficient 0.035
  addUserKnob {3 equiangular_samples l "equi-angular samples"}
- equiangular_samples 16
+ equiangular_samples 5
  addUserKnob {26 ""}
  addUserKnob {7 hdri_offset_angle l "hdri offset angle" t "Rotate the hdri image by this amount around the y-axis." R 0 360}
  addUserKnob {6 use_precomputed_irradiance l "use precomputed irradiance" +STARTLINE}
@@ -151,7 +150,7 @@ Gizmo {
   xpos 1695
   ypos -1484
  }
-set N7ef7bb0 [stack 0]
+set N24811330 [stack 0]
  Reformat {
   type scale
   scale {{"floor(min(parent.hdri_dot.height, parent.hdri_dot.width) * parent.hdri_lighting_scale) > 0 ? parent.hdri_lighting_scale : 1"}}
@@ -204,19 +203,19 @@ set N7ef7bb0 [stack 0]
   xpos -1502
   ypos -1549
  }
-set N106f7e10 [stack 0]
+set N1f5966d0 [stack 0]
  Dot {
   name Dot25
   xpos -1011
   ypos -1549
  }
-set Nc7280a30 [stack 0]
+set N1e8c69b0 [stack 0]
  Dot {
   name Dot15
   xpos -1011
   ypos -1441
  }
-push $Nc7280a30
+push $N1e8c69b0
  Input {
   inputs 0
   name lights
@@ -261,7 +260,7 @@ push $Nc7280a30
    xpos 192
    ypos -2
   }
-set Na8f6c780 [stack 0]
+set N2105a310 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -283,7 +282,7 @@ set Na8f6c780 [stack 0]
    xpos 34
    ypos -6
   }
-set Na8f7fe50 [stack 0]
+set N1e2d3470 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -294,7 +293,7 @@ set Na8f7fe50 [stack 0]
    xpos -98
    ypos 336
   }
-push $Na8f6c780
+push $N2105a310
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -323,7 +322,7 @@ push $Na8f6c780
    xpos 158
    ypos 167
   }
-push $Na8f7fe50
+push $N1e2d3470
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -390,7 +389,7 @@ push $Na8f7fe50
   xpos -914
   ypos -1307
  }
-set Na8f3fdc0 [stack 0]
+set N1c05ed50 [stack 0]
 add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light_properties1.falloff}
  Shuffle {
   in sdf_light_properties1
@@ -405,7 +404,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
   xpos -914
   ypos -864
  }
-push $Na8f3fdc0
+push $N1c05ed50
 add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properties.colour_g sdf_light_properties.colour_b sdf_light_properties.type}
  Shuffle {
   in sdf_light_properties
@@ -418,7 +417,7 @@ add_layer {sdf_light_properties sdf_light_properties.colour_r sdf_light_properti
   xpos -804
   ypos -862
  }
-push $Na8f3fdc0
+push $N1c05ed50
 add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_light.light_pos_dir_z sdf_light.intensity}
  Shuffle {
   in sdf_light
@@ -431,13 +430,13 @@ add_layer {sdf_light sdf_light.light_pos_dir_x sdf_light.light_pos_dir_y sdf_lig
   xpos -697
   ypos -860
  }
-push $Nc7280a30
+push $N1e8c69b0
  Dot {
   name Dot16
   xpos -569
   ypos -1549
  }
-set Nc2bab660 [stack 0]
+set N19eb7ce0 [stack 0]
  Dot {
   name Dot36
   xpos 843
@@ -456,7 +455,7 @@ set Nc2bab660 [stack 0]
   xpos 909
   ypos -1510
  }
-push $Nc2bab660
+push $N19eb7ce0
  Input {
   inputs 0
   name scene
@@ -474,7 +473,7 @@ push $Nc2bab660
   xpos -469
   ypos -1441
  }
-set Nc2bdee00 [stack 0]
+set N1c6c9170 [stack 0]
  Group {
   inputs 2
   name noise_sdf_merge
@@ -505,7 +504,7 @@ set Nc2bdee00 [stack 0]
    xpos 192
    ypos -2
   }
-set Nc2c00380 [stack 0]
+set N1ac62180 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -527,7 +526,7 @@ set Nc2c00380 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc1e99040 [stack 0]
+set N1ecb54e0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -538,7 +537,7 @@ set Nc1e99040 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc2c00380
+push $N1ac62180
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -567,7 +566,7 @@ push $Nc2c00380
    xpos 158
    ypos 167
   }
-push $Nc1e99040
+push $N1ecb54e0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -634,7 +633,7 @@ push $Nc1e99040
   xpos 943
   ypos -1225
  }
-set Nc1f27890 [stack 0]
+set N1f872c10 [stack 0]
 add_layer {sdf_noise_params2 sdf_noise_params2.size sdf_noise_params2.white_point sdf_noise_params2.black_point sdf_noise_params2.lift}
  Shuffle {
   in sdf_noise_params2
@@ -647,7 +646,7 @@ add_layer {sdf_noise_params2 sdf_noise_params2.size sdf_noise_params2.white_poin
   xpos 1233
   ypos -853
  }
-push $Nc1f27890
+push $N1f872c10
 add_layer {sdf_noise_params1 sdf_noise_params1.octaves sdf_noise_params1.lacunarity sdf_noise_params1.gain sdf_noise_params1.gamma}
  Shuffle {
   in sdf_noise_params1
@@ -660,7 +659,7 @@ add_layer {sdf_noise_params1 sdf_noise_params1.octaves sdf_noise_params1.lacunar
   xpos 1094
   ypos -850
  }
-push $Nc1f27890
+push $N1f872c10
 add_layer {sdf_noise_params0 sdf_noise_params0.options sdf_noise_params0.x sdf_noise_params0.y sdf_noise_params0.z}
  Shuffle {
   in sdf_noise_params0
@@ -673,13 +672,13 @@ add_layer {sdf_noise_params0 sdf_noise_params0.options sdf_noise_params0.x sdf_n
   xpos 943
   ypos -847
  }
-push $Nc2bab660
+push $N19eb7ce0
  Dot {
   name Dot1
   xpos -569
   ypos -1381
  }
-push $Nc2bdee00
+push $N1c6c9170
  Group {
   inputs 2
   name object_input_protection
@@ -711,7 +710,7 @@ push $Nc2bdee00
    xpos 192
    ypos -2
   }
-set Nc1f8e2b0 [stack 0]
+set N224de050 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -733,7 +732,7 @@ set Nc1f8e2b0 [stack 0]
    xpos 34
    ypos -6
   }
-set Nc1fa1b70 [stack 0]
+set N208962a0 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -744,7 +743,7 @@ set Nc1fa1b70 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nc1f8e2b0
+push $N224de050
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -773,7 +772,7 @@ push $Nc1f8e2b0
    xpos 158
    ypos 167
   }
-push $Nc1fa1b70
+push $N208962a0
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -840,7 +839,7 @@ push $Nc1fa1b70
   xpos -469
   ypos -1315
  }
-set N952dfa00 [stack 0]
+set N225a7430 [stack 0]
 add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surface.emission sdf_surface.roughness}
  Shuffle {
   in sdf_surface
@@ -853,7 +852,7 @@ add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surfa
   xpos -49
   ypos -862
  }
-push $N952dfa00
+push $N225a7430
 add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elongation_y sdf_shape_mods_1.elongation_z sdf_shape_mods_1.edge_radius}
  Shuffle {
   in sdf_shape_mods_1
@@ -866,7 +865,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
   xpos 326
   ypos -862
  }
-push $N952dfa00
+push $N225a7430
 add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetion_y sdf_shape_mods_0.repetion_z sdf_shape_mods_0.repetion_w}
  Shuffle {
   in sdf_shape_mods_0
@@ -879,7 +878,7 @@ add_layer {sdf_shape_mods_0 sdf_shape_mods_0.repetion_x sdf_shape_mods_0.repetio
   xpos 187
   ypos -861
  }
-push $N952dfa00
+push $N225a7430
 add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.num_children sdf_shape.blend_strength}
  Shuffle {
   in sdf_shape
@@ -892,7 +891,7 @@ add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.n
   xpos 76
   ypos -860
  }
-push $N952dfa00
+push $N225a7430
 add_layer {sdf_emm_colour sdf_emm_colour.r sdf_emm_colour.g sdf_emm_colour.b sdf_emm_colour.x}
  Shuffle {
   in sdf_emm_colour
@@ -905,7 +904,7 @@ add_layer {sdf_emm_colour sdf_emm_colour.r sdf_emm_colour.g sdf_emm_colour.b sdf
   xpos -156
   ypos -864
  }
-push $N952dfa00
+push $N225a7430
 add_layer {sdf_trans_colour sdf_trans_colour.r sdf_trans_colour.g sdf_trans_colour.b sdf_trans_colour.x}
  Shuffle {
   in sdf_trans_colour
@@ -918,7 +917,7 @@ add_layer {sdf_trans_colour sdf_trans_colour.r sdf_trans_colour.g sdf_trans_colo
   xpos -253
   ypos -863
  }
-push $N952dfa00
+push $N225a7430
 add_layer {sdf_spec_colour sdf_spec_colour.r sdf_spec_colour.g sdf_spec_colour.b sdf_spec_colour.x}
  Shuffle {
   in sdf_spec_colour
@@ -931,7 +930,7 @@ add_layer {sdf_spec_colour sdf_spec_colour.r sdf_spec_colour.g sdf_spec_colour.b
   xpos -353
   ypos -862
  }
-push $N952dfa00
+push $N225a7430
 add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_b sdf_colour.colour_a}
  Shuffle {
   in sdf_colour
@@ -944,7 +943,7 @@ add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_
   xpos -469
   ypos -863
  }
-push $N952dfa00
+push $N225a7430
 add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y sdf_dimensions.dimension_z sdf_dimensions.dimension_w}
  Shuffle {
   in sdf_dimensions
@@ -957,7 +956,7 @@ add_layer {sdf_dimensions sdf_dimensions.dimension_x sdf_dimensions.dimension_y 
   xpos 773
   ypos -854
  }
-push $N952dfa00
+push $N225a7430
 add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sdf_rotation_wall_thickness.rotation_y sdf_rotation_wall_thickness.rotation_z sdf_rotation_wall_thickness.wall_thickness}
  Shuffle {
   in sdf_rotation_wall_thickness
@@ -970,7 +969,7 @@ add_layer {sdf_rotation_wall_thickness sdf_rotation_wall_thickness.rotation_x sd
   xpos 622
   ypos -851
  }
-push $N952dfa00
+push $N225a7430
 add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.position_y sdf_position_scale.position_z sdf_position_scale.uniform_scale}
  Shuffle {
   in sdf_position_scale
@@ -983,15 +982,15 @@ add_layer {sdf_position_scale sdf_position_scale.position_x sdf_position_scale.p
   xpos 480
   ypos -856
  }
-push $N7ef7bb0
-push $N106f7e10
+push $N24811330
+push $N1f5966d0
  Reformat {
   format {{{parent.format_.format}}}
   name Reformat2
   xpos -1536
   ypos -1503
  }
-set Nbf63b890 [stack 0]
+set N1bc53840 [stack 0]
  Input {
   inputs 0
   name previous
@@ -1010,7 +1009,7 @@ set Nbf63b890 [stack 0]
   xpos -1330
   ypos -1385
  }
-set Nbf660080 [stack 0]
+set N224b82e0 [stack 0]
 add_layer {variance variance.red variance.green variance.blue variance.num_paths}
  Shuffle {
   in variance
@@ -1018,7 +1017,7 @@ add_layer {variance variance.red variance.green variance.blue variance.num_paths
   xpos -1364
   ypos -1331
  }
-push $Nbf63b890
+push $N1bc53840
  Invert {
   channels rgb
   name Invert2
@@ -1037,7 +1036,7 @@ push $Nbf63b890
   xpos -1330
   ypos -451
  }
-push $Nbf660080
+push $N224b82e0
  Dot {
   name Dot34
   xpos -1227
@@ -1158,7 +1157,7 @@ push $Nbf660080
   xpos 1695
   ypos -264
  }
-set Nbf6ee180 [stack 0]
+set N1c346560 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/decode_alpha.blink
   recompileCount 2
@@ -1170,8 +1169,8 @@ set Nbf6ee180 [stack 0]
   xpos 1661
   ypos -41
  }
-set Nbf6f3100 [stack 0]
-push $Nbf6ee180
+set N1c31a1c0 [stack 0]
+push $N1c346560
  Dot {
   name Dot8
   xpos 1830
@@ -1186,7 +1185,7 @@ push $Nbf6ee180
   xpos 1796
   ypos -34
  }
-push $Nbf6ee180
+push $N1c346560
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/variance.blink
   recompileCount 16
@@ -1204,7 +1203,7 @@ push $Nbf6ee180
   xpos 1560
   ypos -222
  }
-set Ncac44be0 [stack 0]
+set N1e3aecc0 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/minMax.blink
   recompileCount 6
@@ -1221,7 +1220,7 @@ set Ncac44be0 [stack 0]
   xpos 1416
   ypos -160
  }
-push $Ncac44be0
+push $N1e3aecc0
  BlinkScript {
   inputs 2
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/normalize.blink
@@ -1240,7 +1239,7 @@ push $Ncac44be0
   xpos 1560
   ypos -101
  }
-set Ncac7f340 [stack 0]
+set N1f6770c0 [stack 0]
  BlinkScript {
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/minMax.blink
   recompileCount 6
@@ -1257,7 +1256,7 @@ set Ncac7f340 [stack 0]
   xpos 1416
   ypos -30
  }
-push $Ncac7f340
+push $N1f6770c0
  BlinkScript {
   inputs 2
   kernelSourceFile /home/ob1/software/nuke/dev/raymarch/src/blink/kernels/normalize.blink
@@ -1276,7 +1275,7 @@ push $Ncac7f340
   xpos 1560
   ypos 88
  }
-push $Nbf6f3100
+push $N1c31a1c0
  ShuffleCopy {
   inputs 2
   in rgb
