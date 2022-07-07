@@ -123,6 +123,8 @@ You can choose the colour, intensity, and falloff of the light. You can also sof
 
 ### ray_march
 
+Updated to work with the v2.0.0 codebase, but no features added since v1.0.0. I lost my Nuke license so I may not upgrade this to include the many features of the 'path_march' node.
+
 This gizmo renders the scene using a ray marching algorithm, with support for hdri image based lighting. You can input a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
 
 The AOV options are:
