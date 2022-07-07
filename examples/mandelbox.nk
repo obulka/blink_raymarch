@@ -64,7 +64,7 @@ Dot {
  xpos 20922
  ypos 1048
 }
-set N68111d0 [stack 0]
+set N6084a50 [stack 0]
 sdf_light {
  inputs 0
  name sdf_light4
@@ -76,8 +76,7 @@ sdf_light {
  dimension_y 2
  dimension_z 4
  intensity 1000
- falloff 4
- soften_shadows true
+ soften_shadows false
 }
 sdf_light {
  name sdf_light3
@@ -85,12 +84,9 @@ sdf_light {
  xpos 20724
  ypos 874
  type point
- dimension_x 1
- dimension_y 1
  dimension_z 4
  intensity 1000
- falloff 4
- soften_shadows true
+ soften_shadows false
 }
 sdf_light {
  name sdf_light5
@@ -99,20 +95,26 @@ sdf_light {
  ypos 954
  type "ambient occlusion"
  dimension_x 5
- dimension_y 1
  dimension_z 4
  intensity 0.1
  falloff 4
- soften_shadows true
 }
 Dot {
  name Dot3
  xpos 20758
  ypos 1051
 }
-set N6e52dd0 [stack 0]
-sdf_primitive {
+set N63e39d0 [stack 0]
+sdf_material {
  inputs 0
+ name sdf_material1
+ xpos 20587
+ ypos 853
+}
+push 0
+push 0
+sdf_primitive {
+ inputs 3
  name sdf_primitive1
  label mandelbox
  xpos 20587
@@ -129,41 +131,39 @@ Dot {
  xpos 20621
  ypos 1053
 }
-set N70ce0b0 [stack 0]
+set N6632a50 [stack 0]
 ray_march {
  inputs 3
  name ray_march2
  xpos 20587
  ypos 1131
- hit_tolerance 0.001
+ hit_tolerance 0.0001
  max_rays_per_subpixel 10
- ray_distance 20
  output_type Depth
 }
 Dot {
  name Dot5
- xpos 20621
- ypos 1369
+ xpos 20620
+ ypos 1264
 }
-push $N68111d0
-push $N6e52dd0
-push $N70ce0b0
+push $N6084a50
+push $N63e39d0
+push $N6632a50
 ray_march {
  inputs 3
  name ray_march1
  xpos 20724
  ypos 1133
- hit_tolerance 0.001
+ hit_tolerance 0.0001
  max_rays_per_subpixel 10
- ray_distance 20
 }
 HueShift {
  saturation 0.62
  color_saturation 0.82
  hue_rotation -30
  name HueShift1
- xpos 20725
- ypos 1298
+ xpos 20724
+ ypos 1193
 }
 ShuffleCopy {
  inputs 2
@@ -171,19 +171,13 @@ ShuffleCopy {
  out depth
  out2 rgba
  name ShuffleCopy1
- xpos 20725
- ypos 1365
-}
-Blur {
- size 1
- name Blur1
- xpos 20725
- ypos 1421
+ xpos 20724
+ ypos 1260
 }
 ZDefocus2 {
  math depth
- center {{curve x1 0.3918457031 x400 0.1278076172}}
- focal_point {200 388}
+ center 0.3265500963
+ focal_point {483.6000061 388.7999878}
  dof 0.8899999857
  size 13.2
  legacy_resize_mode false
@@ -192,11 +186,11 @@ ZDefocus2 {
  bloom_threshold 1
  bloom_gain 1.6
  name ZDefocus1
- xpos 20725
- ypos 1496
+ xpos 20724
+ ypos 1339
 }
 Dot {
  name Dot1
- xpos 20759
- ypos 1626
+ xpos 20758
+ ypos 1469
 }

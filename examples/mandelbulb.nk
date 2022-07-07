@@ -66,11 +66,9 @@ sdf_light {
  xpos 21015
  ypos 984
  type point
- dimension_x 1
- dimension_y 1
+ dimension_x 0
  dimension_z 4
  intensity 1000
- falloff 4
 }
 sdf_light {
  name sdf_light2
@@ -79,10 +77,8 @@ sdf_light {
  ypos 1060
  type point
  dimension_x 3
- dimension_y 1
  dimension_z 4
  intensity 1000
- falloff 4
 }
 sdf_light {
  name sdf_light1
@@ -93,12 +89,20 @@ sdf_light {
  dimension_x 5
  intensity 0.15
 }
-sdf_primitive {
+sdf_material {
  inputs 0
+ name sdf_material1
+ xpos 20849
+ ypos 1064
+}
+push 0
+push 0
+sdf_primitive {
+ inputs 3
  name sdf_primitive2
  label mandelbulb
  xpos 20849
- ypos 1158
+ ypos 1135
  shape mandelbulb
  dimension_x 15
  dimension_y 10
@@ -110,10 +114,7 @@ ray_march {
  inputs 3
  name ray_march2
  xpos 21015
- ypos 1289
- hit_tolerance 0.001
- ray_distance 20
- max_ray_steps 1000
+ ypos 1288
 }
 HueShift {
  color_saturation 0.82

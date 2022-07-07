@@ -8,8 +8,6 @@ import logging
 
 import nuke
 
-from .utils import rgb_to_hex
-
 
 _LOGGER = logging.getLogger(__file__)
 
@@ -58,13 +56,11 @@ class KnobManager(object):
         """Called when the input has changed"""
 
 
-class SDFKnobManager(KnobManager):
+class SDFGeoKnobManager(KnobManager):
     """Knob manager for primitive shapes in signed distance fields."""
 
     sibling_input_index = 0
     children_input_index = 1
-
-    colour_knob_name = "colour"
 
     _knob_changed_callbacks = KnobChangedCallbacks(KnobManager._knob_changed_callbacks)
 
@@ -73,7 +69,7 @@ class SDFKnobManager(KnobManager):
 
     def __init__(self):
         """Initialize the manager"""
-        super(SDFKnobManager, self).__init__()
+        super(SDFGeoKnobManager, self).__init__()
 
         self._knob_names_only_enabled_if_parent = set()
 
@@ -91,11 +87,6 @@ class SDFKnobManager(KnobManager):
     def has_children(self):
         """bool: True if a node is connected to the 'children' input."""
         return self._node.input(self.children_input_index) is not None
-
-    @_knob_changed_callbacks.register(colour_knob_name)
-    def _colour_changed(self):
-        """Change the node colour to match the object for easier ID."""
-        self._node.knob("tile_color").setValue(rgb_to_hex(self._knob.value()))
 
     @_knob_changed_callbacks.register("inputChange")
     def _input_changed(self):

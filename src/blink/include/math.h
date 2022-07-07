@@ -8,6 +8,9 @@
 // Matrix and vector math operations
 //
 
+#define PI_BY_TWO PI / 2.0f
+#define TWO_PI 2.0f * PI
+
 
 /**
  * Convert degrees to radians.
@@ -94,22 +97,9 @@ inline float3 radiansToDegrees(const float3 &angle)
  *
  * @returns: The fractional portion of the value.
  */
-inline float fract(float value)
+inline float fract(const float value)
 {
     return value - floor(value);
-}
-
-
-/**
- * Get a random value on the interval [0, 1].
- *
- * @arg seed: The random seed.
- *
- * @returns: A random value on the interval [0, 1].
- */
-inline float random(float seed)
-{
-    return fract(sin(seed * 91.3458f) * 47453.5453f);
 }
 
 
@@ -217,6 +207,51 @@ inline int3 clamp_(const int3 value, const int3 lower, const int3 upper)
 
 
 /**
+ * Clamp vector components between float values.
+ *
+ * @arg value: The value to clamp.
+ * @arg lower: The lower bound to clamp to.
+ * @arg upper: The upper bound to clamp to.
+ *
+ * @returns: The clamped value.
+ */
+inline float2 clamp(const float2 &value, const float lower, const float upper)
+{
+    return clamp(value, float2(lower), float2(upper));
+}
+
+
+/**
+ * Clamp vector components between float values.
+ *
+ * @arg value: The value to clamp.
+ * @arg lower: The lower bound to clamp to.
+ * @arg upper: The upper bound to clamp to.
+ *
+ * @returns: The clamped value.
+ */
+inline float3 clamp(const float3 &value, const float lower, const float upper)
+{
+    return clamp(value, float3(lower), float3(upper));
+}
+
+
+/**
+ * Clamp vector components between float values.
+ *
+ * @arg value: The value to clamp.
+ * @arg lower: The lower bound to clamp to.
+ * @arg upper: The upper bound to clamp to.
+ *
+ * @returns: The clamped value.
+ */
+inline float4 clamp(const float4 &value, const float lower, const float upper)
+{
+    return clamp(value, float4(lower), float4(upper));
+}
+
+
+/**
  * Custom round for int3 because the builtin round fails to compile for
  * int3.
  *
@@ -227,6 +262,58 @@ inline int3 clamp_(const int3 value, const int3 lower, const int3 upper)
 inline int3 round_(const float3 value)
 {
     return int3(round(value.x), round(value.y), round(value.z));
+}
+
+
+/**
+ * Sum the components of a vector.
+ *
+ * @arg vector: The vector to sum the components of.
+ *
+ * @returns: The sum of the components.
+ */
+inline float sumComponent(const float2 &vector)
+{
+    return vector.x + vector.y;
+}
+
+
+/**
+ * Sum the components of a vector.
+ *
+ * @arg vector: The vector to sum the components of.
+ *
+ * @returns: The sum of the components.
+ */
+inline float sumComponent(const float3 &vector)
+{
+    return vector.x + vector.y + vector.z;
+}
+
+
+/**
+ * Sum the components of a vector.
+ *
+ * @arg vector: The vector to sum the components of.
+ *
+ * @returns: The sum of the components.
+ */
+inline float sumComponent(const float4 &vector)
+{
+    return vector.x + vector.y + vector.z + vector.w;
+}
+
+
+/**
+ * The maximum component of a vector.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The maximum component of the vector.
+ */
+inline float maxComponent(const float2 &vector)
+{
+    return max(vector.x, vector.y);
 }
 
 
@@ -250,9 +337,22 @@ inline float maxComponent(const float3 &vector)
  *
  * @returns: The maximum component of the vector.
  */
-inline float maxComponent(const float2 &vector)
+inline float maxComponent(const float4 &vector)
 {
-    return max(vector.x, vector.y);
+    return max(vector.x, max(vector.y, max(vector.z, vector.w)));
+}
+
+
+/**
+ * The minimum component of a vector.
+ *
+ * @arg vector: The vector.
+ *
+ * @returns: The minimum component of the vector.
+ */
+inline float minComponent(const float2 &vector)
+{
+    return min(vector.x, vector.y);
 }
 
 
@@ -276,9 +376,9 @@ inline float minComponent(const float3 &vector)
  *
  * @returns: The minimum component of the vector.
  */
-inline float minComponent(const float2 &vector)
+inline float minComponent(const float4 &vector)
 {
-    return min(vector.x, vector.y);
+    return min(vector.x, min(vector.y, min(vector.z, vector.w)));
 }
 
 
@@ -415,6 +515,29 @@ inline float dot2(const float4 &vector)
 }
 
 
+inline bool vectorsAreEqual(const float2 &vector0, const float2 &vector1)
+{
+    return vector0.x == vector1.x && vector0.y == vector1.y;
+}
+
+
+inline bool vectorsAreEqual(const float3 &vector0, const float3 &vector1)
+{
+    return vector0.x == vector1.x && vector0.y == vector1.y && vector0.z == vector1.z;
+}
+
+
+inline bool vectorsAreEqual(const float4 &vector0, const float4 &vector1)
+{
+    return (
+        vector0.x == vector1.x
+        && vector0.y == vector1.y
+        && vector0.z == vector1.z
+        && vector0.w == vector1.w
+    );
+}
+
+
 /**
  * Get a rotation matrix from radian angle values.
  *
@@ -423,16 +546,51 @@ inline float dot2(const float4 &vector)
  */
 inline void rotationMatrix(const float3 &angles, float3x3 &out)
 {
+    const float3 cosAngles = cos(angles);
+    const float3 sinAngles = sin(angles);
+
     // Why tf can I not init a float3x3 normally??
-    out[0][0] = cos(angles.y) * cos(angles.z);
-    out[0][1] = sin(angles.x) * sin(angles.y) * cos(angles.z) - cos(angles.x) * sin(angles.z);
-    out[0][2] = cos(angles.x) * sin(angles.y) * cos(angles.z) + sin(angles.x) * sin(angles.z);
-    out[1][0] = cos(angles.y) * sin(angles.z);
-    out[1][1] = sin(angles.x) * sin(angles.y) * sin(angles.z) + cos(angles.x) * cos(angles.z);
-    out[1][2] = cos(angles.x) * sin(angles.y) * sin(angles.z) - sin(angles.x) * cos(angles.z);
-    out[2][0] = -sin(angles.y);
-    out[2][1] = sin(angles.x) * cos(angles.y);
-    out[2][2] = cos(angles.x) * cos(angles.y);
+    out[0][0] = cosAngles.y * cosAngles.z;
+    out[0][1] = sinAngles.x * sinAngles.y * cosAngles.z - cosAngles.x * sinAngles.z;
+    out[0][2] = cosAngles.x * sinAngles.y * cosAngles.z + sinAngles.x * sinAngles.z;
+    out[1][0] = cosAngles.y * sinAngles.z;
+    out[1][1] = sinAngles.x * sinAngles.y * sinAngles.z + cosAngles.x * cosAngles.z;
+    out[1][2] = cosAngles.x * sinAngles.y * sinAngles.z - sinAngles.x * cosAngles.z;
+    out[2][0] = -sinAngles.y;
+    out[2][1] = sinAngles.x * cosAngles.y;
+    out[2][2] = cosAngles.x * cosAngles.y;
+}
+
+
+/**
+ * Get a rotation matrix from an axis and an angle about that axis.
+ *
+ * @arg angles: The rotation angles in radians.
+ * @arg out: The location to store the rotation matrix.
+ */
+inline void axisAngleRotationMatrix(const float3 &axis, const float angle, float3x3 &out)
+{
+    const float cosAngle = cos(angle);
+    const float oneMinusCosAngle = 1.0f - cosAngle;
+    const float sinAngle = sin(angle);
+
+    const float3 axisSquared = axis * axis;
+
+    const float axisXY = axis.x * axis.y * oneMinusCosAngle;
+    const float axisXZ = axis.x * axis.z * oneMinusCosAngle;
+    const float axisYZ = axis.y * axis.z * oneMinusCosAngle;
+
+    const float3 axisSinAngle = axis * sinAngle;
+
+    out[0][0] = cosAngle + axisSquared.x * oneMinusCosAngle;
+    out[0][1] = axisXY - axisSinAngle.z;
+    out[0][2] = axisXZ + axisSinAngle.y;
+    out[1][0] = axisXY + axisSinAngle.z;
+    out[1][1] = cosAngle + axisSquared.y * oneMinusCosAngle;
+    out[1][2] = axisYZ - axisSinAngle.x;
+    out[2][0] = axisXZ - axisSinAngle.y;
+    out[2][1] = axisYZ + axisSinAngle.x;
+    out[2][2] = cosAngle + axisSquared.z * oneMinusCosAngle;
 }
 
 
@@ -475,6 +633,47 @@ inline void matmul(const float3x3 &m, const float3 &v, float3 &out)
 
 
 /**
+ * Multiply a 4d vector by a 4x4 matrix.
+ *
+ * @arg m: The matrix that will transform the vector.
+ * @arg v: The vector to transform.
+ * @arg out: The location to store the resulting vector.
+ */
+inline float4 matmul(const float4x4 &m, const float4 &v)
+{
+    float4 out;
+    for (int i=0; i < 4; i++)
+    {
+        out[i] = 0;
+
+        for (int j=0; j < 4; j++)
+        {
+            out[i] += m[i][j] * v[j];
+        }
+    }
+
+    return out;
+}
+
+
+/**
+ * Multiply a 3d vector by a 3x3 matrix.
+ *
+ * @arg m: The matrix that will transform the vector.
+ * @arg v: The vector to transform.
+ * @arg out: The location to store the resulting vector.
+ */
+inline float3 matmul(const float3x3 &m, const float3 &v)
+{
+    return float3(
+        m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z,
+        m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z,
+        m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z
+    );
+}
+
+
+/**
  * Offset a point in a direction.
  *
  * @arg point: The point to offset.
@@ -489,57 +688,6 @@ inline float3 offsetPoint(
         const float offset)
 {
     return offset * direction + point;
-}
-
-
-/**
- * Offset a point away from the surface of an object.
- *
- * @arg surfacePoint: The point to offset.
- * @arg direction: The direction to offset in.
- * @arg normal: The normal direction to the surface.
- * @arg bias: Will increase the offset by this factor.
- * @arg tolerance: The hit tolerance.
- *
- * @returns: The offset point.
- */
-inline float3 surfaceOffsetPoint(
-        const float3 &surfacePoint,
-        const float3 &direction,
-        const float3 &normal,
-        const float bias,
-        const float tolerance)
-{
-    return tolerance * bias * (direction + normal) + surfacePoint;
-}
-
-
-/**
- * Randomly redirect the surface normal to give it roughness.
- *
- * @arg normal: The normal to redirect.
- * @arg roughness: The maximum amount to roughen by.
- * @arg seed: The random seed.
- */
-float3 roughen(
-    const float3 &normal,
-    const float roughness,
-    const float3 &seed)
-{
-    const float xAngle = random(seed.x);
-    const float yAngle = random(seed.y);
-    const float zAngle = random(seed.z);
-
-    float3x3 rotation;
-    rotationMatrix(
-        PI * roughness * (float3(xAngle, yAngle, zAngle) - 0.5f) / 2.0f,
-        rotation
-    );
-
-    float3 roughened;
-    matmul(rotation, normal, roughened);
-
-    return normalize(roughened);
 }
 
 
@@ -623,7 +771,8 @@ inline float minLength(const float3 &vector0, const float3 &vector1)
 
 
 /**
- * Get the value of sky the ray would hit at infinite distance
+ * Convert a cartesion vector to cylindrical, without worrying about
+ * the angle.
  *
  * @returns: Cylindrical coordinates without angle, (r, h)
  */
@@ -645,8 +794,8 @@ inline float3 sphericalUnitVectorToCartesion(const float2 &angles)
     const float sinPhi = sin(angles.y);
     return float3(
         cos(angles.x) * sinPhi,
-        sin(angles.x) * sinPhi,
-        cos(angles.y)
+        cos(angles.y),
+        sin(angles.x) * sinPhi
     );
 }
 
@@ -672,6 +821,53 @@ inline float2 normalizeAngles(const float2 &angles)
 }
 
 
+inline float3 anglesBetweenVectors(const float3 &vector0, const float3 &vector1)
+{
+    return float3(
+        acos(dot(float2(vector0.y, vector0.z), float2(vector1.y, vector1.z))),
+        acos(dot(float2(vector0.x, vector0.z), float2(vector1.x, vector1.z))),
+        acos(dot(float2(vector0.x, vector0.y), float2(vector1.x, vector1.y)))
+    );
+}
+
+
+/**
+ * Get the angle and axis to use to rotate a vector onto another.
+ *
+ * @arg axis: The rotation angles in radians.
+ * @arg out: The location to store the axis.
+ *
+ * @returns: The angle.
+ */
+inline float getAngleAndAxisBetweenVectors(
+        const float3 &vector0,
+        const float3 &vector1,
+        float3 &axis)
+{
+    axis = normalize(cross(vector0, vector1));
+    return acos(dot(vector0, vector1));
+}
+
+
+inline float3 alignWithDirection(
+        const float3 &unalignedAxis,
+        const float3 &alignDirection,
+        const float3 &vectorToAlign)
+{
+    float3 rotationAxis;
+    const float angle = getAngleAndAxisBetweenVectors(
+        unalignedAxis,
+        alignDirection,
+        rotationAxis
+    );
+
+    float3x3 rotationMatrix;
+    axisAngleRotationMatrix(rotationAxis, angle, rotationMatrix);
+
+    return matmul(rotationMatrix, vectorToAlign);
+}
+
+
 /**
  * Convert a cartesion unit vector to spherical.
  *
@@ -680,7 +876,9 @@ inline float2 normalizeAngles(const float2 &angles)
  *
  * @returns: The spherical angles in radians.
  */
-float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float thetaOffset)
+inline float2 cartesionUnitVectorToSpherical(
+        const float3 &rayDirection,
+        const float thetaOffset)
 {
     return normalizeAngles(float2(
         atan2(rayDirection.z, rayDirection.x) + thetaOffset,
@@ -696,11 +894,11 @@ float2 cartesionUnitVectorToSpherical(const float3 &rayDirection, const float th
  *
  * @returns: The spherical angles in radians.
  */
-float2 cartesionUnitVectorToSpherical(const float3 &rayDirection)
+inline float2 cartesionUnitVectorToSpherical(const float3 &rayDirection)
 {
     return normalizeAngles(float2(
-        atan2(rayDirection.y, rayDirection.x),
-        acos(rayDirection.z)
+        atan2(rayDirection.z, rayDirection.x),
+        acos(rayDirection.y)
     ));
 }
 
@@ -713,7 +911,7 @@ float2 cartesionUnitVectorToSpherical(const float3 &rayDirection)
  *
  * @returns: The spherical dot product.
  */
-float sphericalUnitDot(const float2 &vector0, const float2 &vector1)
+inline float sphericalUnitDot(const float2 &vector0, const float2 &vector1)
 {
     return (
         cos(vector0.x) * cos(vector1.x)
@@ -804,6 +1002,55 @@ inline float4 blend(const float4 &value0, const float4 &value1, const float weig
 
 
 /**
+ * Blend linearly between two values.
+ *
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg weight: The blend weight, 1 will return value0, and 0 will
+ *     return value1.
+ *
+ * @returns: The blended value.
+ */
+inline float mix(const float value0, const float value1, const float weight)
+{
+    return (1.0f - weight) * value0 + weight * value1;
+}
+
+
+/**
+ * Blend linearly between two values.
+ *
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg weight: The blend weight, 1 will return value0, and 0 will
+ *     return value1.
+ *
+ * @returns: The blended value.
+ */
+inline float3 mix(const float3 &value0, const float3 &value1, const float weight)
+{
+    return (1.0f - weight) * value0 + weight * value1;
+}
+
+
+/**
+ * Blend linearly between two values.
+ *
+ * @arg value0: The first value.
+ * @arg value1: The second value.
+ * @arg weight: The blend weight, 1 will return value0, and 0 will
+ *     return value1.
+ *
+ * @returns: The blended value.
+ */
+inline float4 mix(const float4 &value0, const float4 &value1, const float weight)
+{
+    return (1.0f - weight) * value0 + weight * value1;
+}
+
+
+
+/**
  * Get the position component of a world matrix.
  *
  * @arg worldMatrix: The world matrix.
@@ -820,174 +1067,45 @@ inline void positionFromWorldMatrix(const float4x4 &worldMatrix, float3 &positio
 
 
 /**
- * Reflect a ray off of a surface.
+ * Get the rotation component of a world matrix.
  *
- * @arg incidentRayDirection: The incident direction.
- * @arg surfaceNormalDirection: The normal to the surface.
+ * @arg worldMatrix: The world matrix.
+ * @arg rotation: The location to store the rotation.
  */
-inline float3 reflectRayOffSurface(
-    const float3 &incidentRayDirection,
-    const float3 &surfaceNormalDirection)
+inline void rotationFromWorldMatrix(const float4x4 &worldMatrix, float3x3 &rotationMatrix)
 {
-    return (
-        incidentRayDirection
-        - 2 * dot(incidentRayDirection, surfaceNormalDirection) * surfaceNormalDirection
+    rotationMatrix[0][0] = worldMatrix[0][0];
+    rotationMatrix[0][1] = worldMatrix[0][1];
+    rotationMatrix[0][2] = worldMatrix[0][2];
+    rotationMatrix[1][0] = worldMatrix[1][0];
+    rotationMatrix[1][1] = worldMatrix[1][1];
+    rotationMatrix[1][2] = worldMatrix[1][2];
+    rotationMatrix[2][0] = worldMatrix[2][0];
+    rotationMatrix[2][1] = worldMatrix[2][1];
+    rotationMatrix[2][2] = worldMatrix[2][2];
+}
+
+
+/**
+ *
+ */
+inline float adaptiveSamples(
+        const float minPaths,
+        const float maxPaths,
+        const float3 &variance)
+{
+    return clamp(
+        round(maxPaths * length(variance)),
+        minPaths,
+        maxPaths
     );
 }
 
 
 /**
- * Refract a ray through a surface.
  *
- * @arg incidentRayDirection: The incident direction.
- * @arg surfaceNormalDirection: The normal to the surface.
- * @arg incidentRefractiveIndex: The refractive index the incident ray
- *     is travelling through.
- * @arg refractedRefractiveIndex: The refractive index the refracted ray
- *     will be travelling through.
- *
- * @returns: The refracted ray direction.
  */
-inline float3 refractRayThroughSurface(
-    const float3 &incidentRayDirection,
-    const float3 &surfaceNormalDirection,
-    const float incidentRefractiveIndex,
-    const float refractedRefractiveIndex)
+inline float balanceHeuristic(const float pdf0, const float pdf1)
 {
-    const float refractiveRatio = incidentRefractiveIndex / refractedRefractiveIndex;
-    const float cosIncident = -dot(incidentRayDirection, surfaceNormalDirection);
-    const float sinTransmittedSquared = refractiveRatio * refractiveRatio * (
-        1.0f - cosIncident * cosIncident
-    );
-    if (sinTransmittedSquared > 1.0f)
-    {
-        return reflectRayOffSurface(incidentRayDirection, surfaceNormalDirection);
-    }
-    const float cosTransmitted = sqrt(1.0f - sinTransmittedSquared);
-    return (
-        refractiveRatio * incidentRayDirection
-        + (refractiveRatio * cosIncident - cosTransmitted) * surfaceNormalDirection
-    );
-}
-
-
-/**
- * Compute the schlick, simplified fresnel reflection coefficient.
- *
- * @arg incidentRayDirection: The incident direction.
- * @arg surfaceNormalDirection: The normal to the surface.
- * @arg incidentRefractiveIndex: The refractive index the incident ray
- *     is travelling through.
- * @arg refractedRefractiveIndex: The refractive index the refracted ray
- *     will be travelling through.
- *
- * @returns: The reflection coefficient.
- */
-float schlickReflectionCoefficient(
-    const float3 &incidentRayDirection,
-    const float3 &surfaceNormalDirection,
-    const float incidentRefractiveIndex,
-    const float refractedRefractiveIndex)
-{
-    const float parallelCoefficient = pow(
-        (incidentRefractiveIndex - refractedRefractiveIndex)
-        / (incidentRefractiveIndex + refractedRefractiveIndex),
-        2
-    );
-    float cosX = -dot(incidentRayDirection, surfaceNormalDirection);
-    if (incidentRefractiveIndex > refractedRefractiveIndex)
-    {
-        const float refractiveRatio = incidentRefractiveIndex / refractedRefractiveIndex;
-        const float sinTransmittedSquared = refractiveRatio * refractiveRatio * (
-            1.0f - cosX * cosX
-        );
-        if (sinTransmittedSquared > 1.0f)
-        {
-            return 1.0f;
-        }
-        cosX = sqrt(1.0f - sinTransmittedSquared);
-    }
-    return parallelCoefficient + (1 - parallelCoefficient) * pow(1.0f - cosX, 5);
-}
-
-
-/**
- * Compute the fresnel reflection coefficient.
- *
- * @arg incidentRayDirection: The incident direction.
- * @arg surfaceNormalDirection: The normal to the surface.
- * @arg incidentRefractiveIndex: The refractive index the incident ray
- *     is travelling through.
- * @arg refractedRefractiveIndex: The refractive index the refracted ray
- *     will be travelling through.
- *
- * @returns: The reflection coefficient.
- */
-float reflectionCoefficient(
-    const float3 &incidentRayDirection,
-    const float3 &surfaceNormalDirection,
-    const float incidentRefractiveIndex,
-    const float refractedRefractiveIndex)
-{
-    const float refractiveRatio = incidentRefractiveIndex / refractedRefractiveIndex;
-
-    const float cosIncident = -dot(incidentRayDirection, surfaceNormalDirection);
-
-    const float sinTransmittedSquared = refractiveRatio * refractiveRatio * (
-        1.0f - cosIncident * cosIncident
-    );
-
-    if (sinTransmittedSquared > 1.0f)
-    {
-        return 1.0f;
-    }
-
-    const float cosTransmitted = sqrt(1.0f - sinTransmittedSquared);
-
-    const float orthogonalReflectance = (
-        (incidentRefractiveIndex * cosIncident - refractedRefractiveIndex * cosTransmitted)
-        / (incidentRefractiveIndex * cosIncident + refractedRefractiveIndex * cosTransmitted)
-    );
-
-    const float parallelReflectance = (
-        (refractedRefractiveIndex * cosIncident - incidentRefractiveIndex * cosTransmitted)
-        / (refractedRefractiveIndex * cosIncident + incidentRefractiveIndex * cosTransmitted)
-    );
-
-    return (
-        orthogonalReflectance * orthogonalReflectance
-        + parallelReflectance * parallelReflectance
-    ) / 2.0f;
-}
-
-
-/**
- * Generate a ray out of a camera.
- *
- * @arg cameraWorldMatrix: The camera matrix.
- * @arg inverseProjectionMatrix: The inverse of the projection matrix.
- * @arg uvPosition: The UV position in the resulting image.
- * @arg rayOrigin: Will store the origin of the ray.
- * @arg rayDirection: Will store the direction of the ray.
- */
-void createCameraRay(
-        const float4x4 &cameraWorldMatrix,
-        const float4x4 &inverseProjectionMatrix,
-        const float2 &uvPosition,
-        float3 &rayOrigin,
-        float3 &rayDirection)
-{
-    positionFromWorldMatrix(cameraWorldMatrix, rayOrigin);
-    float4 direction;
-    matmul(
-        inverseProjectionMatrix,
-        float4(uvPosition.x, uvPosition.y, 0, 1),
-        direction
-    );
-    matmul(
-        cameraWorldMatrix,
-        float4(direction.x, direction.y, direction.z, 0),
-        direction
-    );
-    rayDirection = normalize(float3(direction.x, direction.y, direction.z));
+    return pdf0 / (pdf0 + pdf1);
 }

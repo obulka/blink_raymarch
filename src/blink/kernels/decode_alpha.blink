@@ -16,7 +16,7 @@ kernel DecodeAlpha : ImageComputationKernel<ePixelWise>
     void process() {
         SampleType(src) srcPixel = src();
 
-        const float2 decoded = decodeFloatsFromUint(srcPixel.w);
+        const int2 decoded = decodeTwoValuesFromUint(srcPixel.w);
         dst() = float4(decoded.x, decoded.y, 0, 0);
     }
 };

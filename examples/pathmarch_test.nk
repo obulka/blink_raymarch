@@ -1,0 +1,318 @@
+#! /usr/local/Nuke12.0v8/libnuke-12.0.8.so -nx
+version 12.0 v8
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="1976" y="188" w="2504" h="1376" maximized="1" screen="0">
+        <splitter orientation="1">
+            <split size="40"/>
+            <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                <page id="Toolbar.1"/>
+            </dock>
+            <split size="1841" stretch="1"/>
+            <splitter orientation="2">
+                <split size="782"/>
+                <dock id="" activePageId="Viewer.1">
+                    <page id="Viewer.1"/>
+                </dock>
+                <split size="550"/>
+                <dock id="" activePageId="DAG.1" focus="true">
+                    <page id="DAG.1"/>
+                    <page id="Curve Editor.1"/>
+                    <page id="DopeSheet.1"/>
+                </dock>
+            </splitter>
+            <split size="615"/>
+            <dock id="" activePageId="Properties.1">
+                <page id="Properties.1"/>
+                <page id="uk.co.thefoundry.backgroundrenderview.1"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name /home/ob1/software/nuke/dev/raymarch/examples/pathmarch_test.nk
+ frame 309
+ last_frame 400
+ format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ colorManagement Nuke
+ workingSpaceLUT linear
+ monitorLut sRGB
+ int8Lut sRGB
+ int16Lut sRGB
+ logLut Cineon
+ floatLut linear
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode1
+ label "Adaptive Sampling\n"
+ note_font "DejaVu Sans"
+ note_font_size 20
+ xpos 242
+ ypos 581
+ bdwidth 205
+ bdheight 358
+}
+sdf_light {
+ inputs 0
+ name sdf_light2
+ label point
+ xpos -367
+ ypos 329
+ type point
+ intensity 4
+ colour {1 0.8 0.5}
+ soften_shadows false
+}
+sdf_noise {
+ inputs 0
+ name sdf_noise4
+ xpos 163
+ ypos 214
+ size 2
+ translation {2 0 0}
+ octaves 2
+ lacunarity 5
+ gain 0.44
+ gamma 1
+ white_point 0.05
+ diffuse false
+ scattering true
+}
+Dot {
+ inputs 0
+ name Dot17
+ xpos 198
+ ypos 301
+}
+set N69df340 [stack 0]
+Dot {
+ name Dot3
+ xpos 198
+ ypos 594
+}
+set N69e4010 [stack 0]
+Dot {
+ name Dot5
+ xpos 198
+ ypos 729
+}
+Dot {
+ inputs 0
+ name Dot14
+ xpos -328
+ ypos 423
+}
+set N69edc50 [stack 0]
+Dot {
+ name Dot8
+ xpos -328
+ ypos 667
+}
+set N69f2a30 [stack 0]
+Dot {
+ name Dot12
+ xpos -328
+ ypos 817
+}
+push $N69e4010
+push $N69f2a30
+push $N69df340
+push $N69edc50
+push 0
+Constant {
+ inputs 0
+ channels rgb
+ color 0.01
+ format "2048 1024 0 0 2048 1024 1 2K_LatLong"
+ name Constant1
+ xpos 36
+ ypos 153
+}
+Dot {
+ name Dot4
+ xpos 70
+ ypos 293
+}
+set N6a054f0 [stack 0]
+Axis2 {
+ inputs 0
+ name Axis1
+ xpos -109
+ ypos 62
+}
+Camera2 {
+ translate {0 0 6}
+ focal 19.4
+ haperture 24
+ focal_point 10
+ fstop 1
+ name Camera1
+ xpos -109
+ ypos 153
+}
+Dot {
+ name Dot2
+ xpos -85
+ ypos 341
+}
+set N6a3c3e0 [stack 0]
+sdf_noise {
+ inputs 0
+ name sdf_noise1
+ xpos -795
+ ypos 262
+ size 6
+ lacunarity 8
+ black_point 0.08
+ white_point 0.235
+ diffuse false
+ scattering true
+}
+sdf_material {
+ name sdf_material1
+ xpos -795
+ ypos 332
+ transmission 1
+ absorption_colour {0.2 1 1}
+ refractive_index 1.76
+ scattering_coefficient 0.25
+}
+push 0
+sdf_material {
+ inputs 0
+ name sdf_material3
+ xpos -795
+ ypos 180
+ emission 80
+}
+push 0
+sdf_noise {
+ inputs 0
+ name sdf_noise3
+ xpos -800
+ ypos 3
+ size 6
+ black_point 0.03
+ white_point 0.06
+ invert true
+ diffuse false
+ specular true
+}
+sdf_material {
+ name sdf_material4
+ tile_color 0x4dff4dff
+ xpos -800
+ ypos 63
+ colour {0.3 1 0.3}
+ specular 1
+ specular_roughness 0.15
+ specular_colour {0.3 0.8 1}
+}
+push 0
+push 0
+sdf_primitive {
+ inputs 3
+ name sdf_primitive1
+ label sphere
+ xpos -604
+ ypos 56
+ dimension_x 0.75
+ translate {2.5 0 0}
+}
+sdf_primitive {
+ inputs 3
+ name sdf_primitive2
+ label sphere
+ xpos -604
+ ypos 173
+ dimension_x 0.4
+ translate {-3 0 0}
+}
+sdf_primitive {
+ inputs 3
+ name sdf_primitive4
+ label sphere
+ xpos -604
+ ypos 325
+ dimension_x 1
+ translate {-0.5 0 0}
+}
+Dot {
+ name Dot1
+ xpos -570
+ ypos 518
+}
+set N7361d40 [stack 0]
+path_march {
+ inputs 6
+ name path_march3
+ xpos 290
+ ypos 514
+ max_paths_per_pixel 10
+ scattering_coefficient 0.035
+ equiangular_samples 16
+ format 0
+}
+push $N6a054f0
+Dot {
+ name Dot10
+ xpos 70
+ ypos 601
+}
+set N8dc5cc0 [stack 0]
+push $N6a3c3e0
+Dot {
+ name Dot9
+ xpos -85
+ ypos 631
+}
+set N8dca670 [stack 0]
+push $N7361d40
+Dot {
+ name Dot7
+ xpos -570
+ ypos 711
+}
+set N8dcf4b0 [stack 0]
+path_march {
+ inputs 6
+ name path_march4
+ xpos 290
+ ypos 707
+ min_paths_per_pixel 5
+ seeds {4.2342 5.123423 6.1231}
+ scattering_coefficient 0.035
+ equiangular_samples 16
+ format 0
+}
+push $N8dc5cc0
+Dot {
+ name Dot6
+ xpos 70
+ ypos 768
+}
+push $N8dca670
+Dot {
+ name Dot11
+ xpos -85
+ ypos 802
+}
+push $N8dcf4b0
+Dot {
+ name Dot13
+ xpos -570
+ ypos 889
+}
+path_march {
+ inputs 6
+ name path_march5
+ xpos 290
+ ypos 885
+ seeds {7.4534 0.123123 4.252345}
+ scattering_coefficient 0.035
+ equiangular_samples 16
+ format 0
+}

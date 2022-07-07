@@ -1,0 +1,62 @@
+#include "math.h"
+
+
+kernel Variance : ImageComputationKernel<ePixelWise>
+{
+    Image<eRead, eAccessRanged2D, eEdgeClamped> src; // the input image
+    Image<eWrite> dst; // the output image
+
+    param:
+        float2 _range;
+
+    local:
+        float __pixelsInRange;
+
+
+    /**
+     * In define(), parameters can be given labels and default values.
+     */
+    void define()
+    {
+        defineParam(_range, "Range", float2(3, 3));
+    }
+
+
+    /**
+     * The init() function is run before any calls to process().
+     * Local variables can be initialized here.
+     */
+    void init()
+    {
+        src.setRange(-_range.x, -_range.y, _range.x, _range.y);
+    }
+
+
+    /**
+     * Compute the irradiance of a pixel.
+     * 
+     * @arg pos: The x, and y location we are currently processing.
+     */
+    void process(int2 pos)
+    {
+        float4 mean = float4(0);
+        float4 sumOfSquares = float4(0);
+        float numSamples = 0.0f;
+
+        for (int yOffset=-_range.y; yOffset <= _range.y; yOffset++)
+        {
+            for (int xOffset=-_range.x; xOffset <= _range.x; xOffset++)
+            {
+                numSamples += 1.0f;
+
+                const float4 sample = src(xOffset, yOffset);
+
+                mean += (sample - mean) / numSamples;
+
+                sumOfSquares += sample * sample;
+            }
+        }
+
+        dst() = (sumOfSquares - numSamples * mean * mean) / ((numSamples - 1.0f) * numSamples);
+    }
+};

@@ -17,10 +17,10 @@ nuke.toNode("sdf_light").knob("onCreate").setValue(
 """
 from collections import OrderedDict
 
-from .knob_manager import KnobChangedCallbacks, SDFKnobManager
+from .knob_manager import KnobChangedCallbacks, SDFGeoKnobManager
 
 
-class SDFLight(SDFKnobManager):
+class SDFLight(SDFGeoKnobManager):
     """Knob manager for light shapes in signed distance fields."""
 
     type_knob_name = "type"
@@ -28,7 +28,7 @@ class SDFLight(SDFKnobManager):
     shadow_hardness_knob_name = "shadow_hardness"
     falloff_knob_name = "falloff"
 
-    _knob_changed_callbacks = KnobChangedCallbacks(SDFKnobManager._knob_changed_callbacks)
+    _knob_changed_callbacks = KnobChangedCallbacks(SDFGeoKnobManager._knob_changed_callbacks)
 
     dimensional_knob_defaults = {
         "directional": OrderedDict([

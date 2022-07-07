@@ -33,7 +33,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/examples/snowman.nk
- frame 29
+ frame 24
  last_frame 63
  colorManagement Nuke
  workingSpaceLUT linear
@@ -43,15 +43,19 @@ Root {
  logLut Cineon
  floatLut linear
 }
-Read {
+Constant {
  inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/winter_lake_01_4k.exr
- format "4096 2048 0 0 4096 2048 1 4K_LatLong"
- origset true
- name Read1
+ channels rgb
+ color 1
+ name Constant1
  xpos 510
- ypos -19
+ ypos 41
+}
+Reformat {
+ format "2048 1024 0 0 2048 1024 1 2K_LatLong"
+ name Reformat1
+ xpos 510
+ ypos 150
 }
 Dot {
  name Dot4
@@ -83,61 +87,113 @@ sdf_light {
  name sdf_light2
  label point
  xpos 180
- ypos 129
+ ypos 122
  type point
  dimension_x 3
  dimension_y 2
  dimension_z 4
- intensity 500
- falloff 4
+ intensity 50
+ shadow_hardness 100
+ soften_shadows false
 }
 sdf_light {
  name sdf_light1
  label point
  xpos 180
- ypos 213
+ ypos 200
  type point
  dimension_x -1
  dimension_y 3
- intensity 500
- falloff 4
+ intensity 4
+ shadow_hardness 41.5
+ soften_shadows false
 }
 Dot {
  name Dot6
  xpos 214
  ypos 310
 }
-sdf_primitive {
+sdf_material {
  inputs 0
+ name ice
+ xpos -223
+ ypos 210
+ specular 0.25
+}
+sdf_material {
+ inputs 0
+ name snow
+ xpos -249
+ ypos -264
+ specular_roughness 0.07
+}
+set N5552ee0 [stack 0]
+push $N5552ee0
+push $N5552ee0
+push $N5552ee0
+sdf_material {
+ inputs 0
+ name carrot
+ tile_color 0xff4f00ff
+ xpos -40
+ ypos -474
+ colour {1 0.3098039329 0}
+}
+push 0
+sdf_material {
+ inputs 0
+ name hat
+ tile_color 0x1a1a1aff
+ xpos -490
+ ypos -502
+ colour {0.1 0.1 0.1}
+}
+set N59499e0 [stack 0]
+push $N59499e0
+push 0
+sdf_material {
+ inputs 0
+ name jewel
+ tile_color 0xff0000ff
+ xpos -195
+ ypos -667
+ colour {1 0 0}
+ specular 0.1
+}
+push 0
+push 0
+sdf_primitive {
+ inputs 3
  name sdf_primitive5
  tile_color 0xff0000ff
  label octahedron
- xpos -375
- ypos -466
+ xpos -195
+ ypos -577
  shape octahedron
  dimension_x 0.15
  dimension_y 0.01
- colour {1 0 0}
- reflection 0.22
- refractive_index 1.5
- emission 0.055
  translate {0 0.05 0}
  rotate {10 {"45 + frame*2"} 0}
 }
 sdf_primitive {
+ inputs 3
  name sdf_primitive4
  tile_color 0x1a1a1aff
  label cylinder
  xpos -195
- ypos -466
+ ypos -463
  shape cylinder
  dimension_x 0.3
  dimension_y 0.01
- colour 0.1
  translate {0 -0.17 0}
 }
+push $N59499e0
+push 0
+push $N59499e0
+push 0
+push 0
 sdf_primitive {
- inputs 0
+ inputs 3
  name sdf_primitive7
  tile_color 0x1a1a1aff
  label sphere
@@ -145,10 +201,10 @@ sdf_primitive {
  ypos -357
  dimension_x 0.03
  dimension_y 0.01
- colour 0.1
  translate {0.1 0.1 0.25}
 }
 sdf_primitive {
+ inputs 3
  name sdf_primitive14
  tile_color 0x1a1a1aff
  label sphere
@@ -156,11 +212,10 @@ sdf_primitive {
  ypos -357
  dimension_x 0.03
  dimension_y 0.01
- colour 0.1
  translate {-0.1 0.1 0.25}
 }
 sdf_primitive {
- inputs 2
+ inputs 3
  name sdf_primitive3
  tile_color 0x1a1a1aff
  label cylinder
@@ -170,13 +225,12 @@ sdf_primitive {
  dimension_x 0.2
  dimension_y 0.5
  dimension_z 60
- colour 0.1
- transmission {{curve x1 1 x63 0}}
  translate {0 0.4 0}
  blend_type union
  blend_strength 0.06
 }
 sdf_primitive {
+ inputs 3
  name sdf_primitive1
  tile_color 0xff4f00ff
  label cone
@@ -186,7 +240,6 @@ sdf_primitive {
  dimension_x 5
  dimension_y 0.33
  dimension_z 60
- colour {1 0.30972 0}
  translate {0 0 0.63}
  rotate {-90 0 0}
  blend_type union
@@ -194,7 +247,7 @@ sdf_primitive {
 }
 push 0
 sdf_primitive {
- inputs 2
+ inputs 3
  name sdf_primitive15
  label sphere
  xpos -40
@@ -202,14 +255,25 @@ sdf_primitive {
  dimension_x 0.3
  dimension_y 0.1
  dimension_z 60
- reflection 0.01
  translate {0 -0.2 0}
  rotate {{30*sin(.075*frame)} 0 0}
  blend_type union
  blend_strength 0.06
 }
-sdf_primitive {
+push $N5552ee0
+push 0
+push $N5552ee0
+sdf_material {
  inputs 0
+ name chrome
+ xpos -555
+ ypos -216
+ specular 1
+}
+push 0
+push 0
+sdf_primitive {
+ inputs 3
  name sdf_primitive11
  label "hollow sphere"
  xpos -414
@@ -218,7 +282,6 @@ sdf_primitive {
  dimension_x 0.3
  dimension_y 0.1
  dimension_z 0.05
- reflection 1
  translate {0.62 0.4 0}
  rotate {{curve x1 30 x63 120} 0 -20}
  elongation {0.01 0 0}
@@ -226,7 +289,7 @@ sdf_primitive {
 }
 push 0
 sdf_primitive {
- inputs 2
+ inputs 3
  name sdf_primitive12
  label "capped torus"
  xpos -414
@@ -235,7 +298,6 @@ sdf_primitive {
  dimension_x 0.7
  dimension_y 0.1
  dimension_z 26
- reflection 0.01
  translate {0 0.8 0.15}
  rotate {0 -10 130}
  elongation {0.05 0 0}
@@ -243,6 +305,7 @@ sdf_primitive {
  blend_strength 0.015
 }
 sdf_primitive {
+ inputs 3
  name sdf_primitive8
  label "capped torus"
  xpos -222
@@ -251,13 +314,12 @@ sdf_primitive {
  dimension_x 0.3
  dimension_y 0.1
  dimension_z 60
- reflection 0.01
  translate {0.3 0.11 0.2}
  rotate {-90 -30 -30}
  blend_strength 0.06
 }
 sdf_primitive {
- inputs 2
+ inputs 3
  name sdf_primitive2
  label "rectangular prism"
  xpos -40
@@ -273,7 +335,7 @@ sdf_primitive {
 }
 push 0
 sdf_primitive {
- inputs 2
+ inputs 3
  name sdf_primitive13
  label sphere
  xpos -40
@@ -284,17 +346,16 @@ sdf_primitive {
 }
 push 0
 sdf_primitive {
- inputs 2
+ inputs 3
  name sdf_primitive6
  label sphere
  xpos -40
  ypos 92
- reflection 0.01
  translate {0 {.4-frame/70} 0}
 }
 push 0
 sdf_primitive {
- inputs 2
+ inputs 3
  name sdf_primitive9
  label plane
  xpos -40
@@ -303,7 +364,6 @@ sdf_primitive {
  dimension_x 0
  dimension_y 1
  dimension_z 0.01
- reflection 0.5
  translate {0 -0.35 0}
  blend_strength {{.1+frame/50}}
 }
@@ -315,10 +375,7 @@ Dot {
 ray_march {
  inputs 4
  name ray_march2
+ selected true
  xpos 180
- ypos 449
- hit_tolerance 0.001
- max_bounces 12
- max_rays_per_subpixel 24
- hdri_lighting_gain 0.5
+ ypos 441
 }

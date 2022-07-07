@@ -17,10 +17,10 @@ nuke.toNode("sdf_primitive").knob("onCreate").setValue(
 """
 from collections import OrderedDict
 
-from .knob_manager import KnobChangedCallbacks, SDFKnobManager
+from .knob_manager import KnobChangedCallbacks, SDFGeoKnobManager
 
 
-class SDFPrimitive(SDFKnobManager):
+class SDFPrimitive(SDFGeoKnobManager):
     """Knob manager for primitive shapes in signed distance fields."""
 
     shape_knob_name = "shape"
@@ -31,18 +31,15 @@ class SDFPrimitive(SDFKnobManager):
     is_bound_knob_name = "is_bound"
     blend_strength_knob_name = "blend_strength"
     blend_type_knob_name = "blend_type"
-    reflection_knob_name = "reflection"
-    transmission_knob_name = "transmission"
     repetition_knob_name = "repetition"
     repetition_params_knob_name = "repetition_params"
     repetition_spacing_knob_name = "repetition_spacing"
-    enable_mandelbox_trap_colour_knob_name = "use_trap_colour"
 
     mandelbox_shape_label = "mandelbox"
 
-    _dimensional_axes = SDFKnobManager._dimensional_axes + ("w",)
+    _dimensional_axes = SDFGeoKnobManager._dimensional_axes + ("w",)
 
-    _knob_changed_callbacks = KnobChangedCallbacks(SDFKnobManager._knob_changed_callbacks)
+    _knob_changed_callbacks = KnobChangedCallbacks(SDFGeoKnobManager._knob_changed_callbacks)
 
     dimensional_knob_defaults = {
         "sphere": OrderedDict([
@@ -603,17 +600,6 @@ class SDFPrimitive(SDFKnobManager):
                     ),
                 },
             ),
-            (
-                "orbital trap blend strength",
-                {
-                    "default": 1.,
-                    "range": (0., 1.),
-                    "tooltip": (
-                        "Transition between orbital trap based colouring and "
-                        "the colour provided by the 'colour' knob."
-                    ),
-                },
-            ),
         ]),
         mandelbox_shape_label: OrderedDict([
             (
@@ -725,10 +711,6 @@ class SDFPrimitive(SDFKnobManager):
             set_node_label=True,
         )
 
-        self._node.knob(self.enable_mandelbox_trap_colour_knob_name).setVisible(
-            self._knob.value() == self.mandelbox_shape_label,
-        )
-
     @_knob_changed_callbacks.register(repetition_knob_name)
     def _repetition_changed(self):
         """Change the repetition knobs based on which type of repetition
@@ -752,24 +734,6 @@ class SDFPrimitive(SDFKnobManager):
         on whether or not elongate has been enabled.
         """
         self._node.knob(self.elongation_knob_name).setEnabled(self._knob.value())
-
-    @_knob_changed_callbacks.register(reflection_knob_name)
-    def _reflection_changed(self):
-        """Ensure that reflection + transmission <= 1"""
-        reflection = self._knob.value()
-        transmission_knob = self._node.knob(self.transmission_knob_name)
-
-        if reflection + transmission_knob.value() > 1.:
-            transmission_knob.setValue(1. - reflection)
-
-    @_knob_changed_callbacks.register(transmission_knob_name)
-    def _transmission_changed(self):
-        """Ensure that reflection + transmission <= 1"""
-        transmission = self._knob.value()
-        reflection_knob = self._node.knob(self.reflection_knob_name)
-
-        if transmission + reflection_knob.value() > 1.:
-            reflection_knob.setValue(1. - transmission)
 
     @_knob_changed_callbacks.register(blend_type_knob_name)
     def _blend_type_changed(self):

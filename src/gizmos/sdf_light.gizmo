@@ -2,23 +2,26 @@ Gizmo {
  onCreate "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_node_created()"
  knobChanged "__import__('sdf.light', fromlist='SDFLight').SDFLight().handle_knob_changed()"
  tile_color 0xffffffff
- label directional
+ label ambient
  addUserKnob {20 User l "SDF LIght"}
- addUserKnob {4 type t "The type of light." M {directional point ambient "ambient occlusion"}}
- addUserKnob {7 dimension_x l "x direction" t "The x direction of the light." R -1 1}
- addUserKnob {7 dimension_y l "y direction" t "The y direction of the light." R -1 1}
- dimension_y -1
- addUserKnob {7 dimension_z l "z direction" t "The z direction of the light." R -1 1}
+ addUserKnob {4 type t "The type of light." M {ambient "ambient occlusion" directional point}}
+ addUserKnob {7 dimension_x l "x position" t "The x position of the light." +HIDDEN R -10 10}
+ dimension_x 1
+ addUserKnob {7 dimension_y l "y position" t "The y position of the light." +HIDDEN R -10 10}
+ dimension_y 1
+ addUserKnob {7 dimension_z l "z position" t "The z position of the light." +HIDDEN R -10 10}
  addUserKnob {7 intensity t "The intensity of the light." R 0 10}
  intensity 1
- addUserKnob {7 falloff t "The power of the light's intensity falloff. Four is physically accurate." R 0 5}
+ addUserKnob {7 falloff t "The power of the light's intensity falloff. Two is physically accurate." +DISABLED R 0 5}
+ falloff 2
  addUserKnob {18 colour t "The colour of the light."}
  colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." +DISABLED R 1 100}
- shadow_hardness 10
- addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
+ shadow_hardness 1
+ addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE +DISABLED}
  addUserKnob {26 ""}
- addUserKnob {26 info l "" +STARTLINE T "v1.0.0 - (c) Owen Bulka - 2022"}
+ addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
 }
  Input {
   inputs 0
@@ -111,7 +114,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set N693a550 [stack 0]
+set Nec9cd60 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -133,7 +136,7 @@ set N693a550 [stack 0]
    xpos 34
    ypos -6
   }
-set N694dd50 [stack 0]
+set Necb0560 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -144,7 +147,7 @@ set N694dd50 [stack 0]
    xpos -98
    ypos 336
   }
-push $N693a550
+push $Nec9cd60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -173,7 +176,7 @@ push $N693a550
    xpos 158
    ypos 167
   }
-push $N694dd50
+push $Necb0560
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
