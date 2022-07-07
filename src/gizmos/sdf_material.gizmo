@@ -17,7 +17,6 @@ Gizmo {
  specular_use_trap_colour true
  addUserKnob {26 ""}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
- transmission 1
  addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
  addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
  absorption_colour {0 0 0}
@@ -101,6 +100,7 @@ add_layer {sdf_emm_colour sdf_emm_colour.r sdf_emm_colour.g sdf_emm_colour.b sdf
   color {{parent.emission_colour.r} {parent.emission_colour.g} {parent.emission_colour.b} {parent.emission}}
   format "1 1 0 0 1 1 1 1x1"
   name emm_colour
+  selected true
   xpos 887
   ypos 411
  }

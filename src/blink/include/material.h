@@ -10,7 +10,7 @@
 
 // Increase this if you want more than MAX_NESTED_DIELECTRICS nested
 // transmissive objects
-#define MAX_NESTED_DIELECTRICS 5
+#define MAX_NESTED_DIELECTRICS 4
 
 
 /**

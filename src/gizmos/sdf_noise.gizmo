@@ -3,15 +3,14 @@ Gizmo {
  tile_color 0xffffffff
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {7 size R 1 1000}
- size 3
+ size 5
  addUserKnob {4 type M {fBm turbulence}}
  type turbulence
  addUserKnob {13 translation}
- translation {2.3 -0.6 -0.1}
  addUserKnob {3 octaves}
- octaves 10
+ octaves 3
  addUserKnob {7 lacunarity R 1 10}
- lacunarity 6.35
+ lacunarity 6
  addUserKnob {7 gain}
  gain 0.5
  addUserKnob {7 gamma}
@@ -31,7 +30,6 @@ Gizmo {
  addUserKnob {6 transmission_roughness l "transmission roughness" -STARTLINE}
  addUserKnob {6 refractive_index l "refractive index" +STARTLINE}
  addUserKnob {6 scattering +STARTLINE}
- scattering true
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
 }

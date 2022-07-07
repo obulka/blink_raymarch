@@ -9,7 +9,6 @@
 //
 
 #include "math.h"
-#include "colour.h"
 #include "random.h"
 #include "noise.h"
 #include "conversion.h"
@@ -245,11 +244,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         __aperture = fStopToAperture(_fStop, _focalLength);
 
         __hdriPixelSize = float2(
-            hdri.bounds.width() / TWO_PI,
+            hdri.bounds.width() / (2 * PI),
             hdri.bounds.height() / PI
         );
         __irradiancePixelSize = float2(
-            irradiance.bounds.width() / TWO_PI,
+            irradiance.bounds.width() / (2 * PI),
             irradiance.bounds.height() / PI
         );
         __hdriOffsetRadians = degreesToRadians(_hdriOffsetAngle);
@@ -1417,8 +1416,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float previousMaterialPDF = 1.0f;
 
-        bool sampledIrradiance = false;
-
         float3 seed = initialSeed;
 
         // March the ray
@@ -1587,18 +1584,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         lightNormal = -direction;
 
-        // If we are not computing the scene value and we have missed all
-        // objects, return an appropriate colour.
-        if (_outputType > BEAUTY_AOV)
-        {
-            return rayMissAOVs(
-                _outputType,
-                iterations,
-                bounces,
-                firstObjectId
-            );
-        }
-
         const float4 absorptionColour = float4(
             nestedDielectrics[numNestedDielectrics][0],
             nestedDielectrics[numNestedDielectrics][1],
@@ -1606,18 +1591,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             nestedDielectrics[numNestedDielectrics][3]
         );
 
-        const float4 imageLighting = sampledIrradiance ? float4(0) : readHDRIValue(direction);
-
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
-        // TODO use the scattering here
-        rayColour += throughput * imageLighting * exp(
+        rayColour += throughput * readHDRIValue(direction) * exp(
             -absorptionColour * scatteringCoefficient * (
                 distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
             )
         );
-        rayColour.w = (bounces > 0) * firstObjectId;
 
         return rayColour;
     }
@@ -1762,7 +1743,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float4 scatteredColour = float4(0);
         for (int step=1; step <= _equiangularSamples; step++)
         {
-            const float uniform = (step + offset) / (float) _equiangularSamples;
+            const float uniform = (step + offset - 1) / (float) _equiangularSamples;
 
             float equiangularDistance;
             float equiangularPDF = _equiangularSamples * sampleEquiangularPDF(
@@ -1802,7 +1783,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             scatteredColour += scatteringCoefficient * noiseValue * sampleLight(
-                seed * 1.97357f * step,
+                seed * 1.97357f / step,
                 throughput,
                 lightBRDF,
                 distanceToLight,
