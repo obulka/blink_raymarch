@@ -31,11 +31,12 @@ This gizmo renders the scene using a ray marching algorithm, with support for:
 - equi-angular sampling for participating media
     - includes volumetric caustics if you lower the 'light sampling bias' and increase the 'max light sampling bounces' knobs
     - increase the 'equi-angular samples' knob for clearer results when using an 'sdf_noise' node with 'scattering' enabled
-- adaptive sampling by chaining together 'path_march' nodes, using a normalized variance AOV
+- adaptive sampling using a normalized variance AOV
     - plug a 'path_march' node's output into the 'previous' input of another 'path_march' node
     - set the minimum and maximum paths to trace, and the node will adaptively interpolate between the values
     - the first node in the chain will always trace the maximum paths
     - be sure to change the seed on each chained node
+- nested dielectrics
 - depth of field based on the camera input, simply check the 'enable dof' knob
 - hdri image based lighting
 
