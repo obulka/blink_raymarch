@@ -1,6 +1,8 @@
-# BlinkScript Ray Marcher for Nuke
+# BlinkScript Ray/Path Marcher for Nuke
 
-This project contains four gizmos that allow you to ray march a wide variety of shapes, including fractals, utilizing the GPU. Included are two blink kernels, one that is used to precompute the irradiance of a latlong, hdr image, and the other is the main ray marching engine.
+This project contains six gizmos that allow you to ray march, and path march, a wide variety of shapes, including fractals, utilizing the GPU.
+
+![path_trace_example_no_alpha](https://user-images.githubusercontent.com/21975584/177710260-83aae4b8-4ead-47ac-8465-e31ef06935ce.png)
 
 ![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164989275-4eb4791c-df89-4332-981d-aac79b607762.png)
 
@@ -16,15 +18,43 @@ Simply clone/download this repo and add the following line to your `init.py`: `n
 
 ## Requirements
 
-This project has been tested in Nuke 12.0v8, 12.1v5, and 13.0v2. I recommend using 12.0 if you do not have much GPU memory, because it still uses OpenCL for blinkscript, rather than cuda. The cuda version will continue to increase memory consumption until crashing, so the entire framerange needs to fit in memory. You will want to have a GPU, the above examples were rendered using an NVIDIA GeForce GTX 980 Ti.
+This project has been tested in Nuke 12.0v8, 12.1v5, and 13.0v2. I recommend using 12.0 if you do not have much GPU memory, because it still uses OpenCL for blinkscript, rather than cuda. The cuda version will continue to increase memory consumption until crashing. You will want to have a GPU, the above examples were rendered using an NVIDIA GeForce GTX 980 Ti.
 
 ## Gizmos
+
+### path_march
+
+This gizmo renders the scene using a ray marching algorithm, with support for:
+- global illumination
+- multiple importance sampled direct illumination
+    - set the 'max light sampling bounces' to be > 0 to enable this
+- equi-angular sampling for participating media
+    - includes volumetric caustics if you lower the 'light sampling bias' and increase the 'max light sampling bounces' knobs
+    - increase the 'equi-angular samples' knob for clearer results when using an 'sdf_noise' node with 'scattering' enabled
+- adaptive sampling by chaining together 'path_march' nodes, using a normalized variance AOV
+    - plug a 'path_march' node's output into the 'previous' input of another 'path_march' node
+    - set the minimum and maximum paths to trace, and the node will adaptively interpolate between the values
+    - the first node in the chain will always trace the maximum paths
+    - be sure to change the seed on each chained node
+- depth of field based on the camera input, simply check the 'enable dof' knob
+- hdri image based lighting
+
+You can input a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
+
+The AOV options are:
+- beauty
+- normal
+- position
+- depth
+- stats
+
+The stats AOV gives you the average number of iterations, the average number of bounces, and the total number of paths traced per pixel in the r, g, and b channels, respectively.
 
 ### sdf_material
 
 This gizmo lets you set the surface properties of an object, and can be passed into an 'sdf_primitive' node in order to apply the surface material to the primitive.
 
-The surface properties include:
+The material properties include:
 - diffuse colour
 - specular
 - specular roughness
@@ -33,8 +63,13 @@ The surface properties include:
 - transmission roughness
 - absorption colour
 - refractive index
+- scattering coefficient
 - emission
 - emission colour
+
+### sdf_noise
+
+This gizmo allows you to vary the material properties of an 'sdf_material' node, or blend between them. It allows for a position seeded, turbulence or fBm noise, with all the properties of Nuke's built-in noise node, plus the additional ability to modify the black and white points, and lift. You can also invert the noise, and select which material properties will be affected by it. This node can be passed into a material, and it will affect that material and that material only. You can also pass it directly into the 'path_march' node's 'noise' input for use with the global scattering coefficient.
 
 ### sdf_primitive
 
@@ -76,31 +111,14 @@ The current available shapes are:
 ### sdf_light
 
 This gizmo allows you to light the scene with a few different light types, namely:
-- point
-- directional
 - ambient
 - ambient occlusion
+- point
+- directional
 
 You can choose the colour, intensity, and falloff of the light. You can also soften the shadows with a slider.
 
-### path_march
-
-This gizmo renders the scene using a ray marching algorithm, with support for multiple importance sampled, global illumination, and hdri image based lighting. You can input a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
-
-The AOV options are:
-- beauty
-- normal
-- position
-- depth
-- stats
-
-The stats AOV gives you the average number of iterations, the average number of bounces, the total number of paths traced per pixel in the r, g, and b channels, respectively.
-
-The output of this node can be passed as input to an identical node with a different seed, and the child node will use the variance of the input to determine how many paths should be traced for a given pixel, between a minimum and maximum paths per pixel as set on the knobs.
-
 ### ray_march
-
-(currently broken on this branch)
 
 This gizmo renders the scene using a ray marching algorithm, with support for hdri image based lighting. You can input a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
 
@@ -115,3 +133,4 @@ The AOV options are:
 - http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-v-the-mandelbulb-different-de-approximations/
 - https://blog.demofox.org/2020/05/25/casual-shadertoy-path-tracing-1-basic-camera-diffuse-emissive/
 - https://www.researchgate.net/publication/354065092_Multiple_Importance_Sampling_101
+- https://www.arnoldrenderer.com/research/egsr2012_volume.pdf
