@@ -40,6 +40,8 @@ This gizmo renders the scene using a ray marching algorithm, with support for:
 - depth of field based on the camera input, simply check the 'enable dof' knob
 - hdri image based lighting
 
+The alpha channel contains unique ids for each object that is hit on the first bounce.
+
 You can input a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
 
 The AOV options are:
