@@ -1575,7 +1575,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 pixelFootprint = _hitTolerance;
 
                 // Update the random seed
-                seed = 77.134f * random(seed + rng + fabs(intersectionPosition + direction));
+                seed = 5.3749f * random(
+                    seed
+                    + rng
+                    + random(fabs(intersectionPosition + direction))
+                );
             }
 
             lastStepDistance = signedStepDistance;
@@ -1646,7 +1650,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 direction = uniformDirectionInSolidAngle(
                     lightDirection,
                     __lightSamplingAngle,
-                    seed * 3.179f
+                    seed * 1.3179f
                 );
             }
             else
@@ -1718,14 +1722,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             objectIndex = _objectTextureWidth == 0 ? 1 : _objectTextureWidth;
         }
 
-        float3 surfaceNormal = randomUnitVector(seed * 43.73f);
+        float3 surfaceNormal = randomUnitVector(seed * 1.7324f);
         float3 lightDirection = surfaceNormal;
         float3 lightNormal = -surfaceNormal;
         float distanceToLight = 0.0f;
         int selectedLight;
 
         const float lightPDF = sampleLightData(
-            seed * 33.12f,
+            seed * 1.3734f,
             intersectionPosition,
             surfaceNormal,
             emissiveIndices,
@@ -1783,7 +1787,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             scatteredColour += scatteringCoefficient * noiseValue * sampleLight(
-                seed * 1.97357f / step,
+                seed * 1.9757f / step,
                 throughput,
                 lightBRDF,
                 distanceToLight,
@@ -2027,7 +2031,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 float3 bounceDirection;
                 float materialLightPDF;
                 const float materialPDF = sampleMaterial(
-                    seed,
+                    seed * 1.73901f,
                     surfaceNormal,
                     direction,
                     lightDirection,
@@ -2069,7 +2073,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     );
 
                     rayColour += sampleLight(
-                        seed * 3.6912f,
+                        seed * 1.6912f,
                         throughput,
                         lightBRDF,
                         distanceToLight,
@@ -2138,7 +2142,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 pixelFootprint = _hitTolerance;
 
                 // Update the random seed
-                seed = 77.134f * random(seed + rng + fabs(intersectionPosition + direction));
+                seed = 7.134f * random(
+                    seed
+                    + rng
+                    + random(fabs(intersectionPosition + direction))
+                );
             }
 
             lastStepDistance = signedStepDistance;
@@ -2294,7 +2302,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 seed
             );
 
-            seed = 53.1231f * random(seed * path);
+            seed = 53.1231f * random(seed * path * 1.31537f);
         }
 
         const uint objectId = resultPixel.w / numPaths;
