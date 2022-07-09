@@ -8,8 +8,9 @@
 // Matrix and vector math operations
 //
 
-#define PI_BY_TWO PI / 2.0f
-#define TWO_PI 2.0f * PI
+#define PI_BY_TWO (PI / 2.0f)
+#define TWO_PI (2.0f * PI)
+#define EPSILON 0.0001f
 
 
 /**
@@ -860,6 +861,11 @@ inline float3 alignWithDirection(
         alignDirection,
         rotationAxis
     );
+
+    if (angle <= EPSILON)
+    {
+        return vectorToAlign;
+    }
 
     float3x3 rotationMatrix;
     axisAngleRotationMatrix(rotationAxis, angle, rotationMatrix);
