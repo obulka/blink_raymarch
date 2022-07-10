@@ -10,7 +10,6 @@
 
 #define PI_BY_TWO (PI / 2.0f)
 #define TWO_PI (2.0f * PI)
-#define EPSILON 0.0001f
 
 
 /**
@@ -845,7 +844,15 @@ inline float getAngleAndAxisBetweenVectors(
         const float3 &vector1,
         float3 &axis)
 {
-    axis = normalize(cross(vector0, vector1));
+    const float3 perpendicularVector = cross(vector0, vector1);
+    if (length(perpendicularVector) > 0.0f)
+    {
+        axis = normalize(perpendicularVector);
+    }
+    else
+    {
+        axis = vector0;
+    }
     return acos(dot(vector0, vector1));
 }
 
@@ -862,7 +869,7 @@ inline float3 alignWithDirection(
         rotationAxis
     );
 
-    if (angle <= EPSILON)
+    if (angle == 0.0f)
     {
         return vectorToAlign;
     }
