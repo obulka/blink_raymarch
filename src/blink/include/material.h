@@ -342,6 +342,7 @@ inline void transmissiveBounce(
  *
  */
 inline float sampleTransmissive(
+        const bool doAbsorption,
         const float3 &idealRefractedDirection,
         const float3 &refractedDirection,
         const float4 &emittance,
@@ -396,8 +397,14 @@ inline float sampleTransmissive(
         -absorptionColour
         * distanceTravelledThroughMaterial
         * scatteringCoefficient
+        * doAbsorption
     );
-    lightBRDF = exp(-absorptionColour * distanceToLight * scatteringCoefficient);
+    lightBRDF = exp(
+        -absorptionColour
+        * distanceToLight
+        * scatteringCoefficient
+        * doAbsorption
+    );
 
     scatteringCoefficient = refractedScatteringCoefficient;
 
@@ -471,6 +478,7 @@ inline float sampleDiffuse(
  */
 inline float sampleMaterial(
         const float3 &seed,
+        const bool doAbsorption,
         const float3 &surfaceNormal,
         const float3 &incidentDirection,
         const float3 &lightDirection,
@@ -589,6 +597,7 @@ inline float sampleMaterial(
         );
 
         pdf = sampleTransmissive(
+            doAbsorption,
             idealRefractedDirection,
             outgoingDirection,
             emittance,

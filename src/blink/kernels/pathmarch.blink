@@ -151,6 +151,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int __bouncesPerRay;
         bool __lightSamplingEnabled;
         float __lightSamplingAngle;
+        bool __equiangularSamplingEnabled;
 
         float2 __hdriPixelSize;
         float2 __irradiancePixelSize;
@@ -230,6 +231,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         __lightSamplingEnabled = _maxLightSamplingBounces > 0;
 
         __lightSamplingAngle = PI * (1.0f - saturate(_lightSamplingBias));
+
+        __equiangularSamplingEnabled = _equiangularSamples > 0;
 
         float aspect = aspectRatio(_formatHeight, _formatWidth);
         float4x4 cameraProjectionMatrix = projectionMatrix(
@@ -1361,6 +1364,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &rayOrigin,
             const float3 &rayDirection,
             const float3 &initialSeed,
+            const float4 &initialThroughput,
             const float maxRayDistance,
             const float currentNestedDielectrics[MAX_NESTED_DIELECTRICS][8],
             const int currentNumNestedDielectrics,
@@ -1387,7 +1391,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float scatteringCoefficient = nestedDielectrics[numNestedDielectrics][6];
 
         float4 rayColour = float4(0);
-        float4 throughput = float4(1);
+        float4 throughput = initialThroughput;
 
         float lastStepDistance = 1.0f;
 
@@ -1504,6 +1508,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 float materialLightPDF;
                 const float materialPDF = sampleMaterial(
                     seed,
+                    true,
                     surfaceNormal,
                     direction,
                     lightDirection,
@@ -1629,7 +1634,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float lightGeometryFactor = 1.0f;
         if (selectedLight < _lightTextureWidth)
         {
-            lightEmissiveColour = sampleArtificialLight(
+            lightEmissiveColour = throughput * sampleArtificialLight(
                 position,
                 surfaceNormal,
                 offset,
@@ -1640,7 +1645,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
         else if (selectedLight == _lightTextureWidth && usePrecomputedIrradiance)
         {
-            lightEmissiveColour = readIrradianceValue(lightDirection);
+            lightEmissiveColour = throughput * readIrradianceValue(lightDirection);
         }
         else
         {
@@ -1666,6 +1671,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 ),
                 direction,
                 seed,
+                throughput,
                 distanceToLight * 2.0f,
                 nestedDielectrics,
                 numNestedDielectrics,
@@ -1680,7 +1686,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         return (
             lightEmissiveColour
-            * throughput
             * lightBRDF
             * lightGeometryFactor
             * balanceHeuristic(
@@ -1744,6 +1749,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         const float offset = random(random(seed.z) + random(seed.y + random(seed.x)));
 
+        float previousEquiangularDistance = 0.0f;
+
         float4 scatteredColour = float4(0);
         for (int step=1; step <= _equiangularSamples; step++)
         {
@@ -1788,7 +1795,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             scatteredColour += scatteringCoefficient * noiseValue * sampleLight(
                 seed * 1.9757f / step,
-                throughput,
+                throughput * lightBRDF / lightPDF,
                 lightBRDF,
                 distanceToLight,
                 lightDirection,
@@ -1804,15 +1811,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightNormal
             );
 
-            throughput *= exp(
-                -absorptionColour
-                * equiangularDistance
-                * scatteringCoefficient
-                * noiseValue
-            ) / lightPDF;
+            previousEquiangularDistance = equiangularDistance;
         }
 
-        scatteringCoefficient = 0.0f;
         return scatteredColour;
     }
 
@@ -1981,7 +1982,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 if (
-                    _equiangularSamples > 0
+                    __equiangularSamplingEnabled
                     && scatteringCoefficient > 0.0f
                     && numLightsForEquiangular > 0
                 ) {
@@ -2032,6 +2033,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 float materialLightPDF;
                 const float materialPDF = sampleMaterial(
                     seed * 1.73901f,
+                    !__equiangularSamplingEnabled,
                     surfaceNormal,
                     direction,
                     lightDirection,
@@ -2184,8 +2186,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             )
         );
 
-        if (_equiangularSamples > 0 && scatteringCoefficient > 0.0f && numLightsForEquiangular > 0)
-        {
+        if (
+            __equiangularSamplingEnabled
+            && scatteringCoefficient > 0.0f
+            && numLightsForEquiangular > 0
+        ) {
             // Perform Equi-Angular Sampling
             rayColour += sampleEquiangular(
                 seed,
