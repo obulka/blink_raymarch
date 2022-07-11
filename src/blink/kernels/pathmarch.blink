@@ -1751,6 +1751,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float previousEquiangularDistance = 0.0f;
 
+        float noiseSum = 0.0f;
+
         float4 scatteredColour = float4(0);
         for (int step=1; step <= _equiangularSamples; step++)
         {
@@ -1786,6 +1788,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 noiseValue = 1.0f;
             }
 
+            noiseSum += noiseValue;
+
             const float4 lightBRDF = exp(
                 -absorptionColour
                 * (distanceToLight + equiangularDistance)
@@ -1813,6 +1817,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             previousEquiangularDistance = equiangularDistance;
         }
+
+        throughput *= exp(
+            -absorptionColour
+            * distanceSinceLastBounce
+            * scatteringCoefficient
+            * noiseSum
+            / _equiangularSamples
+        ) / lightPDF;
 
         return scatteredColour;
     }
