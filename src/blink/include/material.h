@@ -573,7 +573,6 @@ inline float sampleMaterial(
             lightBRDF,
             lightPDF
         );
-        materialBRDF *= fabs(dot(outgoingDirection, surfaceNormal));
     }
     // Maybe refract the ray
     else if (

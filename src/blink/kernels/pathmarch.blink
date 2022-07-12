@@ -1823,7 +1823,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             * distanceSinceLastBounce
             * scatteringCoefficient
             * noiseSum
-            / _equiangularSamples
+            / (float) _equiangularSamples
         ) / lightPDF;
 
         return scatteredColour;
