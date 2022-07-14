@@ -22,8 +22,8 @@
 
 
 // Increase this if you want more than MAX_CHILD_DEPTH direct children
-#define MAX_CHILD_DEPTH 64
-#define MAX_MIS_EMISSIVE_SHAPES 64
+#define MAX_CHILD_DEPTH 32
+#define MAX_MIS_EMISSIVE_SHAPES 32
 
 
 kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
@@ -403,7 +403,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
             const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
 
-            const float scale = position.w;
+            // const float scale = position.w;
             const int modifications = (int) shapeProperty.y;
             const float blendStrength = shapeProperty.w;
 
@@ -422,9 +422,48 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    float3 localToWorld(const int objectIndex, const float3 &localPosition)
+    {
+        float3 worldPosition = localPosition;
+        for (int j=objectIndex; j >= 0; j--)
+        {
+            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
+            const float numChildren = shapeProperty.z;
+
+            if (j + numChildren < objectIndex)
+            {
+                continue;
+            }
+
+            // Read in the shape properties
+            const SampleType(positions) position = positions(j, 0);
+            const SampleType(rotations) rotation = rotations(j, 0);
+            const SampleType(dimensions) dimension = dimensions(j, 0);
+            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
+            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
+
+            // const float scale = position.w;
+            const int modifications = (int) shapeProperty.y;
+            const float blendStrength = shapeProperty.w;
+
+            // Use parent transform to position child
+            worldPosition = inverseTransformRay(
+                worldPosition,
+                float3(position.x, position.y, position.z),
+                float3(rotation.x, rotation.y, rotation.z),
+                modifications,
+                modParameters0,
+                modParameters1
+            );
+        }
+
+        return worldPosition;
+    }
+
+
     float3 getObjectPosition(const int objectIndex)
     {
-        return -worldToLocal(objectIndex, float3(0));
+        return localToWorld(objectIndex, float3(0));
     }
 
 
