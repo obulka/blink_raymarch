@@ -539,7 +539,7 @@ inline bool vectorsAreEqual(const float4 &vector0, const float4 &vector1)
 
 
 /**
- * Get a rotation matrix from radian angle values.
+ * Get a rotation matrix from radian angle values in ZYX order.
  *
  * @arg angles: The rotation angles in radians.
  * @arg out: The location to store the rotation matrix.
@@ -558,6 +558,30 @@ inline void rotationMatrix(const float3 &angles, float3x3 &out)
     out[1][2] = cosAngles.x * sinAngles.y * sinAngles.z - sinAngles.x * cosAngles.z;
     out[2][0] = -sinAngles.y;
     out[2][1] = sinAngles.x * cosAngles.y;
+    out[2][2] = cosAngles.x * cosAngles.y;
+}
+
+
+/**
+ * Get a rotation matrix from radian angle values in XYZ order.
+ *
+ * @arg angles: The rotation angles in radians.
+ * @arg out: The location to store the rotation matrix.
+ */
+inline void reverseRotationMatrix(const float3 &angles, float3x3 &out)
+{
+    const float3 cosAngles = cos(angles);
+    const float3 sinAngles = sin(angles);
+
+    // Why tf can I not init a float3x3 normally??
+    out[0][0] = cosAngles.y * cosAngles.z;
+    out[0][1] = -cosAngles.y * sinAngles.z;
+    out[0][2] = sinAngles.y;
+    out[1][0] = sinAngles.x * sinAngles.y * cosAngles.z + cosAngles.x * sinAngles.z;
+    out[1][1] = cosAngles.x * cosAngles.z - sinAngles.x * sinAngles.y * sinAngles.z;
+    out[1][2] = -sinAngles.x * cosAngles.y;
+    out[2][0] = sinAngles.x * sinAngles.z - cosAngles.x * sinAngles.y * cosAngles.z;
+    out[2][1] = cosAngles.x * sinAngles.y * sinAngles.z + sinAngles.x * cosAngles.z;
     out[2][2] = cosAngles.x * cosAngles.y;
 }
 

@@ -255,3 +255,49 @@ float3 transformRay(
 
     return transformedRay;
 }
+
+
+/**
+ * Perform the inverse transform on a ray.
+ *
+ * @arg rayOrigin: The location the ray originates from.
+ * @arg position: The amount to translate the ray.
+ * @arg rotation: The amount to rotate the ray (radians).
+ * @arg modifications: The modifications to perform.
+ *     Each bit will enable a modification:
+ *         bit 0: finite repetition
+ *         bit 1: infinite repetition
+ *         bit 2: elongation
+ *         bit 3: mirror x
+ *         bit 4: mirror y
+ *         bit 5: mirror z
+ * @arg repetition: The values to use when repeating the ray.
+ * @arg elongation: The values to use when elongating the ray.
+ *
+ * @returns: The transformed ray origin.
+ */
+float3 inverseTransformRay(
+    const float3 &rayOrigin,
+    const float3 &translation,
+    const float3 &rotation,
+    const int modifications,
+    const float4 &repetition,
+    const float4 &elongation)
+{
+    float3 transformedRay = rayOrigin;
+    performShapeModification(
+        modifications,
+        repetition,
+        elongation,
+        transformedRay
+    );
+
+    float3x3 rotMatrix;
+    reverseRotationMatrix(-rotation, rotMatrix);
+    transformedRay = matmul(
+        rotMatrix.invert(),
+        transformedRay
+    ) + translation;
+
+    return transformedRay;
+}
