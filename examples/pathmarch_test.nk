@@ -327,7 +327,7 @@ sdf_material {
  name sdf_material5
  xpos -1430
  ypos 255
- emission 60
+ emission 20
 }
 push 0
 push 0
@@ -1863,6 +1863,14 @@ sdf_primitive {
  translate {0 0 -2}
  blend_type union
 }
+Viewer {
+ inputs 0
+ frame_range 1001-1111
+ monitorOutOutputTransform rec709
+ name Viewer1
+ xpos 775
+ ypos 621
+}
 push $N907da50
 push $N90b61e0
 push $N939b470
@@ -1876,7 +1884,7 @@ Group {
  addUserKnob {3 min_paths_per_pixel l "min paths per pixel"}
  min_paths_per_pixel 1
  addUserKnob {3 max_paths_per_pixel l "max paths per pixel"}
- max_paths_per_pixel 1
+ max_paths_per_pixel 3
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
  hit_tolerance 0.0001
  addUserKnob {3 max_bounces l "max bounces" t "Limits the number of times the rays can intersect an object per subpixel."}
@@ -1902,9 +1910,9 @@ Group {
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the medium that the camera is currently in." R 1 4}
  refractive_index 1
  addUserKnob {7 scattering_coefficient l "scattering coefficient"}
- scattering_coefficient 0.65
+ scattering_coefficient 1
  addUserKnob {3 equiangular_samples l "equi-angular samples"}
- equiangular_samples 10
+ equiangular_samples 15
  addUserKnob {26 ""}
  addUserKnob {7 hdri_offset_angle l "hdri offset angle" t "Rotate the hdri image by this amount around the y-axis." R 0 360}
  addUserKnob {6 use_precomputed_irradiance l "use precomputed irradiance" +STARTLINE}
@@ -3161,12 +3169,3 @@ push $Nc44e730
   ypos 183
  }
 end_group
-Viewer {
- inputs 0
- frame_range 1001-1111
- gain 0.074
- monitorOutOutputTransform rec709
- name Viewer1
- xpos 775
- ypos 621
-}
