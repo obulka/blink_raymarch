@@ -1594,13 +1594,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     || emittance.w > 0.0f
                     || exitProbability <= rng
                 ) {
-                    return finalAOVs(
-                        _outputType,
-                        iterations,
-                        bounces,
-                        firstObjectId,
-                        rayColour
-                    );
+                    return rayColour;
                 }
 
                 // Prepare the variables for the next march
@@ -2001,7 +1995,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             intersectionPosition,
                             worldToLocal(firstObjectId - 1, intersectionPosition),
                             surfaceNormal,
-                            distanceTravelled,
+                            fabs(matmul(
+                                _cameraWorldMatrix.invert(),
+                                float4(
+                                    intersectionPosition.x,
+                                    intersectionPosition.y,
+                                    intersectionPosition.z,
+                                    1.0f
+                                )
+                            )[2]),
                             firstObjectId
                         );
                     }
