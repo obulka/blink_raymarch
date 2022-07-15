@@ -405,7 +405,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // const float scale = position.w;
             const int modifications = (int) shapeProperty.y;
-            const float blendStrength = shapeProperty.w;
 
             // Use parent transform to position child
             localPosition = transformRay(
@@ -444,7 +443,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // const float scale = position.w;
             const int modifications = (int) shapeProperty.y;
-            const float blendStrength = shapeProperty.w;
 
             // Use parent transform to position child
             worldPosition = inverseTransformRay(
@@ -464,6 +462,36 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     float3 getObjectPosition(const int objectIndex)
     {
         return localToWorld(objectIndex, float3(0));
+    }
+
+
+    inline bool childInteractionIsNotUnion(const int objectIndex)
+    {
+        return (int(shapeProperties(objectIndex, 0, 1)) & 3968) > 0;
+    }
+
+
+    inline bool isParentOf(const int parentIndex, const int childIndex)
+    {
+        return parentIndex + shapeProperties(parentIndex, 0, 2) >= childIndex;
+    }
+
+
+    bool isExitingObject(const int currentMaterialIndex, const int objectIndex)
+    {
+        return (
+            currentMaterialIndex >= 0
+            && (
+                currentMaterialIndex == objectIndex
+                || (
+                    isParentOf(objectIndex, currentMaterialIndex)
+                    && childInteractionIsNotUnion(objectIndex)
+                ) || (
+                    isParentOf(currentMaterialIndex, objectIndex)
+                    && childInteractionIsNotUnion(currentMaterialIndex)
+                )
+            )
+        );
     }
 
 
@@ -1435,7 +1463,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float lastStepDistance = 1.0f;
 
         float firstObjectId = 0.0f;
-        float lastRefractedId = -1.0f;
 
         int iterations = 0;
         int bounces = 0;
@@ -1564,6 +1591,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     emittance,
                     result.y,
                     distanceToLight,
+                    isExitingObject(
+                        nestedDielectrics[numNestedDielectrics][4] - 1,
+                        result.y - 1
+                    ),
                     materialEmissiveColour,
                     materialBRDF,
                     lightBRDF,
@@ -1594,13 +1625,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     || emittance.w > 0.0f
                     || exitProbability <= rng
                 ) {
-                    return finalAOVs(
-                        _outputType,
-                        iterations,
-                        bounces,
-                        firstObjectId,
-                        rayColour
-                    );
+                    return rayColour;
                 }
 
                 // Prepare the variables for the next march
@@ -1914,7 +1939,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float lastStepDistance = 1.0f;
 
         float firstObjectId = 0.0f;
-        float lastRefractedId = -1.0f;
 
         int iterations = 0;
         int bounces = 0;
@@ -2001,7 +2025,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             intersectionPosition,
                             worldToLocal(firstObjectId - 1, intersectionPosition),
                             surfaceNormal,
-                            distanceTravelled,
+                            fabs(matmul(
+                                _cameraWorldMatrix.invert(),
+                                float4(
+                                    intersectionPosition.x,
+                                    intersectionPosition.y,
+                                    intersectionPosition.z,
+                                    1.0f
+                                )
+                            )[2]),
                             firstObjectId
                         );
                     }
@@ -2101,6 +2133,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     emittance,
                     result.y,
                     distanceToLight,
+                    isExitingObject(
+                        nestedDielectrics[numNestedDielectrics][4] - 1,
+                        result.y - 1
+                    ),
                     materialEmissiveColour,
                     materialBRDF,
                     lightBRDF,
@@ -2147,7 +2183,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Perform MIS material sampling
                 // TODO don't assume this object is a sphere
                 const float radius = dimensions(result.y - 1, 0, 0);
-                const float visibleSurfaceArea = TWO_PI * radius * radius;
+                const float visibleSurfaceArea = PI * radius * radius;
 
                 rayColour += (
                     materialEmissiveColour

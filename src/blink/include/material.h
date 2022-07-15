@@ -188,6 +188,7 @@ inline void getReflectivityData(
         const float objectId,
         const float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
         const int numNestedDielectrics,
+        const bool isExiting,
         const float surfaceRefractiveIndex,
         const float surfaceScatteringCoefficient,
         const float incidentRefractiveIndex,
@@ -196,7 +197,7 @@ inline void getReflectivityData(
         float &specularProbability,
         float &refractionProbability)
 {
-    if (nestedDielectrics[numNestedDielectrics][4] == objectId)
+    if (isExiting)
     {
         // We are exiting the material we are in, get the
         // last refractive index from the top of the stack
@@ -353,6 +354,7 @@ inline float sampleTransmissive(
         const float objectId,
         const float distanceToLight,
         const bool doRefraction,
+        const bool isExiting,
         float4 &emissiveColour,
         float4 &materialBRDF,
         float4 &lightBRDF,
@@ -372,7 +374,7 @@ inline float sampleTransmissive(
 
     // We are passing through the surface, so update the refractive index
     incidentRefractiveIndex = refractedRefractiveIndex;
-    if (nestedDielectrics[numNestedDielectrics][4] == objectId)
+    if (isExiting)
     {
         // We are exiting the material we are in, get the
         // last refractive index, by popping the stack
@@ -495,6 +497,7 @@ inline float sampleMaterial(
         const float4 &emittance,
         const float objectId,
         const float distanceToLight,
+        const bool isExiting,
         float4 &emissiveColour,
         float4 &materialBRDF,
         float4 &lightBRDF,
@@ -528,6 +531,7 @@ inline float sampleMaterial(
             objectId,
             nestedDielectrics,
             numNestedDielectrics,
+            isExiting,
             surfaceRefractiveIndex,
             surfaceScatteringCoefficient,
             incidentRefractiveIndex,
@@ -607,6 +611,7 @@ inline float sampleMaterial(
             objectId,
             distanceToLight,
             doRefraction,
+            isExiting,
             emissiveColour,
             materialBRDF,
             lightBRDF,
