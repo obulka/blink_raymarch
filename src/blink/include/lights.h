@@ -58,8 +58,9 @@ float sampleEquiangularPDF(
  * @arg lightDirection: Will store the direction to the light.
  * @arg distanceToLight: Will store the distance to the light.
  */
-inline void irradianceLightData(
+inline void hdriLightData(
         const float3 &surfaceNormal,
+        const float maxRayDistance,
         float3 &lightDirection,
         float3 &lightNormal,
         float &distanceToLight,
@@ -68,7 +69,7 @@ inline void irradianceLightData(
     visibleSurfaceArea = 1.0f;
     lightNormal = -surfaceNormal;
     lightDirection = surfaceNormal;
-    distanceToLight = 1.0f;
+    distanceToLight = maxRayDistance;
 }
 
 
