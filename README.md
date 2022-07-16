@@ -2,7 +2,7 @@
 
 This project contains six gizmos that allow you to ray march, and path march, a wide variety of shapes, including fractals, utilizing the GPU.
 
-![blended](https://user-images.githubusercontent.com/21975584/179269716-91ebdc93-927a-4f96-afd5-bbacf35fd56d.png)
+![blended](https://user-images.githubusercontent.com/21975584/179328892-de242ee0-f3ec-4f9f-bcd4-eba3d76b6ea6.png)
 
 ![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164989275-4eb4791c-df89-4332-981d-aac79b607762.png)
 
