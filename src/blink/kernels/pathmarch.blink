@@ -121,6 +121,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int _maxPathsPerPixel;
         int _maxBounces;
         int _maxLightSamplingBounces;
+        bool _sampleHDRI;
         float _lightSamplingBias;
         float _maxRayDistance;
         int _maxRaySteps;
@@ -132,6 +133,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _scatteringCoefficient;
         float4 _absorptionColour;
         int _equiangularSamples;
+        bool _sampleHDRIEquiangular;
 
         // Shape Textures
         int _objectTextureWidth;
@@ -200,6 +202,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_maxRaySteps, "Max Ray Steps", 128);
         defineParam(_maxBounces, "Max Bounces", 1);
         defineParam(_maxLightSamplingBounces, "Max Light Sampling Bounces", 0);
+        defineParam(_sampleHDRI, "Sample HDRI", true);
         defineParam(_lightSamplingBias, "Light Sampling Bias", 0.0f);
         defineParam(_hitTolerance, "Hit Tolerance", 0.001f);
         defineParam(_shadowBias, "Shadow Bias", 1.0f);
@@ -209,6 +212,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_scatteringCoefficient, "Scattering Coefficient", 0.0f);
         defineParam(_absorptionColour, "brdf Colour", float4(1));
         defineParam(_equiangularSamples, "Equi-Angular Samples", 5);
+        defineParam(_sampleHDRIEquiangular, "Sample HDRI Equi-Angular", true);
 
         // Shape Counts
         defineParam(_objectTextureWidth, "Object Texture Width", 0);
@@ -1341,15 +1345,20 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
-            const int numLights,
-            const bool usePrecomputedIrradiance,
+            const int numEmissive,
+            const bool sampleHDRI,
             float3 &lightDirection,
             float3 &lightNormal,
             float &distanceToLight,
             int &selectedLight)
     {
         const float rng = random(random(seed.x + seed.y) + random(seed.z));
-        selectedLight = max(0, (int) floor(rng * (numLights - _hitTolerance)));
+        const int numSamplingOptions = (
+            numEmissive
+            + _lightTextureWidth
+            + sampleHDRI
+        );
+        selectedLight = max(0, (int) floor(rng * (numSamplingOptions - 0.0001f)));
 
         float visibleSurfaceArea = 1.0f;
 
@@ -1373,25 +1382,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
             }
         }
-        else if (selectedLight == _lightTextureWidth && usePrecomputedIrradiance)
-        {
-            irradianceLightData(
-                surfaceNormal,
-                lightDirection,
-                lightNormal,
-                distanceToLight,
-                visibleSurfaceArea
-            );
-        }
-        else
+        else if (selectedLight - _lightTextureWidth < numEmissive)
         {
             // Selected one of the emissive objects
-
-            const int objectIndex = emissiveIndices[
-                selectedLight
-                - _lightTextureWidth
-                - usePrecomputedIrradiance
-            ];
+            const int objectIndex = emissiveIndices[selectedLight - _lightTextureWidth];
 
             const float3 position = getObjectPosition(objectIndex);
 
@@ -1409,8 +1403,19 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 visibleSurfaceArea
             );
         }
+        else
+        {
+            hdriLightData(
+                surfaceNormal,
+                _maxRayDistance,
+                lightDirection,
+                lightNormal,
+                distanceToLight,
+                visibleSurfaceArea
+            );
+        }
 
-        return sampleLightsPDF(numLights, visibleSurfaceArea);
+        return sampleLightsPDF(max(1, numSamplingOptions), visibleSurfaceArea);
     }
 
 
@@ -1564,7 +1569,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 float3 lightDirection = surfaceNormal;
                 float3 lightNormal = -surfaceNormal;
                 float distanceToLight = 0.0f;
-                int selectedLight;
 
                 // Get material data for material and light sampling
                 float4 materialBRDF;
@@ -1664,13 +1668,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             nestedDielectrics[numNestedDielectrics][3]
         );
 
+        const float correctedDistance = (
+            distanceSinceLastBounce
+            + _maxRayDistance
+            - distanceTravelled
+        );
+
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
         rayColour += throughput * readHDRIValue(direction) * exp(
-            -absorptionColour * scatteringCoefficient * (
-                distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
-            )
+            -absorptionColour * scatteringCoefficient * correctedDistance
         );
 
         return rayColour;
@@ -1689,12 +1697,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float materialPDF,
             const float offset,
             const int selectedLight,
-            const bool usePrecomputedIrradiance,
+            const int numEmissive,
+            const bool sampleHDRI,
             const float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
             const int numNestedDielectrics,
             float3 &lightNormal)
     {
-        float4 lightEmissiveColour;
+        float4 lightEmissiveColour = float4(0);
         float lightGeometryFactor = 1.0f;
         if (selectedLight < _lightTextureWidth)
         {
@@ -1707,20 +1716,25 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 selectedLight
             );
         }
-        else if (selectedLight == _lightTextureWidth && usePrecomputedIrradiance)
-        {
-            lightEmissiveColour = throughput * readIrradianceValue(lightDirection);
-        }
-        else
+        else if (selectedLight - _lightTextureWidth - sampleHDRI < numEmissive)
         {
             float3 direction;
-            if (_maxLightSamplingBounces > 1 && __lightSamplingAngle > 0.0f)
+            float distance = distanceToLight;
+            if (selectedLight - _lightTextureWidth == numEmissive)
+            {
+                direction = cosineDirectionInHemisphere(
+                    lightDirection,
+                    seed * 1.97812f
+                );
+            }
+            else if (_maxLightSamplingBounces > 1 && __lightSamplingAngle > 0.0f)
             {
                 direction = uniformDirectionInSolidAngle(
                     lightDirection,
                     __lightSamplingAngle,
                     seed * 1.3179f
                 );
+                distance *= 2.0f;
             }
             else
             {
@@ -1736,7 +1750,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 direction,
                 seed,
                 throughput,
-                distanceToLight * 2.0f,
+                distance,
                 nestedDielectrics,
                 numNestedDielectrics,
                 lightNormal
@@ -1769,7 +1783,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &rayOrigin,
             const float3 &rayDirection,
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
-            const int numLights,
+            const int numEmissive,
             const float distanceSinceLastBounce,
             const float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
             const int numNestedDielectrics,
@@ -1802,8 +1816,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             intersectionPosition,
             surfaceNormal,
             emissiveIndices,
-            numLights,
-            false,
+            numEmissive,
+            _sampleHDRIEquiangular,
             lightDirection,
             lightNormal,
             distanceToLight,
@@ -1812,8 +1826,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         const float3 lightPosition = intersectionPosition + lightDirection * distanceToLight;
 
         const float offset = random(random(seed.z) + random(seed.y + random(seed.x)));
-
-        float previousEquiangularDistance = 0.0f;
 
         float noiseSum = 0.0f;
 
@@ -1835,7 +1847,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 particlePosition = rayOrigin + equiangularDistance * rayDirection;
             const float3 particleToLight = lightPosition - particlePosition;
             distanceToLight = length(particleToLight);
-            
+
             if (distanceToLight > 0.0f)
             {
                 lightDirection = normalize(particleToLight);
@@ -1873,13 +1885,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightPDF,
                 0.0f,
                 selectedLight,
-                false,
+                numEmissive,
+                _sampleHDRIEquiangular,
                 nestedDielectrics,
                 numNestedDielectrics,
                 lightNormal
             );
-
-            previousEquiangularDistance = equiangularDistance;
         }
 
         throughput *= exp(
@@ -1910,8 +1921,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int numEmissive,
             float3 &seed)
     {
-        const int numLightsForEquiangular = _lightTextureWidth + numEmissive;
-        const int numLights = numLightsForEquiangular + _usePrecomputedIrradiance;
+        const int numLights = _lightTextureWidth + numEmissive;
 
         float refractiveIndex = _refractiveIndex;
         float scatteringCoefficient = _scatteringCoefficient;
@@ -1962,7 +1972,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float previousMaterialPDF = 1.0f;
 
-        bool sampledIrradiance = false;
+        bool sampledLight = false;
 
         // March the ray
         while (
@@ -2067,7 +2077,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 if (
                     __equiangularSamplingEnabled
                     && scatteringCoefficient > 0.0f
-                    && numLightsForEquiangular > 0
                 ) {
                     // Perform Equi-Angular Sampling
                     rayColour += sampleEquiangular(
@@ -2076,7 +2085,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         origin,
                         direction,
                         emissiveIndices,
-                        numLightsForEquiangular,
+                        numEmissive,
                         distanceSinceLastBounce,
                         nestedDielectrics,
                         numNestedDielectrics,
@@ -2099,8 +2108,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         intersectionPosition,
                         surfaceNormal,
                         emissiveIndices,
-                        numLights,
-                        _usePrecomputedIrradiance,
+                        numEmissive,
+                        _sampleHDRI,
                         lightDirection,
                         lightNormal,
                         distanceToLight,
@@ -2156,11 +2165,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     && materialLightPDF > _hitTolerance
                 ) {
                     // Perform MIS light sampling
-                    sampledIrradiance = (
-                        selectedLight == _lightTextureWidth
-                        && _usePrecomputedIrradiance
-                    );
-
                     rayColour += sampleLight(
                         seed * 1.6912f,
                         throughput,
@@ -2173,17 +2177,20 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         materialLightPDF,
                         reflectionOffset,
                         selectedLight,
-                        _usePrecomputedIrradiance,
+                        numEmissive,
+                        _sampleHDRI,
                         nestedDielectrics,
                         numNestedDielectrics,
                         lightNormal
                     );
+
+                    sampledLight = true;
                 }
 
                 // Perform MIS material sampling
                 // TODO don't assume this object is a sphere
                 const float radius = dimensions(result.y - 1, 0, 0);
-                const float visibleSurfaceArea = PI * radius * radius;
+                const float visibleSurfaceArea = 2.0f * PI * radius * radius;
 
                 rayColour += (
                     materialEmissiveColour
@@ -2254,45 +2261,32 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        const float4 absorptionColour = float4(
-            nestedDielectrics[numNestedDielectrics][0],
-            nestedDielectrics[numNestedDielectrics][1],
-            nestedDielectrics[numNestedDielectrics][2],
-            nestedDielectrics[numNestedDielectrics][3]
-        );
+        if (__equiangularSamplingEnabled && scatteringCoefficient > 0.0f)
+        {
+            const float correctedDistance = (
+                distanceSinceLastBounce
+                + _maxRayDistance
+                - distanceTravelled
+            );
 
-        const float4 imageLighting = sampledIrradiance ? float4(0) : readHDRIValue(direction);
-
-        // Read the hdri value in the direction the ray was last travelling
-        // and absorb an amount of light proportional to the distance travelled
-        // through the last material
-        // TODO use the scattering here
-        rayColour += throughput * imageLighting * exp(
-            -absorptionColour * scatteringCoefficient * (
-                distanceTravelledThroughMaterial + _maxRayDistance - distanceTravelled
-            )
-        );
-
-        if (
-            __equiangularSamplingEnabled
-            && scatteringCoefficient > 0.0f
-            && numLightsForEquiangular > 0
-        ) {
             // Perform Equi-Angular Sampling
             rayColour += sampleEquiangular(
                 seed,
-                positionOnRay,
+                origin + correctedDistance * direction,
                 origin,
                 direction,
                 emissiveIndices,
-                numLightsForEquiangular,
-                distanceSinceLastBounce + _maxRayDistance - distanceTravelled,
+                numEmissive,
+                correctedDistance,
                 nestedDielectrics,
                 numNestedDielectrics,
                 throughput,
                 scatteringCoefficient
             );
         }
+
+        // Read the hdri value in the direction the ray was last travelling
+        rayColour += throughput * readHDRIValue(direction);
 
         rayColour.w = (bounces > 0) * firstObjectId;
         return rayColour;

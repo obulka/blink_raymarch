@@ -19,12 +19,17 @@ from .utils import rgb_to_hex
 class SDFMaterial(KnobManager):
     """Knob manager for primitive shapes in signed distance fields."""
 
-    colour_knob_name = "colour"
+    colour_knob_names = (
+        "colour",
+        "specular_colour",
+        "absorption_colour",
+        "emission_colour",
+    )
 
     _knob_changed_callbacks = KnobChangedCallbacks(KnobManager._knob_changed_callbacks)
 
 
-    @_knob_changed_callbacks.register(colour_knob_name)
+    @_knob_changed_callbacks.register_multiple(colour_knob_names)
     def _colour_changed(self):
         """Change the node colour to match the object for easier ID."""
         self._node.knob("tile_color").setValue(rgb_to_hex(self._knob.value()))
