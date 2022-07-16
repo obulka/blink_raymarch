@@ -112,7 +112,7 @@ sdf_material {
  inputs 0
  name sdf_material10
  tile_color 0xff
- xpos 415
+ xpos 459
  ypos 245
  colour {0 0 0}
  transmission 1
@@ -125,7 +125,7 @@ sdf_material {
  inputs 0
  name sdf_material11
  tile_color 0xff
- xpos 240
+ xpos 284
  ypos 243
  colour {0 0 0}
  transmission 1
@@ -137,7 +137,7 @@ push 0
 sdf_material {
  inputs 0
  name sdf_material5
- xpos -72
+ xpos -28
  ypos 320
  emission 10
 }
@@ -145,7 +145,7 @@ sdf_material {
  inputs 0
  name sdf_material13
  tile_color 0xff
- xpos -76
+ xpos -32
  ypos 163
  colour {0 0 0}
  transmission 1
@@ -161,7 +161,7 @@ sdf_primitive {
  inputs 3
  name sdf_primitive15
  label cylinder
- xpos 79
+ xpos 123
  ypos 157
  shape cylinder
  dimension_x 1
@@ -178,7 +178,7 @@ sdf_primitive {
  inputs 3
  name sdf_primitive14
  label "rectangular prism"
- xpos 79
+ xpos 123
  ypos 233
  shape "rectangular prism"
  dimension_x 1
@@ -195,7 +195,7 @@ sdf_primitive {
  inputs 3
  name sdf_primitive5
  label sphere
- xpos 79
+ xpos 123
  ypos 314
  dimension_x 0.3
  translate {-2 0 0}
@@ -205,7 +205,7 @@ sdf_primitive {
  inputs 3
  name sdf_primitive17
  label "cut sphere"
- xpos 240
+ xpos 284
  ypos 314
  shape "cut sphere"
  dimension_x 1
@@ -219,7 +219,7 @@ sdf_primitive {
  inputs 3
  name sdf_primitive11
  label "cut sphere"
- xpos 415
+ xpos 459
  ypos 314
  shape "cut sphere"
  dimension_x 1
@@ -232,7 +232,7 @@ sdf_primitive {
 }
 Dot {
  name Dot3
- xpos 449
+ xpos 493
  ypos 450
 }
 path_march {

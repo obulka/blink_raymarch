@@ -4,7 +4,6 @@ Gizmo {
  addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
  colour {1 1 1}
- addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 diffuse_use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." -STARTLINE}
  diffuse_use_trap_colour true
  addUserKnob {26 ""}
@@ -12,7 +11,6 @@ Gizmo {
  addUserKnob {7 specular_roughness l "specular roughness" t "The object's surface will scatter the specularly reflected light more the higher this value is."}
  addUserKnob {18 specular_colour l "specular colour" t "The specular colour."}
  specular_colour {1 1 1}
- addUserKnob {6 specular_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 specular_use_trap_colour l "use trap colour" t "Use the trap colour for specualrly reflected light." -STARTLINE}
  specular_use_trap_colour true
  addUserKnob {26 ""}
@@ -20,7 +18,6 @@ Gizmo {
  addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
  addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
  absorption_colour {0 0 0}
- addUserKnob {6 absorption_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
  absorption_use_trap_colour true
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
@@ -32,7 +29,6 @@ Gizmo {
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)"}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
  emission_colour {1 0.8 0.5}
- addUserKnob {6 emission_colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
  addUserKnob {6 emission_use_trap_colour l "use trap colour" t "Use the trap colour for emitted light." -STARTLINE}
  emission_use_trap_colour true
  addUserKnob {26 div0 l "" +STARTLINE}

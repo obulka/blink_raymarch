@@ -18,6 +18,7 @@ nuke.toNode("sdf_light").knob("onCreate").setValue(
 from collections import OrderedDict
 
 from .knob_manager import KnobChangedCallbacks, SDFGeoKnobManager
+from .utils import rgb_to_hex
 
 
 class SDFLight(SDFGeoKnobManager):
@@ -27,59 +28,28 @@ class SDFLight(SDFGeoKnobManager):
     soften_shadows_knob_name = "soften_shadows"
     shadow_hardness_knob_name = "shadow_hardness"
     falloff_knob_name = "falloff"
+    colour_knob_name = "colour"
 
     _knob_changed_callbacks = KnobChangedCallbacks(SDFGeoKnobManager._knob_changed_callbacks)
+
+    _dimensional_axes = ("x", "y")
 
     dimensional_knob_defaults = {
         "directional": OrderedDict([
             (
-                "x direction",
+                "direction",
                 {
-                    "default": 0.,
-                    "range": (-1., 1.),
-                    "tooltip": "The x direction of the light.",
-                },
-            ),
-            (
-                "y direction",
-                {
-                    "default": -1.,
-                    "range": (-1., 1.),
-                    "tooltip": "The y direction of the light.",
-                },
-            ),
-            (
-                "z direction",
-                {
-                    "default": 0.,
-                    "range": (-1., 1.),
-                    "tooltip": "The z direction of the light.",
+                    "default": [0., -1., 0.],
+                    "tooltip": "The direction of the light.",
                 },
             ),
         ]),
         "point": OrderedDict([
             (
-                "x position",
+                "position",
                 {
-                    "default": 0.,
-                    "range": (-10., 10.),
-                    "tooltip": "The x position of the light.",
-                },
-            ),
-            (
-                "y position",
-                {
-                    "default": 1.,
-                    "range": (-10., 10.),
-                    "tooltip": "The y position of the light.",
-                },
-            ),
-            (
-                "z position",
-                {
-                    "default": 0.,
-                    "range": (-10., 10.),
-                    "tooltip": "The z position of the light.",
+                    "default": [0., 1., 0.],
+                    "tooltip": "The position of the light.",
                 },
             ),
         ]),
@@ -108,6 +78,11 @@ class SDFLight(SDFGeoKnobManager):
             not_ambient and soften_shadows_knob.value(),
         )
 
+    @_knob_changed_callbacks.register(colour_knob_name)
+    def _colour_changed(self):
+        """Change the node colour to match the object for easier ID."""
+        self._node.knob("tile_color").setValue(rgb_to_hex(self._knob.value()))
+
     @_knob_changed_callbacks.register(type_knob_name)
     def _type_changed(self):
         """Dynamically enable/disable and change the labels/tooltips/values
@@ -126,3 +101,26 @@ class SDFLight(SDFGeoKnobManager):
         on whether or not shadow softening has been enabled.
         """
         self._node.knob(self.shadow_hardness_knob_name).setEnabled(self._knob.value())
+
+    def _dropdown_context_changed(self, default_dict, context_knobs, set_node_label=False):
+        """Dynamically enable/disable and change the labels/tooltips/values
+        of the context knobs dependent on dropdown knobs.
+
+        Args:
+            default_dict (dict(str, OrderedDict(str, dict()))): The
+                default values for the context sensitive knobs.
+
+            context_knobs (list(nuke.Knob)): The knobs that change with
+                the context.
+
+            set_node_label (bool): Set the node's label to the context
+                value if True.
+        """
+        if "ambient" in self._knob.value():
+            context_knobs = context_knobs[::-1]
+
+        super(SDFLight, self)._dropdown_context_changed(
+            default_dict,
+            context_knobs,
+            set_node_label=set_node_label,
+        )

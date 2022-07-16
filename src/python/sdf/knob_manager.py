@@ -28,6 +28,20 @@ class KnobChangedCallbacks(dict):
             return method
         return decorated
 
+    def register_multiple(self, knob_names):
+        """Register the decorated function as a callback of the knobs
+        given by knob_names.
+
+        Args:
+            knob_name (list(str)): The name of the knobs this is a
+                callback for.
+        """
+        def decorated(method):
+            for knob_name in knob_names:
+                self[knob_name] = method
+            return method
+        return decorated
+
 
 class KnobManager(object):
     """Knob manager for primitive shapes in signed distance fields."""
@@ -122,6 +136,7 @@ class SDFGeoKnobManager(KnobManager):
             default_values.items(),
             context_knobs,
         ):
+            print("Visible", context_knob)
             context_knob.setVisible(True)
             context_knob.setLabel(knob_name)
             context_knob.setValue(knob_values["default"])
@@ -130,4 +145,5 @@ class SDFGeoKnobManager(KnobManager):
                 context_knob.setRange(*knob_values["range"])
 
         for context_knob in context_knobs[len(default_values):]:
+            print("Not Visible", context_knob)
             context_knob.setVisible(False)
