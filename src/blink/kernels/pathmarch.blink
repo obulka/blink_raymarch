@@ -1668,14 +1668,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             nestedDielectrics[numNestedDielectrics][3]
         );
 
+        const float correctedDistance = (
+            distanceSinceLastBounce
+            + _maxRayDistance
+            - distanceTravelled
+        );
+
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
         rayColour += throughput * readHDRIValue(direction) * exp(
-            -absorptionColour * scatteringCoefficient * (
-                distanceTravelledThroughMaterial
-                + _maxRayDistance - distanceTravelled // Correction for hit tolerance
-            )
+            -absorptionColour * scatteringCoefficient * correctedDistance
         );
 
         return rayColour;
@@ -1824,8 +1827,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         const float offset = random(random(seed.z) + random(seed.y + random(seed.x)));
 
-        float previousEquiangularDistance = 0.0f;
-
         float noiseSum = 0.0f;
 
         float4 scatteredColour = float4(0);
@@ -1890,8 +1891,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 numNestedDielectrics,
                 lightNormal
             );
-
-            previousEquiangularDistance = equiangularDistance;
         }
 
         throughput *= exp(
@@ -2262,27 +2261,23 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        const float4 absorptionColour = float4(
-            nestedDielectrics[numNestedDielectrics][0],
-            nestedDielectrics[numNestedDielectrics][1],
-            nestedDielectrics[numNestedDielectrics][2],
-            nestedDielectrics[numNestedDielectrics][3]
-        );
+        if (__equiangularSamplingEnabled && scatteringCoefficient > 0.0f)
+        {
+            const float correctedDistance = (
+                distanceSinceLastBounce
+                + _maxRayDistance
+                - distanceTravelled
+            );
 
-
-        if (
-            __equiangularSamplingEnabled
-            && scatteringCoefficient > 0.0f
-        ) {
             // Perform Equi-Angular Sampling
             rayColour += sampleEquiangular(
                 seed,
-                positionOnRay + (_maxRayDistance - distanceTravelled) * direction,
+                origin + correctedDistance * direction,
                 origin,
                 direction,
                 emissiveIndices,
                 numEmissive,
-                distanceSinceLastBounce + _maxRayDistance - distanceTravelled,
+                correctedDistance,
                 nestedDielectrics,
                 numNestedDielectrics,
                 throughput,
@@ -2291,9 +2286,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         // Read the hdri value in the direction the ray was last travelling
-        const float4 imageLighting = readHDRIValue(direction);
-
-        rayColour += throughput * imageLighting;
+        rayColour += throughput * readHDRIValue(direction);
 
         rayColour.w = (bounces > 0) * firstObjectId;
         return rayColour;
