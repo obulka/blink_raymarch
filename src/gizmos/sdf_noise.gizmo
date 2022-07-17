@@ -1,14 +1,14 @@
 Gizmo {
  inputs 0
  tile_color 0xffffffff
- addUserKnob {20 User l "SDF Primitive"}
- addUserKnob {7 size R 1 1000}
- size 5
+ addUserKnob {20 User l "SDF Noise"}
+ addUserKnob {7 size R 1 300}
+ size 10
  addUserKnob {4 type M {fBm turbulence}}
  type turbulence
  addUserKnob {13 translation}
  addUserKnob {3 octaves}
- octaves 3
+ octaves 5
  addUserKnob {7 lacunarity R 1 10}
  lacunarity 6
  addUserKnob {7 gain}
@@ -22,7 +22,6 @@ Gizmo {
  addUserKnob {6 invert +STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {6 diffuse +STARTLINE}
- diffuse true
  addUserKnob {6 specular -STARTLINE}
  addUserKnob {6 transmission -STARTLINE}
  addUserKnob {6 emission -STARTLINE}
@@ -30,6 +29,7 @@ Gizmo {
  addUserKnob {6 transmission_roughness l "transmission roughness" -STARTLINE}
  addUserKnob {6 refractive_index l "refractive index" +STARTLINE}
  addUserKnob {6 scattering +STARTLINE}
+ addUserKnob {6 extinction -STARTLINE}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
 }
@@ -37,7 +37,7 @@ add_layer {sdf_noise_params0 sdf_noise_params0.options sdf_noise_params0.x sdf_n
  Constant {
   inputs 0
   channels sdf_noise_params0
-  color {{"(parent.scattering << 10) | (parent.invert << 9) | (parent.specular_roughness << 8) | (parent.transmission_roughness << 7) | (parent.refractive_index << 6) | (parent.emission << 5) | (parent.transmission << 4) | (parent.specular << 3) | (parent.diffuse << 2) | (parent.type << 1) | 1"} {parent.translation.x} {parent.translation.y} {parent.translation.z}}
+  color {{"(parent.extinction << 11) | (parent.scattering << 10) | (parent.invert << 9) | (parent.specular_roughness << 8) | (parent.transmission_roughness << 7) | (parent.refractive_index << 6) | (parent.emission << 5) | (parent.transmission << 4) | (parent.specular << 3) | (parent.diffuse << 2) | (parent.type << 1) | 1"} {parent.translation.x} {parent.translation.y} {parent.translation.z}}
   format "1 1 0 0 1 1 1 1x1"
   name noise_params0
   xpos 841
