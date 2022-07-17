@@ -1,9 +1,7 @@
-#! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
-version 13.2 v2
 Gizmo {
  knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
  tile_color 0xffffffff
- addUserKnob {20 User l "SDF Primitive"}
+ addUserKnob {20 User l "SDF Material"}
  addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
  colour {1 1 1}
  addUserKnob {6 diffuse_use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." -STARTLINE}
@@ -17,18 +15,20 @@ Gizmo {
  specular_use_trap_colour true
  addUserKnob {26 ""}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
- transmission 1
  addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
- addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
- absorption_colour {0 0 0}
- addUserKnob {6 absorption_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
- absorption_use_trap_colour true
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the object." R 1 4}
  refractive_index 1.33
  addUserKnob {6 do_refraction l "do refraction" -STARTLINE}
  do_refraction true
+ addUserKnob {18 extinction_colour l "extinction colour" t "The colour absorbed as light travels through the material."}
+ extinction_colour {1 1 1}
+ addUserKnob {6 extinction_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
+ extinction_use_trap_colour true
  addUserKnob {7 extinction_coefficient l "extinction coefficient" t "The amount of energy lost as the light travells through the material."}
- extinction_coefficient 1
+ addUserKnob {18 scattering_colour l "scattering colour"}
+ scattering_colour {1 1 1}
+ addUserKnob {6 scattering_use_trap_colour l "use trap colour" t "Scatter the trap colour during transmission." -STARTLINE}
+ scattering_use_trap_colour true
  addUserKnob {7 scattering_coefficient l "scattering coefficient"}
  addUserKnob {26 ""}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)" R 0 100}
@@ -42,8 +42,8 @@ Gizmo {
  Input {
   inputs 0
   name noise
-  xpos 1146
-  ypos 441
+  xpos 1170
+  ypos 446
  }
 add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_b sdf_colour.colour_a}
  Constant {
@@ -52,13 +52,13 @@ add_layer {sdf_colour sdf_colour.colour_r sdf_colour.colour_g sdf_colour.colour_
   color {{parent.colour.r} {parent.colour.g} {parent.colour.b} {parent.specular_roughness}}
   format "1 1 0 0 1 1 1 1x1"
   name diffuse_colour
-  xpos 515
-  ypos 411
+  xpos 510
+  ypos 417
  }
  Dot {
   name Dot3
-  xpos 549
-  ypos 610
+  xpos 544
+  ypos 618
  }
 add_layer {sdf_spec_colour sdf_spec_colour.r sdf_spec_colour.g sdf_spec_colour.b sdf_spec_colour.x}
  Constant {
@@ -67,77 +67,94 @@ add_layer {sdf_spec_colour sdf_spec_colour.r sdf_spec_colour.g sdf_spec_colour.b
   color {{parent.specular_colour.r} {parent.specular_colour.g} {parent.specular_colour.b} {parent.specular}}
   format "1 1 0 0 1 1 1 1x1"
   name spec_colour
-  xpos 640
-  ypos 411
+  xpos 620
+  ypos 417
  }
  Copy {
   inputs 2
   channels all
   name Copy8
-  xpos 640
-  ypos 678
+  xpos 620
+  ypos 674
  }
 add_layer {sdf_trans_colour sdf_trans_colour.r sdf_trans_colour.g sdf_trans_colour.b sdf_trans_colour.x}
  Constant {
   inputs 0
   channels sdf_trans_colour
-  color {{"parent.absorption_colour.r * parent.extinction_coefficient"} {"parent.absorption_colour.g * parent.extinction_coefficient"} {"parent.absorption_colour.b * parent.extinction_coefficient"} {parent.transmission}}
+  color {{"parent.extinction_colour.r * parent.extinction_coefficient"} {"parent.extinction_colour.g * parent.extinction_coefficient"} {"parent.extinction_colour.b * parent.extinction_coefficient"} {parent.transmission}}
   format "1 1 0 0 1 1 1 1x1"
   name trans_colour
-  xpos 763
-  ypos 411
+  xpos 730
+  ypos 417
  }
  Copy {
   inputs 2
   channels all
   name Copy9
-  xpos 763
-  ypos 678
+  xpos 730
+  ypos 674
+ }
+add_layer {sdf_scattering_colour sdf_scattering_colour.red sdf_scattering_colour.green sdf_scattering_colour.blue}
+ Constant {
+  inputs 0
+  channels sdf_scattering_colour
+  color {{"parent.scattering_colour.r * parent.scattering_coefficient"} {"parent.scattering_colour.g * parent.scattering_coefficient"} {"parent.scattering_colour.b * parent.scattering_coefficient"} 0}
+  format "1 1 0 0 1 1 1 1x1"
+  name scattering_colour
+  xpos 840
+  ypos 417
+ }
+ Copy {
+  inputs 2
+  channels all
+  name Copy1
+  xpos 840
+  ypos 674
  }
 add_layer {sdf_emm_colour sdf_emm_colour.r sdf_emm_colour.g sdf_emm_colour.b sdf_emm_colour.x}
  Constant {
   inputs 0
   channels sdf_emm_colour
-  color {{parent.emission_colour.r} {parent.emission_colour.g} {parent.emission_colour.b} {parent.emission}}
+  color {{"parent.emission_colour.r * parent.emission"} {"parent.emission_colour.g * parent.emission"} {"parent.emission_colour.b * parent.emission"} {parent.emission}}
   format "1 1 0 0 1 1 1 1x1"
   name emm_colour
-  xpos 887
-  ypos 411
+  xpos 950
+  ypos 417
  }
  Copy {
   inputs 2
   channels all
   name Copy10
-  xpos 887
-  ypos 678
+  xpos 950
+  ypos 674
  }
 add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surface.emission sdf_surface.roughness}
  Constant {
   inputs 0
   channels sdf_surface
-  color {{parent.refractive_index} {"(parent.diffuse_use_trap_colour ? 8192 : 0)  | (parent.specular_use_trap_colour ? 16384 : 0) | (parent.absorption_use_trap_colour ? 32768 : 0) | (parent.emission_use_trap_colour ? 65536 : 0) | (parent.do_refraction ? 131072 : 0)"} {parent.scattering_coefficient} {parent.transmission_roughness}}
+  color {{parent.refractive_index} {"(parent.diffuse_use_trap_colour ? 8192 : 0)  | (parent.specular_use_trap_colour ? 16384 : 0) | (parent.extinction_use_trap_colour ? 32768 : 0) | (parent.emission_use_trap_colour ? 65536 : 0) | (parent.scattering_use_trap_colour ? 131072 : 0) | (parent.do_refraction ? 262144 : 0)"} {parent.transmission_roughness} 0}
   format "1 1 0 0 1 1 1 1x1"
   name surface
-  xpos 1011
-  ypos 412
+  xpos 1060
+  ypos 417
  }
  Copy {
   inputs 2
   channels all
   name Copy5
-  xpos 1011
-  ypos 678
+  xpos 1060
+  ypos 674
  }
  Copy {
   inputs 2
   channels all
   name Copy3
-  xpos 1146
-  ypos 678
+  xpos 1170
+  ypos 674
  }
  Output {
   name Output1
-  xpos 1146
-  ypos 839
+  xpos 1170
+  ypos 830
  }
 end_group
