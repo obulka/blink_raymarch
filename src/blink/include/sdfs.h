@@ -1368,13 +1368,14 @@ float distanceToColourlessObject(
  *     Each bit will enable a modification:
  *         bit 13: enable diffuse trap colour
  *         bit 14: enable specular trap colour
- *         bit 15: enable absorption trap colour
+ *         bit 15: enable extinction trap colour
  *         bit 16: enable emission trap colour
+ *         bit 17: enable scattering trap colour
  * @arg diffuseColour: The diffuse colour of the surface will be stored
  *     here. This will only be modified by the fractals (23-25).
  * @arg specularColour: The specular colour of the surface will be
  *     stored here. This will only be modified by the fractals (23-25).
- * @arg absorptionColour: The absorption colour of the surface will be
+ * @arg extinctionCoefficient: The extinction colour of the surface will be
  *     stored here. This will only be modified by the fractals (23-25).
  * @arg emissionColour: The emission colour of the surface will be
  *     stored here. This will only be modified by the fractals (23-25).
@@ -1388,8 +1389,9 @@ float distanceToObject(
         const int modifications,
         float4 &diffuseColour,
         float4 &specularColour,
-        float4 &absorptionColour,
-        float4 &emissionColour)
+        float4 &extinctionCoefficient,
+        float4 &emissionColour,
+        float4 &scatteringCoefficient)
 {
     if (shapeType >= 23)
     {
@@ -1416,10 +1418,26 @@ float distanceToObject(
                 colour
             );
         }
-        diffuseColour = modifications & 8192 ? diffuseColour * colour : diffuseColour;
-        specularColour = modifications & 16384 ? specularColour * colour : specularColour;
-        absorptionColour = modifications & 32768 ? absorptionColour * colour : absorptionColour;
-        emissionColour = modifications & 65536 ? emissionColour * colour : emissionColour;
+        if (modifications & 8192)
+        {
+            diffuseColour *= colour;
+        }
+        if (modifications & 16384)
+        {
+            specularColour *= colour;
+        }
+        if (modifications & 32768)
+        {
+            extinctionCoefficient *= colour;
+        }
+        if (modifications & 65536)
+        {
+            emissionColour *= colour;
+        }
+        if (modifications & 131072)
+        {
+            scatteringCoefficient *= colour;
+        }
 
         return distance;
     }
@@ -1529,8 +1547,9 @@ float distanceToObject(
  *         bit 6: hollowing
  *         bit 13: enable diffuse trap colour
  *         bit 14: enable specular trap colour
- *         bit 15: enable absorption trap colour
+ *         bit 15: enable extinction trap colour
  *         bit 16: enable emission trap colour
+ *         bit 17: enable scattering trap colour
  * @arg edgeRadius: The radius to round the edges by.
  * @arg wallThickness: The thickness of the walls if hollowing the
  *     object.
@@ -1538,7 +1557,7 @@ float distanceToObject(
  *     here. This will only be modified by the fractals (23-25).
  * @arg specularColour: The specular colour of the surface will be
  *     stored here. This will only be modified by the fractals (23-25).
- * @arg absorptionColour: The absorption colour of the surface will be
+ * @arg extinctionCoefficient: The extinction colour of the surface will be
  *     stored here. This will only be modified by the fractals (23-25).
  * @arg emissionColour: The emission colour of the surface will be
  *     stored here. This will only be modified by the fractals (23-25).
@@ -1555,8 +1574,9 @@ inline float getModifiedDistance(
     const float wallThickness,
     float4 &diffuseColour,
     float4 &specularColour,
-    float4 &absorptionColour,
-    float4 &emissionColour)
+    float4 &extinctionCoefficient,
+    float4 &emissionColour,
+    float4 &scatteringCoefficient)
 {
     float nextDistance = distanceToObject(
         rayOrigin / uniformScale,
@@ -1565,8 +1585,9 @@ inline float getModifiedDistance(
         modifications,
         diffuseColour,
         specularColour,
-        absorptionColour,
-        emissionColour
+        extinctionCoefficient,
+        emissionColour,
+        scatteringCoefficient
     ) * uniformScale;
 
     return performDistanceModification(

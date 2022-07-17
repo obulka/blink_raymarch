@@ -1,3 +1,5 @@
+#! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
+version 13.2 v2
 Gizmo {
  knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
  tile_color 0xffffffff
@@ -15,6 +17,7 @@ Gizmo {
  specular_use_trap_colour true
  addUserKnob {26 ""}
  addUserKnob {7 transmission t "The amount of light that is transmitted through the shape's surface. This plus 'reflection' should be less than or equal to one."}
+ transmission 1
  addUserKnob {7 transmission_roughness l "transmission roughness" t "The object's surface will scatter the transmitted light more the higher this value is."}
  addUserKnob {18 absorption_colour l "absorption colour" t "The colour absorbed as light travels through the material."}
  absorption_colour {0 0 0}
@@ -24,8 +27,9 @@ Gizmo {
  refractive_index 1.33
  addUserKnob {6 do_refraction l "do refraction" -STARTLINE}
  do_refraction true
- addUserKnob {7 scattering_coefficient l "scattering coefficient" R 0 100}
- scattering_coefficient 1
+ addUserKnob {7 extinction_coefficient l "extinction coefficient" t "The amount of energy lost as the light travells through the material."}
+ extinction_coefficient 1
+ addUserKnob {7 scattering_coefficient l "scattering coefficient"}
  addUserKnob {26 ""}
  addUserKnob {7 emission t "The amount of light emitted by the object. Increase the 'hdri lighting samples' to give it less noise. This is more of a placeholder for when the path marched version is released :)" R 0 100}
  addUserKnob {18 emission_colour l "emission colour" t "The emission colour."}
@@ -77,7 +81,7 @@ add_layer {sdf_trans_colour sdf_trans_colour.r sdf_trans_colour.g sdf_trans_colo
  Constant {
   inputs 0
   channels sdf_trans_colour
-  color {{parent.absorption_colour.r} {parent.absorption_colour.g} {parent.absorption_colour.b} {parent.transmission}}
+  color {{"parent.absorption_colour.r * parent.extinction_coefficient"} {"parent.absorption_colour.g * parent.extinction_coefficient"} {"parent.absorption_colour.b * parent.extinction_coefficient"} {parent.transmission}}
   format "1 1 0 0 1 1 1 1x1"
   name trans_colour
   xpos 763
@@ -97,7 +101,6 @@ add_layer {sdf_emm_colour sdf_emm_colour.r sdf_emm_colour.g sdf_emm_colour.b sdf
   color {{parent.emission_colour.r} {parent.emission_colour.g} {parent.emission_colour.b} {parent.emission}}
   format "1 1 0 0 1 1 1 1x1"
   name emm_colour
-  selected true
   xpos 887
   ypos 411
  }

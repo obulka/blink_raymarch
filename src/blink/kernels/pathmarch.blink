@@ -56,6 +56,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
     Image<eRead, eAccessRandom, eEdgeNone> emittances;
 
+    Image<eRead, eAccessRandom, eEdgeNone> scatteringCoefficients;
+
 
     // shape type.x, operation.y, numChildren.z, blend strength.w
     Image<eRead, eAccessRandom, eEdgeNone> shapeProperties;
@@ -130,8 +132,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Scene params
         float _refractiveIndex;
-        float _scatteringCoefficient;
-        float4 _absorptionColour;
+        float4 _scatteringCoefficient;
+        float4 _extinctionCoefficient;
         int _equiangularSamples;
         bool _sampleHDRIEquiangular;
 
@@ -209,8 +211,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Scene params
         defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
-        defineParam(_scatteringCoefficient, "Scattering Coefficient", 0.0f);
-        defineParam(_absorptionColour, "brdf Colour", float4(1));
+        defineParam(_scatteringCoefficient, "Scattering Coefficient", float4(0));
+        defineParam(_extinctionCoefficient, "Extinction Coefficient", float4(1));
         defineParam(_equiangularSamples, "Equi-Angular Samples", 5);
         defineParam(_sampleHDRIEquiangular, "Sample HDRI Equi-Angular", true);
 
@@ -718,7 +720,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             float4 &specularity,
             float4 &transmittance,
             float4 &emittance,
-            float4 &surface,
+            float4 &scatteringCoefficient,
+            float &transmissionRoughness,
+            float &refractiveIndex,
             bool &doRefraction)
     {
         float distance = _maxRayDistance;
@@ -734,15 +738,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             + 1 // mods
             + 1 // nextDistance
             + 3 // diffuse colour
-            + 1 // roughness
+            + 1 // specular roughness
             + 3 // specular colour
             + 1 // specular
-            + 3 // transmissive colour
+            + 3 // extinction coefficient
             + 1 // transmission
             + 3 // emissive colour
-            + 1 // emission
-            + 3 // unused for now
+            + 3 // scattering coefficient
             + 1 // refractive index
+            + 1 // transmission roughness
             + 1 // objectId
             + 1 // blendStrength
         ];
@@ -761,6 +765,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             SampleType(specularities) specularColour = specularities(j, 0);
             SampleType(transmittances) transmissiveColour = transmittances(j, 0);
             SampleType(emittances) emissiveColour = emittances(j, 0);
+            SampleType(scatteringCoefficients) scatteringColour = scatteringCoefficients(j, 0);
             SampleType(surfaceProperties) surfaceProperty = surfaceProperties(j, 0);
 
             const int modifications = ((int) shapeProperty.y) | ((int) surfaceProperty.y);
@@ -775,7 +780,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             float4 blendedSpecularColour = specularColour;
             float4 blendedTransmissiveColour = transmissiveColour;
             float4 blendedEmissiveColour = emissiveColour;
-            float4 blendedSurface = surfaceProperty;
+            float4 blendedScatteringCoefficient = scatteringColour;
+            float blendedRefractiveIndex = surfaceProperty.x;
+            float blendedTransmissionRoughness = surfaceProperty.z;
 
             // Position relative to the parent if we have any
             float3 parentTransformedRay = rayOrigin;
@@ -809,7 +816,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 blendedDiffuseColour,
                 blendedSpecularColour,
                 blendedTransmissiveColour,
-                blendedEmissiveColour
+                blendedEmissiveColour,
+                blendedScatteringCoefficient
             );
 
             // Track which object was hit for the alpha channel
@@ -833,12 +841,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     specularity = blendedSpecularColour;
                     transmittance = blendedTransmissiveColour;
                     emittance = blendedEmissiveColour;
-
-                    surface = blendedSurface;
+                    scatteringCoefficient = blendedScatteringCoefficient;
+                    transmissionRoughness = blendedTransmissionRoughness;
+                    refractiveIndex = blendedRefractiveIndex;
 
                     id = objectId;
 
-                    doRefraction = modifications & 131072;
+                    doRefraction = modifications & 262144;
                 }
 
                 // This was tagged as a boundary object, skip its children
@@ -883,15 +892,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     parentStack[stackLastIndex][19],
                     parentStack[stackLastIndex][20],
                     parentStack[stackLastIndex][21],
-                    parentStack[stackLastIndex][22]
+                    0
                 );
-                blendedSurface = surfaceProperty;
-                blendedSurface = float4(
+                blendedScatteringCoefficient = float4(
+                    parentStack[stackLastIndex][22],
                     parentStack[stackLastIndex][23],
                     parentStack[stackLastIndex][24],
-                    parentStack[stackLastIndex][25],
-                    parentStack[stackLastIndex][26]
+                    0
                 );
+                blendedTransmissionRoughness = parentStack[stackLastIndex][25];
+                blendedRefractiveIndex = parentStack[stackLastIndex][26];
+
                 objectId = parentStack[stackLastIndex][27];
                 stackLastIndex--;
                 parentStackLength--;
@@ -939,14 +950,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                 parentStack[stackIndex][19],
                                 parentStack[stackIndex][20],
                                 parentStack[stackIndex][21],
-                                parentStack[stackIndex][22]
+                                0
                             );
-                            const float4 parentSurfaceProperty = float4(
+                            const float4 parentScatteringCoefficient = float4(
+                                parentStack[stackIndex][22],
                                 parentStack[stackIndex][23],
                                 parentStack[stackIndex][24],
-                                parentStack[stackIndex][25],
-                                parentStack[stackIndex][26]
+                                0
                             );
+                            const float parentTransmissionRoughness = parentStack[stackLastIndex][25];
+                            const float parentRefractiveIndex = parentStack[stackLastIndex][26];
+
                             if (fabs(nextDistance) > fabs(parentNextDistance))
                             {
                                 objectId = parentStack[stackIndex][27];
@@ -966,8 +980,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                                 blendedTransmissiveColour,
                                 parentEmissiveColour,
                                 blendedEmissiveColour,
-                                parentSurfaceProperty,
-                                blendedSurface,
+                                parentScatteringCoefficient,
+                                blendedScatteringCoefficient,
+                                parentTransmissionRoughness,
+                                blendedTransmissionRoughness,
+                                parentRefractiveIndex,
+                                blendedRefractiveIndex,
                                 parentBlendStrength
                             );
                         }
@@ -981,12 +999,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             specularity = blendedSpecularColour;
                             transmittance = blendedTransmissiveColour;
                             emittance = blendedEmissiveColour;
-
-                            surface = blendedSurface;
+                            scatteringCoefficient = blendedScatteringCoefficient;
+                            transmissionRoughness = blendedTransmissionRoughness;
+                            refractiveIndex = blendedRefractiveIndex;
 
                             id = objectId;
 
-                            doRefraction = parentModifications & 131072;
+                            doRefraction = parentModifications & 262144;
                         }
                     }
 
@@ -1016,12 +1035,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     specularity = blendedSpecularColour;
                     transmittance = blendedTransmissiveColour;
                     emittance = blendedEmissiveColour;
-
-                    surface = blendedSurface;
+                    scatteringCoefficient = blendedScatteringCoefficient;
+                    transmissionRoughness = blendedTransmissionRoughness;
+                    refractiveIndex = blendedRefractiveIndex;
 
                     id = objectId;
 
-                    doRefraction = modifications & 131072;
+                    doRefraction = modifications & 262144;
                 }
             }
             else
@@ -1051,11 +1071,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 parentStack[parentStackLength][19] = blendedEmissiveColour.x;
                 parentStack[parentStackLength][20] = blendedEmissiveColour.y;
                 parentStack[parentStackLength][21] = blendedEmissiveColour.z;
-                parentStack[parentStackLength][22] = blendedEmissiveColour.w;
-                parentStack[parentStackLength][23] = blendedSurface.x;
-                parentStack[parentStackLength][24] = blendedSurface.y;
-                parentStack[parentStackLength][25] = blendedSurface.z;
-                parentStack[parentStackLength][26] = blendedSurface.w;
+                parentStack[parentStackLength][22] = blendedScatteringCoefficient.x;
+                parentStack[parentStackLength][23] = blendedScatteringCoefficient.y;
+                parentStack[parentStackLength][24] = blendedScatteringCoefficient.z;
+                parentStack[parentStackLength][25] = blendedTransmissionRoughness;
+                parentStack[parentStackLength][26] = blendedRefractiveIndex;
                 parentStack[parentStackLength][27] = objectId;
                 parentStack[parentStackLength][28] = blendStrength;
                 parentStackLength++;
@@ -1326,13 +1346,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             intensity = float2(intensityAtPosition, shadowIntensityAtPosition);
         }
 
-        return emissiveTerm(
-            float4(
-                lightProperty.x,
-                lightProperty.y,
-                lightProperty.z,
-                intensity.x * intensity.y
-            )
+        return intensity.x * intensity.y * float4(
+            lightProperty.x,
+            lightProperty.y,
+            lightProperty.z,
+            0
         );
     }
 
@@ -1438,20 +1456,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &initialSeed,
             const float4 &initialThroughput,
             const float maxRayDistance,
-            const float currentNestedDielectrics[MAX_NESTED_DIELECTRICS][8],
+            const float currentNestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
             const int currentNumNestedDielectrics,
+            const int numEmissive,
             float3 &lightNormal)
     {
-        float nestedDielectrics[MAX_NESTED_DIELECTRICS][
-            4   // Absorption colour of object
-            + 1 // ID of the dielectric we are currently in
-            + 1 // Refractive index of that object
-            + 1 // Scattering coefficient
-            + 1 // Do refraction
-        ];
+        const int numLights = _lightTextureWidth + numEmissive + _sampleHDRIEquiangular;
+
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS];
         for (int nestedIndex=0; nestedIndex <= currentNumNestedDielectrics; nestedIndex++)
         {
-            for (int dataIndex=0; dataIndex < 8; dataIndex++)
+            for (int dataIndex=0; dataIndex < NESTED_DIELECTRIC_PARAMS; dataIndex++)
             {
                 nestedDielectrics[nestedIndex][dataIndex] = (
                     currentNestedDielectrics[nestedIndex][dataIndex]
@@ -1459,8 +1474,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             }
         }
         int numNestedDielectrics = currentNumNestedDielectrics;
-        float refractiveIndex = nestedDielectrics[numNestedDielectrics][5];
-        float scatteringCoefficient = nestedDielectrics[numNestedDielectrics][6];
+        float refractiveIndex = nestedDielectrics[numNestedDielectrics][REFRACTIVE_INDEX];
+        float4 scatteringCoefficient = float4(
+            nestedDielectrics[numNestedDielectrics][SCATTERING_X],
+            nestedDielectrics[numNestedDielectrics][SCATTERING_Y],
+            nestedDielectrics[numNestedDielectrics][SCATTERING_Z],
+            0
+        );
 
         float4 rayColour = float4(0);
         float4 throughput = initialThroughput;
@@ -1485,7 +1505,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float4 specularity;
         float4 transmittance;
         float4 emittance;
-        float4 surface;
 
         float pixelFootprint = _hitTolerance;
 
@@ -1503,6 +1522,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // Get the closest distance to an object
             bool doRefraction = true;
+            float4 objectScatteringCoefficient = float4(0);
+            float objectTransmissionRoughness = 0.0f;
+            float objectRefractiveIndex = 1.0f;
+
             const float2 result = getMinDistanceToObjectInScene(
                 positionOnRay,
                 pixelFootprint,
@@ -1510,7 +1533,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 specularity,
                 transmittance,
                 emittance,
-                surface,
+                objectScatteringCoefficient,
+                objectTransmissionRoughness,
+                objectRefractiveIndex,
                 doRefraction
             );
 
@@ -1555,7 +1580,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         specularity,
                         transmittance,
                         emittance,
-                        surface
+                        objectTransmissionRoughness,
+                        objectRefractiveIndex
                     );
                 }
 
@@ -1587,16 +1613,16 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     transmissionOffset,
                     transmittance,
                     doRefraction,
-                    surface.x,
-                    surface.z,
-                    surface.w,
+                    objectRefractiveIndex,
+                    objectScatteringCoefficient,
+                    objectTransmissionRoughness,
                     specularity,
                     diffusivity.w,
                     emittance,
                     result.y,
                     distanceToLight,
                     isExitingObject(
-                        nestedDielectrics[numNestedDielectrics][4] - 1,
+                        nestedDielectrics[numNestedDielectrics][OBJECT_ID] - 1,
                         result.y - 1
                     ),
                     materialEmissiveColour,
@@ -1612,7 +1638,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     materialLightPDF
                 );
 
-                rayColour += materialEmissiveColour * throughput;
+                const float radius = dimensions(result.y - 1, 0, 0);
+                const float visibleSurfaceArea = 2.0f * PI * radius * radius;
+
+                rayColour += (
+                    materialEmissiveColour
+                    * throughput
+                    * balanceHeuristic(
+                        previousMaterialPDF,
+                        sampleLightsPDF(numLights, visibleSurfaceArea)
+                    )
+                );
 
                 throughput *= materialBRDF / materialPDF;
 
@@ -1661,11 +1697,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         lightNormal = -direction;
 
-        const float4 absorptionColour = float4(
-            nestedDielectrics[numNestedDielectrics][0],
-            nestedDielectrics[numNestedDielectrics][1],
-            nestedDielectrics[numNestedDielectrics][2],
-            nestedDielectrics[numNestedDielectrics][3]
+        const float4 extinctionCoefficient = float4(
+            nestedDielectrics[numNestedDielectrics][EXTINCTION_X],
+            nestedDielectrics[numNestedDielectrics][EXTINCTION_Y],
+            nestedDielectrics[numNestedDielectrics][EXTINCTION_Z],
+            0
         );
 
         const float correctedDistance = (
@@ -1678,7 +1714,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
         rayColour += throughput * readHDRIValue(direction) * scatteringCoefficient * exp(
-            -absorptionColour * correctedDistance
+            -extinctionCoefficient * correctedDistance
         );
 
         return rayColour;
@@ -1699,7 +1735,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int selectedLight,
             const int numEmissive,
             const bool sampleHDRI,
-            const float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
+            const float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
             const int numNestedDielectrics,
             float3 &lightNormal)
     {
@@ -1753,6 +1789,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 distance,
                 nestedDielectrics,
                 numNestedDielectrics,
+                numEmissive,
                 lightNormal
             );
             lightGeometryFactor = geometryFactor(
@@ -1785,18 +1822,18 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numEmissive,
             const float distanceSinceLastBounce,
-            const float nestedDielectrics[MAX_NESTED_DIELECTRICS][8],
+            const float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
             const int numNestedDielectrics,
             float4 &throughput,
-            float &scatteringCoefficient)
+            float4 &scatteringCoefficient)
     {
-        const float4 absorptionColour = float4(
-            nestedDielectrics[numNestedDielectrics][0],
-            nestedDielectrics[numNestedDielectrics][1],
-            nestedDielectrics[numNestedDielectrics][2],
-            nestedDielectrics[numNestedDielectrics][3]
+        const float4 extinctionCoefficient = float4(
+            nestedDielectrics[numNestedDielectrics][EXTINCTION_X],
+            nestedDielectrics[numNestedDielectrics][EXTINCTION_Y],
+            nestedDielectrics[numNestedDielectrics][EXTINCTION_Z],
+            0
         );
-        int objectIndex = nestedDielectrics[numNestedDielectrics][4] - 1;
+        int objectIndex = nestedDielectrics[numNestedDielectrics][OBJECT_ID] - 1;
         if (objectIndex < 0)
         {
             // blink cannot handle single pixel images in versions < 12.1
@@ -1827,7 +1864,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         const float offset = random(random(seed.z) + random(seed.y + random(seed.x)));
 
-        float noiseSum = 0.0f;
+        float scatteringNoiseSum = 0.0f;
+        float extinctionNoiseSum = 0.0f;
 
         float4 scatteredColour = float4(0);
         for (int step=1; step <= _equiangularSamples; step++)
@@ -1859,20 +1897,27 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 particlePosition,
                 noiseOptions
             );
+            float scatteringNoise = noiseValue;
+            float extinctionNoise = noiseValue;
             if (noiseValue < 0.0f || !(noiseOptions & 1024))
             {
-                noiseValue = 1.0f;
+                scatteringNoise = 1.0f;
+            }
+            if (noiseValue < 0.0f || !(noiseOptions & 2048))
+            {
+                extinctionNoise = 1.0f;
             }
 
-            noiseSum += noiseValue;
+            scatteringNoiseSum += scatteringNoise;
+            extinctionNoiseSum += extinctionNoise;
 
             const float4 lightBRDF = exp(
-                -absorptionColour
-                * noiseValue
+                -extinctionCoefficient
+                * extinctionNoise
                 * (distanceToLight + equiangularDistance)
             );
 
-            scatteredColour += scatteringCoefficient * noiseValue * sampleLight(
+            scatteredColour += scatteringCoefficient * scatteringNoise * sampleLight(
                 seed * 1.9757f / step,
                 throughput * lightBRDF / lightPDF,
                 lightBRDF,
@@ -1893,8 +1938,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         throughput *= exp(
-            -absorptionColour
-            * noiseSum
+            -extinctionCoefficient
+            * extinctionNoiseSum
             * distanceSinceLastBounce
             / (float) _equiangularSamples
         ) / lightPDF;
@@ -1919,26 +1964,21 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int numEmissive,
             float3 &seed)
     {
-        const int numLights = _lightTextureWidth + numEmissive;
+        const int numLights = _lightTextureWidth + numEmissive + _sampleHDRI;
 
         float refractiveIndex = _refractiveIndex;
-        float scatteringCoefficient = _scatteringCoefficient;
+        float4 scatteringCoefficient = _scatteringCoefficient;
 
-        float nestedDielectrics[MAX_NESTED_DIELECTRICS][
-            4   // Absorption colour of object
-            + 1 // ID of the dielectric we are currently in
-            + 1 // Refractive index of that object
-            + 1 // Scattering probability
-            + 1 // Do refraction
-        ];
-        nestedDielectrics[0][0] = _absorptionColour.x;
-        nestedDielectrics[0][1] = _absorptionColour.y;
-        nestedDielectrics[0][2] = _absorptionColour.z;
-        nestedDielectrics[0][3] = _absorptionColour.w;
-        nestedDielectrics[0][4] = -1;
-        nestedDielectrics[0][5] = refractiveIndex;
-        nestedDielectrics[0][6] = scatteringCoefficient;
-        nestedDielectrics[0][7] = false;
+        float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS];
+        nestedDielectrics[0][EXTINCTION_X] = _extinctionCoefficient.x;
+        nestedDielectrics[0][EXTINCTION_Y] = _extinctionCoefficient.y;
+        nestedDielectrics[0][EXTINCTION_Z] = _extinctionCoefficient.z;
+        nestedDielectrics[0][OBJECT_ID] = -1;
+        nestedDielectrics[0][REFRACTIVE_INDEX] = refractiveIndex;
+        nestedDielectrics[0][SCATTERING_X] = scatteringCoefficient.x;
+        nestedDielectrics[0][SCATTERING_Y] = scatteringCoefficient.y;
+        nestedDielectrics[0][SCATTERING_Z] = scatteringCoefficient.z;
+        nestedDielectrics[0][DO_REFRACTION] = false;
         int numNestedDielectrics = 0;
 
         float4 rayColour = float4(0);
@@ -1982,6 +2022,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // Get the closest distance to an object
             bool doRefraction = true;
+            float4 objectScatteringCoefficient = float4(0);
+            float objectTransmissionRoughness = 0.0f;
+            float objectRefractiveIndex = 1.0f;
+
             const float2 result = getMinDistanceToObjectInScene(
                 positionOnRay,
                 pixelFootprint,
@@ -1989,7 +2033,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 specularity,
                 transmittance,
                 emittance,
-                surface,
+                objectScatteringCoefficient,
+                objectTransmissionRoughness,
+                objectRefractiveIndex,
                 doRefraction
             );
 
@@ -2062,7 +2108,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         specularity,
                         transmittance,
                         emittance,
-                        surface
+                        objectTransmissionRoughness,
+                        objectRefractiveIndex
                     );
                 }
 
@@ -2074,7 +2121,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 if (
                     __equiangularSamplingEnabled
-                    && scatteringCoefficient > 0.0f
+                    && (
+                        length(scatteringCoefficient) > 0.0f
+                        || nestedDielectrics[numNestedDielectrics][EXTINCTION_X] > 0.0f
+                        || nestedDielectrics[numNestedDielectrics][EXTINCTION_Y] > 0.0f
+                        || nestedDielectrics[numNestedDielectrics][EXTINCTION_Z] > 0.0f
+                    )
                 ) {
                     // Perform Equi-Angular Sampling
                     rayColour += sampleEquiangular(
@@ -2132,16 +2184,16 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     transmissionOffset,
                     transmittance,
                     doRefraction,
-                    surface.x,
-                    surface.z,
-                    surface.w,
+                    objectRefractiveIndex,
+                    objectScatteringCoefficient,
+                    objectTransmissionRoughness,
                     specularity,
                     diffusivity.w,
                     emittance,
                     result.y,
                     distanceToLight,
                     isExitingObject(
-                        nestedDielectrics[numNestedDielectrics][4] - 1,
+                        nestedDielectrics[numNestedDielectrics][OBJECT_ID] - 1,
                         result.y - 1
                     ),
                     materialEmissiveColour,
@@ -2259,8 +2311,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        if (__equiangularSamplingEnabled && scatteringCoefficient > 0.0f)
-        {
+        if (
+            __equiangularSamplingEnabled
+            && (
+                length(scatteringCoefficient) > 0.0f
+                || nestedDielectrics[numNestedDielectrics][EXTINCTION_X] > 0.0f
+                || nestedDielectrics[numNestedDielectrics][EXTINCTION_Y] > 0.0f
+                || nestedDielectrics[numNestedDielectrics][EXTINCTION_Z] > 0.0f
+            )
+        ) {
             const float correctedDistance = (
                 distanceSinceLastBounce
                 + _maxRayDistance

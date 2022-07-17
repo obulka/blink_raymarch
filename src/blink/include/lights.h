@@ -69,7 +69,7 @@ inline void hdriLightData(
     visibleSurfaceArea = 1.0f;
     lightNormal = -surfaceNormal;
     lightDirection = surfaceNormal;
-    distanceToLight = maxRayDistance;
+    distanceToLight = 1.0f;
 }
 
 
