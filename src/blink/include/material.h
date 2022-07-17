@@ -11,7 +11,11 @@
 // Increase this if you want more than MAX_NESTED_DIELECTRICS nested
 // transmissive objects
 #define MAX_NESTED_DIELECTRICS 4
+
+// Number of parameters needed for nested dielectrics
 #define NESTED_DIELECTRIC_PARAMS 9
+
+// Indices for the nested dielectrics
 #define EXTINCTION_X 0
 #define EXTINCTION_Y 1
 #define EXTINCTION_Z 2

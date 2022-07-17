@@ -60,6 +60,9 @@
 #define PARENT_REFRACTIVE_INDEX 27
 #define PARENT_OBJECT_ID 28
 
+// Maximum recursion depth for ray marching
+#define MAX_RAYS_PER_SUBPIXEL 100
+
 
 kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 {
@@ -154,6 +157,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         bool _usePrecomputedIrradiance;
 
         // Ray params
+        int _numRaysPerPixel;
+        int _maxSpawnableRays;
+
         int _minPathsPerPixel;
         int _maxPathsPerPixel;
         int _maxBounces;
@@ -233,6 +239,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_usePrecomputedIrradiance, "Use Precomputed Irradiance", true);
 
         // Ray params
+        defineParam(_numRaysPerPixel, "Num Rays Per Pixel", 1);
+        defineParam(_maxSpawnableRays, "Max Rays To Spawn On Impact", 1);
+
         defineParam(_minPathsPerPixel, "Min Paths Per Pixel", 1);
         defineParam(_maxPathsPerPixel, "Max Paths Per Pixel", 1);
         defineParam(_maxRayDistance, "Max Ray Distance", 1000.0f);
@@ -741,7 +750,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      * @returns: The minimum distance to an object in the scene, and the
      *     unique identifier of the object.
      */
-    float2 getMinDistanceToObjectInScene(
+    float getMinDistanceToObjectInScene(
             const float3 &rayOrigin,
             const float pixelFootprint,
             float4 &diffusivity,
@@ -751,10 +760,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             float4 &scatteringCoefficient,
             float &transmissionRoughness,
             float &refractiveIndex,
-            bool &doRefraction)
+            bool &doRefraction,
+            int &id)
     {
         float distance = _maxRayDistance;
-        float id = 0.0f;
+        id = 0;
 
         // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour
         // roughness, specular colour, specular, transmissive colour, transmission,
@@ -1098,7 +1108,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             }
         }
 
-        return float2(distance, id);
+        return distance;
     }
 
 
@@ -1466,7 +1476,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      *
      * @returns: The light intensity.
      */
-    inline float4 marchRay(
+    inline float4 marchPath(
             const float3 &rayOrigin,
             const float3 &rayDirection,
             const float3 &initialSeed,
@@ -1538,26 +1548,24 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // Get the closest distance to an object
             bool doRefraction = true;
-            float4 objectScatteringCoefficient = float4(0);
-            float objectTransmissionRoughness = 0.0f;
-            float objectRefractiveIndex = 1.0f;
+            float4 refractedScatteringCoefficient = float4(0);
+            float refractedTransmissionRoughness = 0.0f;
+            float refractedRefractiveIndex = 1.0f;
+            int objectId = 0;
 
-            const float2 result = getMinDistanceToObjectInScene(
+            const float signedStepDistance = getMinDistanceToObjectInScene(
                 positionOnRay,
                 pixelFootprint,
                 diffusivity,
                 specularity,
                 transmittance,
                 emittance,
-                objectScatteringCoefficient,
-                objectTransmissionRoughness,
-                objectRefractiveIndex,
-                doRefraction
+                refractedScatteringCoefficient,
+                refractedTransmissionRoughness,
+                refractedRefractiveIndex,
+                doRefraction,
+                objectId
             );
-
-            // Keep the signed distance so we know whether or not we are
-            // inside the object
-            const float signedStepDistance = result.x;
 
             // Get the absolute value, the true shortest distance to a
             // surface
@@ -1583,7 +1591,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 int noiseOptions;
                 const float noiseValue = getNoiseValue(
-                    result.y - 1,
+                    objectId - 1,
                     intersectionPosition,
                     noiseOptions
                 );
@@ -1596,8 +1604,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         specularity,
                         transmittance,
                         emittance,
-                        objectTransmissionRoughness,
-                        objectRefractiveIndex
+                        refractedTransmissionRoughness,
+                        refractedRefractiveIndex
                     );
                 }
 
@@ -1629,17 +1637,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     transmissionOffset,
                     transmittance,
                     doRefraction,
-                    objectRefractiveIndex,
-                    objectScatteringCoefficient,
-                    objectTransmissionRoughness,
+                    refractedRefractiveIndex,
+                    refractedScatteringCoefficient,
+                    refractedTransmissionRoughness,
                     specularity,
                     diffusivity.w,
                     emittance,
-                    result.y,
+                    objectId,
                     distanceToLight,
                     isExitingObject(
                         nestedDielectrics[numNestedDielectrics][OBJECT_ID] - 1,
-                        result.y - 1
+                        objectId - 1
                     ),
                     materialEmissiveColour,
                     materialBRDF,
@@ -1654,7 +1662,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     materialLightPDF
                 );
 
-                const float radius = dimensions(result.y - 1, 0, 0);
+                const float radius = dimensions(objectId - 1, 0, 0);
                 const float visibleSurfaceArea = 2.0f * PI * radius * radius;
 
                 rayColour += (
@@ -1737,6 +1745,85 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Compute the combined intensity of all lights on the surface of an
+     * object.
+     *
+     * @arg pointOnSurface: The point on the surface to compute the
+     *     light intensity at.
+     * @arg surfaceNormal: The normal direction to the surface.
+     *
+     * @returns: The light intensity.
+     */
+    inline float4 sampleArtificialLights(
+            const float3 &pointOnSurface,
+            const float3 &surfaceNormal,
+            const float4 &emittance,
+            const float diffuseProbability,
+            const float pixelFootprint)
+    {
+        float2 lightIntensity = float2(emittance.w, 0);
+        float4 lightColour = emittance;
+
+        float2 currentLightIntensity;
+
+        // for each light in the scene
+        for (int lightIndex=0; lightIndex < _lightTextureWidth; lightIndex++)
+        {
+            float3 lightDirection = surfaceNormal;
+            float3 lightNormal = -surfaceNormal;
+            float distanceToLight = 0.0f;
+            float visibleSurfaceArea = 1.0f;
+
+            SampleType(lights) light = lights(lightIndex, 0);
+            const int lightType = abs((int) lightProperties(lightIndex, 0, 3));
+
+            if (lightType > 1)
+            {
+                getLightData(
+                    pointOnSurface,
+                    float3(light.x, light.y, light.z),
+                    lightType,
+                    _maxRayDistance,
+                    distanceToLight,
+                    visibleSurfaceArea,
+                    lightDirection,
+                    lightNormal
+                );
+            }
+
+            // Compute the intensity
+            lightColour += sampleArtificialLight(
+                pointOnSurface,
+                surfaceNormal,
+                pixelFootprint * _shadowBias,
+                lightDirection,
+                distanceToLight,
+                lightIndex
+            );
+        }
+
+        // Read the hdri diffuse light contribution
+        if (_usePrecomputedIrradiance && diffuseProbability > _hitTolerance)
+        {
+            const float4 hdriLightColour = readIrradianceValue(surfaceNormal);
+            lightColour += diffuseProbability * hdriLightColour;
+            lightIntensity += float2(
+                diffuseProbability * length(
+                    float3(
+                        hdriLightColour.x,
+                        hdriLightColour.y,
+                        hdriLightColour.z
+                    )
+                ),
+                1.0f
+            );
+        }
+
+        return saturate(lightColour);
+    }
+
+
     float4 sampleLight(
             const float3 &seed,
             const float4 &throughput,
@@ -1793,7 +1880,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 direction = lightDirection;
             }
 
-            lightEmissiveColour = marchRay(
+            lightEmissiveColour = marchPath(
                 offsetPoint(
                     position,
                     surfaceNormal,
@@ -2020,7 +2107,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float4 specularity;
         float4 transmittance;
         float4 emittance;
-        float4 surface;
 
         float pixelFootprint = _hitTolerance;
 
@@ -2038,26 +2124,26 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             // Get the closest distance to an object
             bool doRefraction = true;
-            float4 objectScatteringCoefficient = float4(0);
-            float objectTransmissionRoughness = 0.0f;
-            float objectRefractiveIndex = 1.0f;
+            float4 refractedScatteringCoefficient = float4(0);
+            float refractedTransmissionRoughness = 0.0f;
+            float refractedRefractiveIndex = 1.0f;
+            int objectId = 0;
 
-            const float2 result = getMinDistanceToObjectInScene(
+            // Keep the signed distance so we know whether or not we are
+            // inside the object
+            const float signedStepDistance = getMinDistanceToObjectInScene(
                 positionOnRay,
                 pixelFootprint,
                 diffusivity,
                 specularity,
                 transmittance,
                 emittance,
-                objectScatteringCoefficient,
-                objectTransmissionRoughness,
-                objectRefractiveIndex,
-                doRefraction
+                refractedScatteringCoefficient,
+                refractedTransmissionRoughness,
+                refractedRefractiveIndex,
+                doRefraction,
+                objectId
             );
-
-            // Keep the signed distance so we know whether or not we are
-            // inside the object
-            const float signedStepDistance = result.x;
 
             // Get the absolute value, the true shortest distance to a
             // surface
@@ -2085,7 +2171,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 {
                     // Keep the ID of the first object hit, so we can
                     // store it in the alpha channel
-                    firstObjectId = result.y;
+                    firstObjectId = objectId;
 
                     // Early exit for the various AOVs that are not 'beauty'
                     if (_outputType > BEAUTY_AOV && _outputType < STATS_AOV)
@@ -2111,7 +2197,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 int noiseOptions;
                 const float noiseValue = getNoiseValue(
-                    result.y - 1,
+                    objectId - 1,
                     intersectionPosition,
                     noiseOptions
                 );
@@ -2124,8 +2210,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         specularity,
                         transmittance,
                         emittance,
-                        objectTransmissionRoughness,
-                        objectRefractiveIndex
+                        refractedTransmissionRoughness,
+                        refractedRefractiveIndex
                     );
                 }
 
@@ -2200,17 +2286,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     transmissionOffset,
                     transmittance,
                     doRefraction,
-                    objectRefractiveIndex,
-                    objectScatteringCoefficient,
-                    objectTransmissionRoughness,
+                    refractedRefractiveIndex,
+                    refractedScatteringCoefficient,
+                    refractedTransmissionRoughness,
                     specularity,
                     diffusivity.w,
                     emittance,
-                    result.y,
+                    objectId,
                     distanceToLight,
                     isExitingObject(
                         nestedDielectrics[numNestedDielectrics][OBJECT_ID] - 1,
-                        result.y - 1
+                        objectId - 1
                     ),
                     materialEmissiveColour,
                     materialBRDF,
@@ -2255,7 +2341,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 // Perform MIS material sampling
                 // TODO don't assume this object is a sphere
-                const float radius = dimensions(result.y - 1, 0, 0);
+                const float radius = dimensions(objectId - 1, 0, 0);
                 const float visibleSurfaceArea = 2.0f * PI * radius * radius;
 
                 rayColour += (
@@ -2367,6 +2453,348 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     * March a ray through the scene.
+     *
+     * @arg rayOrigin: The origin of the ray.
+     * @arg rayDirection: The direction of the ray.
+     * @arg seed: A random value to use as the seed for roughness.
+     *
+     * @returns: The ray colour.
+     */
+    float4 marchRay(
+            const float3 &rayOrigin,
+            const float3 &rayDirection,
+            float3 &seed)
+    {
+        const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, _maxSpawnableRays);
+
+        // rayOrigin, rayDirection, rayIntensity, index of refraction
+        float rays[MAX_RAYS_PER_SUBPIXEL][3 + 3 + 1 + 1];
+        rays[0][0] = rayOrigin.x;
+        rays[0][1] = rayOrigin.y;
+        rays[0][2] = rayOrigin.z;
+
+        rays[0][3] = rayDirection.x;
+        rays[0][4] = rayDirection.y;
+        rays[0][5] = rayDirection.z;
+
+        rays[0][6] = 1.0f;
+
+        rays[0][7] = _refractiveIndex;
+
+        int numRays = 1;
+        int currentRayIndex = 0;
+
+        float4 diffusivity;
+        float4 specularity;
+        float4 transmittance;
+        float4 emittance;
+
+        float4 rayColour = float4(0);
+        float4 lightColour = float4(0);
+
+        float lastStepDistance = 1.0f;
+
+        float firstObjectId = 0.0f;
+
+        float pixelFootprint = _hitTolerance;
+
+        float id = 0.0f;
+        float depth = 0.0f;
+
+        int bounces = 0;
+        int iterations = 1;
+
+        // While we have not reached the ray limit
+        while (currentRayIndex < numRays)
+        {
+            // Reset these values
+            float lightIntensity = 1;
+            float distanceTravelled = 0;
+            bool madeContact = false;
+
+            // Get the next ray
+            float3 origin = float3(
+                rays[currentRayIndex][0],
+                rays[currentRayIndex][1],
+                rays[currentRayIndex][2]
+            );
+            const float3 direction = float3(
+                rays[currentRayIndex][3],
+                rays[currentRayIndex][4],
+                rays[currentRayIndex][5]
+            );
+            const float rayIntensity = rays[currentRayIndex][6];
+
+            float3 positionOnRay = origin;
+
+            // March the ray
+            while (
+                distanceTravelled < _maxRayDistance
+                && iterations < _maxRaySteps
+                && rayIntensity > _hitTolerance
+            ) {
+                positionOnRay = origin + distanceTravelled * direction;
+
+                // Get the closest distance to an object
+                bool doRefraction = true;
+                float4 refractedScatteringCoefficient = float4(0);
+                float refractedTransmissionRoughness = 0.0f;
+                float refractedRefractiveIndex = 1.0f;
+                int objectId = 0;
+
+                // Get the closest distance to an object
+                const float signedStepDistance = getMinDistanceToObjectInScene(
+                    positionOnRay,
+                    pixelFootprint,
+                    diffusivity,
+                    specularity,
+                    transmittance,
+                    emittance,
+                    refractedScatteringCoefficient,
+                    refractedTransmissionRoughness,
+                    refractedRefractiveIndex,
+                    doRefraction,
+                    objectId
+                );
+
+                // Get the absolute value, the true shortest distance to a
+                // surface
+                const float stepDistance = fabs(signedStepDistance);
+
+                // Keep track of the distance the ray has travelled
+                distanceTravelled += stepDistance;
+
+                pixelFootprint += _hitTolerance * stepDistance;
+
+                // Have we hit the nearest object?
+                if (stepDistance < pixelFootprint)
+                {
+                    float3 intersectionPosition = positionOnRay + stepDistance * direction;
+
+                    // The normal to the surface at that position
+                    float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
+                        intersectionPosition,
+                        pixelFootprint
+                    );
+
+                    // Roughen the surface
+                    if (diffusivity.w > 0.0f)
+                    {
+                        surfaceNormal = uniformDirectionInSolidAngle(
+                            surfaceNormal,
+                            diffusivity.w * diffusivity.w,
+                            seed
+                        );
+                    }
+
+                    // Keep the ID of the first object hit, so we can
+                    // store it in the alpha channel
+                    if (bounces == 0)
+                    {
+                        // Keep the ID of the first object hit, so we can
+                        // store it in the alpha channel
+                        firstObjectId = objectId;
+
+                        // Early exit for the various AOVs that are not 'beauty'
+                        if (_outputType > BEAUTY_AOV && _outputType < STATS_AOV)
+                        {
+                            return earlyExitAOVs(
+                                _outputType,
+                                intersectionPosition,
+                                worldToLocal(firstObjectId - 1, intersectionPosition),
+                                surfaceNormal,
+                                fabs(matmul(
+                                    _cameraWorldMatrix.invert(),
+                                    float4(
+                                        intersectionPosition.x,
+                                        intersectionPosition.y,
+                                        intersectionPosition.z,
+                                        1.0f
+                                    )
+                                )[2]),
+                                firstObjectId
+                            );
+                        }
+                    }
+
+                    int noiseOptions;
+                    const float noiseValue = getNoiseValue(
+                        objectId - 1,
+                        intersectionPosition,
+                        noiseOptions
+                    );
+                    if (noiseValue >= 0.0f)
+                    {
+                        useNoiseOnMaterial(
+                            noiseOptions,
+                            noiseValue,
+                            diffusivity,
+                            specularity,
+                            transmittance,
+                            emittance,
+                            refractedTransmissionRoughness,
+                            refractedRefractiveIndex
+                        );
+                    }
+
+                    const float diffuseProbability = saturate(1 - specularity.w - transmittance.w);
+
+                    // Get the light intensity
+                    lightColour = sampleArtificialLights(
+                        intersectionPosition,
+                        surfaceNormal,
+                        emittance,
+                        diffuseProbability,
+                        pixelFootprint
+                    );
+
+                    // Update the colour of the ray
+                    rayColour = blend(
+                        lightColour * diffusivity,
+                        rayColour,
+                        rayIntensity * diffuseProbability * length(lightColour)
+                    );
+
+                    // Exit if we have reached the bounce limit
+                    if (++bounces >= __bouncesPerRay)
+                    {
+                        return finalAOVs(
+                            _outputType,
+                            iterations,
+                            bounces,
+                            firstObjectId,
+                            rayColour
+                        );
+                    }
+
+                    // Otherwise compute the refraction values
+                    const float incidentRefractiveIndex = rays[currentRayIndex][7];
+                    const float reflectivity = schlickReflectionCoefficient(
+                        direction,
+                        surfaceNormal,
+                        incidentRefractiveIndex,
+                        refractedRefractiveIndex
+                    );
+                    const float refraction = saturate(transmittance.w * (1 - reflectivity));
+                    float intensity = rayIntensity * refraction;
+                    float reflection = specularity.w;
+
+                    // And spawn a refracted ray using them
+                    if (numRays < lastRay && intensity > _hitTolerance)
+                    {
+                        reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
+
+                        const float3 refractedDirection = refractRayThroughSurface(
+                            direction,
+                            surfaceNormal,
+                            incidentRefractiveIndex,
+                            refractedRefractiveIndex
+                        );
+
+                        // Offset the point so that it doesn't get trapped on
+                        // surface.
+                        const float3 refractedOrigin = offsetPoint(
+                            intersectionPosition,
+                            -surfaceNormal,
+                            (2.0f * pixelFootprint + stepDistance) * _shadowBias
+                        );
+
+                        rays[numRays][0] = refractedOrigin.x;
+                        rays[numRays][1] = refractedOrigin.y;
+                        rays[numRays][2] = refractedOrigin.z;
+
+                        rays[numRays][3] = refractedDirection.x;
+                        rays[numRays][4] = refractedDirection.y;
+                        rays[numRays][5] = refractedDirection.z;
+
+                        rays[numRays][6] = intensity;
+
+                        rays[numRays][7] = refractedRefractiveIndex;
+
+                        numRays++;
+                    }
+
+                    // Also spawn a reflected ray
+                    intensity = rayIntensity * reflection;
+                    if (numRays < lastRay && intensity > _hitTolerance)
+                    {
+                        const float3 reflectedDirection = reflectRayOffSurface(
+                            direction,
+                            surfaceNormal
+                        );
+
+                        // Offset the point so that it doesn't get trapped on
+                        // surface.
+                        const float3 reflectedOrigin = offsetPoint(
+                            intersectionPosition,
+                            surfaceNormal,
+                            pixelFootprint * _shadowBias
+                        );
+
+                        rays[numRays][0] = reflectedOrigin.x;
+                        rays[numRays][1] = reflectedOrigin.y;
+                        rays[numRays][2] = reflectedOrigin.z;
+
+                        rays[numRays][3] = reflectedDirection.x;
+                        rays[numRays][4] = reflectedDirection.y;
+                        rays[numRays][5] = reflectedDirection.z;
+
+                        rays[numRays][6] = intensity;
+
+                        rays[numRays][7] = incidentRefractiveIndex;
+
+                        numRays++;
+                    }
+
+                    // Flag that we have collided with at least one object.
+                    madeContact = true;
+                    pixelFootprint = _hitTolerance;
+
+                    // Update the random seed
+                    seed = 5.689f * random(
+                        seed + random(fabs(intersectionPosition + direction))
+                    );
+
+                    break;
+                }
+
+                lastStepDistance = signedStepDistance;
+                iterations++;
+            }
+
+            // If we are not computing the scene value and we have missed all
+            // objects, return black.
+            if (_outputType > 0)
+            {
+                return rayMissAOVs(
+                    _outputType,
+                    iterations,
+                    bounces,
+                    firstObjectId
+                );
+            }
+
+            // Otherwise, if we missed all objects, read the hdri value
+            // in the direction the ray was last travelling
+            if (!madeContact)
+            {
+                rayColour = blend(
+                    saturate(readHDRIValue(direction)),
+                    rayColour,
+                    rayIntensity
+                );
+            }
+
+            currentRayIndex++;
+        }
+
+        rayColour.w = (bounces > 0) * firstObjectId;
+        return rayColour;
+    }
+
+
+    /**
      *
      */
     int getEmissiveIndices(int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES])
@@ -2381,6 +2809,51 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         return currentIndex;
+    }
+
+
+    void getCameraRay(
+            const float3 &seed,
+            const float2 &pixelLocation,
+            float3 &rayOrigin,
+            float3 &rayDirection)
+    {
+        const float2 uvCoordinates = pixelsToUV(
+            pixelLocation + random(float2(seed.x, seed.y)),
+            float2(_formatWidth, _formatHeight)
+        );
+        if (_latLong)
+        {
+            createLatLongCameraRay(
+                _cameraWorldMatrix,
+                uvCoordinates,
+                rayOrigin,
+                rayDirection
+            );
+        }
+        else if (_depthOfFieldEnabled)
+        {
+            createCameraRay(
+                _cameraWorldMatrix,
+                __inverseCameraProjectionMatrix,
+                uvCoordinates,
+                __aperture,
+                _focalDistance,
+                seed,
+                rayOrigin,
+                rayDirection
+            );
+        }
+        else
+        {
+            createCameraRay(
+                _cameraWorldMatrix,
+                __inverseCameraProjectionMatrix,
+                uvCoordinates,
+                rayOrigin,
+                rayDirection
+            );
+        }
     }
 
 
@@ -2401,6 +2874,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             _maxPathsPerPixel,
             float3(variancePixel.x, variancePixel.y, variancePixel.z)
         );
+        const float totalPaths = numPaths + _numRaysPerPixel;
 
         float4 resultPixel = float4(0);
 
@@ -2410,47 +2884,39 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         const int numEmissive = getEmissiveIndices(emissiveMISOptions);
 
+        for (int ray=1; ray <= _numRaysPerPixel; ray++)
+        {
+            // Generate a ray from the camera
+            float3 rayOrigin;
+            float3 rayDirection;
+            getCameraRay(
+                seed,
+                pixelLocation,
+                rayOrigin,
+                rayDirection
+            );
+
+            // Determine the colour of the ray
+            resultPixel += marchRay(
+                rayOrigin,
+                rayDirection,
+                seed
+            );
+
+            seed = 37.5798f * random(seed * ray * 1.79183324f);
+        }
+
         for (int path=1; path <= numPaths; path++)
         {
             // Generate a ray from the camera
             float3 rayOrigin;
             float3 rayDirection;
-            const float2 uvCoordinates = pixelsToUV(
-                pixelLocation + random(float2(seed.x, seed.y)),
-                float2(_formatWidth, _formatHeight)
+            getCameraRay(
+                seed,
+                pixelLocation,
+                rayOrigin,
+                rayDirection
             );
-            if (_latLong)
-            {
-                createLatLongCameraRay(
-                    _cameraWorldMatrix,
-                    uvCoordinates,
-                    rayOrigin,
-                    rayDirection
-                );
-            }
-            else if (_depthOfFieldEnabled)
-            {
-                createCameraRay(
-                    _cameraWorldMatrix,
-                    __inverseCameraProjectionMatrix,
-                    uvCoordinates,
-                    __aperture,
-                    _focalDistance,
-                    seed,
-                    rayOrigin,
-                    rayDirection
-                );
-            }
-            else
-            {
-                createCameraRay(
-                    _cameraWorldMatrix,
-                    __inverseCameraProjectionMatrix,
-                    uvCoordinates,
-                    rayOrigin,
-                    rayDirection
-                );
-            }
 
             // Determine the colour of the ray
             resultPixel += marchPath(
@@ -2464,17 +2930,17 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             seed = 53.1231f * random(seed * path * 1.31537f);
         }
 
-        const uint objectId = resultPixel.w / numPaths;
+        const uint objectId = resultPixel.w / totalPaths;
 
         const float numPrecomputedPaths = variancePixel.w;
 
-        dst() = (resultPixel + numPrecomputedPaths * src()) / (numPaths + numPrecomputedPaths);
+        dst() = (resultPixel + numPrecomputedPaths * src()) / (totalPaths + numPrecomputedPaths);
 
         if (_outputType == STATS_AOV)
         {
-            dst(2) = numPaths + numPrecomputedPaths;
+            dst(2) = totalPaths + numPrecomputedPaths;
         }
 
-        dst(3) = encodeTwoValuesInUint(objectId, numPaths + numPrecomputedPaths);
+        dst(3) = encodeTwoValuesInUint(objectId, totalPaths + numPrecomputedPaths);
     }
 };
