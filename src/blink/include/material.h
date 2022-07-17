@@ -398,13 +398,11 @@ inline float sampleTransmissive(
     materialBRDF = exp(
         -absorptionColour
         * distanceTravelledThroughMaterial
-        * scatteringCoefficient
         * doAbsorption
     );
     lightBRDF = exp(
         -absorptionColour
         * distanceToLight
-        * scatteringCoefficient
         * doAbsorption
     );
 

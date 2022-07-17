@@ -1677,8 +1677,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // Read the hdri value in the direction the ray was last travelling
         // and absorb an amount of light proportional to the distance travelled
         // through the last material
-        rayColour += throughput * readHDRIValue(direction) * exp(
-            -absorptionColour * scatteringCoefficient * correctedDistance
+        rayColour += throughput * readHDRIValue(direction) * scatteringCoefficient * exp(
+            -absorptionColour * correctedDistance
         );
 
         return rayColour;
@@ -1868,9 +1868,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
             const float4 lightBRDF = exp(
                 -absorptionColour
-                * (distanceToLight + equiangularDistance)
-                * scatteringCoefficient
                 * noiseValue
+                * (distanceToLight + equiangularDistance)
             );
 
             scatteredColour += scatteringCoefficient * noiseValue * sampleLight(
@@ -1895,9 +1894,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         throughput *= exp(
             -absorptionColour
-            * distanceSinceLastBounce
-            * scatteringCoefficient
             * noiseSum
+            * distanceSinceLastBounce
             / (float) _equiangularSamples
         ) / lightPDF;
 
