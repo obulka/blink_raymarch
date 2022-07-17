@@ -25,6 +25,41 @@
 #define MAX_CHILD_DEPTH 32
 #define MAX_MIS_EMISSIVE_SHAPES 32
 
+// Number of parameters needed in the parent stacks
+#define PARENT_STACK_PARAMS 8
+#define FULL_PARENT_STACK_PARAMS 29
+
+// Indices to store parent stack data
+#define NUM_CHILDREN 0
+#define TRANSFORM_X 1
+#define TRANSFORM_Y 2
+#define TRANSFORM_Z 3
+#define SCALE 4
+#define MODIFICATIONS 5
+#define BLEND_STRENGTH 6
+#define DISTANCE 7
+#define DIFFUSE_COLOUR_R 8
+#define DIFFUSE_COLOUR_G 9
+#define DIFFUSE_COLOUR_B 10
+#define SPECULAR_ROUGHNESS 11
+#define SPECULAR_COLOUR_R 12
+#define SPECULAR_COLOUR_G 13
+#define SPECULAR_COLOUR_B 14
+#define SPECULAR 15
+#define EXTINCTION_R 16
+#define EXTINCTION_G 17
+#define EXTINCTION_B 18
+#define TRANSMISSION 19
+#define EMISSION_R 20
+#define EMISSION_G 21
+#define EMISSION_B 22
+#define SCATTERING_R 23
+#define SCATTERING_G 24
+#define SCATTERING_B 25
+#define TRANSMISSION_ROUGHNESS 26
+#define PARENT_REFRACTIVE_INDEX 27
+#define PARENT_OBJECT_ID 28
+
 
 kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 {
@@ -517,14 +552,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour
         // roughness, specular colour, specular, transmissive colour, transmission,
         // emissive colour, emission, refractive index, objectId, blendStrength
-        float parentStack[MAX_CHILD_DEPTH][
-            1   // numChildren
-            + 3 // transformedRay
-            + 1 // scale
-            + 1 // mods
-            + 1 // nextDistance
-            + 1 // blendStrength
-        ];
+        float parentStack[MAX_CHILD_DEPTH][PARENT_STACK_PARAMS];
         int parentStackLength = 0;
 
         for (int j=0; j < _objectTextureWidth; j++)
@@ -549,10 +577,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             float3 parentTransformedRay = rayOrigin;
             if (parentStackLength > 0)
             {
-                parentTransformedRay.x = parentStack[stackLastIndex][1];
-                parentTransformedRay.y = parentStack[stackLastIndex][2];
-                parentTransformedRay.z = parentStack[stackLastIndex][3];
-                scale *= parentStack[stackLastIndex][4];
+                parentTransformedRay.x = parentStack[stackLastIndex][TRANSFORM_X];
+                parentTransformedRay.y = parentStack[stackLastIndex][TRANSFORM_Y];
+                parentTransformedRay.z = parentStack[stackLastIndex][TRANSFORM_Z];
+                scale *= parentStack[stackLastIndex][SCALE];
             }
 
             // Use parent transform to position child
@@ -600,12 +628,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
                 {
-                    parentStack[parentIndex][0] -= numChildren + 1.0f;
+                    parentStack[parentIndex][NUM_CHILDREN] -= numChildren + 1.0f;
                 }
 
                 // If there are no parents, or still children of the parent
                 // we do not need to compute anything further for this loop
-                if (parentStackLength <= 0 || parentStack[stackLastIndex][0] > 0.0f)
+                if (parentStackLength <= 0 || parentStack[stackLastIndex][NUM_CHILDREN] > 0.0f)
                 {
                     continue;
                 }
@@ -613,7 +641,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // pop stack
                 // we know that there will be no more children if we did not continue
                 numChildren = 0.0f;
-                nextDistance = parentStack[stackLastIndex][6];
+                nextDistance = parentStack[stackLastIndex][DISTANCE];
                 stackLastIndex--;
                 parentStackLength--;
             }
@@ -629,7 +657,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     // the objects that still have children
                     for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)
                     {
-                        const int parentModifications = (int) parentStack[stackIndex][5];
+                        const int parentModifications = parentStack[stackIndex][MODIFICATIONS];
 
                         // Do not need to interact with bounding volumes.
                         // They are in the stack for relative positioning
@@ -637,8 +665,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         // the bounding box to follow the children
                         if (!(parentModifications & 4096))
                         {
-                            const float parentNextDistance = parentStack[stackIndex][6];
-                            const float parentBlendStrength = parentStack[stackIndex][7];
+                            const float parentBlendStrength = parentStack[stackIndex][BLEND_STRENGTH];
+                            const float parentNextDistance = parentStack[stackIndex][DISTANCE];
 
                             // Compute interaction between parent and this child
                             nextDistance = performChildInteraction(
@@ -661,13 +689,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         // Decrement the number of children each parent has
                         for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
                         {
-                            parentStack[parentIndex][0] -= 1.0f;
+                            parentStack[parentIndex][NUM_CHILDREN] -= 1.0f;
                         }
 
                         // Get the number of children still remaining for the parent
                         // If there are still children, we can break out of this loop
                         // to process the rest of them before the parent itself
-                        numChildren = parentStack[stackLastIndex][0];
+                        numChildren = parentStack[stackLastIndex][NUM_CHILDREN];
                     }
                     while (numChildren <= 0.0f && --stackLastIndex >= 0);
 
@@ -684,14 +712,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Node has Children, push it to the stack for later
                 // processing when we have all its children
                 // parentStack.push()
-                parentStack[parentStackLength][0] = numChildren;
-                parentStack[parentStackLength][1] = transformedRay.x;
-                parentStack[parentStackLength][2] = transformedRay.y;
-                parentStack[parentStackLength][3] = transformedRay.z;
-                parentStack[parentStackLength][4] = scale;
-                parentStack[parentStackLength][5] = (float) modifications;
-                parentStack[parentStackLength][6] = nextDistance;
-                parentStack[parentStackLength][7] = blendStrength;
+                parentStack[parentStackLength][NUM_CHILDREN] = numChildren;
+                parentStack[parentStackLength][TRANSFORM_X] = transformedRay.x;
+                parentStack[parentStackLength][TRANSFORM_Y] = transformedRay.y;
+                parentStack[parentStackLength][TRANSFORM_Z] = transformedRay.z;
+                parentStack[parentStackLength][SCALE] = scale;
+                parentStack[parentStackLength][MODIFICATIONS] = (float) modifications;
+                parentStack[parentStackLength][BLEND_STRENGTH] = blendStrength;
+                parentStack[parentStackLength][DISTANCE] = nextDistance;
                 parentStackLength++;
             }
         }
@@ -731,25 +759,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         // numChildren, transformedRay, scale, mods, nextDistance, diffuse colour
         // roughness, specular colour, specular, transmissive colour, transmission,
         // emissive colour, emission, refractive index, objectId, blendStrength
-        float parentStack[MAX_CHILD_DEPTH][
-            1   // numChildren
-            + 3 // transformedRay
-            + 1 // scale
-            + 1 // mods
-            + 1 // nextDistance
-            + 3 // diffuse colour
-            + 1 // specular roughness
-            + 3 // specular colour
-            + 1 // specular
-            + 3 // extinction coefficient
-            + 1 // transmission
-            + 3 // emissive colour
-            + 3 // scattering coefficient
-            + 1 // refractive index
-            + 1 // transmission roughness
-            + 1 // objectId
-            + 1 // blendStrength
-        ];
+        float parentStack[MAX_CHILD_DEPTH][FULL_PARENT_STACK_PARAMS];
         int parentStackLength = 0;
 
         for (int j=0; j < _objectTextureWidth; j++)
@@ -788,10 +798,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             float3 parentTransformedRay = rayOrigin;
             if (parentStackLength > 0)
             {
-                parentTransformedRay.x = parentStack[stackLastIndex][1];
-                parentTransformedRay.y = parentStack[stackLastIndex][2];
-                parentTransformedRay.z = parentStack[stackLastIndex][3];
-                scale *= parentStack[stackLastIndex][4];
+                parentTransformedRay.x = parentStack[stackLastIndex][TRANSFORM_X];
+                parentTransformedRay.y = parentStack[stackLastIndex][TRANSFORM_Y];
+                parentTransformedRay.z = parentStack[stackLastIndex][TRANSFORM_Z];
+                scale *= parentStack[stackLastIndex][SCALE];
             }
 
             // Use parent transform to position child
@@ -856,12 +866,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
                 {
-                    parentStack[parentIndex][0] -= numChildren + 1.0f;
+                    parentStack[parentIndex][NUM_CHILDREN] -= numChildren + 1.0f;
                 }
 
                 // If there are no parents, or still children of the parent
                 // we do not need to compute anything further for this loop
-                if (parentStackLength <= 0 || parentStack[stackLastIndex][0] > 0.0f)
+                if (parentStackLength <= 0 || parentStack[stackLastIndex][NUM_CHILDREN] > 0.0f)
                 {
                     continue;
                 }
@@ -869,41 +879,41 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // pop stack
                 // we know that there will be no more children if we did not continue
                 numChildren = 0.0f;
-                nextDistance = parentStack[stackLastIndex][6];
+                nextDistance = parentStack[stackLastIndex][DISTANCE];
                 blendedDiffuseColour = float4(
-                    parentStack[stackLastIndex][7],
-                    parentStack[stackLastIndex][8],
-                    parentStack[stackLastIndex][9],
-                    parentStack[stackLastIndex][10]
+                    parentStack[stackLastIndex][DIFFUSE_COLOUR_R],
+                    parentStack[stackLastIndex][DIFFUSE_COLOUR_G],
+                    parentStack[stackLastIndex][DIFFUSE_COLOUR_B],
+                    parentStack[stackLastIndex][SPECULAR_ROUGHNESS]
                 );
                 blendedSpecularColour = float4(
-                    parentStack[stackLastIndex][11],
-                    parentStack[stackLastIndex][12],
-                    parentStack[stackLastIndex][13],
-                    parentStack[stackLastIndex][14]
+                    parentStack[stackLastIndex][SPECULAR_COLOUR_R],
+                    parentStack[stackLastIndex][SPECULAR_COLOUR_G],
+                    parentStack[stackLastIndex][SPECULAR_COLOUR_B],
+                    parentStack[stackLastIndex][SPECULAR]
                 );
                 blendedTransmissiveColour = float4(
-                    parentStack[stackLastIndex][15],
-                    parentStack[stackLastIndex][16],
-                    parentStack[stackLastIndex][17],
-                    parentStack[stackLastIndex][18]
+                    parentStack[stackLastIndex][EXTINCTION_R],
+                    parentStack[stackLastIndex][EXTINCTION_G],
+                    parentStack[stackLastIndex][EXTINCTION_B],
+                    parentStack[stackLastIndex][TRANSMISSION]
                 );
                 blendedEmissiveColour = float4(
-                    parentStack[stackLastIndex][19],
-                    parentStack[stackLastIndex][20],
-                    parentStack[stackLastIndex][21],
+                    parentStack[stackLastIndex][EMISSION_R],
+                    parentStack[stackLastIndex][EMISSION_G],
+                    parentStack[stackLastIndex][EMISSION_B],
                     0
                 );
                 blendedScatteringCoefficient = float4(
-                    parentStack[stackLastIndex][22],
-                    parentStack[stackLastIndex][23],
-                    parentStack[stackLastIndex][24],
+                    parentStack[stackLastIndex][SCATTERING_R],
+                    parentStack[stackLastIndex][SCATTERING_G],
+                    parentStack[stackLastIndex][SCATTERING_B],
                     0
                 );
-                blendedTransmissionRoughness = parentStack[stackLastIndex][25];
-                blendedRefractiveIndex = parentStack[stackLastIndex][26];
+                blendedTransmissionRoughness = parentStack[stackLastIndex][TRANSMISSION_ROUGHNESS];
+                blendedRefractiveIndex = parentStack[stackLastIndex][PARENT_REFRACTIVE_INDEX];
 
-                objectId = parentStack[stackLastIndex][27];
+                objectId = parentStack[stackLastIndex][PARENT_OBJECT_ID];
                 stackLastIndex--;
                 parentStackLength--;
             }
@@ -927,45 +937,51 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         // the bounding box to follow the children
                         if (!(parentModifications & 4096))
                         {
-                            const float parentNextDistance = parentStack[stackIndex][6];
+                            const float parentBlendStrength = (
+                                parentStack[stackIndex][BLEND_STRENGTH]
+                            );
+                            const float parentNextDistance = parentStack[stackIndex][DISTANCE];
                             const float4 parentDiffuseColour = float4(
-                                parentStack[stackIndex][7],
-                                parentStack[stackIndex][8],
-                                parentStack[stackIndex][9],
-                                parentStack[stackIndex][10]
+                                parentStack[stackIndex][DIFFUSE_COLOUR_R],
+                                parentStack[stackIndex][DIFFUSE_COLOUR_G],
+                                parentStack[stackIndex][DIFFUSE_COLOUR_B],
+                                parentStack[stackIndex][SPECULAR_ROUGHNESS]
                             );
                             const float4 parentSpecularColour = float4(
-                                parentStack[stackIndex][11],
-                                parentStack[stackIndex][12],
-                                parentStack[stackIndex][13],
-                                parentStack[stackIndex][14]
+                                parentStack[stackIndex][SPECULAR_COLOUR_R],
+                                parentStack[stackIndex][SPECULAR_COLOUR_G],
+                                parentStack[stackIndex][SPECULAR_COLOUR_B],
+                                parentStack[stackIndex][SPECULAR]
                             );
                             const float4 parentTransmissiveColour = float4(
-                                parentStack[stackIndex][15],
-                                parentStack[stackIndex][16],
-                                parentStack[stackIndex][17],
-                                parentStack[stackIndex][18]
+                                parentStack[stackIndex][EXTINCTION_R],
+                                parentStack[stackIndex][EXTINCTION_G],
+                                parentStack[stackIndex][EXTINCTION_B],
+                                parentStack[stackIndex][TRANSMISSION]
                             );
                             const float4 parentEmissiveColour = float4(
-                                parentStack[stackIndex][19],
-                                parentStack[stackIndex][20],
-                                parentStack[stackIndex][21],
+                                parentStack[stackIndex][EMISSION_R],
+                                parentStack[stackIndex][EMISSION_G],
+                                parentStack[stackIndex][EMISSION_B],
                                 0
                             );
                             const float4 parentScatteringCoefficient = float4(
-                                parentStack[stackIndex][22],
-                                parentStack[stackIndex][23],
-                                parentStack[stackIndex][24],
+                                parentStack[stackIndex][SCATTERING_R],
+                                parentStack[stackIndex][SCATTERING_G],
+                                parentStack[stackIndex][SCATTERING_B],
                                 0
                             );
-                            const float parentTransmissionRoughness = parentStack[stackLastIndex][25];
-                            const float parentRefractiveIndex = parentStack[stackLastIndex][26];
+                            const float parentTransmissionRoughness = (
+                                parentStack[stackLastIndex][TRANSMISSION_ROUGHNESS]
+                            );
+                            const float parentRefractiveIndex = (
+                                parentStack[stackLastIndex][PARENT_REFRACTIVE_INDEX]
+                            );
 
                             if (fabs(nextDistance) > fabs(parentNextDistance))
                             {
-                                objectId = parentStack[stackIndex][27];
+                                objectId = parentStack[stackIndex][PARENT_OBJECT_ID];
                             }
-                            const float parentBlendStrength = parentStack[stackIndex][28];
 
                             // Compute interaction between parent and this child
                             nextDistance = performChildInteraction(
@@ -1014,13 +1030,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         // Decrement the number of children each parent has
                         for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
                         {
-                            parentStack[parentIndex][0] -= 1.0f;
+                            parentStack[parentIndex][NUM_CHILDREN] -= 1.0f;
                         }
 
                         // Get the number of children still remaining for the parent
                         // If there are still children, we can break out of this loop
                         // to process the rest of them before the parent itself
-                        numChildren = parentStack[stackLastIndex][0];
+                        numChildren = parentStack[stackLastIndex][NUM_CHILDREN];
                     }
                     while (numChildren <= 0.0f && --stackLastIndex >= 0);
 
@@ -1049,35 +1065,35 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 // Node has Children, push it to the stack for later
                 // processing when we have all its children
                 // parentStack.push()
-                parentStack[parentStackLength][0] = numChildren;
-                parentStack[parentStackLength][1] = transformedRay.x;
-                parentStack[parentStackLength][2] = transformedRay.y;
-                parentStack[parentStackLength][3] = transformedRay.z;
-                parentStack[parentStackLength][4] = scale;
-                parentStack[parentStackLength][5] = (float) modifications;
-                parentStack[parentStackLength][6] = nextDistance;
-                parentStack[parentStackLength][7] = blendedDiffuseColour.x;
-                parentStack[parentStackLength][8] = blendedDiffuseColour.y;
-                parentStack[parentStackLength][9] = blendedDiffuseColour.z;
-                parentStack[parentStackLength][10] = blendedDiffuseColour.w;
-                parentStack[parentStackLength][11] = blendedSpecularColour.x;
-                parentStack[parentStackLength][12] = blendedSpecularColour.y;
-                parentStack[parentStackLength][13] = blendedSpecularColour.z;
-                parentStack[parentStackLength][14] = blendedSpecularColour.w;
-                parentStack[parentStackLength][15] = blendedTransmissiveColour.x;
-                parentStack[parentStackLength][16] = blendedTransmissiveColour.y;
-                parentStack[parentStackLength][17] = blendedTransmissiveColour.z;
-                parentStack[parentStackLength][18] = blendedTransmissiveColour.w;
-                parentStack[parentStackLength][19] = blendedEmissiveColour.x;
-                parentStack[parentStackLength][20] = blendedEmissiveColour.y;
-                parentStack[parentStackLength][21] = blendedEmissiveColour.z;
-                parentStack[parentStackLength][22] = blendedScatteringCoefficient.x;
-                parentStack[parentStackLength][23] = blendedScatteringCoefficient.y;
-                parentStack[parentStackLength][24] = blendedScatteringCoefficient.z;
-                parentStack[parentStackLength][25] = blendedTransmissionRoughness;
-                parentStack[parentStackLength][26] = blendedRefractiveIndex;
-                parentStack[parentStackLength][27] = objectId;
-                parentStack[parentStackLength][28] = blendStrength;
+                parentStack[parentStackLength][NUM_CHILDREN] = numChildren;
+                parentStack[parentStackLength][TRANSFORM_X] = transformedRay.x;
+                parentStack[parentStackLength][TRANSFORM_Y] = transformedRay.y;
+                parentStack[parentStackLength][TRANSFORM_Z] = transformedRay.z;
+                parentStack[parentStackLength][SCALE] = scale;
+                parentStack[parentStackLength][MODIFICATIONS] = (float) modifications;
+                parentStack[parentStackLength][BLEND_STRENGTH] = blendStrength;
+                parentStack[parentStackLength][DISTANCE] = nextDistance;
+                parentStack[parentStackLength][DIFFUSE_COLOUR_R] = blendedDiffuseColour.x;
+                parentStack[parentStackLength][DIFFUSE_COLOUR_G] = blendedDiffuseColour.y;
+                parentStack[parentStackLength][DIFFUSE_COLOUR_B] = blendedDiffuseColour.z;
+                parentStack[parentStackLength][SPECULAR_ROUGHNESS] = blendedDiffuseColour.w;
+                parentStack[parentStackLength][SPECULAR_COLOUR_R] = blendedSpecularColour.x;
+                parentStack[parentStackLength][SPECULAR_COLOUR_G] = blendedSpecularColour.y;
+                parentStack[parentStackLength][SPECULAR_COLOUR_B] = blendedSpecularColour.z;
+                parentStack[parentStackLength][SPECULAR] = blendedSpecularColour.w;
+                parentStack[parentStackLength][EXTINCTION_R] = blendedTransmissiveColour.x;
+                parentStack[parentStackLength][EXTINCTION_G] = blendedTransmissiveColour.y;
+                parentStack[parentStackLength][EXTINCTION_B] = blendedTransmissiveColour.z;
+                parentStack[parentStackLength][TRANSMISSION] = blendedTransmissiveColour.w;
+                parentStack[parentStackLength][EMISSION_R] = blendedEmissiveColour.x;
+                parentStack[parentStackLength][EMISSION_G] = blendedEmissiveColour.y;
+                parentStack[parentStackLength][EMISSION_B] = blendedEmissiveColour.z;
+                parentStack[parentStackLength][SCATTERING_R] = blendedScatteringCoefficient.x;
+                parentStack[parentStackLength][SCATTERING_G] = blendedScatteringCoefficient.y;
+                parentStack[parentStackLength][SCATTERING_B] = blendedScatteringCoefficient.z;
+                parentStack[parentStackLength][TRANSMISSION_ROUGHNESS] = blendedTransmissionRoughness;
+                parentStack[parentStackLength][PARENT_REFRACTIVE_INDEX] = blendedRefractiveIndex;
+                parentStack[parentStackLength][PARENT_OBJECT_ID] = objectId;
                 parentStackLength++;
             }
         }
