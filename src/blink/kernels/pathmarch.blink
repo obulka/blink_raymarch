@@ -1641,6 +1641,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     * _shadowBias
                 );
 
+                const float4 extinctionCoefficient = getExtinctionCoefficient(
+                    nestedDielectrics,
+                    numNestedDielectrics
+                );
+
                 // Get material data for material and light sampling
                 float4 materialBRDF;
                 float3 bounceDirection;
@@ -1686,13 +1691,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                 throughput *= (
                     materialBRDF
-                    * exp(
-                        -distanceSinceLastBounce
-                        * getExtinctionCoefficient(
-                            nestedDielectrics,
-                            numNestedDielectrics
-                        )
-                    ) / materialPDF
+                    * exp(-distanceSinceLastBounce * extinctionCoefficient)
+                    / materialPDF
                 );
 
                 // Exit if we have reached the bounce limit

@@ -389,8 +389,7 @@ inline float sampleTransmissive(
     // We are passing through the surface
     if (isExiting)
     {
-        // We are exiting the material we are in, get the
-        // last refractive index, by popping the stack
+        // We are exiting the material we are in, pop the stack
         numNestedDielectrics--;
     }
     else
@@ -411,6 +410,7 @@ inline float sampleTransmissive(
 
     const float probabilityOverPi = refractionProbability / PI;
 
+    materialBRDF = float4(1);
     lightPDF = 0.0f;
 
     return probabilityOverPi * dot(idealRefractedDirection, refractedDirection);
