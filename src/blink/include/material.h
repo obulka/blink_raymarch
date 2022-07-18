@@ -282,20 +282,12 @@ inline float specularBounce(
 inline float sampleSpecular(
         const float3 &idealSpecularDirection,
         const float3 &specularDirection,
-        const float3 &lightDirection,
-        const float4 &emittance,
         const float4 &specularity,
         const float specularProbability,
-        float4 &emissiveColour,
         float4 &materialBRDF,
-        float4 &lightBRDF,
         float &lightPDF)
 {
     materialBRDF = specularity;
-    lightBRDF = specularity;
-
-    // Update the colour of the ray
-    emissiveColour = emittance;
 
     const float probabilityOverPi = specularProbability / PI;
 
@@ -356,18 +348,14 @@ inline float sampleTransmissive(
         const bool doExtinction,
         const float3 &idealRefractedDirection,
         const float3 &refractedDirection,
-        const float4 &emittance,
         const float4 &transmittance,
         const float refractionProbability,
         const float refractedRefractiveIndex,
         const float4 &refractedScatteringCoefficient,
         const float objectId,
-        const float distanceToLight,
         const bool doRefraction,
         const bool isExiting,
-        float4 &emissiveColour,
         float4 &materialBRDF,
-        float4 &lightBRDF,
         float &lightPDF,
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
         int &numNestedDielectrics,
@@ -411,16 +399,8 @@ inline float sampleTransmissive(
         * distanceTravelledThroughMaterial
         * doExtinction
     );
-    lightBRDF = exp(
-        -extinctionCoefficient
-        * distanceToLight
-        * doExtinction
-    );
 
     scatteringCoefficient = refractedScatteringCoefficient;
-
-    // Update the colour of the ray
-    emissiveColour = emittance;
 
     // We are entering a new material so reset the distance
     distanceTravelledThroughMaterial = 0.0f;
@@ -460,26 +440,15 @@ inline void diffuseBounce(
  */
 inline float sampleDiffuse(
         const float3 &surfaceNormal,
-        const float4 &emittance,
         const float4 &diffusivity,
         const float3 &diffuseDirection,
-        const float3 &lightDirection,
         const float diffuseProbability,
-        float4 &emissiveColour,
         float4 &materialBRDF,
-        float4 &lightBRDF,
         float &lightPDF)
 {
     materialBRDF = diffusivity;
-
-    lightBRDF = materialBRDF;
-
-    // Update the colour of the ray
-    emissiveColour = emittance;
-
     const float probabilityOverPi = diffuseProbability / PI;
-
-    lightPDF = probabilityOverPi * saturate(dot(lightDirection, surfaceNormal));
+    lightPDF = probabilityOverPi;
     return probabilityOverPi * dot(diffuseDirection, surfaceNormal);
 }
 
@@ -492,7 +461,6 @@ inline float sampleMaterial(
         const bool doExtinction,
         const float3 &surfaceNormal,
         const float3 &incidentDirection,
-        const float3 &lightDirection,
         const float4 &diffusivity,
         const float reflectionOffset,
         const float transmissionOffset,
@@ -503,13 +471,9 @@ inline float sampleMaterial(
         const float transmissiveRoughness,
         const float4 &specularity,
         const float specularRoughness,
-        const float4 &emittance,
         const float objectId,
-        const float distanceToLight,
         const bool isExiting,
-        float4 &emissiveColour,
         float4 &materialBRDF,
-        float4 &lightBRDF,
         float3 &outgoingDirection,
         float3 &position,
         float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
@@ -577,13 +541,9 @@ inline float sampleMaterial(
         pdf = sampleSpecular(
             idealSpecularDirection,
             outgoingDirection,
-            lightDirection,
-            emittance,
             specularity,
             specularProbability,
-            emissiveColour,
             materialBRDF,
-            lightBRDF,
             lightPDF
         );
     }
@@ -612,18 +572,14 @@ inline float sampleMaterial(
             doExtinction,
             idealRefractedDirection,
             outgoingDirection,
-            emittance,
             transmittance,
             refractionProbability,
             refractedRefractiveIndex,
             refractedScatteringCoefficient,
             objectId,
-            distanceToLight,
             doRefraction,
             isExiting,
-            emissiveColour,
             materialBRDF,
-            lightBRDF,
             lightPDF,
             nestedDielectrics,
             numNestedDielectrics,
@@ -650,14 +606,10 @@ inline float sampleMaterial(
 
         pdf = sampleDiffuse(
             surfaceNormal,
-            emittance,
             diffusivity,
             outgoingDirection,
-            lightDirection,
             1.0f - specularProbability - refractionProbability,
-            emissiveColour,
             materialBRDF,
-            lightBRDF,
             lightPDF
         );
         materialBRDF *= fabs(dot(outgoingDirection, surfaceNormal));
