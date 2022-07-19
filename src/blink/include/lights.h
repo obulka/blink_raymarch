@@ -59,16 +59,15 @@ float sampleEquiangularPDF(
  * @arg distanceToLight: Will store the distance to the light.
  */
 inline void hdriLightData(
+        const float3 &seed,
         const float3 &surfaceNormal,
         const float maxRayDistance,
         float3 &lightDirection,
-        float3 &lightNormal,
         float &distanceToLight,
         float &visibleSurfaceArea)
 {
     visibleSurfaceArea = 1.0f;
-    lightNormal = -surfaceNormal;
-    lightDirection = surfaceNormal;
+    lightDirection = cosineDirectionInHemisphere(surfaceNormal, seed);
     distanceToLight = 1.0f;
 }
 
@@ -86,12 +85,11 @@ inline void sphericalLightData(
         const float3 &position,
         const float radius,
         float3 &lightDirection,
-        float3 &lightNormal,
         float &distanceToLight,
         float &visibleSurfaceArea)
 {
     visibleSurfaceArea = 2.0f * PI * radius * radius;
-    lightNormal = uniformDirectionInHemisphere(
+    float3 lightNormal = uniformDirectionInHemisphere(
         normalize(pointOnSurface - position),
         seed
     );
@@ -113,14 +111,12 @@ inline void directionalLightData(
         const float3 &direction,
         const float maxRayDistance,
         float3 &lightDirection,
-        float3 &lightNormal,
         float &distanceToLight,
         float &visibleSurfaceArea)
 {
     visibleSurfaceArea = 2.0f * PI;
     distanceToLight = maxRayDistance;
     lightDirection = normalize(-direction);
-    lightNormal = direction;
 }
 
 
@@ -137,7 +133,6 @@ inline void pointLightData(
         const float3 &pointOnSurface,
         const float3 &position,
         float3 &lightDirection,
-        float3 &lightNormal,
         float &distanceToLight,
         float &visibleSurfaceArea)
 {
@@ -145,7 +140,6 @@ inline void pointLightData(
     lightDirection = position - pointOnSurface;
     distanceToLight = length(lightDirection);
     lightDirection = normalize(lightDirection);
-    lightNormal = -lightDirection;
 }
 
 
@@ -205,8 +199,7 @@ inline void getLightData(
         const float maxRayDistance,
         float &distanceToLight,
         float &solidAngle,
-        float3 &lightDirection,
-        float3 &lightNormal)
+        float3 &lightDirection)
 {
     if (lightType == 2)
     {
@@ -215,7 +208,6 @@ inline void getLightData(
             light,
             maxRayDistance,
             lightDirection,
-            lightNormal,
             distanceToLight,
             solidAngle
         );
@@ -227,7 +219,6 @@ inline void getLightData(
             pointOnSurface,
             light,
             lightDirection,
-            lightNormal,
             distanceToLight,
             solidAngle
         );
