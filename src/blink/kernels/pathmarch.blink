@@ -162,6 +162,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         int _minPathsPerPixel;
         int _maxPathsPerPixel;
+        bool _roulette;
         int _maxBounces;
         int _maxLightSamplingBounces;
         bool _sampleHDRI;
@@ -169,6 +170,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float _lightSamplingBias;
         float _maxRayDistance;
         int _maxRaySteps;
+        bool _levelOfDetail;
         float _hitTolerance;
         float _shadowBias;
 
@@ -245,6 +247,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         defineParam(_minPathsPerPixel, "Min Paths Per Pixel", 1);
         defineParam(_maxPathsPerPixel, "Max Paths Per Pixel", 1);
+        defineParam(_roulette, "Roulette", true);
         defineParam(_maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(_maxRaySteps, "Max Ray Steps", 128);
         defineParam(_maxBounces, "Max Bounces", 1);
@@ -252,6 +255,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_sampleHDRI, "Sample HDRI", true);
         defineParam(_sampleAllLights, "Sample All Lights", false);
         defineParam(_lightSamplingBias, "Light Sampling Bias", 0.0f);
+        defineParam(_levelOfDetail, "Level of Detail", true);
         defineParam(_hitTolerance, "Hit Tolerance", 0.001f);
         defineParam(_shadowBias, "Shadow Bias", 1.0f);
 
@@ -278,7 +282,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      */
     void init()
     {
-        __bouncesPerRay = _maxBounces <= 0 ? 1 : _maxBounces;
+        __bouncesPerRay = max(0, _maxBounces);
 
         __lightSamplingEnabled = _maxLightSamplingBounces > 0;
 
@@ -525,7 +529,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
     inline bool isParentOf(const int parentIndex, const int childIndex)
     {
-        return parentIndex + shapeProperties(parentIndex, 0, 2) >= childIndex;
+        return (
+            parentIndex < childIndex
+            && parentIndex + shapeProperties(parentIndex, 0, 2) >= childIndex
+        );
     }
 
 
@@ -1449,14 +1456,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightDirection = uniformDirectionInSolidAngle(
                     lightDirection,
                     __lightSamplingAngle,
-                    seed * 1.3179f
+                    RAND_CONST_0 * seed
                 );
             }
         }
         else
         {
             hdriLightData(
-                seed * 1.97812f,
+                seed * RAND_CONST_1,
                 surfaceNormal,
                 _maxRayDistance,
                 lightDirection,
@@ -1610,8 +1617,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             distanceTravelled += stepDistance;
             distanceSinceLastBounce += stepDistance;
 
-            pixelFootprint += _hitTolerance * stepDistance;
-
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
             {
@@ -1636,10 +1641,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 const float reflectionOffset = pixelFootprint * _shadowBias;
-                const float transmissionOffset = (
-                    (2.0f * pixelFootprint + stepDistance)
-                    * _shadowBias
-                );
+                const float transmissionOffset = 2.0f * pixelFootprint * _shadowBias;
 
                 const float4 extinctionCoefficient = getExtinctionCoefficient(
                     nestedDielectrics,
@@ -1704,9 +1706,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     throughput.z
                 );
                 if (
-                    ++bounces >= _maxLightSamplingBounces
+                    ++bounces > _maxLightSamplingBounces
                     || emittance.w > 0.0f
-                    || exitProbability <= rng
+                    || (_roulette && exitProbability <= rng)
                 ) {
                     return rayColour;
                 }
@@ -1719,8 +1721,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 direction = bounceDirection;
                 origin = intersectionPosition;
 
-                // Account for the lost intensity from the early exits
-                throughput /= exitProbability;
+                if (_roulette)
+                {
+                    // Account for the lost intensity from the early exits
+                    throughput /= exitProbability;
+                }
 
                 // Reset the pixel footprint so multiple reflections don't
                 // reduce precision
@@ -1732,6 +1737,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     + rng
                     + random(fabs(intersectionPosition + direction))
                 );
+            }
+            else if (_levelOfDetail)
+            {
+                pixelFootprint += _hitTolerance * stepDistance;
             }
 
             lastStepDistance = signedStepDistance;
@@ -1867,7 +1876,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Perform MIS light sampling
         return sampleLight(
-            seed * 1.6912f,
+            seed * RAND_CONST_2,
             throughput,
             lightBRDF,
             distanceToLight,
@@ -1909,7 +1918,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             float distanceToLight = 0.0f;
 
             const float lightPDF = sampleLightData(
-                seed * 1.79132f / (path + 1),
+                seed * RAND_CONST_3 / (path + 1),
                 position,
                 surfaceNormal,
                 emissiveIndices,
@@ -1921,7 +1930,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             lightColour += sampleLight(
-                seed * 1.12752f * (path + 1),
+                seed * RAND_CONST_4 * (path + 1),
                 throughput,
                 lightBRDF,
                 distanceToLight,
@@ -2051,13 +2060,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         {
             const float uniform = (step + offset - 1) / (float) _equiangularSamples;
 
-            float3 surfaceNormal = randomUnitVector(seed * 1.7324f);
+            float3 surfaceNormal = randomUnitVector(seed * RAND_CONST_5);
             float3 lightDirection = surfaceNormal;
             float distanceToLight = 0.0f;
             int selectedLight;
 
             const float lightPDF = sampleRandomLightData(
-                seed * 1.3734f * step,
+                seed * RAND_CONST_6 * step,
                 intersectionPosition,
                 surfaceNormal,
                 emissiveIndices,
@@ -2114,7 +2123,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             scatteredColour += scatteringCoefficient * scatteringNoise * sampleLight(
-                seed * 1.9757f / step,
+                seed * RAND_CONST_7 / step,
                 throughput,
                 lightBRDF,
                 distanceToLight,
@@ -2220,10 +2229,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Compute the amount we would offset a point to escape the surface
         const float reflectionOffset = pixelFootprint * _shadowBias;
-        const float transmissionOffset = (
-            (2.0f * pixelFootprint + stepDistance)
-            * _shadowBias
-        );
+        const float transmissionOffset = 2.0f * pixelFootprint * _shadowBias;
 
         // Perform Equi-Angular Sampling
         rayColour += sampleEquiangular(
@@ -2246,7 +2252,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float3 bounceDirection;
         float materialLightPDF;
         const float materialPDF = sampleMaterial(
-            seed * 1.73901f,
+            seed * RAND_CONST_8,
             surfaceNormal,
             direction,
             diffusivity,
@@ -2279,7 +2285,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         ) {
             // Perform MIS light sampling
             rayColour += doLightSampling(
-                seed * 1.593284f,
+                seed * RAND_CONST_9,
                 throughput,
                 materialBRDF,
                 surfaceNormal,
@@ -2414,8 +2420,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             distanceTravelled += stepDistance;
             distanceSinceLastBounce += stepDistance;
 
-            pixelFootprint += _hitTolerance * stepDistance;
-
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
             {
@@ -2492,7 +2496,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     throughput.y,
                     throughput.z
                 );
-                if (++bounces >= __bouncesPerRay || exitProbability <= rng)
+                if (++bounces > __bouncesPerRay || (_roulette && exitProbability <= rng))
                 {
                     return finalAOVs(
                         _outputType,
@@ -2502,13 +2506,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         rayColour
                     );
                 }
-
-                // Account for the lost intensity from the early exits
-                throughput /= exitProbability;
-
-                // Reset the pixel footprint so multiple reflections don't
-                // reduce precision
-                pixelFootprint = _hitTolerance;
+                if (_roulette)
+                {
+                    // Account for the lost intensity from the early exits
+                    throughput /= exitProbability;
+                }
 
                 // Update the random seed
                 seed = 7.134f * random(
@@ -2518,6 +2520,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
 
                 distanceSinceLastBounce = 0.0f;
+
+                // Reset the pixel footprint so multiple reflections don't
+                // reduce precision
+                pixelFootprint = _hitTolerance;
+            }
+            else if (_levelOfDetail)
+            {
+                pixelFootprint += _hitTolerance * stepDistance;
             }
 
             lastStepDistance = signedStepDistance;
@@ -3024,7 +3034,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 seed
             );
 
-            seed = 37.5798f * random(seed * ray * 1.79183324f);
+            seed = 37.5798f * random(seed * ray * RAND_CONST_10);
         }
 
         for (int path=1; path <= numPaths; path++)
@@ -3048,7 +3058,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 seed
             );
 
-            seed = 53.1231f * random(seed * path * 1.31537f);
+            seed = 53.1231f * random(seed * path * RAND_CONST_11);
         }
 
         const uint objectId = resultPixel.w / totalPaths;

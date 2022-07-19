@@ -22,7 +22,8 @@ class SDFMaterial(KnobManager):
     colour_knob_names = (
         "colour",
         "specular_colour",
-        "absorption_colour",
+        "extinction_colour",
+        "scattering_colour",
         "emission_colour",
     )
 

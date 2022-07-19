@@ -10,7 +10,7 @@
 
 // Increase this if you want more than MAX_NESTED_DIELECTRICS nested
 // transmissive objects
-#define MAX_NESTED_DIELECTRICS 4
+#define MAX_NESTED_DIELECTRICS 8
 
 // Number of parameters needed for nested dielectrics
 #define NESTED_DIELECTRIC_PARAMS 9
@@ -220,9 +220,11 @@ inline void getReflectivityData(
         const int numNestedDielectrics,
         const bool isExiting,
         const float surfaceRefractiveIndex,
+        const float4 &surfaceExtinctionCoefficient,
         const float4 &surfaceScatteringCoefficient,
         float &incidentRefractiveIndex,
         float &refractedRefractiveIndex,
+        float4 &refractedExtinctionCoefficient,
         float4 &refractedScatteringCoefficient,
         float &specularProbability,
         float &refractionProbability)
@@ -233,17 +235,20 @@ inline void getReflectivityData(
     {
         // We are exiting the material we are in, get the
         // last refractive index from the top of the stack
+        refractedExtinctionCoefficient = getExtinctionCoefficient(
+            nestedDielectrics,
+            numNestedDielectrics - 1
+        );
         refractedRefractiveIndex = nestedDielectrics[numNestedDielectrics - 1][REFRACTIVE_INDEX];
-        refractedScatteringCoefficient = float4(
-            nestedDielectrics[numNestedDielectrics - 1][SCATTERING_X],
-            nestedDielectrics[numNestedDielectrics - 1][SCATTERING_Y],
-            nestedDielectrics[numNestedDielectrics - 1][SCATTERING_Z],
-            0
+        refractedScatteringCoefficient = getScatteringCoefficient(
+            nestedDielectrics,
+            numNestedDielectrics - 1
         );
     }
     else
     {
         // Otherwise we will be entering a new material
+        refractedExtinctionCoefficient = surfaceExtinctionCoefficient;
         refractedRefractiveIndex = surfaceRefractiveIndex;
         refractedScatteringCoefficient = surfaceScatteringCoefficient;
     }
@@ -374,9 +379,9 @@ inline void transmissiveBounce(
 inline float sampleTransmissive(
         const float3 &idealRefractedDirection,
         const float3 &refractedDirection,
-        const float4 &transmittance,
         const float refractionProbability,
         const float refractedRefractiveIndex,
+        const float4 &refractedExtinctionCoefficient,
         const float4 &refractedScatteringCoefficient,
         const float objectId,
         const bool doRefraction,
@@ -397,9 +402,9 @@ inline float sampleTransmissive(
         // We are not exiting the material we are in, we are entering
         // a new one, so push the next refractive index to the stack
         numNestedDielectrics++;
-        nestedDielectrics[numNestedDielectrics][EXTINCTION_X] = transmittance.x;
-        nestedDielectrics[numNestedDielectrics][EXTINCTION_Y] = transmittance.y;
-        nestedDielectrics[numNestedDielectrics][EXTINCTION_Z] = transmittance.z;
+        nestedDielectrics[numNestedDielectrics][EXTINCTION_X] = refractedExtinctionCoefficient.x;
+        nestedDielectrics[numNestedDielectrics][EXTINCTION_Y] = refractedExtinctionCoefficient.y;
+        nestedDielectrics[numNestedDielectrics][EXTINCTION_Z] = refractedExtinctionCoefficient.z;
         nestedDielectrics[numNestedDielectrics][OBJECT_ID] = objectId;
         nestedDielectrics[numNestedDielectrics][REFRACTIVE_INDEX] = refractedRefractiveIndex;
         nestedDielectrics[numNestedDielectrics][SCATTERING_X] = refractedScatteringCoefficient.x;
@@ -494,6 +499,7 @@ inline float sampleMaterial(
     float incidentRefractiveIndex;
     float refractedRefractiveIndex;
     float4 refractedScatteringCoefficient;
+    float4 refractedExtinctionCoefficient;
     float specularProbability = specularity.w;
     float refractionProbability = transmittance.w;
 
@@ -507,9 +513,11 @@ inline float sampleMaterial(
             numNestedDielectrics,
             isExiting,
             surfaceRefractiveIndex,
+            transmittance,
             surfaceScatteringCoefficient,
             incidentRefractiveIndex,
             refractedRefractiveIndex,
+            refractedExtinctionCoefficient,
             refractedScatteringCoefficient,
             specularProbability,
             refractionProbability
@@ -572,9 +580,9 @@ inline float sampleMaterial(
         pdf = sampleTransmissive(
             idealRefractedDirection,
             outgoingDirection,
-            transmittance,
             refractionProbability,
             refractedRefractiveIndex,
+            refractedExtinctionCoefficient,
             refractedScatteringCoefficient,
             objectId,
             doRefraction,
