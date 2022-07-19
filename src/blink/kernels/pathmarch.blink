@@ -2005,9 +2005,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &intersectionPosition,
             const float3 &rayOrigin,
             const float3 &rayDirection,
+            const float distanceSinceLastBounce,
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numEmissive,
-            const float distanceSinceLastBounce,
             const float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
             const int numNestedDielectrics,
             float4 &throughput)
@@ -2231,9 +2231,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             intersectionPosition,
             origin,
             direction,
+            distance,
             emissiveIndices,
             numEmissive,
-            distance,
             nestedDielectrics,
             numNestedDielectrics,
             throughput
@@ -2548,9 +2548,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             origin + correctedDistance * direction,
             origin,
             direction,
+            correctedDistance,
             emissiveIndices,
             numEmissive,
-            correctedDistance,
             nestedDielectrics,
             numNestedDielectrics,
             throughput
