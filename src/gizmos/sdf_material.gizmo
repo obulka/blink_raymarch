@@ -1,7 +1,9 @@
+#! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
+version 13.2 v2
 Gizmo {
  knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
  tile_color 0xffffffff
- addUserKnob {20 User l "SDF Material"}
+ addUserKnob {20 User l "SDF Primitive"}
  addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
  colour {1 1 1}
  addUserKnob {6 diffuse_use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." -STARTLINE}
@@ -24,7 +26,7 @@ Gizmo {
  extinction_colour {1 1 1}
  addUserKnob {6 extinction_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
  extinction_use_trap_colour true
- addUserKnob {7 extinction_coefficient l "extinction coefficient" t "The amount of energy lost as the light travells through the material."}
+ addUserKnob {7 extinction_coefficient l "extinction coefficient" t "The amount of energy lost as the light travells through the material." R 0 10}
  addUserKnob {18 scattering_colour l "scattering colour"}
  scattering_colour {1 1 1}
  addUserKnob {6 scattering_use_trap_colour l "use trap colour" t "Scatter the trap colour during transmission." -STARTLINE}
@@ -81,7 +83,7 @@ add_layer {sdf_trans_colour sdf_trans_colour.r sdf_trans_colour.g sdf_trans_colo
  Constant {
   inputs 0
   channels sdf_trans_colour
-  color {{"parent.extinction_colour.r * parent.extinction_coefficient"} {"parent.extinction_colour.g * parent.extinction_coefficient"} {"parent.extinction_colour.b * parent.extinction_coefficient"} {parent.transmission}}
+  color {{"(1 - max(0, min(1, parent.extinction_colour.r))) * parent.extinction_coefficient"} {"(1 - max(0, min(1, parent.extinction_colour.g)))  * parent.extinction_coefficient"} {"(1 - max(0, min(1, parent.extinction_colour.b)))  * parent.extinction_coefficient"} {parent.transmission}}
   format "1 1 0 0 1 1 1 1x1"
   name trans_colour
   xpos 730

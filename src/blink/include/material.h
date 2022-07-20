@@ -470,8 +470,7 @@ inline float sampleMaterial(
         const float3 &surfaceNormal,
         const float3 &incidentDirection,
         const float4 &diffusivity,
-        const float reflectionOffset,
-        const float transmissionOffset,
+        const float offset,
         const float4 &transmittance,
         const bool doRefraction,
         const float surfaceRefractiveIndex,
@@ -541,7 +540,7 @@ inline float sampleMaterial(
             surfaceNormal,
             diffuseDirection,
             roughness,
-            reflectionOffset,
+            offset,
             idealSpecularDirection,
             outgoingDirection,
             position
@@ -568,7 +567,7 @@ inline float sampleMaterial(
             surfaceNormal,
             diffuseDirection,
             roughness,
-            transmissionOffset,
+            offset,
             incidentRefractiveIndex,
             refractedRefractiveIndex,
             doRefraction,
@@ -604,7 +603,7 @@ inline float sampleMaterial(
         diffuseBounce(
             surfaceNormal,
             diffuseDirection,
-            reflectionOffset,
+            offset,
             outgoingDirection,
             position
         );
