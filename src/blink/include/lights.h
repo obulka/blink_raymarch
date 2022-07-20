@@ -9,6 +9,15 @@
 //
 
 
+inline float4 multipleImportanceSample(
+        const float4 &emittance,
+        const float4 &throughput,
+        const float pdf0,
+        const float pdf1)
+{
+    return emittance * throughput * balanceHeuristic(pdf0, pdf1);
+}
+
 
 /**
  *
@@ -61,12 +70,9 @@ float sampleEquiangularPDF(
 inline void hdriLightData(
         const float3 &seed,
         const float3 &surfaceNormal,
-        const float maxRayDistance,
         float3 &lightDirection,
-        float &distanceToLight,
-        float &visibleSurfaceArea)
+        float &distanceToLight)
 {
-    visibleSurfaceArea = 1.0f;
     lightDirection = cosineDirectionInHemisphere(surfaceNormal, seed);
     distanceToLight = 1.0f;
 }
