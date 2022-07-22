@@ -30,7 +30,7 @@ kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
         }
 
         float minValue = FLT_MAX;
-        float maxValue = -FLT_MAX;
+        float maxValue = 0.0f;
         float mean = 0.0f;
 
         for (int y=src.bounds.y1; y < src.bounds.y2; y++)
@@ -62,9 +62,9 @@ kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
                     src(x, y, 2)
                 );
 
-                const float3 difference = pixelValue - mean;
+                const float deviation = sumComponent(fabs(pixelValue - mean));
 
-                standardDeviation += sumComponent(difference * difference) / __numSamples;
+                standardDeviation += min(deviation * deviation, 9999.0f) / __numSamples;
             }
         }
 

@@ -10,7 +10,7 @@ kernel Variance : ImageComputationKernel<ePixelWise>
         float2 _range;
 
     local:
-        float __pixelsInRange;
+        float __numSamples;
 
 
     /**
@@ -29,6 +29,8 @@ kernel Variance : ImageComputationKernel<ePixelWise>
     void init()
     {
         src.setRange(-_range.x, -_range.y, _range.x, _range.y);
+
+        __numSamples = (2.0f * _range.x + 1.0f) * (2.0f * _range.y + 1.0f);
     }
 
 
@@ -40,23 +42,27 @@ kernel Variance : ImageComputationKernel<ePixelWise>
     void process(int2 pos)
     {
         float4 mean = float4(0);
-        float4 sumOfSquares = float4(0);
-        float numSamples = 0.0f;
-
         for (int yOffset=-_range.y; yOffset <= _range.y; yOffset++)
         {
             for (int xOffset=-_range.x; xOffset <= _range.x; xOffset++)
             {
-                numSamples += 1.0f;
-
-                const float4 sample = src(xOffset, yOffset);
-
-                mean += (sample - mean) / numSamples;
-
-                sumOfSquares += sample * sample;
+                mean += src(xOffset, yOffset) / __numSamples;
             }
         }
 
-        dst() = (sumOfSquares - numSamples * mean * mean) / ((numSamples - 1.0f) * numSamples);
+        float4 sumOfSquares = float4(0);
+        for (int yOffset=-_range.y; yOffset <= _range.y; yOffset++)
+        {
+            for (int xOffset=-_range.x; xOffset <= _range.x; xOffset++)
+            {
+                const float4 sample = src(xOffset, yOffset);
+
+                const float4 deviation = src(xOffset, yOffset) - mean;
+
+                sumOfSquares += deviation * deviation / (__numSamples - 1.0f);
+            }
+        }
+
+        dst() = sumOfSquares;
     }
 };

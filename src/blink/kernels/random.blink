@@ -1,0 +1,42 @@
+#include "math.h"
+#include "random.h"
+
+
+kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
+{
+    Image<eRead, eAccessPoint, eEdgeNone> seed; // the input image
+    Image<eWrite> dst; // the output image
+
+
+    param:
+        float2 _inclusiveRange;
+
+    local:
+        float __rangeLength;
+
+
+    /**
+     * In define(), parameters can be given labels and default values.
+     */
+    void define()
+    {
+        defineParam(_inclusiveRange, "Inclusive Range", float2(0, 1));
+    }
+
+
+    /**
+     * The init() function is run before any calls to process().
+     * Local variables can be initialized here.
+     */
+    void init()
+    {
+        __rangeLength = _inclusiveRange.y - _inclusiveRange.x;
+    }
+
+
+    void process()
+    {
+        // float4 seed = seed();
+        dst() = __rangeLength * random(seed()) + _inclusiveRange.x;
+    }
+};

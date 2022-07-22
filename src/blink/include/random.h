@@ -109,6 +109,20 @@ inline float3 random(const float3 &seed)
 /**
  *
  */
+inline float4 random(const float4 &seed)
+{
+    return float4(
+        random(seed.x),
+        random(seed.y),
+        random(seed.z),
+        random(seed.w)
+    );
+}
+
+
+/**
+ *
+ */
 float3 randomUnitVector(const float3 &seed)
 {
     const float z = random(seed.x) * 2.0f - 1.0f;

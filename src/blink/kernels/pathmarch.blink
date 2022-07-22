@@ -2788,7 +2788,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     void process(int2 pos)
     {
         SampleType(noise) noisePixel = noise();
-        float3 seed = 43.67f * random(float3(noisePixel.x, noisePixel.y, noisePixel.z));
+        float3 seed = random(float3(noisePixel.x, noisePixel.y, noisePixel.z));
 
         const float4 variancePixel = variance();
 
