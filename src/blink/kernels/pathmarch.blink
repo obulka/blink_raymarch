@@ -170,6 +170,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         bool _levelOfDetail;
         float _hitTolerance;
         float _shadowBias;
+        float _maxBrightness;
 
         // Scene params
         float _refractiveIndex;
@@ -252,6 +253,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_levelOfDetail, "Level of Detail", true);
         defineParam(_hitTolerance, "Hit Tolerance", 0.001f);
         defineParam(_shadowBias, "Shadow Bias", 1.0f);
+        defineParam(_maxBrightness, "Maximum Brightness", 999999.9f);
 
         // Scene params
         defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
@@ -2523,6 +2525,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             distanceTravelled < _maxRayDistance
             && iterations < _maxRaySteps
             && sumComponent(throughput) > _hitTolerance
+            && length(rayColour) < _maxBrightness
         ) {
             positionOnRay = origin + distanceSinceLastBounce * direction;
 
@@ -2636,8 +2639,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     throughput.y,
                     throughput.z
                 );
-                if (++bounces > __bouncesPerRay || (_roulette && exitProbability <= rng))
-                {
+                if (
+                    ++bounces > __bouncesPerRay
+                    || emittance.w > 1.0f
+                    || (_roulette && exitProbability <= rng)
+                ) {
                     return finalAOVs(
                         _outputType,
                         iterations,
@@ -2829,7 +2835,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 seed
             ) / totalPaths;
 
-            seed = 53.1231f * random(seed * path * RAND_CONST_11);
+            seed = RAND_CONST_10 * random(seed * path * RAND_CONST_11);
         }
 
         const uint objectId = resultPixel.w / totalPaths;

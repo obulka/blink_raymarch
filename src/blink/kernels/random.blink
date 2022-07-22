@@ -2,7 +2,7 @@
 #include "random.h"
 
 
-kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
+kernel Random : ImageComputationKernel<ePixelWise>
 {
     Image<eRead, eAccessPoint, eEdgeNone> seed; // the input image
     Image<eWrite> dst; // the output image

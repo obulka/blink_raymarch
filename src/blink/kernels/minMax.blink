@@ -6,9 +6,20 @@ kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessRandom, eEdgeNone> src; // the input image
     Image<eWrite> dst; // the output image
 
+    param:
+        float _maximum;
 
     local:
         float __numSamples;
+
+
+    /**
+     * In define(), parameters can be given labels and default values.
+     */
+    void define()
+    {
+        defineParam(_maximum, "Inclusive Range", 99999.9f);
+    }
 
 
     /**
@@ -64,7 +75,7 @@ kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
 
                 const float deviation = sumComponent(fabs(pixelValue - mean));
 
-                standardDeviation += min(deviation * deviation, 9999.0f) / __numSamples;
+                standardDeviation += min(deviation * deviation, _maximum) / __numSamples;
             }
         }
 
