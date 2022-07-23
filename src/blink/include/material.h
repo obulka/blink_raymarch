@@ -591,11 +591,6 @@ inline float sampleMaterial(
             nestedDielectrics,
             numNestedDielectrics
         );
-
-        if (doRefraction)
-        {
-            materialBRDF *= fabs(dot(outgoingDirection, surfaceNormal));
-        }
     }
     // Otherwise diffuse the light
     else
@@ -616,7 +611,6 @@ inline float sampleMaterial(
             materialBRDF,
             lightPDF
         );
-        materialBRDF *= fabs(dot(outgoingDirection, surfaceNormal));
     }
 
     return pdf;

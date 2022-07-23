@@ -2435,9 +2435,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        if (_usePrecomputedIrradiance && materialLightPDF  > 0.0f)
+        if (_usePrecomputedIrradiance && materialLightPDF > 0.0f)
         {
-            emittance += diffusivity.w * readIrradianceValue(surfaceNormal);
+            emittance += diffusivity * diffusivity.w * readIrradianceValue(surfaceNormal);
             usedPrecomputedIrradiance = true;
         }
 
@@ -2452,7 +2452,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             sampleLightsPDF(numLights, visibleSurfaceArea)
         );
 
-        throughput *= materialBRDF / materialPDF;
+        float materialGeometryFactor = 1.0f;
+        if (materialLightPDF > 0.0f)
+        {
+            materialGeometryFactor = saturate(dot(bounceDirection, surfaceNormal));
+        }
+
+        throughput *= materialBRDF * materialGeometryFactor / materialPDF;
 
         // Prepare the variables for the next march
         previousMaterialPDF = materialPDF;
@@ -2641,7 +2647,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 );
                 if (
                     ++bounces > __bouncesPerRay
-                    || emittance.w > 1.0f
+                    || emittance.w >= 1.0f
+                    || usedPrecomputedIrradiance
                     || (_roulette && exitProbability <= rng)
                 ) {
                     return finalAOVs(
@@ -2712,11 +2719,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             throughput
         );
 
-        if (!(_usePrecomputedIrradiance && usedPrecomputedIrradiance))
-        {
-            // Read the hdri value in the direction the ray was last travelling
-            rayColour += throughput * readHDRIValue(direction);
-        }
+        // Read the hdri value in the direction the ray was last travelling
+        rayColour += throughput * readHDRIValue(direction);
 
         rayColour.w = (bounces > 0) * firstObjectId;
         return rayColour;
