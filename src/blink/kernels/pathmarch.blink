@@ -131,6 +131,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     // the precomputed irradiance of the hdri
     Image<eRead, eAccessRandom, eEdgeClamped> irradiance;
 
+    // the shape positons.xyz, scale.w
+    Image<eRead, eAccessRandom, eEdgeNone> holdouts;
+
 
     // the output image
     Image<eWrite> dst;
@@ -178,6 +181,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float4 _extinctionCoefficient;
         int _equiangularSamples;
         bool _sampleHDRIEquiangular;
+
+        bool _useHoldouts;
 
         // Shape Textures
         int _objectTextureWidth;
@@ -261,6 +266,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_extinctionCoefficient, "Extinction Coefficient", float4(1));
         defineParam(_equiangularSamples, "Equi-Angular Samples", 5);
         defineParam(_sampleHDRIEquiangular, "Sample HDRI Equi-Angular", true);
+
+        defineParam(_useHoldouts, "Use Holdouts", false);
 
         // Shape Counts
         defineParam(_objectTextureWidth, "Object Texture Width", 0);
@@ -583,6 +590,31 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         );
     }
 
+    float getMinDistanceToHoldoutsPointCloud(const float3 &rayOrigin)
+    {
+        float minDistance = _maxRayDistance;
+
+        for (int y=holdouts.bounds.y1; y < holdouts.bounds.y2; y++)
+        {
+            for (int x=holdouts.bounds.x1; x < holdouts.bounds.x2; x++)
+            {
+                const float distance = length(
+                    rayOrigin
+                    - float3(
+                        holdouts(x, y, 0),
+                        holdouts(x, y, 1),
+                        holdouts(x, y, 2)
+                    )
+                );
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                }
+            }
+        }
+
+        return minDistance;
+    }
 
     /**
      * Compute the minimum distance to an object in the scene
@@ -766,6 +798,16 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 parentStack[parentStackLength][BLEND_STRENGTH] = blendStrength;
                 parentStack[parentStackLength][DISTANCE] = nextDistance;
                 parentStackLength++;
+            }
+        }
+
+        if (_useHoldouts)
+        {
+            const float holdoutDistance = getMinDistanceToHoldoutsPointCloud(rayOrigin);
+
+            if (holdoutDistance < fabs(distance))
+            {
+                distance = holdoutDistance;
             }
         }
 
@@ -1147,6 +1189,29 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         diffusivity.w = 1.0f - specularity.w - transmittance.w;
+
+        if (_useHoldouts)
+        {
+            const float holdoutDistance = getMinDistanceToHoldoutsPointCloud(rayOrigin);
+
+            if (holdoutDistance < fabs(distance))
+            {
+                distance = holdoutDistance;
+
+                diffusivity = float4(0);
+                specularity = float4(0);
+                transmittance = float4(0);
+                emittance = float4(0);
+                scatteringCoefficient = float4(0);
+                specularRoughness = 0.0f;
+                transmissionRoughness = 0.0f;
+                refractiveIndex = 1.0f;
+
+                id = -1;
+
+                doRefraction = false;
+            }
+        }
 
         return distance;
     }
