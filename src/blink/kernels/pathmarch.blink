@@ -164,6 +164,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int _maxLightSamplingBounces;
         bool _sampleHDRI;
         bool _sampleAllLights;
+        bool _doSecondaryLightSampling;
         float _lightSamplingBias;
         float _maxRayDistance;
         int _maxRaySteps;
@@ -249,6 +250,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_maxLightSamplingBounces, "Max Light Sampling Bounces", 0);
         defineParam(_sampleHDRI, "Sample HDRI", true);
         defineParam(_sampleAllLights, "Sample All Lights", false);
+        defineParam(_doSecondaryLightSampling, "Secondary Light Sampling", false);
         defineParam(_lightSamplingBias, "Light Sampling Bias", 0.0f);
         defineParam(_levelOfDetail, "Level of Detail", true);
         defineParam(_hitTolerance, "Hit Tolerance", 0.001f);
@@ -1709,6 +1711,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         if (
             __lightSamplingEnabled
+            && _doSecondaryLightSampling
             && materialLightPDF > 0.0f
             && _lightTextureWidth > 0
         ) {
