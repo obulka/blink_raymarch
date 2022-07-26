@@ -337,7 +337,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         const float gamma = noiseParams1(index, 0, 3);
         const float size = noiseParams2(index, 0, 0);
 
-        const float3 noisePosition = worldToLocal(index, position + translation);
+        float3 noisePosition;
+        if (index == _objectTextureWidth)
+        {
+            noisePosition = position + translation;
+        }
+        else
+        {
+            noisePosition = worldToLocal(index, position + translation);
+        }
 
         float noiseValue;
         if (noiseOptions & 2)
