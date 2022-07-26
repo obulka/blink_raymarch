@@ -2330,6 +2330,41 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Handle the interaction between a ray and the surface of a material.
+     *
+     * @arg stepDistance: The last step size to be marched.
+     * @arg pixelFootprint: 
+     * @arg distance:
+     * @arg intersectionPosition:
+     * @arg surfaceNormal:
+     * @arg objectId:
+     * @arg emissiveIndices: The indices of the emissive objects in the
+     *     scene.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg doRefraction:
+     * @arg numLights:
+     * @arg seed: The seed to use in randomization.
+     * @arg direction: The incoming ray direction.
+     * @arg origin: The ray origin.
+     * @arg diffusivity: The diffuse values of the surface.
+     * @arg specularity: The specular values of the surface.
+     * @arg transmittance: The extinction coefficient and transmissive
+     *     probability of the surface.
+     * @arg emittance: The emissive values of the surface.
+     * @arg specularRoughness: The specular roughness of the surface.
+     * @arg transmissionRoughness: The transmissive roughness of the
+     *     surface.
+     * @arg refractiveIndex: The refractive index of the material.
+     * @arg scatteringCoefficient: The scattering coefficient of the
+     *     material.
+     * @arg nestedDielectrics:
+     * @arg numNestedDielectrics:
+     * @arg rayColour:
+     * @arg throughput:
+     * @arg previousMaterialPDF:
+     * @arg usedPrecomputedIrradiance:
+     */
     float4 materialInteraction(
             const float stepDistance,
             const float pixelFootprint,
@@ -2476,11 +2511,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * March a ray through the scene.
+     * March a path through the scene.
      *
      * @arg rayOrigin: The origin of the ray.
      * @arg rayDirection: The direction of the ray.
-     * @arg seed: A random value to use as the seed for roughness.
+     * @arg emissiveIndices: The indices of the emissive objects in the
+     *     scene.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg seed: The seed to use in randomization.
      *
      * @returns: The ray colour.
      */
@@ -2736,7 +2774,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     * Get the indices of all the emissive objects in the scene.
      *
+     * @arg emissiveIndices: The array to store the indices in.
+     *
+     * @returns: The total number of emissive objects found.
      */
     int getEmissiveIndices(int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES])
     {
@@ -2753,6 +2795,16 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Create a ray out of the camera. It will be either a standard ray,
+     * a latlong ray, or a ray that will result in depth of field.
+     *
+     * @arg seed: The seed to use in randomization.
+     * @arg pixelLocation: The x, and y locations of the pixel.
+     * @arg rayOrigin: The location to store the origin of the new ray.
+     * @arg rayDirection: The location to store the direction of the new
+     *     ray.
+     */
     void getCameraRay(
             const float3 &seed,
             const float2 &pixelLocation,
