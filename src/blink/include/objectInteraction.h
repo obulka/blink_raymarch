@@ -9,6 +9,11 @@
 //
 // These operate on the signed distances that have been computed
 //
+#define SUBTRACTION 128
+#define INTERSECTION 256
+#define SMOOTH_UNION 512
+#define SMOOTH_SUBTRACTION 1024
+#define SMOOTH_INTERSECTION 2048
 
 
 /**
@@ -451,7 +456,7 @@ float performChildInteraction(
         float &value5,
         const float blendSize)
 {
-    if (modifications & 128)
+    if (modifications & SUBTRACTION)
     {
         return subtraction(
             value0,
@@ -472,7 +477,7 @@ float performChildInteraction(
             value5
         );
     }
-    if (modifications & 256)
+    if (modifications & INTERSECTION)
     {
         return intersection(
             value0,
@@ -493,7 +498,7 @@ float performChildInteraction(
             value5
         );
     }
-    if (modifications & 512)
+    if (modifications & SMOOTH_UNION)
     {
         return smoothUnion(
             value0,
@@ -515,7 +520,7 @@ float performChildInteraction(
             blendSize
         );
     }
-    if (modifications & 1024)
+    if (modifications & SMOOTH_SUBTRACTION)
     {
         return smoothSubtraction(
             value0,
@@ -537,7 +542,7 @@ float performChildInteraction(
             blendSize
         );
     }
-    if (modifications & 2048)
+    if (modifications & SMOOTH_INTERSECTION)
     {
         return smoothIntersection(
             value0,
@@ -605,23 +610,23 @@ float performChildInteraction(
         const float value1,
         const float blendSize)
 {
-    if (modifications & 128)
+    if (modifications & SUBTRACTION)
     {
         return subtraction(value0, value1);
     }
-    if (modifications & 256)
+    if (modifications & INTERSECTION)
     {
         return intersection(value0, value1);
     }
-    if (modifications & 512)
+    if (modifications & SMOOTH_UNION)
     {
         return smoothUnion(value0, value1, blendSize);
     }
-    if (modifications & 1024)
+    if (modifications & SMOOTH_SUBTRACTION)
     {
         return smoothSubtraction(value0, value1, blendSize);
     }
-    if (modifications & 2048)
+    if (modifications & SMOOTH_INTERSECTION)
     {
         return smoothIntersection(value0, value1, blendSize);
     }

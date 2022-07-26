@@ -26,6 +26,19 @@
 #define SCATTERING_Z 7
 #define DO_REFRACTION 8
 
+#define NOISE_ENABLED 1
+#define FBM_NOISE 2
+#define DIFFUSE_NOISE 4
+#define SPECULAR_NOISE 8
+#define TRANSMITTANCE_NOISE 16
+#define EMITTANCE_NOISE 32
+#define REFRACTIVE_INDEX_NOISE 64
+#define TRANSMISSION_ROUGHNESS_NOISE 128
+#define SPECULAR_ROUGHNESS_NOISE 256
+#define INVERT_NOISE 512
+#define SCATTERING_NOISE 1024
+#define EXTINCTION_NOISE 2048
+
 
 inline float4 getExtinctionCoefficient(
         const float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
@@ -631,33 +644,33 @@ inline void useNoiseOnMaterial(
         float &transmissiveRoughness,
         float &refractiveIndex)
 {
-    if (noiseOptions & 4)
+    if (noiseOptions & DIFFUSE_NOISE)
     {
         diffusivity.x *= noiseValue;
         diffusivity.y *= noiseValue;
         diffusivity.z *= noiseValue;
     }
-    if (noiseOptions & 8)
+    if (noiseOptions & SPECULAR_NOISE)
     {
         specularity.w *= noiseValue;
     }
-    if (noiseOptions & 16)
+    if (noiseOptions & TRANSMITTANCE_NOISE)
     {
         transmittance.w *= noiseValue;
     }
-    if (noiseOptions & 32)
+    if (noiseOptions & EMITTANCE_NOISE)
     {
         emittance *= noiseValue;
     }
-    if (noiseOptions & 64)
+    if (noiseOptions & REFRACTIVE_INDEX_NOISE)
     {
         refractiveIndex = (refractiveIndex - 1.0f) * noiseValue + 1.0f;
     }
-    if (noiseOptions & 128)
+    if (noiseOptions & TRANSMISSION_ROUGHNESS_NOISE)
     {
         transmissiveRoughness *= noiseValue;
     }
-    if (noiseOptions & 256)
+    if (noiseOptions & SPECULAR_ROUGHNESS_NOISE)
     {
         specularRoughness *= noiseValue;
     }
@@ -672,7 +685,7 @@ void useNoiseOnEmittance(
         const float noiseValue,
         float4 &emittance)
 {
-    if (noiseOptions & 32)
+    if (noiseOptions & EMITTANCE_NOISE)
     {
         emittance *= noiseValue;
     }

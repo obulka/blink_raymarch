@@ -63,6 +63,10 @@
 // Maximum recursion depth for ray marching
 #define MAX_RAYS_PER_SUBPIXEL 100
 
+#define IS_BOUND 4096
+
+#define IS_NOT_UNION 3968
+
 
 kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 {
@@ -320,7 +324,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     float getNoiseValue(const int index, const float3 &position, int &noiseOptions)
     {
         noiseOptions = (int) noiseParams0(index, 0, 0);
-        if ((noiseOptions & 1) == 0)
+        if ((noiseOptions & NOISE_ENABLED) == 0)
         {
             return -1.0f;
         }
@@ -348,7 +352,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         float noiseValue;
-        if (noiseOptions & 2)
+        if (noiseOptions & FBM_NOISE)
         {
             noiseValue = fractalBrownianMotionNoise(
                 octaves,
@@ -383,7 +387,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         noiseValue = saturate(noiseValue * (1.0f - lift) + lift);
 
-        if (noiseOptions & 512)
+        if (noiseOptions & INVERT_NOISE)
         {
             noiseValue = 1.0f - noiseValue;
         }
@@ -563,7 +567,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
     inline bool childInteractionIsNotUnion(const int objectIndex)
     {
-        return (int(shapeProperties(objectIndex, 0, 1)) & 3968) > 0;
+        return (int(shapeProperties(objectIndex, 0, 1)) & IS_NOT_UNION) > 0;
     }
 
 
@@ -668,7 +672,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // If this is a bounding volume, we can skip its children
             // if we aren't close to, or inside it
             if (
-                modifications & 4096
+                modifications & IS_BOUND
                 && numChildren > 0
                 && nextDistance > _hitTolerance + pixelFootprint
             ) {
@@ -893,7 +897,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // If this is a bounding volume, we can skip its children
             // if we aren't close to, or inside it
             if (
-                modifications & 4096
+                modifications & IS_BOUND
                 && numChildren > 0
                 && nextDistance > _hitTolerance + pixelFootprint
             ) {
@@ -2280,11 +2284,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
             float scatteringNoise = noiseValue;
             float extinctionNoise = noiseValue;
-            if (noiseValue < 0.0f || !(noiseOptions & 1024))
+            if (noiseValue < 0.0f || !(noiseOptions & SCATTERING_NOISE))
             {
                 scatteringNoise = 1.0f;
             }
-            if (noiseValue < 0.0f || !(noiseOptions & 2048))
+            if (noiseValue < 0.0f || !(noiseOptions & EXTINCTION_NOISE))
             {
                 extinctionNoise = 1.0f;
             }

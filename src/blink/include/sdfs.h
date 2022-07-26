@@ -11,6 +11,38 @@
 // https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
 //
 
+#define SPHERE 0
+#define ELLIPSOID 1
+#define CUT_SPHERE 2
+#define HOLLOW_SPHERE 3
+#define DEATH_STAR 4
+#define SOLID_ANGLE 5
+#define RECTANGULAR_PRISM 6
+#define RECTANGULAR_PRISM_FRAME 7
+#define RHOMBUS 8
+#define TRIANGULAR_PRISM 9
+#define CYLINDER 10
+#define INFINITE_CYLINDER 11
+#define PLANE 12
+#define CAPSULE 13
+#define CONE 14
+#define INFINITE_CONE 15
+#define CAPPED_CONE 16
+#define ROUNDED_CONE 17
+#define TORUS 18
+#define CAPPED_TORUS 19
+#define LINK 20
+#define HEXAGONAL_PRISM 21
+#define OCTAHEDRON 22
+#define MANDELBULB 23
+#define MANDELBOX 24
+
+#define DIFFUSE_TRAP 8192
+#define SPECULAR_TRAP 16384
+#define EXTINCTION_TRAP 32768
+#define EMISSION_TRAP 65536
+#define SCATTERING_TRAP 131072
+
 
 /**
  * Compute the min distance from a point to a point.
@@ -1168,11 +1200,11 @@ float distanceToColourlessObject(
         const int shapeType,
         const float4 &dimensions)
 {
-    if (shapeType == 0)
+    if (shapeType == SPHERE)
     {
         return distanceToSphere(position, dimensions.x);
     }
-    if (shapeType == 1)
+    if (shapeType == ELLIPSOID)
     {
         return distanceToEllipsoid(
             position,
@@ -1181,11 +1213,11 @@ float distanceToColourlessObject(
             dimensions.z
         );
     }
-    if (shapeType == 2)
+    if (shapeType == CUT_SPHERE)
     {
         return distanceToCutSphere(position, dimensions.x, dimensions.y);
     }
-    if (shapeType == 3)
+    if (shapeType == HOLLOW_SPHERE)
     {
         return distanceToHollowSphere(
             position,
@@ -1194,7 +1226,7 @@ float distanceToColourlessObject(
             dimensions.z
         );
     }
-    if (shapeType == 4)
+    if (shapeType == DEATH_STAR)
     {
         return distanceToDeathStar(
             position,
@@ -1203,7 +1235,7 @@ float distanceToColourlessObject(
             dimensions.z
         );
     }
-    if (shapeType == 5)
+    if (shapeType == SOLID_ANGLE)
     {
         return distanceToSolidAngle(
             position,
@@ -1211,7 +1243,7 @@ float distanceToColourlessObject(
             degreesToRadians(dimensions.y)
         );
     }
-    if (shapeType == 6)
+    if (shapeType == RECTANGULAR_PRISM)
     {
         return distanceToRectangularPrism(
             position,
@@ -1220,7 +1252,7 @@ float distanceToColourlessObject(
             dimensions.z
         );
     }
-    if (shapeType == 7)
+    if (shapeType == RECTANGULAR_PRISM_FRAME)
     {
         return distanceToRectangularPrismFrame(
             position,
@@ -1230,7 +1262,7 @@ float distanceToColourlessObject(
             dimensions.w
         );
     }
-    if (shapeType == 8)
+    if (shapeType == RHOMBUS)
     {
         return distanceToRhombus(
             position,
@@ -1240,26 +1272,26 @@ float distanceToColourlessObject(
             dimensions.w
         );
     }
-    if (shapeType == 9)
+    if (shapeType == TRIANGULAR_PRISM)
     {
         return distanceToTriangularPrism(position, dimensions.x, dimensions.y);
     }
-    if (shapeType == 10)
+    if (shapeType == CYLINDER)
     {
         return distanceToCylinder(position, dimensions.x, dimensions.y);
     }
-    if (shapeType == 11)
+    if (shapeType == INFINITE_CYLINDER)
     {
         return distanceToInfiniteCylinder(position, dimensions.x);
     }
-    if (shapeType == 12)
+    if (shapeType == PLANE)
     {
         return distanceToPlane(
             position,
             normalize(float3(dimensions.x, dimensions.y, dimensions.z))
         );
     }
-    if (shapeType == 13)
+    if (shapeType == CAPSULE)
     {
         return distanceToCapsule(
             position,
@@ -1268,7 +1300,7 @@ float distanceToColourlessObject(
             dimensions.z
         );
     }
-    if (shapeType == 14)
+    if (shapeType == CONE)
     {
         return distanceToCone(
             position,
@@ -1276,11 +1308,11 @@ float distanceToColourlessObject(
             dimensions.y
         );
     }
-    if (shapeType == 15)
+    if (shapeType == INFINITE_CONE)
     {
         return distanceToInfiniteCone(position, degreesToRadians(dimensions.x));
     }
-    if (shapeType == 16)
+    if (shapeType == CAPPED_CONE)
     {
         return distanceToCappedCone(
             position,
@@ -1289,7 +1321,7 @@ float distanceToColourlessObject(
             dimensions.z
         );
     }
-    if (shapeType == 17)
+    if (shapeType == ROUNDED_CONE)
     {
         return distanceToRoundedCone(
             position,
@@ -1298,11 +1330,11 @@ float distanceToColourlessObject(
             dimensions.z
         );
     }
-    if (shapeType == 18)
+    if (shapeType == TORUS)
     {
         return distanceToTorus(position, dimensions.x, dimensions.y);
     }
-    if (shapeType == 19)
+    if (shapeType == CAPPED_TORUS)
     {
         return distanceToCappedTorus(
             position,
@@ -1311,7 +1343,7 @@ float distanceToColourlessObject(
             degreesToRadians(dimensions.z)
         );
     }
-    if (shapeType == 20)
+    if (shapeType == LINK)
     {
         return distanceToLink(
             position,
@@ -1320,11 +1352,11 @@ float distanceToColourlessObject(
             dimensions.z
         );
     }
-    if (shapeType == 21)
+    if (shapeType == HEXAGONAL_PRISM)
     {
         return distanceToHexagonalPrism(position, dimensions.x, dimensions.y);
     }
-    if (shapeType == 22)
+    if (shapeType == OCTAHEDRON)
     {
         return distanceToOctahedron(position, dimensions.x);
     }
@@ -1393,11 +1425,11 @@ float distanceToObject(
         float4 &emissionColour,
         float4 &scatteringCoefficient)
 {
-    if (shapeType >= 23)
+    if (shapeType >= MANDELBULB)
     {
         float4 colour = float4(1);
         float distance = FLT_MAX;
-        if (shapeType == 23)
+        if (shapeType == MANDELBULB)
         {
             distance = distanceToMandelbulb(
                 position,
@@ -1407,7 +1439,7 @@ float distanceToObject(
                 colour
             );
         }
-        if (shapeType == 24)
+        if (shapeType == MANDELBOX)
         {
             distance = distanceToMandelbox(
                 position,
@@ -1418,23 +1450,23 @@ float distanceToObject(
                 colour
             );
         }
-        if (modifications & 8192)
+        if (modifications & DIFFUSE_TRAP)
         {
             diffuseColour *= colour;
         }
-        if (modifications & 16384)
+        if (modifications & SPECULAR_TRAP)
         {
             specularColour *= colour;
         }
-        if (modifications & 32768)
+        if (modifications & EXTINCTION_TRAP)
         {
             extinctionCoefficient *= colour;
         }
-        if (modifications & 65536)
+        if (modifications & EMISSION_TRAP)
         {
             emissionColour *= colour;
         }
-        if (modifications & 131072)
+        if (modifications & SCATTERING_TRAP)
         {
             scatteringCoefficient *= colour;
         }
@@ -1485,7 +1517,7 @@ float distanceToObject(
         const int shapeType,
         const float4 &dimensions)
 {
-    if (shapeType == 23)
+    if (shapeType == MANDELBULB)
     {
         return distanceToMandelbulb(
             position,
@@ -1494,7 +1526,7 @@ float distanceToObject(
             dimensions.z
         );
     }
-    if (shapeType == 24)
+    if (shapeType == MANDELBOX)
     {
         return distanceToMandelbox(
             position,

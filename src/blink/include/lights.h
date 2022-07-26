@@ -8,6 +8,9 @@
 // Handle Various Lights
 //
 
+#define DIRECTIONAL_LIGHT 2
+#define POINT_LIGHT 3
+
 
 inline float4 multipleImportanceSample(
         const float4 &emittance,
@@ -207,7 +210,7 @@ inline void getLightData(
         float &solidAngle,
         float3 &lightDirection)
 {
-    if (lightType == 2)
+    if (lightType == DIRECTIONAL_LIGHT)
     {
         // directional
         directionalLightData(
@@ -218,7 +221,7 @@ inline void getLightData(
             solidAngle
         );
     }
-    else if (lightType == 3)
+    else if (lightType == POINT_LIGHT)
     {
         // point
         pointLightData(

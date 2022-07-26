@@ -10,6 +10,14 @@
 // These modify the ray position before computing the SD
 //
 
+#define FINITE_REPETITION 1
+#define INFINITE_REPETITION 2
+#define ELONGATE 4
+#define MIRROR_X 8
+#define MIRROR_Y 16
+#define MIRROR_Z 32
+#define HOLLOW 64
+
 
 /**
  * Infinitely repeat an object in the positive quadrant.
@@ -149,7 +157,7 @@ void performShapeModification(
         const float4 &elongation,
         float3 &position)
 {
-    if (modifications & 1)
+    if (modifications & FINITE_REPETITION)
     {
         position = finiteRepetition(
             position,
@@ -157,29 +165,29 @@ void performShapeModification(
             repetition.w
         );
     }
-    else if (modifications & 2)
+    else if (modifications & INFINITE_REPETITION)
     {
         position = infiniteRepetition(
             position,
             float3(repetition.x, repetition.y, repetition.z)
         );
     }
-    if (modifications & 4)
+    if (modifications & ELONGATE)
     {
         position = elongate(
             position,
             float3(elongation.x, elongation.y, elongation.z)
         );
     }
-    if (modifications & 8)
+    if (modifications & MIRROR_X)
     {
         position = mirrorX(position);
     }
-    if (modifications & 16)
+    if (modifications & MIRROR_Y)
     {
         position = mirrorY(position);
     }
-    if (modifications & 32)
+    if (modifications & MIRROR_Z)
     {
         position = mirrorZ(position);
     }
@@ -205,7 +213,7 @@ float performDistanceModification(
         const float distance)
 {
     float result = distance;
-    if (modifications & 64)
+    if (modifications & HOLLOW)
     {
         result = hollow(result, wallThickness);
     }
