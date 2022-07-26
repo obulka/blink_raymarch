@@ -88,7 +88,7 @@ inline void hdriLightData(
 inline void sphericalLightData(
         const float3 &seed,
         const float3 &pointOnSurface,
-        const float3 &position,
+        const float3 &lightPosition,
         const float radius,
         float3 &lightDirection,
         float &distanceToLight,
@@ -96,10 +96,10 @@ inline void sphericalLightData(
 {
     visibleSurfaceArea = 2.0f * PI * radius * radius;
     float3 lightNormal = uniformDirectionInHemisphere(
-        normalize(pointOnSurface - position),
+        normalize(pointOnSurface - lightPosition),
         seed
     );
-    lightDirection = position + lightNormal * radius - pointOnSurface;
+    lightDirection = lightPosition + lightNormal * radius - pointOnSurface;
     distanceToLight = length(lightDirection);
     lightDirection = normalize(lightDirection);
 }

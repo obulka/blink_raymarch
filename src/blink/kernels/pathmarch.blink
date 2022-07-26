@@ -1366,10 +1366,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      * @returns: The intenstity of shadow.
      */
     inline float sampleSoftShadow(
+            const float3 &rayOrigin,
             const float3 &rayDirection,
             const float distanceToShadePoint,
-            const float softness,
-            float3 &rayOrigin)
+            const float softness)
     {
         float distanceTravelled = 0;
         float shadowIntensity = 1.0f;
@@ -1377,10 +1377,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         int iterations = 0;
         float pixelFootprint = _hitTolerance;
+
+        float3 position = rayOrigin;
         while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)
         {
             const float stepDistance = fabs(
-                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint)
+                getMinDistanceToObjectInScene(position, pixelFootprint)
             );
             const float stepDistanceSquared = stepDistance * stepDistance;
             float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);
@@ -1397,7 +1399,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             }
 
             lastStepDistance = stepDistance;
-            rayOrigin += rayDirection * stepDistance;
+            position += rayDirection * stepDistance;
             distanceTravelled += stepDistance;
             pixelFootprint += stepDistance * _hitTolerance;
             iterations++;
@@ -1423,17 +1425,19 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
      * @returns: The intenstity of shadow.
      */
     float sampleShadow(
+            const float3 &rayOrigin,
             const float3 &rayDirection,
-            const float distanceToShadePoint,
-            float3 &rayOrigin)
+            const float distanceToShadePoint)
     {
         float distanceTravelled = 0;
         int iterations = 0;
         float pixelFootprint = _hitTolerance;
+        float3 position = rayOrigin;
+
         while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)
         {
             const float stepDistance = fabs(
-                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint)
+                getMinDistanceToObjectInScene(position, pixelFootprint)
             );
 
             if (stepDistance < pixelFootprint)
@@ -1441,7 +1445,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 return 0;
             }
 
-            rayOrigin += rayDirection * stepDistance;
+            position += rayDirection * stepDistance;
             distanceTravelled += stepDistance;
             pixelFootprint += stepDistance * _hitTolerance;
             iterations++;
@@ -1510,7 +1514,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     inline float4 sampleArtificialLight(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
-            const float offset,
             const float3 &lightDirection,
             const float distanceToLight,
             const int selectedLight)
@@ -1549,28 +1552,23 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightProperty1.y,
                 distanceToLight
             );
-            float3 surfaceOffset = offsetPoint(
-                pointOnSurface,
-                surfaceNormal,
-                offset
-            );
 
             float shadowIntensityAtPosition;
             if (lightType < 0)
             {
                 shadowIntensityAtPosition = sampleSoftShadow(
+                    pointOnSurface,
                     lightDirection,
                     distanceToLight,
-                    lightProperty1.x,
-                    surfaceOffset
+                    lightProperty1.x
                 );
             }
             else
             {
                 shadowIntensityAtPosition = sampleShadow(
+                    pointOnSurface,
                     lightDirection,
-                    distanceToLight,
-                    surfaceOffset
+                    distanceToLight
                 );
             }
 
@@ -1589,7 +1587,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     inline float4 sampleArtificialLights(
             const float3 &position,
             const float3 &surfaceNormal,
-            const float offset,
             const float4 &throughput,
             const float4 &materialBRDF,
             const float materialPDF)
@@ -1615,7 +1612,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 sampleArtificialLight(
                     position,
                     surfaceNormal,
-                    offset,
                     lightDirection,
                     distanceToLight,
                     lightIndex
@@ -1715,11 +1711,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             && materialLightPDF > 0.0f
             && _lightTextureWidth > 0
         ) {
-            // Perform MIS light sampling
-            rayColour += sampleArtificialLights(
+            const float3 offsetPosition = offsetPoint(
                 origin,
                 surfaceNormal,
-                offset,
+                offset
+            );
+            // Perform MIS light sampling
+            rayColour += sampleArtificialLights(
+                offsetPosition,
+                surfaceNormal,
                 throughput,
                 materialBRDF,
                 materialLightPDF
@@ -1967,7 +1967,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &lightDirection,
             const float lightPDF,
             const float materialPDF,
-            const float offset,
             const int selectedLight,
             const int numEmissive,
             const bool sampleHDRI,
@@ -1976,12 +1975,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     {
         float4 lightColour = float4(0);
         float lightGeometryFactor;
+
         if (selectedLight < _lightTextureWidth)
         {
             lightColour = sampleArtificialLight(
                 position,
                 surfaceNormal,
-                offset,
                 lightDirection,
                 distanceToLight,
                 selectedLight
@@ -1992,11 +1991,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         {
             float actualDistance;
             lightColour = marchPath(
-                offsetPoint(
-                    position,
-                    surfaceNormal,
-                    offset
-                ),
+                position,
                 lightDirection,
                 seed,
                 sampleHDRI,
@@ -2029,7 +2024,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &surfaceNormal,
             const float3 &position,
             const float materialPDF,
-            const float offset,
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numEmissive,
             const bool sampleHDRI,
@@ -2064,7 +2058,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             lightDirection,
             lightPDF,
             materialPDF,
-            offset,
             selectedLight,
             numEmissive,
             sampleHDRI,
@@ -2081,7 +2074,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float3 &surfaceNormal,
             const float3 &position,
             const float materialPDF,
-            const float offset,
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numEmissive,
             const bool sampleHDRI,
@@ -2118,7 +2110,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightDirection,
                 lightPDF,
                 materialPDF,
-                offset,
                 path,
                 numEmissive,
                 sampleHDRI,
@@ -2145,6 +2136,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
             const int numNestedDielectrics)
     {
+        const float3 offsetPosition = offsetPoint(
+            position,
+            surfaceNormal,
+            offset
+        );
         if (_sampleAllLights)
         {
             return sampleLights(
@@ -2152,9 +2148,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 throughput,
                 materialBRDF,
                 surfaceNormal,
-                position,
+                offsetPosition,
                 materialPDF,
-                offset,
                 emissiveIndices,
                 numEmissive,
                 sampleHDRI,
@@ -2167,9 +2162,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             throughput,
             materialBRDF,
             surfaceNormal,
-            position,
+            offsetPosition,
             materialPDF,
-            offset,
             emissiveIndices,
             numEmissive,
             sampleHDRI,
@@ -2305,7 +2299,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightDirection,
                 equiangularPDF,
                 lightPDF,
-                0.0f,
                 selectedLight,
                 numEmissive,
                 _sampleHDRIEquiangular,
