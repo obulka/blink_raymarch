@@ -483,7 +483,7 @@ float fractalBrownianMotionNoise(
  *
  * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
  */
-float turbulanceNoise(
+float turbulenceNoise(
         const int octaves,
         const float lacunarity,
         const float size,
@@ -521,7 +521,7 @@ float turbulanceNoise(
  *
  * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
  */
-float turbulanceNoise(
+float turbulenceNoise(
         const int octaves,
         const float lacunarity,
         const float size,
@@ -559,7 +559,7 @@ float turbulanceNoise(
  *
  * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
  */
-float turbulanceNoise(
+float turbulenceNoise(
         const int octaves,
         const float lacunarity,
         const float size,
