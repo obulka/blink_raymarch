@@ -7,7 +7,7 @@
 //
 // Signed Distance Transformations
 //
-// These operate on the signed distances that have been computed
+// These operate on the signed values that have been computed
 //
 #define SUBTRACTION 128
 #define INTERSECTION 256
@@ -17,18 +17,22 @@
 
 
 /**
- * The union of the two distances. Ie. The minimum. The corresponding
+ * The union of the two values. Ie. The minimum. The corresponding
  * colour will be placed in colour1, and the corresponding surface will
  * be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg colour0: The first colour.
  * @arg colour1: The second colour.
  * @arg colour8: The first surface.
  * @arg colour9: The second surface.
+ * @arg value2: The third value.
+ * @arg value3: The fourth value.
+ * @arg value4: The fifth value.
+ * @arg value5: The sixth value.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float union_(
         const float value0,
@@ -64,14 +68,14 @@ inline float union_(
 
 
 /**
- * The union of the two distances. Ie. The minimum. The corresponding
+ * The union of the two values. Ie. The minimum. The corresponding
  * colour will be placed in colour1, and the corresponding surface will
  * be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float union_(const float value0, const float value1)
 {
@@ -88,14 +92,18 @@ inline float union_(const float value0, const float value1)
  * colour will be placed in colour1, and the corresponding surface will
  * be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg colour0: The first colour.
  * @arg colour1: The second colour.
  * @arg colour8: The first surface.
  * @arg colour9: The second surface.
+ * @arg value2: The third value.
+ * @arg value3: The fourth value.
+ * @arg value4: The fifth value.
+ * @arg value5: The sixth value.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float subtraction(
         const float value0,
@@ -135,10 +143,10 @@ inline float subtraction(
  * colour will be placed in colour1, and the corresponding surface will
  * be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float subtraction(const float value0, const float value1)
 {
@@ -151,14 +159,18 @@ inline float subtraction(const float value0, const float value1)
  * colour will be placed in colour1, and the corresponding surface will
  * be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg colour0: The first colour.
  * @arg colour1: The second colour.
  * @arg colour8: The first surface.
  * @arg colour9: The second surface.
+ * @arg value2: The third value.
+ * @arg value3: The fourth value.
+ * @arg value4: The fifth value.
+ * @arg value5: The sixth value.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float intersection(
         const float value0,
@@ -198,10 +210,10 @@ inline float intersection(
  * colour will be placed in colour1, and the corresponding surface will
  * be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float intersection(const float value0, const float value1)
 {
@@ -214,15 +226,19 @@ inline float intersection(const float value0, const float value1)
  * corresponding colour will be placed in colour1, and the corresponding
  * surface will be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg colour0: The first colour.
  * @arg colour1: The second colour.
  * @arg colour8: The first surface.
  * @arg colour9: The second surface.
+ * @arg value2: The third value.
+ * @arg value3: The fourth value.
+ * @arg value4: The fifth value.
+ * @arg value5: The sixth value.
  * @arg blendSize: The amount to blend between the objects.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float smoothUnion(
         const float value0,
@@ -262,11 +278,11 @@ inline float smoothUnion(
  * corresponding colour will be placed in colour1, and the corresponding
  * surface will be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg blendSize: The amount to blend between the objects.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float smoothUnion(const float value0, const float value1, const float blendSize)
 {
@@ -280,15 +296,19 @@ inline float smoothUnion(const float value0, const float value1, const float ble
  * The corresponding colour will be placed in colour1, and the
  * corresponding surface will be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg colour0: The first colour.
  * @arg colour1: The second colour.
  * @arg colour8: The first surface.
  * @arg colour9: The second surface.
+ * @arg value2: The third value.
+ * @arg value3: The fourth value.
+ * @arg value4: The fifth value.
+ * @arg value5: The sixth value.
  * @arg blendSize: The amount to blend between the objects.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float smoothSubtraction(
         const float value0,
@@ -328,11 +348,11 @@ inline float smoothSubtraction(
  * The corresponding colour will be placed in colour1, and the
  * corresponding surface will be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg blendSize: The amount to blend between the objects.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float smoothSubtraction(
         const float value0,
@@ -349,15 +369,19 @@ inline float smoothSubtraction(
  * corresponding colour will be placed in colour1, and the corresponding
  * surface will be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg colour0: The first colour.
  * @arg colour1: The second colour.
  * @arg colour8: The first surface.
  * @arg colour9: The second surface.
+ * @arg value2: The third value.
+ * @arg value3: The fourth value.
+ * @arg value4: The fifth value.
+ * @arg value5: The sixth value.
  * @arg blendSize: The amount to blend between the objects.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float smoothIntersection(
         const float value0,
@@ -397,11 +421,11 @@ inline float smoothIntersection(
  * corresponding colour will be placed in colour1, and the corresponding
  * surface will be placed in colour9.
  *
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg blendSize: The amount to blend between the objects.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 inline float smoothIntersection(
         const float value0,
@@ -414,7 +438,7 @@ inline float smoothIntersection(
 
 
 /**
- * Compute the modified distance resulting from the interaction between
+ * Compute the modified value resulting from the interaction between
  * two objects. The corresponding colour will be placed in colour1, and
  * the corresponding surface will be placed in colour9.
  *
@@ -426,15 +450,19 @@ inline float smoothIntersection(
  *         bit 10: smooth subtraction
  *         bit 11: smooth intersection
  *     any other value will default to union.
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg colour0: The first colour.
  * @arg colour1: The second colour.
  * @arg colour8: The first surface.
  * @arg colour9: The second surface.
+ * @arg value2: The third value.
+ * @arg value3: The fourth value.
+ * @arg value4: The fifth value.
+ * @arg value5: The sixth value.
  * @arg blendSize: The amount to blend between the objects.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 float performChildInteraction(
         const int modifications,
@@ -586,7 +614,7 @@ float performChildInteraction(
 
 
 /**
- * Compute the modified distance resulting from the interaction between
+ * Compute the modified value resulting from the interaction between
  * two objects. The corresponding colour will be placed in colour1, and
  * the corresponding surface will be placed in colour9.
  *
@@ -598,11 +626,11 @@ float performChildInteraction(
  *         bit 10: smooth subtraction
  *         bit 11: smooth intersection
  *     any other value will default to union.
- * @arg value0: The first distance.
- * @arg value1: The second distance.
+ * @arg value0: The first value.
+ * @arg value1: The second value.
  * @arg blendSize: The amount to blend between the objects.
  *
- * @returns: The nearest, modified distance.
+ * @returns: The nearest, modified value.
  */
 float performChildInteraction(
         const int modifications,

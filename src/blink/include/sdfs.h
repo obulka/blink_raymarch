@@ -1404,13 +1404,15 @@ float distanceToColourlessObject(
  *         bit 16: enable emission trap colour
  *         bit 17: enable scattering trap colour
  * @arg diffuseColour: The diffuse colour of the surface will be stored
- *     here. This will only be modified by the fractals (23-25).
+ *     here. This will only be modified by the fractals (>23).
  * @arg specularColour: The specular colour of the surface will be
- *     stored here. This will only be modified by the fractals (23-25).
- * @arg extinctionCoefficient: The extinction colour of the surface will be
- *     stored here. This will only be modified by the fractals (23-25).
+ *     stored here. This will only be modified by the fractals (>23).
+ * @arg extinctionCoefficient: The extinction colour of the surface will
+ *     be stored here. This will only be modified by the fractals (>23).
  * @arg emissionColour: The emission colour of the surface will be
- *     stored here. This will only be modified by the fractals (23-25).
+ *     stored here. This will only be modified by the fractals (>23).
+ * @arg scatteringCoefficient: The scattering colour of the surface will
+ *     be stored here. This will only be modified by the fractals (>23).
  *
  * @returns: The minimum distance from the point to the shape.
  */
@@ -1586,13 +1588,15 @@ float distanceToObject(
  * @arg wallThickness: The thickness of the walls if hollowing the
  *     object.
  * @arg diffuseColour: The diffuse colour of the surface will be stored
- *     here. This will only be modified by the fractals (23-25).
+ *     here. This will only be modified by the fractals (>23).
  * @arg specularColour: The specular colour of the surface will be
- *     stored here. This will only be modified by the fractals (23-25).
- * @arg extinctionCoefficient: The extinction colour of the surface will be
- *     stored here. This will only be modified by the fractals (23-25).
+ *     stored here. This will only be modified by the fractals (>23).
+ * @arg extinctionCoefficient: The extinction colour of the surface will
+ *     be stored here. This will only be modified by the fractals (>23).
  * @arg emissionColour: The emission colour of the surface will be
- *     stored here. This will only be modified by the fractals (23-25).
+ *     stored here. This will only be modified by the fractals (>23).
+ * @arg scatteringCoefficient: The scattering colour of the surface will
+ *     be stored here. This will only be modified by the fractals (>23).
  *
  * @returns: The distance to the modified object.
  */

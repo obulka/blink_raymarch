@@ -3039,7 +3039,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 }
 
                 // Update the random seed
-                seed = RAND_CONST_9 * random(
+                seed = RAND_CONST_12 * random(
                     seed
                     + rng
                     + random(fabs(intersectionPosition + direction))
