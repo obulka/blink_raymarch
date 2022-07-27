@@ -1,3 +1,5 @@
+#! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
+version 13.2 v2
 Gizmo {
  inputs 3
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
@@ -37,11 +39,9 @@ Gizmo {
  repetition_spacing 1.1
  addUserKnob {26 ""}
  addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: This object will be subtracted from all of its\n        children, leaving holes.\n    Intersection: Only the region where this object and its\n        children overlap will remain.\n    Smooth Union: All children will smoothly blend together\n        with this object according to the 'blend strength'.\n    Smooth Subtraction:This object will be subtracted from all\n        of its children,  leaving holes that are smoothed\n        according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object\n        and its children overlap will remain, and the remaining\n        regions will be smoothed according to the 'blend\n        strength'." +DISABLED M {union subtraction intersection "smooth union" "smooth subtraction" "smooth intersection" "" "" ""}}
- blend_type intersection
  addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected." +DISABLED}
- blend_strength 0.805
+ blend_strength 0.1
  addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +DISABLED +STARTLINE}
- is_bound true
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
 }
@@ -213,7 +213,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set Nbaf5ee0 [stack 0]
+set N1379a720 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -235,7 +235,7 @@ set Nbaf5ee0 [stack 0]
    xpos 34
    ypos -6
   }
-set N11346800 [stack 0]
+set N149e6650 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -246,7 +246,7 @@ set N11346800 [stack 0]
    xpos -98
    ypos 336
   }
-push $Nbaf5ee0
+push $N1379a720
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -275,7 +275,7 @@ push $Nbaf5ee0
    xpos 158
    ypos 167
   }
-push $N11346800
+push $N149e6650
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -368,7 +368,7 @@ push $N11346800
    xpos 192
    ypos -2
   }
-set N114150b0 [stack 0]
+set N1e48f340 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -390,7 +390,7 @@ set N114150b0 [stack 0]
    xpos 34
    ypos -6
   }
-set N11428d00 [stack 0]
+set N405a0270 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -401,7 +401,7 @@ set N11428d00 [stack 0]
    xpos -98
    ypos 336
   }
-push $N114150b0
+push $N1e48f340
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -430,7 +430,7 @@ push $N114150b0
    xpos 158
    ypos 167
   }
-push $N11428d00
+push $N405a0270
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true

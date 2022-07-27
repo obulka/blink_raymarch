@@ -512,6 +512,47 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     * Get the scale of an object.
+     *
+     * @arg objectIndex: The index of the object.
+     *
+     * @returns: The scale of the object.
+     */
+    float getScale(const int objectIndex)
+    {
+        float scale = 1.0f;
+
+        for (int j=0; j <= objectIndex; j++)
+        {
+            const float numChildren = shapeProperties(j, 0, 2);
+
+            if (j + numChildren < objectIndex)
+            {
+                j += numChildren;
+                continue;
+            }
+
+            scale *= positions(j, 0, 3);
+        }
+
+        return scale;
+    }
+
+
+    /**
+     * Get the radius of an object.
+     *
+     * @arg objectIndex: The index of the object.
+     *
+     * @returns: The radius of the object.
+     */
+    float getRadius(const int objectIndex)
+    {
+        return getScale(objectIndex) * dimensions(objectIndex, 0, 0);
+    }
+
+
+    /**
      * Get the local position, from a world position.
      *
      * @arg objectIndex: The index of the object whose local coordinate
@@ -1362,14 +1403,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         const float3 objectPosition = getObjectPosition(objectIndex);
 
-        // TODO don't assume it's a sphere
-        const float radius = dimensions(objectIndex, 0, 0);
-
         sphericalLightData(
             seed,
             position,
             objectPosition,
-            radius,
+            getRadius(objectIndex),
             lightDirection,
             distanceToLight,
             visibleSurfaceArea
@@ -1919,7 +1957,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        const float radius = dimensions(objectId - 1, 0, 0);
+        const float radius = getRadius(objectId - 1);
         const float visibleSurfaceArea = 2.0f * PI * radius * radius;
 
         rayColour += multipleImportanceSample(
@@ -2812,7 +2850,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         // Perform MIS material sampling
-        const float radius = dimensions(objectId - 1, 0, 0);
+        const float radius = getRadius(objectId - 1);
         const float visibleSurfaceArea = 2.0f * PI * radius * radius;
 
         rayColour += multipleImportanceSample(
