@@ -17,7 +17,7 @@ Gizmo {
  addUserKnob {18 colour t "The colour of the light."}
  colour {1 0.8 0.5}
  addUserKnob {7 shadow_hardness l "shadow hardness" t "The hardness of the shadows, this is a non-physically accurate effect, but can look nice." +DISABLED R 1 100}
- shadow_hardness 50
+ shadow_hardness 1
  addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
@@ -129,7 +129,7 @@ add_layer {sdf_light_properties1 sdf_light_properties1.shadow_hardness sdf_light
    xpos 192
    ypos -2
   }
-set Ndd9b0f0 [stack 0]
+set N9c25a60 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -151,7 +151,7 @@ set Ndd9b0f0 [stack 0]
    xpos 34
    ypos -6
   }
-set Ndde3a10 [stack 0]
+set N9c0a000 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -162,7 +162,7 @@ set Ndde3a10 [stack 0]
    xpos -98
    ypos 336
   }
-push $Ndd9b0f0
+push $N9c25a60
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -191,7 +191,7 @@ push $Ndd9b0f0
    xpos 158
    ypos 167
   }
-push $Ndde3a10
+push $N9c0a000
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true

@@ -8,9 +8,9 @@ Gizmo {
  type turbulence
  addUserKnob {13 translation}
  addUserKnob {3 octaves}
- octaves 5
+ octaves 7
  addUserKnob {7 lacunarity R 1 10}
- lacunarity 6
+ lacunarity 5
  addUserKnob {7 gain}
  gain 0.5
  addUserKnob {7 gamma}

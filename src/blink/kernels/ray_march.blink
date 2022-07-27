@@ -68,7 +68,7 @@
 #define IS_NOT_UNION 3968
 
 
-kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
+kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 {
     // the input which specifies the format, process is called once per pixel
     // in this image, which also provides random seeds

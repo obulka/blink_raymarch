@@ -1,3 +1,9 @@
+// Copyright 2022 by Owen Bulka.
+// All rights reserved.
+// This file is released under the "MIT License Agreement".
+// Please see the LICENSE.md file that should have been included as part
+// of this package.
+
 #include "math.h"
 
 
@@ -14,7 +20,7 @@ kernel Variance : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * In define(), parameters can be given labels and default values.
+     * Give the parameters labels and default values.
      */
     void define()
     {
@@ -23,8 +29,7 @@ kernel Variance : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * The init() function is run before any calls to process().
-     * Local variables can be initialized here.
+     * Initialize the local variables.
      */
     void init()
     {
@@ -35,7 +40,7 @@ kernel Variance : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * Compute the irradiance of a pixel.
+     * Compute the variance of a pixel.
      * 
      * @arg pos: The x, and y location we are currently processing.
      */

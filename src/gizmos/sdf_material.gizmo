@@ -1,9 +1,7 @@
-#! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
-version 13.2 v2
 Gizmo {
  knobChanged "__import__('sdf.material', fromlist='SDFMaterial').SDFMaterial().handle_knob_changed()"
  tile_color 0xffffffff
- addUserKnob {20 User l "SDF Primitive"}
+ addUserKnob {20 User l "SDF Material"}
  addUserKnob {18 colour l "diffuse colour" t "The diffuse colour of the shape."}
  colour {1 1 1}
  addUserKnob {6 diffuse_use_trap_colour l "use trap colour" t "When enabled the surface of the mandelbox will be coloured algorithmically, rather than using the specified surface colour. However, reducing the surface colour channels will remove colour from the corresponding trap colour channel." -STARTLINE}
@@ -23,7 +21,7 @@ Gizmo {
  addUserKnob {6 do_refraction l "do refraction" -STARTLINE}
  do_refraction true
  addUserKnob {18 extinction_colour l "extinction colour" t "The colour absorbed as light travels through the material."}
- extinction_colour {1 1 1}
+ extinction_colour {0 0 0}
  addUserKnob {6 extinction_use_trap_colour l "use trap colour" t "Absorb the trap colour during transmission." -STARTLINE}
  extinction_use_trap_colour true
  addUserKnob {7 extinction_coefficient l "extinction coefficient" t "The amount of energy lost as the light travells through the material." R 0 10}
@@ -83,7 +81,7 @@ add_layer {sdf_trans_colour sdf_trans_colour.r sdf_trans_colour.g sdf_trans_colo
  Constant {
   inputs 0
   channels sdf_trans_colour
-  color {{"(1 - max(0, min(1, parent.extinction_colour.r))) * parent.extinction_coefficient"} {"(1 - max(0, min(1, parent.extinction_colour.g)))  * parent.extinction_coefficient"} {"(1 - max(0, min(1, parent.extinction_colour.b)))  * parent.extinction_coefficient"} {parent.transmission}}
+  color {{"(1 - clamp(parent.extinction_colour.r, 0, 1)) * parent.extinction_coefficient"} {"(1 - clamp(parent.extinction_colour.g, 0, 1))  * parent.extinction_coefficient"} {"(1 - clamp(parent.extinction_colour.b, 0, 1))  * parent.extinction_coefficient"} {parent.transmission}}
   format "1 1 0 0 1 1 1 1x1"
   name trans_colour
   xpos 730
@@ -157,6 +155,6 @@ add_layer {sdf_surface sdf_surface.reflection sdf_surface.transmission sdf_surfa
  Output {
   name Output1
   xpos 1170
-  ypos 830
+  ypos 782
  }
 end_group
