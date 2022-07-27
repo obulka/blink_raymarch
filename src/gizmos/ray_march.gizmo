@@ -1,12 +1,10 @@
-#! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
-version 13.2 v2
 Gizmo {
  inputs 6
  knobChanged "__import__('sdf.path_march', fromlist='PathMarch').PathMarch().handle_knob_changed()"
  addUserKnob {20 User l "Ray March"}
- addUserKnob {3 min_paths_per_pixel l "min paths per pixel"}
+ addUserKnob {3 min_paths_per_pixel l "min paths per pixel" t "The minimum number of paths to trace for each pixel. This is only used when a previous render with a 'variance' layer is plugged into the 'previous' input."}
  min_paths_per_pixel 1
- addUserKnob {3 max_paths_per_pixel l "max paths per pixel"}
+ addUserKnob {3 max_paths_per_pixel l "max paths per pixel" t "The maximum paths to trace. If nothing is plugged into the 'previous' input, then each pixel will trace this many paths."}
  max_paths_per_pixel 1
  addUserKnob {6 roulette t "Randomly terminate rays with a probability proportional to the remaining strength, or throughput of a ray." +STARTLINE}
  roulette true
@@ -19,53 +17,53 @@ Gizmo {
  max_bounces 7
  addUserKnob {7 hit_tolerance l "hit tolerance" t "The ray will be considered to have hit an object when it is within this distance of its surface" R 1e-06 0.01}
  hit_tolerance 0.0001
- addUserKnob {7 shadow_bias l "shadow bias" R 1 5}
+ addUserKnob {7 shadow_bias l "shadow bias" t "Increase the distance a ray is offset from a surface after intersecting by this factor." R 1 5}
  shadow_bias 1
  addUserKnob {7 max_brightness l "max brightness" t "The maximum brightness of a pixel. This protects against overflowing to infinity." R 1 1e+08}
  max_brightness 100000000
  addUserKnob {26 ""}
- addUserKnob {13 seeds t "The seeds used to generate per-pixel noise."}
+ addUserKnob {13 seeds t "The seeds used to generate per-pixel, random seeds. Be sure to change this on each render used for adaptive sampling, or set the expression on these knobs to be `random()`"}
  seeds {1 2 3}
- addUserKnob {6 enable_dof l "enable depth of field" t "Enable the use of depth of field." +STARTLINE}
- addUserKnob {6 level_of_detail l "dynamic level of detail" +STARTLINE}
+ addUserKnob {6 enable_dof l "enable depth of field" t "Enable the use of depth of field. The amount to defocus is driven by the camera parameters." +STARTLINE}
+ addUserKnob {6 level_of_detail l "dynamic level of detail" t "Increase the hit tolerance the farther the ray travels without hitting a surface. This has performance and antialiasing benefits." +STARTLINE}
  level_of_detail true
  addUserKnob {26 ""}
- addUserKnob {3 max_light_sampling_bounces l "max light sampling bounces"}
+ addUserKnob {3 max_light_sampling_bounces l "max light sampling bounces" t "The maximum number of bounces during light sampling. Light sampling will be disabled if this is 0. Light sampling means that each time a surface is hit, the direct illumination from lights in the scene will be computed, which helps to reduce noise very quickly."}
  max_light_sampling_bounces 7
- addUserKnob {6 sample_hdri l "sample hdri" t "Sample the HDRI during light sampling." -STARTLINE}
- addUserKnob {6 sample_all_lights l "sample all lights" t "Sample every light in the scene on each bounce." -STARTLINE}
- addUserKnob {7 light_sampling_bias l "light sampling bias"}
+ addUserKnob {6 sample_hdri l "sample hdri" t "Include the HDRI in the list of lights that can be sampled during light sampling." -STARTLINE}
+ addUserKnob {6 sample_all_lights l "sample all lights" t "Sample every light in the scene during light sampling, rather than just one random one. This will reduce noise quickly but slow things down." -STARTLINE}
+ addUserKnob {7 light_sampling_bias l "light sampling bias" t "A fully biased (1) light sampling means that on each light sample the ray will be initialised pointing directly at the light. Reducing this bias means that some rays will be pointed away from the light. This, when combined with multiple 'max light sampling bounces' allows the renderer to find difficult paths, such as volumetric caustics."}
  light_sampling_bias 1
- addUserKnob {6 secondary_sampling l "secondary sampling" t "Sample the artificial lights while casting shadow rays for light sampling." +STARTLINE}
+ addUserKnob {6 secondary_sampling l "secondary sampling" t "Sample the artificial lights (those in the 'lights' input) while casting shadow rays for light sampling." +STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {3 equiangular_samples l "equi-angular samples"}
+ addUserKnob {3 equiangular_samples l "equi-angular samples" t "The number of equi-angular samples to perform if the extinction/scattering coefficients are greater than 0. This enables participating media such as fog/smoke/clouds to be traced."}
  equiangular_samples 7
- addUserKnob {6 sample_hdri_equiangular l "sample hdri" t "Sample the HDRI during equi-angular sampling." -STARTLINE}
+ addUserKnob {6 sample_hdri_equiangular l "sample hdri" t "Sample the HDRI during equi-angular sampling. If there are no lights in the scene, this will allow you to see the participating media. With more than one light in the scene, this will increase noise." -STARTLINE}
  addUserKnob {7 refractive_index l "refractive index" t "The index of refraction of the medium that the camera is currently in." R 1 4}
  refractive_index 1
  addUserKnob {18 extinction_colour l "extinction colour" t "The colour absorbed as light travels through the material that the camera is in."}
  extinction_colour {0 0 0}
  addUserKnob {7 extinction_coefficient l "extinction coefficient" t "The amount of energy lost as the light travells through the material." R 0 10}
- addUserKnob {18 scattering_colour l "scattering colour" t "The colour being scattered."}
+ addUserKnob {18 scattering_colour l "scattering colour" t "The colour being scattered by the participating media."}
  scattering_colour {1 1 1}
- addUserKnob {7 scattering_coefficient l "scattering coefficient"}
+ addUserKnob {7 scattering_coefficient l "scattering coefficient" t "The amount of light being scattered by the participating media."}
  addUserKnob {26 ""}
  addUserKnob {7 hdri_offset_angle l "hdri offset angle" t "Rotate the hdri image by this amount around the y-axis." R 0 360}
  addUserKnob {26 ""}
- addUserKnob {6 use_precomputed_irradiance l "use precomputed irradiance" +STARTLINE}
- addUserKnob {7 hdri_lighting_scale l "hdri irradiance scale" R 0.1 1}
+ addUserKnob {6 use_precomputed_irradiance l "use precomputed irradiance" t "Use precomputed irradiance on diffuse bounces. This will mean that noise is all but illiminated imediately, and so will be fast, but will not give correct occlusion, or indirect illumination." +STARTLINE}
+ addUserKnob {7 hdri_lighting_scale l "hdri irradiance scale" t "The amount to scale the precomputed irradiance. A smaller scale will improve memory usage and lookup times." R 0.1 1}
  hdri_lighting_scale 0.25
- addUserKnob {3 hdri_irradiance_samples l "hdri irradiance samples"}
+ addUserKnob {3 hdri_irradiance_samples l "hdri irradiance samples" t "The number of samples to use when precomputing the irradiance."}
  hdri_irradiance_samples 100
- addUserKnob {7 hdri_lighting_blur l "hdri irradiance blur" R 0 10}
+ addUserKnob {7 hdri_lighting_blur l "hdri irradiance blur" t "The amount to blur the precomputed irradiance. This can be necessary to increase when there are small, very bright, points in the HDRI, because they will not be sampled smoothly and quickly." R 0 10}
  hdri_lighting_blur 10
  addUserKnob {26 ""}
- addUserKnob {3 variance_range l "variance range"}
+ addUserKnob {3 variance_range l "variance range" t "The number of adjacent pixels that will contribute to the variance of a pixel for the variance AOV which is automatically output."}
  variance_range 1
  addUserKnob {26 ""}
- addUserKnob {4 output_type l output t "The AOV type to output.\n\nThe stats AOV has the average number of steps in the red channel, the average number of bounces in the green channel, and the total number of paths that have been traced for a pixel in the blue channel." M {Beauty "World Position" "Local Position" Normal Depth Stats "" "" "" "" "" "" "" ""}}
- addUserKnob {41 format T format_.format}
- addUserKnob {6 latlong l LatLong t "Output a LatLong." +STARTLINE}
+ addUserKnob {4 output_type l output t "The AOV type to output.\n\nThe stats AOV has the average number of steps in the red channel, the average number of bounces in the green channel, and the total number of paths that have been traced for a pixel in the blue channel." M {Beauty "World Position" "Local Position" Normal Depth Stats "" "" "" "" "" "" "" "" ""}}
+ addUserKnob {41 format t "The format to output." T format_.format}
+ addUserKnob {6 latlong l LatLong t "Output a LatLong, 360 degree field of view image." +STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
 }

@@ -1,5 +1,3 @@
-#! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
-version 13.2 v2
 Gizmo {
  inputs 3
  onCreate "__import__('sdf.primitive', fromlist='SDFPrimitive').SDFPrimitive().handle_node_created()"
