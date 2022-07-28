@@ -1,5 +1,5 @@
-#! /usr/local/Nuke12.0v8/libnuke-12.0.8.so -nx
-version 12.0 v8
+#! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
+version 13.2 v2
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
     <window x="1976" y="188" w="2504" h="1376" maximized="1" screen="0">
@@ -10,7 +10,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             </dock>
             <split size="1841" stretch="1"/>
             <splitter orientation="2">
-                <split size="782"/>
+                <split size="783"/>
                 <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
                 </dock>
@@ -41,75 +41,74 @@ Root {
  colorManagement Nuke
  workingSpaceLUT linear
  monitorLut sRGB
+ monitorOutLUT rec709
  int8Lut sRGB
  int16Lut sRGB
  logLut Cineon
  floatLut linear
 }
-Axis2 {
+StickyNote {
  inputs 0
- name Axis2
- xpos 20898
- ypos 825
+ name StickyNote1
+ label "Increase the number of paths to clean up the\ndefocused noise. You can also disable the\n'enable depth of field' knob and use the depth\nAOV with a ZDefocus node"
+ xpos 20842
+ ypos 1103
 }
-Camera2 {
- translate {{curve x1 0 x400 -0.1} 0 2.5}
- focal 17.8
- name Camera2
- xpos 20898
- ypos 920
-}
-Dot {
- name Dot4
- xpos 20922
- ypos 1048
-}
-set N6084a50 [stack 0]
 sdf_light {
  inputs 0
  name sdf_light4
  label point
  xpos 20724
- ypos 805
- type point
- dimension_x 3
+ ypos 907
+ dimension_x {3 0 3}
  dimension_y 2
- dimension_z 4
- intensity 1000
- soften_shadows false
+ intensity 2
 }
 sdf_light {
  name sdf_light3
  label point
  xpos 20724
- ypos 874
- type point
- dimension_z 4
- intensity 1000
- soften_shadows false
+ ypos 945
+ dimension_x {1 1 2}
+ intensity 2
 }
 sdf_light {
  name sdf_light5
  label "ambient occlusion"
  xpos 20724
- ypos 954
+ ypos 983
  type "ambient occlusion"
- dimension_x 5
- dimension_z 4
+ dimension_x {5 0 0}
  intensity 0.1
  falloff 4
 }
-Dot {
- name Dot3
- xpos 20758
- ypos 1051
+push 0
+push 0
+Axis2 {
+ inputs 0
+ name Axis2
+ xpos 20856
+ ypos 829
 }
-set N63e39d0 [stack 0]
+Camera2 {
+ translate {{curve x1 0 x400 -0.1} 0 2.5}
+ focal 17.8
+ focal_point 0.38
+ fstop 10
+ name Camera2
+ xpos 20856
+ ypos 930
+}
+Dot {
+ name Dot4
+ xpos 20880
+ ypos 1052
+}
 sdf_material {
  inputs 0
  name sdf_material1
- xpos 20587
- ypos 853
+ xpos 20446
+ ypos 989
 }
 push 0
 push 0
@@ -118,7 +117,7 @@ sdf_primitive {
  name sdf_primitive1
  label mandelbox
  xpos 20587
- ypos 953
+ ypos 983
  shape mandelbox
  dimension_x -1.75
  dimension_y 17
@@ -131,31 +130,17 @@ Dot {
  xpos 20621
  ypos 1053
 }
-set N6632a50 [stack 0]
 ray_march {
- inputs 3
- name ray_march2
- xpos 20587
- ypos 1131
- hit_tolerance 0.0001
- max_rays_per_subpixel 10
- output_type Depth
-}
-Dot {
- name Dot5
- xpos 20620
- ypos 1264
-}
-push $N6084a50
-push $N63e39d0
-push $N6632a50
-ray_march {
- inputs 3
- name ray_march1
+ inputs 5
+ name ray_march3
  xpos 20724
- ypos 1133
- hit_tolerance 0.0001
- max_rays_per_subpixel 10
+ ypos 1126
+ max_paths_per_pixel 5
+ max_bounces 0
+ enable_dof true
+ max_light_sampling_bounces 1
+ equiangular_samples 0
+ format 0
 }
 HueShift {
  saturation 0.62
@@ -163,34 +148,11 @@ HueShift {
  hue_rotation -30
  name HueShift1
  xpos 20724
- ypos 1193
-}
-ShuffleCopy {
- inputs 2
- red red
- out depth
- out2 rgba
- name ShuffleCopy1
- xpos 20724
- ypos 1260
-}
-ZDefocus2 {
- math depth
- center 0.3265500963
- focal_point {483.6000061 388.7999878}
- dof 0.8899999857
- size 13.2
- legacy_resize_mode false
- show_legacy_resize_mode false
- aspect 2
- bloom_threshold 1
- bloom_gain 1.6
- name ZDefocus1
- xpos 20724
- ypos 1339
+ ypos 1152
 }
 Dot {
  name Dot1
+ selected true
  xpos 20758
- ypos 1469
+ ypos 1230
 }

@@ -65,6 +65,8 @@
 
 #define IS_BOUND 4096
 
+#define MOD_DO_REFRACTION 262144
+
 #define IS_NOT_UNION 3968
 
 
@@ -847,16 +849,21 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         // They are in the stack for relative positioning
                         // if they weren't then we would have to manually move
                         // the bounding box to follow the children
-                        const float parentBlendStrength = parentStack[stackIndex][BLEND_STRENGTH];
-                        const float parentNextDistance = parentStack[stackIndex][DISTANCE];
+                        if (
+                            !(parentModifications & IS_BOUND)
+                            || (parentModifications & MOD_DO_REFRACTION)
+                        ) {
+                            const float parentBlendStrength = parentStack[stackIndex][BLEND_STRENGTH];
+                            const float parentNextDistance = parentStack[stackIndex][DISTANCE];
 
-                        // Compute interaction between parent and this child
-                        nextDistance = performChildInteraction(
-                            parentModifications,
-                            parentNextDistance,
-                            nextDistance,
-                            parentBlendStrength
-                        );
+                            // Compute interaction between parent and this child
+                            nextDistance = performChildInteraction(
+                                parentModifications,
+                                parentNextDistance,
+                                nextDistance,
+                                parentBlendStrength
+                            );
+                        }
 
                         // Update the global min distance (and surface/colour)
                         if (fabs(nextDistance) < fabs(distance))
@@ -1051,7 +1058,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     id = objectId;
 
-                    doRefraction = modifications & 262144;
+                    doRefraction = modifications & MOD_DO_REFRACTION;
                 }
 
                 // This was tagged as a boundary object, skip its children
@@ -1129,74 +1136,79 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         // They are in the stack for relative positioning
                         // if they weren't then we would have to manually move
                         // the bounding box to follow the children
-                        const float parentBlendStrength = (
-                            parentStack[stackIndex][BLEND_STRENGTH]
-                        );
-                        const float parentNextDistance = parentStack[stackIndex][DISTANCE];
-                        const float4 parentDiffuseColour = float4(
-                            parentStack[stackIndex][DIFFUSE_COLOUR_R],
-                            parentStack[stackIndex][DIFFUSE_COLOUR_G],
-                            parentStack[stackIndex][DIFFUSE_COLOUR_B],
-                            parentStack[stackIndex][SPECULAR_ROUGHNESS]
-                        );
-                        const float4 parentSpecularColour = float4(
-                            parentStack[stackIndex][SPECULAR_COLOUR_R],
-                            parentStack[stackIndex][SPECULAR_COLOUR_G],
-                            parentStack[stackIndex][SPECULAR_COLOUR_B],
-                            parentStack[stackIndex][SPECULAR]
-                        );
-                        const float4 parentTransmissiveColour = float4(
-                            parentStack[stackIndex][EXTINCTION_R],
-                            parentStack[stackIndex][EXTINCTION_G],
-                            parentStack[stackIndex][EXTINCTION_B],
-                            parentStack[stackIndex][TRANSMISSION]
-                        );
-                        const float4 parentEmissiveColour = float4(
-                            parentStack[stackIndex][EMISSION_R],
-                            parentStack[stackIndex][EMISSION_G],
-                            parentStack[stackIndex][EMISSION_B],
-                            0
-                        );
-                        const float4 parentScatteringCoefficient = float4(
-                            parentStack[stackIndex][SCATTERING_R],
-                            parentStack[stackIndex][SCATTERING_G],
-                            parentStack[stackIndex][SCATTERING_B],
-                            0
-                        );
-                        const float parentTransmissionRoughness = (
-                            parentStack[stackLastIndex][TRANSMISSION_ROUGHNESS]
-                        );
+                        if (
+                            !(parentModifications & IS_BOUND)
+                            || (parentModifications & MOD_DO_REFRACTION)
+                        ) {
+                            const float parentBlendStrength = (
+                                parentStack[stackIndex][BLEND_STRENGTH]
+                            );
+                            const float parentNextDistance = parentStack[stackIndex][DISTANCE];
+                            const float4 parentDiffuseColour = float4(
+                                parentStack[stackIndex][DIFFUSE_COLOUR_R],
+                                parentStack[stackIndex][DIFFUSE_COLOUR_G],
+                                parentStack[stackIndex][DIFFUSE_COLOUR_B],
+                                parentStack[stackIndex][SPECULAR_ROUGHNESS]
+                            );
+                            const float4 parentSpecularColour = float4(
+                                parentStack[stackIndex][SPECULAR_COLOUR_R],
+                                parentStack[stackIndex][SPECULAR_COLOUR_G],
+                                parentStack[stackIndex][SPECULAR_COLOUR_B],
+                                parentStack[stackIndex][SPECULAR]
+                            );
+                            const float4 parentTransmissiveColour = float4(
+                                parentStack[stackIndex][EXTINCTION_R],
+                                parentStack[stackIndex][EXTINCTION_G],
+                                parentStack[stackIndex][EXTINCTION_B],
+                                parentStack[stackIndex][TRANSMISSION]
+                            );
+                            const float4 parentEmissiveColour = float4(
+                                parentStack[stackIndex][EMISSION_R],
+                                parentStack[stackIndex][EMISSION_G],
+                                parentStack[stackIndex][EMISSION_B],
+                                0
+                            );
+                            const float4 parentScatteringCoefficient = float4(
+                                parentStack[stackIndex][SCATTERING_R],
+                                parentStack[stackIndex][SCATTERING_G],
+                                parentStack[stackIndex][SCATTERING_B],
+                                0
+                            );
+                            const float parentTransmissionRoughness = (
+                                parentStack[stackLastIndex][TRANSMISSION_ROUGHNESS]
+                            );
 
-                        const float parentRefractiveIndex = (
-                            parentStack[stackLastIndex][PARENT_REFRACTIVE_INDEX]
-                        );
+                            const float parentRefractiveIndex = (
+                                parentStack[stackLastIndex][PARENT_REFRACTIVE_INDEX]
+                            );
 
-                        if (fabs(nextDistance) > fabs(parentNextDistance))
-                        {
-                            objectId = parentStack[stackIndex][PARENT_OBJECT_ID];
+                            if (fabs(nextDistance) > fabs(parentNextDistance))
+                            {
+                                objectId = parentStack[stackIndex][PARENT_OBJECT_ID];
+                            }
+
+                            // Compute interaction between parent and this child
+                            nextDistance = performChildInteraction(
+                                parentModifications,
+                                parentNextDistance,
+                                nextDistance,
+                                parentDiffuseColour,
+                                blendedDiffuseColour,
+                                parentSpecularColour,
+                                blendedSpecularColour,
+                                parentTransmissiveColour,
+                                blendedTransmissiveColour,
+                                parentEmissiveColour,
+                                blendedEmissiveColour,
+                                parentScatteringCoefficient,
+                                blendedScatteringCoefficient,
+                                parentTransmissionRoughness,
+                                blendedTransmissionRoughness,
+                                parentRefractiveIndex,
+                                blendedRefractiveIndex,
+                                parentBlendStrength
+                            );
                         }
-
-                        // Compute interaction between parent and this child
-                        nextDistance = performChildInteraction(
-                            parentModifications,
-                            parentNextDistance,
-                            nextDistance,
-                            parentDiffuseColour,
-                            blendedDiffuseColour,
-                            parentSpecularColour,
-                            blendedSpecularColour,
-                            parentTransmissiveColour,
-                            blendedTransmissiveColour,
-                            parentEmissiveColour,
-                            blendedEmissiveColour,
-                            parentScatteringCoefficient,
-                            blendedScatteringCoefficient,
-                            parentTransmissionRoughness,
-                            blendedTransmissionRoughness,
-                            parentRefractiveIndex,
-                            blendedRefractiveIndex,
-                            parentBlendStrength
-                        );
 
                         // Update the global min distance (and surface/colour)
                         if (fabs(nextDistance) < fabs(distance))
@@ -1214,7 +1226,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                             id = objectId;
 
-                            doRefraction = parentModifications & 262144;
+                            doRefraction = parentModifications & MOD_DO_REFRACTION;
                         }
                     }
 
@@ -1251,7 +1263,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
                     id = objectId;
 
-                    doRefraction = modifications & 262144;
+                    doRefraction = modifications & MOD_DO_REFRACTION;
                 }
             }
             else
@@ -1352,8 +1364,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float3 &lightDirection,
             float &distanceToLight)
     {
-        float visibleSurfaceArea = 1.0f;
-
         // Selected a 'fake' light eg. point, directional, ambient
         SampleType(lights) light = lights(lightIndex, 0);
         const int lightType = abs((int) lightProperties(lightIndex, 0, 3));
@@ -1366,12 +1376,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 lightType,
                 _maxRayDistance,
                 distanceToLight,
-                visibleSurfaceArea,
                 lightDirection
             );
         }
 
-        return sampleLightsPDF(max(1, numLights), visibleSurfaceArea);
+        return sampleLightsPDF(max(1, numLights));
     }
 
 
@@ -1399,8 +1408,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float3 &lightDirection,
             float &distanceToLight)
     {
-        float visibleSurfaceArea = 1.0f;
-
         const float3 objectPosition = getObjectPosition(objectIndex);
 
         sphericalLightData(
@@ -1409,8 +1416,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             objectPosition,
             getRadius(objectIndex),
             lightDirection,
-            distanceToLight,
-            visibleSurfaceArea
+            distanceToLight
         );
 
         if (_maxLightSamplingBounces > 1 && __lightSamplingAngle > 0.0f)
@@ -1422,7 +1428,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        return sampleLightsPDF(max(1, numLights), visibleSurfaceArea);
+        return sampleLightsPDF(max(1, numLights));
     }
 
 
@@ -1454,8 +1460,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float3 &lightDirection,
             float &distanceToLight)
     {
-        float visibleSurfaceArea = 1.0f;
-
         if (selectedLight < _lightTextureWidth)
         {
             return sampleArtificialLightData(
@@ -1484,7 +1488,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             lightDirection,
             distanceToLight
         );
-        return sampleLightsPDF(max(1, numLights), 1.0f);
+        return sampleLightsPDF(max(1, numLights));
     }
 
 
@@ -1957,14 +1961,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        const float radius = getRadius(objectId - 1);
-        const float visibleSurfaceArea = 2.0f * PI * radius * radius;
-
         rayColour += multipleImportanceSample(
             emittance,
             throughput,
             previousMaterialPDF,
-            sampleLightsPDF(numLights, visibleSurfaceArea)
+            sampleLightsPDF(numLights)
         );
 
         throughput *= materialBRDF / materialPDF;
@@ -2849,15 +2850,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             usedPrecomputedIrradiance = true;
         }
 
-        // Perform MIS material sampling
-        const float radius = getRadius(objectId - 1);
-        const float visibleSurfaceArea = 2.0f * PI * radius * radius;
-
         rayColour += multipleImportanceSample(
             emittance,
             throughput,
             previousMaterialPDF,
-            sampleLightsPDF(numLights, visibleSurfaceArea)
+            sampleLightsPDF(numLights)
         );
 
         float materialGeometryFactor = 1.0f;
