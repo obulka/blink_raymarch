@@ -51,6 +51,13 @@ StickyNote {
  xpos 525
  ypos 30
 }
+StickyNote {
+ inputs 0
+ name StickyNote2
+ label "enable the 'use precomputed irradiance'\nto get the instant smoothing of the example\non github"
+ xpos 282
+ ypos 411
+}
 sdf_light {
  inputs 0
  name sdf_light2
@@ -136,7 +143,7 @@ Dot {
  xpos -188
  ypos -227
 }
-set N81cf260 [stack 0]
+set N9ac1b60 [stack 0]
 Dot {
  name Dot6
  xpos -90
@@ -147,13 +154,13 @@ Dot {
  xpos -90
  ypos -78
 }
-set N81d8f00 [stack 0]
+set N9acb800 [stack 0]
 Dot {
  name Dot1
  xpos -90
  ypos 44
 }
-push $N81d8f00
+push $N9acb800
 sdf_material {
  inputs 0
  name bbox
@@ -163,7 +170,7 @@ sdf_material {
  transmission 1
  do_refraction false
 }
-push $N81cf260
+push $N9ac1b60
 sdf_material {
  inputs 0
  name carrot
@@ -190,7 +197,7 @@ sdf_material {
  ypos -457
  colour {0.1 0.1 0.1}
 }
-set N83f0150 [stack 0]
+set N9ce2a50 [stack 0]
 push 0
 sdf_material {
  inputs 0
@@ -228,9 +235,9 @@ sdf_primitive {
  dimension_y 0.01
  translate {0 -0.17 0}
 }
-push $N83f0150
+push $N9ce2a50
 push 0
-push $N83f0150
+push $N9ce2a50
 push 0
 push 0
 sdf_primitive {
@@ -298,9 +305,9 @@ sdf_primitive {
  rotate {{30*sin(.075*frame)} 0 0}
  blend_strength 0.06
 }
-push $N81cf260
+push $N9ac1b60
 push 0
-push $N81cf260
+push $N9ac1b60
 sdf_material {
  inputs 0
  name chrome
@@ -416,17 +423,11 @@ Dot {
 ray_march {
  inputs 5
  name ray_march1
+ selected true
  xpos 180
  ypos 417
  max_paths_per_pixel 5
  max_light_sampling_bounces 1
  equiangular_samples 0
  format 0
-}
-StickyNote {
- inputs 0
- name StickyNote2
- label "enable the 'use precomputed irradiance'\nto get the instant smoothing of the example\non github"
- xpos 282
- ypos 411
 }

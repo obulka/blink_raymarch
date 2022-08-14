@@ -114,6 +114,8 @@ inline void hdriLightData(
  * @arg radius: The radius of the sphere.
  * @arg lightDirection: Will store the direction to the light.
  * @arg distanceToLight: Will store the distance to the light.
+ * @arg visibleSurfaceArea: The surface area that is visible to the
+ *     position we are sampling from.
  */
 inline void sphericalLightData(
         const float3 &seed,
@@ -121,8 +123,10 @@ inline void sphericalLightData(
         const float3 &lightPosition,
         const float radius,
         float3 &lightDirection,
-        float &distanceToLight)
+        float &distanceToLight,
+        float &visibleSurfaceArea)
 {
+    visibleSurfaceArea = 2.0f * PI * radius * radius;
     float3 lightNormal = uniformDirectionInHemisphere(
         normalize(pointOnSurface - lightPosition),
         seed
@@ -141,13 +145,17 @@ inline void sphericalLightData(
  * @arg maxRayDistance: The maximum distance the ray can travel.
  * @arg lightDirection: Will store the direction to the light.
  * @arg distanceToLight: Will store the distance to the light.
+ * @arg visibleSurfaceArea: The surface area that is visible to the
+ *     position we are sampling from.
  */
 inline void directionalLightData(
         const float3 &direction,
         const float maxRayDistance,
         float3 &lightDirection,
-        float &distanceToLight)
+        float &distanceToLight,
+        float &visibleSurfaceArea)
 {
+    visibleSurfaceArea = 2.0f * PI;
     distanceToLight = maxRayDistance;
     lightDirection = normalize(-direction);
 }
@@ -161,13 +169,17 @@ inline void directionalLightData(
  * @arg position: The position of the light.
  * @arg lightDirection: Will store the direction to the light.
  * @arg distanceToLight: Will store the distance to the light.
+ * @arg visibleSurfaceArea: The surface area that is visible to the
+ *     position we are sampling from.
  */
 inline void pointLightData(
         const float3 &pointOnSurface,
         const float3 &position,
         float3 &lightDirection,
-        float &distanceToLight)
+        float &distanceToLight,
+        float &visibleSurfaceArea)
 {
+    visibleSurfaceArea = 0.0f;
     lightDirection = position - pointOnSurface;
     distanceToLight = length(lightDirection);
     lightDirection = normalize(lightDirection);
@@ -179,12 +191,21 @@ inline void pointLightData(
  * scene.
  *
  * @arg numLights: The number of lights in the scene.
+ * @arg visibleSurfaceArea: The surface area that is visible to the
+ *     position we are sampling from.
  *
  * @returns: The probability distribution function.
  */
-inline float sampleLightsPDF(const float numLights)
+inline float sampleLightsPDF(const float numLights, const float visibleSurfaceArea)
 {
-    return 1.0f / numLights;
+    if (visibleSurfaceArea == 0.0f)
+    {
+        return 1.0f / numLights;
+    }
+    else
+    {
+        return 1.0f / numLights / visibleSurfaceArea;
+    }
 }
 
 
@@ -219,6 +240,8 @@ inline float lightIntensity(
  *     3: ambient occlusion
  * @arg maxRayDistance: The maximum distance a ray can travel.
  * @arg distanceToLight: Will store the distance to the light.
+ * @arg visibleSurfaceArea: The surface area that is visible to the
+ *     position we are sampling from.
  * @arg lightDirection: Will store the direction to the light.
  */
 inline void getLightData(
@@ -227,6 +250,7 @@ inline void getLightData(
         const int lightType,
         const float maxRayDistance,
         float &distanceToLight,
+        float &visibleSurfaceArea,
         float3 &lightDirection)
 {
     if (lightType == DIRECTIONAL_LIGHT)
@@ -236,7 +260,8 @@ inline void getLightData(
             light,
             maxRayDistance,
             lightDirection,
-            distanceToLight
+            distanceToLight,
+            visibleSurfaceArea
         );
     }
     else if (lightType == POINT_LIGHT)
@@ -246,7 +271,8 @@ inline void getLightData(
             pointOnSurface,
             light,
             lightDirection,
-            distanceToLight
+            distanceToLight,
+            visibleSurfaceArea
         );
     }
 }

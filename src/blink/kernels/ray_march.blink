@@ -1364,6 +1364,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float3 &lightDirection,
             float &distanceToLight)
     {
+        float visibleSurfaceArea = 1.0f;
+
         // Selected a 'fake' light eg. point, directional, ambient
         SampleType(lights) light = lights(lightIndex, 0);
         const int lightType = abs((int) lightProperties(lightIndex, 0, 3));
@@ -1376,11 +1378,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 lightType,
                 _maxRayDistance,
                 distanceToLight,
+                visibleSurfaceArea,
                 lightDirection
             );
         }
 
-        return sampleLightsPDF(max(1, numLights));
+        return sampleLightsPDF(max(1, numLights), visibleSurfaceArea);
     }
 
 
@@ -1408,6 +1411,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float3 &lightDirection,
             float &distanceToLight)
     {
+        float visibleSurfaceArea = 1.0f;
+
         const float3 objectPosition = getObjectPosition(objectIndex);
 
         sphericalLightData(
@@ -1416,7 +1421,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             objectPosition,
             getRadius(objectIndex),
             lightDirection,
-            distanceToLight
+            distanceToLight,
+            visibleSurfaceArea
         );
 
         if (_maxLightSamplingBounces > 1 && __lightSamplingAngle > 0.0f)
@@ -1428,7 +1434,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        return sampleLightsPDF(max(1, numLights));
+        return sampleLightsPDF(max(1, numLights), visibleSurfaceArea);
     }
 
 
@@ -1460,6 +1466,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             float3 &lightDirection,
             float &distanceToLight)
     {
+        float visibleSurfaceArea = 1.0f;
+
         if (selectedLight < _lightTextureWidth)
         {
             return sampleArtificialLightData(
@@ -1488,7 +1496,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             lightDirection,
             distanceToLight
         );
-        return sampleLightsPDF(max(1, numLights));
+        return sampleLightsPDF(max(1, numLights), 1.0f);
     }
 
 
@@ -1961,11 +1969,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
+        const float radius = getRadius(objectId - 1);
+        const float visibleSurfaceArea = 2.0f * PI * radius * radius;
+
         rayColour += multipleImportanceSample(
             emittance,
             throughput,
             previousMaterialPDF,
-            sampleLightsPDF(numLights)
+            sampleLightsPDF(numLights, visibleSurfaceArea)
         );
 
         throughput *= materialBRDF / materialPDF;
@@ -2137,7 +2148,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     throughput.z
                 );
                 if (
-                    ++bounces > _maxLightSamplingBounces
+                    ++bounces >= _maxLightSamplingBounces
                     || emittance.w > 0.0f
                     || (_roulette && exitProbability <= rng)
                 ) {
@@ -2846,15 +2857,24 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         if (_usePrecomputedIrradiance && materialLightPDF > 0.0f)
         {
-            emittance += diffusivity * diffusivity.w * readIrradianceValue(surfaceNormal);
+            rayColour += (
+                diffusivity
+                * diffusivity.w
+                * throughput
+                * readIrradianceValue(surfaceNormal)
+            );
             usedPrecomputedIrradiance = true;
         }
+
+        // Perform MIS material sampling
+        const float radius = getRadius(objectId - 1);
+        const float visibleSurfaceArea = 2.0f * PI * radius * radius;
 
         rayColour += multipleImportanceSample(
             emittance,
             throughput,
             previousMaterialPDF,
-            sampleLightsPDF(numLights)
+            sampleLightsPDF(numLights, visibleSurfaceArea)
         );
 
         float materialGeometryFactor = 1.0f;
