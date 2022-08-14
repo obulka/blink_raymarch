@@ -43,17 +43,16 @@
  * Note also that these noise functions are the most practical and useful
  * signed version of Perlin noise.
  *
- * @param[in] hash  hash value
- * @param[in] x     distance to the corner
+ * @arg hash: Hash value.
+ * @arg x: Distance to the corner.
  *
- * @return gradient value
+ * @returns: Gradient value.
  */
-static float grad(int hash, float x)
+float grad(const int hash, const float x)
 {
     const int h = hash & 0x0F;  // Convert low 4 bits of hash code
     float grad = 1.0f + (h & 7);    // Gradient value 1.0, 2.0, ..., 8.0
     if ((h & 8) != 0) grad = -grad; // Set a random sign for the gradient
-//  float grad = gradients1D[h];    // NOTE : Test of Gradient look-up table instead of the above
     return (grad * x);              // Multiply the gradient with the distance
 }
 
@@ -61,69 +60,68 @@ static float grad(int hash, float x)
 /**
  * Helper functions to compute gradients-dot-residual vectors (2D)
  *
- * @param[in] hash  hash value
- * @param[in] x     x coord of the distance to the corner
- * @param[in] y     y coord of the distance to the corner
+ * @arg hash: Hash value.
+ * @arg x: x coordinate of the distance to the corner.
+ * @arg y: y coordinate of the distance to the corner.
  *
- * @return gradient value
+ * @returns: Gradient value.
  */
-static float grad(int hash, float x, float y)
+float grad(const int hash, const float x, const float y)
 {
     const int h = hash & 0x3F;  // Convert low 3 bits of hash code
     const float u = h < 4 ? x : y;  // into 8 simple gradient directions,
     const float v = h < 4 ? y : x;
-    return ((h & 1) ? -u : u) + ((h & 2) ? -2.0f * v : 2.0f * v); // and compute the dot product with (x,y).
+    // and compute the dot product with (x,y).
+    return ((h & 1) ? -u : u) + ((h & 2) ? -2.0f * v : 2.0f * v);
 }
 
 
 /**
  * Helper functions to compute gradients-dot-residual vectors (3D)
  *
- * @param[in] hash  hash value
- * @param[in] x     x coord of the distance to the corner
- * @param[in] y     y coord of the distance to the corner
- * @param[in] z     z coord of the distance to the corner
+ * @arg hash: Hash value.
+ * @arg x: x coordinate of the distance to the corner.
+ * @arg y: y coordinate of the distance to the corner.
+ * @arg z: z coordinate of the distance to the corner.
  *
- * @return gradient value
+ * @returns: Gradient value
  */
-static float grad(int hash, float x, float y, float z)
+float grad(const int hash, const float x, const float y, const float z)
 {
-    int h = hash & 15;     // Convert low 4 bits of hash code into 12 simple
-    float u = h < 8 ? x : y; // gradient directions, and compute dot product.
-    float v = h < 4 ? y : h == 12 || h == 14 ? x : z; // Fix repeats at h = 12 to 15
+    const int h = hash & 15;     // Convert low 4 bits of hash code into 12 simple
+    const float u = h < 8 ? x : y; // gradient directions, and compute dot product.
+    const float v = h < 4 ? y : h == 12 || h == 14 ? x : z; // Fix repeats at h = 12 to 15
     return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
 }
 
 
 /**
  * 1D Perlin simplex noise
+ * Takes around 74ns on an AMD APU.
  *
- *  Takes around 74ns on an AMD APU.
+ * @arg x: float coordinate.
  *
- * @param[in] x float coordinate
- *
- * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
+ * @returns: Noise value in the range [-1, 1], value of 0 on all integer
+ *     coordinates.
  */
 float perlinSimplexNoise(const float seed)
 {
-    float n0, n1;   // Noise contributions from the two "corners"
+    float n0, n1; // Noise contributions from the two "corners"
 
     // Corners coordinates (nearest integer values):
-    int i0 = floor(seed);
-    int i1 = i0 + 1;
+    const int i0 = floor(seed);
+    const int i1 = i0 + 1;
     // Distances to corners (between 0 and 1):
-    float x0 = seed - i0;
-    float x1 = x0 - 1.0f;
+    const float x0 = seed - i0;
+    const float x1 = x0 - 1.0f;
 
     // Calculate the contribution from the first corner
-    float t0 = 1.0f - x0*x0;
-//  if(t0 < 0.0f) t0 = 0.0f; // not possible
+    float t0 = 1.0f - x0 * x0;
     t0 *= t0;
     n0 = t0 * t0 * grad(wangHash(i0), x0);
 
     // Calculate the contribution from the second corner
-    float t1 = 1.0f - x1*x1;
-//  if(t1 < 0.0f) t1 = 0.0f; // not possible
+    float t1 = 1.0f - x1 * x1;
     t1 *= t1;
     n1 = t1 * t1 * grad(wangHash(i1), x1);
 
@@ -135,13 +133,13 @@ float perlinSimplexNoise(const float seed)
 
 /**
  * 2D Perlin simplex noise
+ * Takes around 150ns on an AMD APU.
  *
- *  Takes around 150ns on an AMD APU.
+ * @arg x: float coordinate
+ * @arg y: float coordinate
  *
- * @param[in] x float coordinate
- * @param[in] y float coordinate
- *
- * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
+ * @returns: Noise value in the range [-1, 1], value of 0 on all integer
+ *     coordinates.
  */
 float perlinSimplexNoise(const float2 &seed)
 {
@@ -181,9 +179,11 @@ float perlinSimplexNoise(const float2 &seed)
     // a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
     // c = (3-sqrt(3))/6
 
-    const float x1 = x0 - i1 + G2;            // Offsets for middle corner in (x,y) unskewed coords
+    // Offsets for middle corner in (x,y) unskewed coords
+    const float x1 = x0 - i1 + G2;
     const float y1 = y0 - j1 + G2;
-    const float x2 = x0 - 1.0f + 2.0f * G2;   // Offsets for last corner in (x,y) unskewed coords
+    // Offsets for last corner in (x,y) unskewed coords
+    const float x2 = x0 - 1.0f + 2.0f * G2;
     const float y2 = y0 - 1.0f + 2.0f * G2;
 
     // Work out the hashed gradient indices of the three simplex corners
@@ -192,7 +192,7 @@ float perlinSimplexNoise(const float2 &seed)
     const int gi2 = wangHash(i + 1 + wangHash(j + 1));
 
     // Calculate the contribution from the first corner
-    float t0 = 0.5f - x0*x0 - y0*y0;
+    float t0 = 0.5f - x0 * x0 - y0 * y0;
     if (t0 < 0.0f)
     {
         n0 = 0.0f;
@@ -204,7 +204,7 @@ float perlinSimplexNoise(const float2 &seed)
     }
 
     // Calculate the contribution from the second corner
-    float t1 = 0.5f - x1*x1 - y1*y1;
+    float t1 = 0.5f - x1 * x1 - y1 * y1;
     if (t1 < 0.0f)
     {
         n1 = 0.0f;
@@ -216,7 +216,7 @@ float perlinSimplexNoise(const float2 &seed)
     }
 
     // Calculate the contribution from the third corner
-    float t2 = 0.5f - x2*x2 - y2*y2;
+    float t2 = 0.5f - x2 * x2 - y2 * y2;
     if (t2 < 0.0f)
     {
         n2 = 0.0f;
@@ -236,28 +236,29 @@ float perlinSimplexNoise(const float2 &seed)
 /**
  * 3D Perlin simplex noise
  *
- * @param[in] x float coordinate
- * @param[in] y float coordinate
- * @param[in] z float coordinate
+ * @arg x: float coordinate
+ * @arg y: float coordinate
+ * @arg z: float coordinate
  *
- * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
+ * @returns: Noise value in the range [-1, 1], value of 0 on all integer
+ *     coordinates.
  */
 float perlinSimplexNoise(const float3 &seed)
 {
     float n0, n1, n2, n3; // Noise contributions from the four corners
 
     // Skew the input space to determine which simplex cell we're in
-    float s = sumComponent(seed) * F3; // Very nice and simple skew factor for 3D
-    int i = floor(seed.x + s);
-    int j = floor(seed.y + s);
-    int k = floor(seed.z + s);
-    float t = (i + j + k) * G3;
-    float X0 = i - t; // Unskew the cell origin back to (x,y,z) space
-    float Y0 = j - t;
-    float Z0 = k - t;
-    float x0 = seed.x - X0; // The x,y,z distances from the cell origin
-    float y0 = seed.y - Y0;
-    float z0 = seed.z - Z0;
+    const float s = sumComponent(seed) * F3; // Very nice and simple skew factor for 3D
+    const int i = floor(seed.x + s);
+    const int j = floor(seed.y + s);
+    const int k = floor(seed.z + s);
+    const float t = (i + j + k) * G3;
+    const float X0 = i - t; // Unskew the cell origin back to (x,y,z) space
+    const float Y0 = j - t;
+    const float Z0 = k - t;
+    const float x0 = seed.x - X0; // The x,y,z distances from the cell origin
+    const float y0 = seed.y - Y0;
+    const float z0 = seed.z - Z0;
 
     // For the 3D case, the simplex shape is a slightly irregular tetrahedron.
     // Determine which simplex we are in.
@@ -298,24 +299,24 @@ float perlinSimplexNoise(const float3 &seed)
     // a step of (0,1,0) in (i,j,k) means a step of (-c,1-c,-c) in (x,y,z), and
     // a step of (0,0,1) in (i,j,k) means a step of (-c,-c,1-c) in (x,y,z), where
     // c = 1/6.
-    float x1 = x0 - i1 + G3; // Offsets for second corner in (x,y,z) coords
-    float y1 = y0 - j1 + G3;
-    float z1 = z0 - k1 + G3;
-    float x2 = x0 - i2 + 2.0f * G3; // Offsets for third corner in (x,y,z) coords
-    float y2 = y0 - j2 + 2.0f * G3;
-    float z2 = z0 - k2 + 2.0f * G3;
-    float x3 = x0 - 1.0f + 3.0f * G3; // Offsets for last corner in (x,y,z) coords
-    float y3 = y0 - 1.0f + 3.0f * G3;
-    float z3 = z0 - 1.0f + 3.0f * G3;
+    const float x1 = x0 - i1 + G3; // Offsets for second corner in (x,y,z) coords
+    const float y1 = y0 - j1 + G3;
+    const float z1 = z0 - k1 + G3;
+    const float x2 = x0 - i2 + 2.0f * G3; // Offsets for third corner in (x,y,z) coords
+    const float y2 = y0 - j2 + 2.0f * G3;
+    const float z2 = z0 - k2 + 2.0f * G3;
+    const float x3 = x0 - 1.0f + 3.0f * G3; // Offsets for last corner in (x,y,z) coords
+    const float y3 = y0 - 1.0f + 3.0f * G3;
+    const float z3 = z0 - 1.0f + 3.0f * G3;
 
     // Work out the hashed gradient indices of the four simplex corners
-    int gi0 = wangHash(i + wangHash(j + wangHash(k)));
-    int gi1 = wangHash(i + i1 + wangHash(j + j1 + wangHash(k + k1)));
-    int gi2 = wangHash(i + i2 + wangHash(j + j2 + wangHash(k + k2)));
-    int gi3 = wangHash(i + 1 + wangHash(j + 1 + wangHash(k + 1)));
+    const int gi0 = wangHash(i + wangHash(j + wangHash(k)));
+    const int gi1 = wangHash(i + i1 + wangHash(j + j1 + wangHash(k + k1)));
+    const int gi2 = wangHash(i + i2 + wangHash(j + j2 + wangHash(k + k2)));
+    const int gi3 = wangHash(i + 1 + wangHash(j + 1 + wangHash(k + 1)));
 
     // Calculate the contribution from the four corners
-    float t0 = 0.6f - x0*x0 - y0*y0 - z0*z0;
+    float t0 = 0.6f - x0 * x0 - y0 * y0 - z0 * z0;
     if (t0 < 0)
     {
         n0 = 0.0;
@@ -325,7 +326,7 @@ float perlinSimplexNoise(const float3 &seed)
         t0 *= t0;
         n0 = t0 * t0 * grad(gi0, x0, y0, z0);
     }
-    float t1 = 0.6f - x1*x1 - y1*y1 - z1*z1;
+    float t1 = 0.6f - x1 * x1 - y1 * y1 - z1 * z1;
     if (t1 < 0)
     {
         n1 = 0.0;
@@ -335,7 +336,7 @@ float perlinSimplexNoise(const float3 &seed)
         t1 *= t1;
         n1 = t1 * t1 * grad(gi1, x1, y1, z1);
     }
-    float t2 = 0.6f - x2*x2 - y2*y2 - z2*z2;
+    float t2 = 0.6f - x2 * x2 - y2 * y2 - z2 * z2;
     if (t2 < 0)
     {
         n2 = 0.0;
@@ -345,7 +346,7 @@ float perlinSimplexNoise(const float3 &seed)
         t2 *= t2;
         n2 = t2 * t2 * grad(gi2, x2, y2, z2);
     }
-    float t3 = 0.6f - x3*x3 - y3*y3 - z3*z3;
+    float t3 = 0.6f - x3 * x3 - y3 * y3 - z3 * z3;
     if (t3 < 0)
     {
         n3 = 0.0;
@@ -357,17 +358,33 @@ float perlinSimplexNoise(const float3 &seed)
     }
     // Add contributions from each corner to get the final noise value.
     // The result is scaled to stay just inside [-1,1]
-    return 32.0f*(n0 + n1 + n2 + n3);
+    return 32.0f * (n0 + n1 + n2 + n3);
 }
 
 
+// Copyright 2022 by Owen Bulka.
+// All rights reserved.
+// This file is released under the "MIT License Agreement".
+// Please see the LICENSE.md file that should have been included as part
+// of this package.
+
+//
+// Use the perlin simplex noise
+//
+
+
 /**
- * Fractal/Fractional Brownian Motion (fBm) summation of 1D Perlin Simplex noise
+ * fBM noise.
  *
- * @param[in] octaves   number of fraction of noise to sum
- * @param[in] x         float coordinate
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
  *
- * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
+ * @returns: The noise value in the range [-1, 1], with a value of 0 on
+ *     all integer coordinates.
  */
 float fractalBrownianMotionNoise(
         const int octaves,
@@ -400,12 +417,17 @@ float fractalBrownianMotionNoise(
 
 
 /**
- * Fractal/Fractional Brownian Motion (fBm) summation of 1D Perlin Simplex noise
+ * fBM noise.
  *
- * @param[in] octaves   number of fraction of noise to sum
- * @param[in] x         float coordinate
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
  *
- * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
+ * @returns: The noise value in the range [-1, 1], with a value of 0 on
+ *     all integer coordinates.
  */
 float fractalBrownianMotionNoise(
         const int octaves,
@@ -438,12 +460,17 @@ float fractalBrownianMotionNoise(
 
 
 /**
- * Fractal/Fractional Brownian Motion (fBm) summation of 1D Perlin Simplex noise
+ * fBM noise.
  *
- * @param[in] octaves   number of fraction of noise to sum
- * @param[in] x         float coordinate
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
  *
- * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
+ * @returns: The noise value in the range [-1, 1], with a value of 0 on
+ *     all integer coordinates.
  */
 float fractalBrownianMotionNoise(
         const int octaves,
@@ -476,14 +503,19 @@ float fractalBrownianMotionNoise(
 
 
 /**
- * Fractal/Fractional Brownian Motion (fBm) summation of 1D Perlin Simplex noise
+ * Turbulence noise.
  *
- * @param[in] octaves   number of fraction of noise to sum
- * @param[in] x         float coordinate
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
  *
- * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
+ * @returns: The noise value in the range [0, 1], with a value of 0 on
+ *     all integer coordinates.
  */
-float turbulanceNoise(
+float turbulenceNoise(
         const int octaves,
         const float lacunarity,
         const float size,
@@ -514,14 +546,19 @@ float turbulanceNoise(
 
 
 /**
- * Fractal/Fractional Brownian Motion (fBm) summation of 1D Perlin Simplex noise
+ * Turbulence noise.
  *
- * @param[in] octaves   number of fraction of noise to sum
- * @param[in] x         float coordinate
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
  *
- * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
+ * @returns: The noise value in the range [0, 1], with a value of 0 on
+ *     all integer coordinates.
  */
-float turbulanceNoise(
+float turbulenceNoise(
         const int octaves,
         const float lacunarity,
         const float size,
@@ -552,14 +589,19 @@ float turbulanceNoise(
 
 
 /**
- * Fractal/Fractional Brownian Motion (fBm) summation of 1D Perlin Simplex noise
+ * Turbulence noise.
  *
- * @param[in] octaves   number of fraction of noise to sum
- * @param[in] x         float coordinate
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
  *
- * @return Noise value in the range[-1; 1], value of 0 on all integer coordinates.
+ * @returns: The noise value in the range [0, 1], with a value of 0 on
+ *     all integer coordinates.
  */
-float turbulanceNoise(
+float turbulenceNoise(
         const int octaves,
         const float lacunarity,
         const float size,

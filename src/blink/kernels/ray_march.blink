@@ -63,8 +63,14 @@
 // Maximum recursion depth for ray marching
 #define MAX_RAYS_PER_SUBPIXEL 100
 
+#define IS_BOUND 4096
 
-kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
+#define MOD_DO_REFRACTION 262144
+
+#define IS_NOT_UNION 3968
+
+
+kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 {
     // the input which specifies the format, process is called once per pixel
     // in this image, which also provides random seeds
@@ -157,20 +163,21 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         bool _usePrecomputedIrradiance;
 
         // Ray params
-        int _numRaysPerPixel;
-        int _maxSpawnableRays;
-
         int _minPathsPerPixel;
         int _maxPathsPerPixel;
+        bool _roulette;
         int _maxBounces;
         int _maxLightSamplingBounces;
         bool _sampleHDRI;
         bool _sampleAllLights;
+        bool _doSecondaryLightSampling;
         float _lightSamplingBias;
         float _maxRayDistance;
         int _maxRaySteps;
+        bool _levelOfDetail;
         float _hitTolerance;
         float _shadowBias;
+        float _maxBrightness;
 
         // Scene params
         float _refractiveIndex;
@@ -210,7 +217,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * In define(), parameters can be given labels and default values.
+     * Give the parameters labels and default values.
      */
     void define()
     {
@@ -240,20 +247,21 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         defineParam(_usePrecomputedIrradiance, "Use Precomputed Irradiance", true);
 
         // Ray params
-        defineParam(_numRaysPerPixel, "Num Rays Per Pixel", 1);
-        defineParam(_maxSpawnableRays, "Max Rays To Spawn On Impact", 1);
-
         defineParam(_minPathsPerPixel, "Min Paths Per Pixel", 1);
         defineParam(_maxPathsPerPixel, "Max Paths Per Pixel", 1);
+        defineParam(_roulette, "Roulette", true);
         defineParam(_maxRayDistance, "Max Ray Distance", 1000.0f);
         defineParam(_maxRaySteps, "Max Ray Steps", 128);
         defineParam(_maxBounces, "Max Bounces", 1);
         defineParam(_maxLightSamplingBounces, "Max Light Sampling Bounces", 0);
         defineParam(_sampleHDRI, "Sample HDRI", true);
         defineParam(_sampleAllLights, "Sample All Lights", false);
+        defineParam(_doSecondaryLightSampling, "Secondary Light Sampling", false);
         defineParam(_lightSamplingBias, "Light Sampling Bias", 0.0f);
+        defineParam(_levelOfDetail, "Level of Detail", true);
         defineParam(_hitTolerance, "Hit Tolerance", 0.001f);
         defineParam(_shadowBias, "Shadow Bias", 1.0f);
+        defineParam(_maxBrightness, "Maximum Brightness", 999999.9f);
 
         // Scene params
         defineParam(_refractiveIndex, "Index of Refraction", 1.0f);
@@ -273,12 +281,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * The init() function is run before any calls to process().
-     * Local variables can be initialized here.
+     * Initialize the local variables.
      */
     void init()
     {
-        __bouncesPerRay = _maxBounces <= 0 ? 1 : _maxBounces;
+        __bouncesPerRay = max(0, _maxBounces);
 
         __lightSamplingEnabled = _maxLightSamplingBounces > 0;
 
@@ -315,14 +322,25 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Get the noise value at a position.
+     *
+     * @arg index: The index of the noise.
+     * @arg position: The position at which we want the noise.
+     * @arg noiseOptions: The noise modifier options.
+     *
+     * @returns: The noise value.
+     */
     float getNoiseValue(const int index, const float3 &position, int &noiseOptions)
     {
+        // Make sure there is a noise node plugged into the object.
         noiseOptions = (int) noiseParams0(index, 0, 0);
-        if ((noiseOptions & 1) == 0)
+        if ((noiseOptions & NOISE_ENABLED) == 0)
         {
             return -1.0f;
         }
 
+        // Read the noise parameters
         const float3 translation = float3(
             noiseParams0(index, 0, 1),
             noiseParams0(index, 0, 2),
@@ -335,10 +353,21 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         const float gamma = noiseParams1(index, 0, 3);
         const float size = noiseParams2(index, 0, 0);
 
-        const float3 noisePosition = worldToLocal(index, position + translation);
+        // Translate the noise, and convert the position to the local
+        // coordinate system
+        float3 noisePosition;
+        if (index == _objectTextureWidth)
+        {
+            noisePosition = position + translation;
+        }
+        else
+        {
+            noisePosition = worldToLocal(index, position + translation);
+        }
 
+        // Get the noise value based on which type of noise we are using
         float noiseValue;
-        if (noiseOptions & 2)
+        if (noiseOptions & FBM_NOISE)
         {
             noiseValue = fractalBrownianMotionNoise(
                 octaves,
@@ -351,7 +380,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         }
         else
         {
-            noiseValue = turbulanceNoise(
+            noiseValue = turbulenceNoise(
                 octaves,
                 lacunarity,
                 size,
@@ -361,7 +390,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-
+        // Modify the noise using the grade parameters
         const float whitePoint = noiseParams2(index, 0, 1);
         const float blackPoint = noiseParams2(index, 0, 2);
         const float lift = noiseParams2(index, 0, 3);
@@ -373,12 +402,62 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         noiseValue = saturate(noiseValue * (1.0f - lift) + lift);
 
-        if (noiseOptions & 512)
+        if (noiseOptions & INVERT_NOISE)
         {
             noiseValue = 1.0f - noiseValue;
         }
 
         return noiseValue;
+    }
+
+
+    /**
+     * Modify the material properties of an object based on noise.
+     *
+     * @arg objectIndex: The index of the object.
+     * @arg intersectionPosition: The position at which the we are
+     *     modifying the material.
+     * @arg diffusivity: The diffuse values of the surface.
+     * @arg specularity: The specular values of the surface.
+     * @arg transmittance: The extinction coefficient and transmissive
+     *     probability of the surface.
+     * @arg emittance: The emissive values of the surface.
+     * @arg specularRoughness: The specular roughness of the surface.
+     * @arg transmissionRoughness: The transmissive roughness of the
+     *     surface.
+     * @arg refractiveIndex: The refractive index of the material.
+     */
+    void noiseMaterialInteraction(
+            const int objectIndex,
+            const float3 &intersectionPosition,
+            float4 &diffusivity,
+            float4 &specularity,
+            float4 &transmittance,
+            float4 &emittance,
+            float &specularRoughness,
+            float &transmissionRoughness,
+            float &refractiveIndex)
+    {
+        int noiseOptions;
+        const float noiseValue = getNoiseValue(
+            objectIndex,
+            intersectionPosition,
+            noiseOptions
+        );
+        if (noiseValue >= 0.0f)
+        {
+            useNoiseOnMaterial(
+                noiseOptions,
+                noiseValue,
+                diffusivity,
+                specularity,
+                transmittance,
+                emittance,
+                specularRoughness,
+                transmissionRoughness,
+                refractiveIndex
+            );
+        }
     }
 
 
@@ -434,6 +513,56 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Get the scale of an object.
+     *
+     * @arg objectIndex: The index of the object.
+     *
+     * @returns: The scale of the object.
+     */
+    float getScale(const int objectIndex)
+    {
+        float scale = 1.0f;
+
+        for (int j=0; j <= objectIndex; j++)
+        {
+            const float numChildren = shapeProperties(j, 0, 2);
+
+            if (j + numChildren < objectIndex)
+            {
+                j += numChildren;
+                continue;
+            }
+
+            scale *= positions(j, 0, 3);
+        }
+
+        return scale;
+    }
+
+
+    /**
+     * Get the radius of an object.
+     *
+     * @arg objectIndex: The index of the object.
+     *
+     * @returns: The radius of the object.
+     */
+    float getRadius(const int objectIndex)
+    {
+        return getScale(objectIndex) * dimensions(objectIndex, 0, 0);
+    }
+
+
+    /**
+     * Get the local position, from a world position.
+     *
+     * @arg objectIndex: The index of the object whose local coordinate
+     *     system we are using.
+     * @arg worldPosition: The world position.
+     *
+     * @returns: The local position of the worldPosition.
+     */
     float3 worldToLocal(const int objectIndex, const float3 &worldPosition)
     {
         float3 localPosition = worldPosition;
@@ -473,6 +602,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Get the world position, from a local position.
+     *
+     * @arg objectIndex: The index of the object whose local coordinate
+     *     system we are using.
+     * @arg localPosition: The local position.
+     *
+     * @returns: The world position of the localPosition.
+     */
     float3 localToWorld(const int objectIndex, const float3 &localPosition)
     {
         float3 worldPosition = localPosition;
@@ -511,24 +649,61 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Get the world position of an object.
+     *
+     * @arg objectIndex: The index of the object.
+     *
+     * @returns: The world position of the object.
+     */
     float3 getObjectPosition(const int objectIndex)
     {
         return localToWorld(objectIndex, float3(0));
     }
 
 
+    /**
+     * Check whether or not an object is set to interact with its
+     * children in a way that is not union.
+     *
+     * @arg objectIndex: The index of the object to check.
+     *
+     * @returns: True if object's interaction type is not set to union,
+     *     and false otherwise.
+     */
     inline bool childInteractionIsNotUnion(const int objectIndex)
     {
-        return (int(shapeProperties(objectIndex, 0, 1)) & 3968) > 0;
+        return (int(shapeProperties(objectIndex, 0, 1)) & IS_NOT_UNION) > 0;
     }
 
 
+    /**
+     * Check whether or not an object is the parent of another.
+     *
+     * @arg parentIndex: The index of the potential parent.
+     * @arg childIndex: The index of the potential child.
+     *
+     * @returns: True if the object is the parent, and false otherwise.
+     */
     inline bool isParentOf(const int parentIndex, const int childIndex)
     {
-        return parentIndex + shapeProperties(parentIndex, 0, 2) >= childIndex;
+        return (
+            parentIndex < childIndex
+            && parentIndex + shapeProperties(parentIndex, 0, 2) >= childIndex
+        );
     }
 
 
+    /**
+     * Check whether or not we will be exiting the current material if
+     * we transmit through the surface of an object.
+     *
+     * @arg currentMaterialIndex: The index of the object whose material
+     *     we are currently travelling through.
+     * @arg objectIndex: The index of the object that we have hit.
+     *
+     * @returns: True if we will be exiting, and false otherwise.
+     */
     bool isExitingObject(const int currentMaterialIndex, const int objectIndex)
     {
         return (
@@ -548,7 +723,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * Compute the minimum distance to an object in the scene
+     * Compute the minimum distance to an object in the scene.
      *
      * @arg rayOrigin: The origin position of the ray.
      * @arg pixelFootprint: A value proportional to the amount of world
@@ -621,7 +796,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // If this is a bounding volume, we can skip its children
             // if we aren't close to, or inside it
             if (
-                modifications & 4096
+                modifications & IS_BOUND
                 && numChildren > 0
                 && nextDistance > _hitTolerance + pixelFootprint
             ) {
@@ -674,8 +849,10 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         // They are in the stack for relative positioning
                         // if they weren't then we would have to manually move
                         // the bounding box to follow the children
-                        if (!(parentModifications & 4096))
-                        {
+                        if (
+                            !(parentModifications & IS_BOUND)
+                            || (parentModifications & MOD_DO_REFRACTION)
+                        ) {
                             const float parentBlendStrength = parentStack[stackIndex][BLEND_STRENGTH];
                             const float parentNextDistance = parentStack[stackIndex][DISTANCE];
 
@@ -740,17 +917,27 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * Compute the minimum distance to an object in the scene
+     * Compute the minimum distance to an object in the scene.
      *
      * @arg rayOrigin: The origin position of the ray.
      * @arg pixelFootprint: A value proportional to the amount of world
      *     space that fills a pixel, like the distance from camera.
-     * @arg colour: Location to store the colour of the hit object.
-     * @arg surface: Location to store the surface properties of the hit
-     *     object.
+     * @arg diffusivity: The diffuse values of the nearest surface.
+     * @arg specularity: The specular values of the nearest surface.
+     * @arg transmittance: The extinction coefficient and transmissive
+     *     probability of the nearest surface.
+     * @arg emittance: The emissive values of the nearest surface.
+     * @arg scatteringCoefficient: The scattering coefficient of the
+     *     nearest material.
+     * @arg specularRoughness: The specular roughness of the surface.
+     * @arg transmissionRoughness: The transmissive roughness of the
+     *     nearest surface.
+     * @arg refractiveIndex: The refractive index of the material.
+     * @arg doRefraction: Whether or not refraction is enabled on the
+     *     nearest material.
+     * @arg id: The ID of the nearest object.
      *
-     * @returns: The minimum distance to an object in the scene, and the
-     *     unique identifier of the object.
+     * @returns: The minimum distance to an object in the scene.
      */
     float getMinDistanceToObjectInScene(
             const float3 &rayOrigin,
@@ -849,7 +1036,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // If this is a bounding volume, we can skip its children
             // if we aren't close to, or inside it
             if (
-                modifications & 4096
+                modifications & IS_BOUND
                 && numChildren > 0
                 && nextDistance > _hitTolerance + pixelFootprint
             ) {
@@ -871,7 +1058,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                     id = objectId;
 
-                    doRefraction = modifications & 262144;
+                    doRefraction = modifications & MOD_DO_REFRACTION;
                 }
 
                 // This was tagged as a boundary object, skip its children
@@ -943,14 +1130,16 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     // the objects that still have children
                     for (int stackIndex=stackLastIndex; stackIndex >= 0; stackIndex--)
                     {
-                        const int parentModifications = (int) parentStack[stackIndex][5];
+                        const int parentModifications = parentStack[stackIndex][MODIFICATIONS];
 
                         // Do not need to interact with bounding volumes.
                         // They are in the stack for relative positioning
                         // if they weren't then we would have to manually move
                         // the bounding box to follow the children
-                        if (!(parentModifications & 4096))
-                        {
+                        if (
+                            !(parentModifications & IS_BOUND)
+                            || (parentModifications & MOD_DO_REFRACTION)
+                        ) {
                             const float parentBlendStrength = (
                                 parentStack[stackIndex][BLEND_STRENGTH]
                             );
@@ -988,6 +1177,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                             const float parentTransmissionRoughness = (
                                 parentStack[stackLastIndex][TRANSMISSION_ROUGHNESS]
                             );
+
                             const float parentRefractiveIndex = (
                                 parentStack[stackLastIndex][PARENT_REFRACTIVE_INDEX]
                             );
@@ -1036,7 +1226,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                             id = objectId;
 
-                            doRefraction = parentModifications & 262144;
+                            doRefraction = parentModifications & MOD_DO_REFRACTION;
                         }
                     }
 
@@ -1073,7 +1263,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
                     id = objectId;
 
-                    doRefraction = modifications & 262144;
+                    doRefraction = modifications & MOD_DO_REFRACTION;
                 }
             }
             else
@@ -1154,25 +1344,230 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     * Sample the data of a particular artificial light in the scene.
+     * Artificial lights are any that are passed into the 'lights'
+     * input.
+     *
+     * @arg position: The position on the surface to sample the data of.
+     * @arg lightIndex: The index of the chosen light in the lights
+     *     texture.
+     * @arg numLights: The number of lights in the scene.
+     * @arg lightDirection: The direction from the surface to the light.
+     * @arg distanceToLight: The distance to the light's surface.
+     *
+     * @returns: The PDF of the light.
+     */
+    float sampleArtificialLightData(
+            const float3 &position,
+            const int lightIndex,
+            const int numLights,
+            float3 &lightDirection,
+            float &distanceToLight)
+    {
+        float visibleSurfaceArea = 1.0f;
+
+        // Selected a 'fake' light eg. point, directional, ambient
+        SampleType(lights) light = lights(lightIndex, 0);
+        const int lightType = abs((int) lightProperties(lightIndex, 0, 3));
+
+        if (lightType > 1)
+        {
+            getLightData(
+                position,
+                float3(light.x, light.y, light.z),
+                lightType,
+                _maxRayDistance,
+                distanceToLight,
+                visibleSurfaceArea,
+                lightDirection
+            );
+        }
+
+        return sampleLightsPDF(max(1, numLights), visibleSurfaceArea);
+    }
+
+
+    /**
+     * Sample the data of a particular physical light in the scene.
+     * Physical lights are any that have an emissive material, rather
+     * than being passed into the 'lights' input with the artificial
+     * lights.
+     *
+     * @arg seed: The seed to use in randomization.
+     * @arg position: The position on the surface to sample the data of.
+     * @arg objectIndex: The index of the chosen light in the object
+     *     texture.
+     * @arg numLights: The number of lights in the scene.
+     * @arg lightDirection: The direction from the surface to the light.
+     * @arg distanceToLight: The distance to the light's surface.
+     *
+     * @returns: The PDF of the light.
+     */
+    float samplePhysicalLightData(
+            const float3 &seed,
+            const float3 &position,
+            const int objectIndex,
+            const int numLights,
+            float3 &lightDirection,
+            float &distanceToLight)
+    {
+        float visibleSurfaceArea = 1.0f;
+
+        const float3 objectPosition = getObjectPosition(objectIndex);
+
+        sphericalLightData(
+            seed,
+            position,
+            objectPosition,
+            getRadius(objectIndex),
+            lightDirection,
+            distanceToLight,
+            visibleSurfaceArea
+        );
+
+        if (_maxLightSamplingBounces > 1 && __lightSamplingAngle > 0.0f)
+        {
+            lightDirection = uniformDirectionInSolidAngle(
+                lightDirection,
+                __lightSamplingAngle,
+                RAND_CONST_0 * seed
+            );
+        }
+
+        return sampleLightsPDF(max(1, numLights), visibleSurfaceArea);
+    }
+
+
+    /**
+     * Sample the data of a particular light in the scene.
+     *
+     * @arg seed: The seed to use in randomization.
+     * @arg position: The position on the surface to sample the data of.
+     * @arg surfaceNormal: The normal to the surface at the position we
+     *     are sampling the data of.
+     * @arg emissiveIndices: The indices of the emissive objects in the
+     *     scene.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg numLights: The number of lights in the scene.
+     * @arg selectedLight: The index of the chosen light to sample.
+     * @arg lightDirection: The direction from the surface to the light.
+     * @arg distanceToLight: The distance to the light's surface.
+     *
+     * @returns: The PDF of the light.
+     */
+    float sampleLightData(
+            const float3 &seed,
+            const float3 &position,
+            const float3 &surfaceNormal,
+            const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
+            const int numEmissive,
+            const int numLights,
+            const int selectedLight,
+            float3 &lightDirection,
+            float &distanceToLight)
+    {
+        float visibleSurfaceArea = 1.0f;
+
+        if (selectedLight < _lightTextureWidth)
+        {
+            return sampleArtificialLightData(
+                position,
+                selectedLight,
+                numLights,
+                lightDirection,
+                distanceToLight
+            );
+        }
+        else if (selectedLight - _lightTextureWidth < numEmissive)
+        {
+            return samplePhysicalLightData(
+                seed,
+                position,
+                emissiveIndices[selectedLight - _lightTextureWidth],
+                numLights,
+                lightDirection,
+                distanceToLight
+            );
+        }
+
+        hdriLightData(
+            seed * RAND_CONST_1,
+            surfaceNormal,
+            lightDirection,
+            distanceToLight
+        );
+        return sampleLightsPDF(max(1, numLights), 1.0f);
+    }
+
+
+    /**
+     * Sample the data of a random light in the scene.
+     *
+     * @arg seed: The seed to use in randomization.
+     * @arg position: The position on the surface to sample the data of.
+     * @arg surfaceNormal: The normal to the surface at the position we
+     *     are sampling the data of.
+     * @arg emissiveIndices: The indices of the emissive objects in the
+     *     scene.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg sampleHDRI: Whether or not to sample the HDRI. If there are
+     *     lights in the scene this will increase the noise, but will be
+     *     more accurate.
+     * @arg lightDirection: The direction from the surface to the light.
+     * @arg distanceToLight: The distance to the light's surface.
+     * @arg selectedLight: The index of the chosen light to sample.
+     *
+     * @returns: The PDF of the light.
+     */
+    float sampleRandomLightData(
+            const float3 &seed,
+            const float3 &position,
+            const float3 &surfaceNormal,
+            const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
+            const int numEmissive,
+            const bool sampleHDRI,
+            float3 &lightDirection,
+            float &distanceToLight,
+            int &selectedLight)
+    {
+        const float rng = random(random(seed.x + seed.y) + random(seed.z));
+        const int numSamplingOptions = (
+            numEmissive
+            + _lightTextureWidth
+            + sampleHDRI
+        );
+        selectedLight = max(0, (int) floor(rng * (numSamplingOptions - 0.0001f)));
+
+        return sampleLightData(
+            seed,
+            position,
+            surfaceNormal,
+            emissiveIndices,
+            numEmissive,
+            numSamplingOptions,
+            selectedLight,
+            lightDirection,
+            distanceToLight
+        );
+    }
+
+
+    /**
      * Compute a soft shadow value.
      *
-     * @arg rayDirection: The direction of the shadow ray.
+     * @arg rayOrigin: The origin of the ray.
+     * @arg rayDirection: The direction to cast the shadow ray.
      * @arg distanceToShadePoint: The maximum distance to check for
      *     a shadow casting object.
      * @arg softness: The softness of the shadow.
-     * @arg rayOrigin: The origin of the ray.
-     * @arg colour: Will store the colour of the object which casts the
-     *     shadow.
-     * @arg surface: Will store the surface properties of the object
-     *     which casts the shadow.
      *
-     * @returns: The intenstity of shadow.
+     * @returns: The shadow intenstity.
      */
-    inline float computeSoftShadow(
+    inline float sampleSoftShadow(
+            const float3 &rayOrigin,
             const float3 &rayDirection,
             const float distanceToShadePoint,
-            const float softness,
-            float3 &rayOrigin)
+            const float softness)
     {
         float distanceTravelled = 0;
         float shadowIntensity = 1.0f;
@@ -1180,10 +1575,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         int iterations = 0;
         float pixelFootprint = _hitTolerance;
+
+        float3 position = rayOrigin;
         while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)
         {
             const float stepDistance = fabs(
-                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint)
+                getMinDistanceToObjectInScene(position, pixelFootprint)
             );
             const float stepDistanceSquared = stepDistance * stepDistance;
             float softOffset = stepDistanceSquared / (2.0f * lastStepDistance);
@@ -1200,7 +1597,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             }
 
             lastStepDistance = stepDistance;
-            rayOrigin += rayDirection * stepDistance;
+            position += rayDirection * stepDistance;
             distanceTravelled += stepDistance;
             pixelFootprint += stepDistance * _hitTolerance;
             iterations++;
@@ -1214,29 +1611,27 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     /**
      * Compute a shadow value.
      *
-     * @arg rayDirection: The direction of the shadow ray.
+     * @arg rayOrigin: The origin of the ray.
+     * @arg rayDirection: The direction to cast the shadow ray.
      * @arg distanceToShadePoint: The maximum distance to check for
      *     a shadow casting object.
-     * @arg rayOrigin: The origin of the ray.
-     * @arg colour: Will store the colour of the object which casts the
-     *     shadow.
-     * @arg surface: Will store the surface properties of the object
-     *     which casts the shadow.
      *
-     * @returns: The intenstity of shadow.
+     * @returns: The shadow intenstity.
      */
-    float computeShadow(
+    float sampleShadow(
+            const float3 &rayOrigin,
             const float3 &rayDirection,
-            const float distanceToShadePoint,
-            float3 &rayOrigin)
+            const float distanceToShadePoint)
     {
         float distanceTravelled = 0;
         int iterations = 0;
         float pixelFootprint = _hitTolerance;
+        float3 position = rayOrigin;
+
         while (distanceTravelled < distanceToShadePoint && iterations < _maxRaySteps / 2)
         {
             const float stepDistance = fabs(
-                getMinDistanceToObjectInScene(rayOrigin, pixelFootprint)
+                getMinDistanceToObjectInScene(position, pixelFootprint)
             );
 
             if (stepDistance < pixelFootprint)
@@ -1244,7 +1639,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 return 0;
             }
 
-            rayOrigin += rayDirection * stepDistance;
+            position += rayDirection * stepDistance;
             distanceTravelled += stepDistance;
             pixelFootprint += stepDistance * _hitTolerance;
             iterations++;
@@ -1257,31 +1652,28 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     /**
      * Compute the ambient occlusion.
      *
-     * @arg rayDirection: The direction of the shadow ray.
      * @arg rayOrigin: The origin of the ray.
+     * @arg surfaceNormal: The normal to the surface.
      * @arg amount: The amount to scale the occlusion value by.
      * @arg iterations: The number of iterations to refine the
      *     occlusion.
-     * @arg colour: Will store the colour of the final occluding object.
-     * @arg surface: Will store the surface properties of the final
-     *     occluding object.
      *
-     * @returns: The occlusion.
+     * @returns: The occlusion value.
      */
-    inline float computeAmbientOcclusion(
-            const float3 &rayDirection,
+    inline float sampleAmbientOcclusion(
             const float3 &rayOrigin,
+            const float3 &surfaceNormal,
             const float amount,
             const int iterations)
     {
         float occlusion = 0.0f;
         float occlusionScaleFactor = 1.0f;
-        for(int iteration=0; iteration < iterations; iteration++)
+        for (int iteration=0; iteration < iterations; iteration++)
         {
             const float stepDistance = 0.001f + 0.15f * float(iteration) / 4.0f;
             const float distanceToClosestObject = fabs(
                 getMinDistanceToObjectInScene(
-                    rayOrigin + stepDistance * rayDirection,
+                    rayOrigin + stepDistance * surfaceNormal,
                     _hitTolerance
                 )
             );
@@ -1291,29 +1683,29 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         return (
             amount
-            * saturate(0.5f + 0.5f * rayDirection.y)  // ambient
+            * saturate(0.5f + 0.5f * surfaceNormal.y)  // ambient
             * saturate(1.0f - 1.5f * occlusion)       // occlusion
         );
     }
 
 
     /**
-     * Compute the combined intensity of all lights on the surface of an
-     * object.
+     * Perform direct illumination light sampling on a chosen artificial
+     * light in the scene.
      *
      * @arg pointOnSurface: The point on the surface to compute the
      *     light intensity at.
-     * @arg surfaceNormal: The normal direction to the surface.
-     * @arg surfaceColour: The colour of the object.
-     * @arg surface: The surface properties of the object.
-     * @arg lightColour: Will store the light colour.
+     * @arg surfaceNormal: The normal to the surface at the position we
+     *     are sampling the illumination of.
+     * @arg lightDirection: The direction from the surface to the light.
+     * @arg distanceToLight: The distance to the light's surface.
+     * @arg selectedLight: The index of the chosen light to sample.
      *
-     * @returns: The light intensity.
+     * @returns: The colour of the sampled light.
      */
     inline float4 sampleArtificialLight(
             const float3 &pointOnSurface,
             const float3 &surfaceNormal,
-            const float offset,
             const float3 &lightDirection,
             const float distanceToLight,
             const int selectedLight)
@@ -1337,9 +1729,9 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         {
             intensity = float2(
                 1.0f,
-                computeAmbientOcclusion(
-                    surfaceNormal,
+                sampleAmbientOcclusion(
                     pointOnSurface,
+                    surfaceNormal,
                     light.w,
                     (int) light.x
                 )
@@ -1352,28 +1744,23 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightProperty1.y,
                 distanceToLight
             );
-            float3 surfaceOffset = offsetPoint(
-                pointOnSurface,
-                surfaceNormal,
-                offset
-            );
 
             float shadowIntensityAtPosition;
             if (lightType < 0)
             {
-                shadowIntensityAtPosition = computeSoftShadow(
+                shadowIntensityAtPosition = sampleSoftShadow(
+                    pointOnSurface,
                     lightDirection,
                     distanceToLight,
-                    lightProperty1.x,
-                    surfaceOffset
+                    lightProperty1.x
                 );
             }
             else
             {
-                shadowIntensityAtPosition = computeShadow(
+                shadowIntensityAtPosition = sampleShadow(
+                    pointOnSurface,
                     lightDirection,
-                    distanceToLight,
-                    surfaceOffset
+                    distanceToLight
                 );
             }
 
@@ -1390,132 +1777,237 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     * Perform direct illumination light sampling on every artificial
+     * light in the scene.
      *
+     * @arg position: The position on the surface to sample the
+     *     illumination of.
+     * @arg surfaceNormal: The surface normal at the intersection point.
+     * @arg throughput: The throughput of the ray.
+     * @arg materialBRDF: The BRDF of the surface at the position we
+     *     are sampling the illumination of.
+     * @arg materialPDF: The PDF of the material we are sampling the
+     *     direct illumination of.
+     *
+     * @returns: The colour of the sampled light.
      */
-    float sampleLightData(
-            const float3 &seed,
-            const float3 &pointOnSurface,
+    inline float4 sampleArtificialLights(
+            const float3 &position,
             const float3 &surfaceNormal,
-            const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
-            const int numEmissive,
-            const int numLights,
-            const int selectedLight,
-            float3 &lightDirection,
-            float &distanceToLight)
+            const float4 &throughput,
+            const float4 &materialBRDF,
+            const float materialPDF)
     {
-        float visibleSurfaceArea = 1.0f;
+        float4 lightColour = float4(0);
 
-        if (selectedLight < _lightTextureWidth)
+        for (int lightIndex=0; lightIndex < _lightTextureWidth; lightIndex++)
         {
-            // Selected a 'fake' light eg. point, directional, ambient
-            SampleType(lights) light = lights(selectedLight, 0);
-            const int lightType = abs((int) lightProperties(selectedLight, 0, 3));
+            float3 lightDirection = surfaceNormal;
+            float distanceToLight = 0.0f;
 
-            if (lightType > 1)
-            {
-                getLightData(
-                    pointOnSurface,
-                    float3(light.x, light.y, light.z),
-                    lightType,
-                    _maxRayDistance,
-                    distanceToLight,
-                    visibleSurfaceArea,
-                    lightDirection
-                );
-            }
-        }
-        else if (selectedLight - _lightTextureWidth < numEmissive)
-        {
-            // Selected one of the emissive objects
-            const int objectIndex = emissiveIndices[selectedLight - _lightTextureWidth];
-
-            const float3 position = getObjectPosition(objectIndex);
-
-            // TODO don't assume it's a sphere
-            const float radius = dimensions(objectIndex, 0, 0);
-
-            sphericalLightData(
-                seed,
-                pointOnSurface,
+            const float lightPDF = sampleArtificialLightData(
                 position,
-                radius,
+                lightIndex,
+                _lightTextureWidth,
                 lightDirection,
-                distanceToLight,
-                visibleSurfaceArea
+                distanceToLight
             );
 
-            if (_maxLightSamplingBounces > 1 && __lightSamplingAngle > 0.0f)
-            {
-                lightDirection = uniformDirectionInSolidAngle(
+            float geometryFactor = saturate(dot(lightDirection, surfaceNormal));
+
+            lightColour += multipleImportanceSample(
+                sampleArtificialLight(
+                    position,
+                    surfaceNormal,
                     lightDirection,
-                    __lightSamplingAngle,
-                    seed * 1.3179f
-                );
-            }
-        }
-        else
-        {
-            hdriLightData(
-                seed * 1.97812f,
-                surfaceNormal,
-                _maxRayDistance,
-                lightDirection,
-                distanceToLight,
-                visibleSurfaceArea
+                    distanceToLight,
+                    lightIndex
+                ),
+                throughput * materialBRDF * geometryFactor / lightPDF,
+                lightPDF,
+                materialPDF * geometryFactor
             );
         }
-        return sampleLightsPDF(max(1, numLights), visibleSurfaceArea);
+
+        return lightColour;
     }
 
 
     /**
+     * Handle the interaction between a ray and the surface of a material.
      *
+     * @arg pixelFootprint: A value proportional to the amount of world
+     *     space that fills a pixel, like the distance from camera.
+     * @arg distance: The distance travelled since the last bounce.
+     * @arg intersectionPosition: The position at which the ray
+     *     intersects the geometry.
+     * @arg surfaceNormal: The surface normal at the intersection point.
+     * @arg objectId: The ID of the object that was hit.
+     * @arg doRefraction: Whether or not refraction is enabled on the
+     *     material.
+     * @arg numLights: The number of lights in the scene.
+     * @arg seed: The seed to use in randomization.
+     * @arg direction: The incoming ray direction.
+     * @arg origin: The ray origin.
+     * @arg diffusivity: The diffuse values of the surface.
+     * @arg specularity: The specular values of the surface.
+     * @arg transmittance: The extinction coefficient and transmissive
+     *     probability of the surface.
+     * @arg emittance: The emissive values of the surface.
+     * @arg specularRoughness: The specular roughness of the surface.
+     * @arg transmissionRoughness: The transmissive roughness of the
+     *     surface.
+     * @arg refractiveIndex: The refractive index of the material.
+     * @arg scatteringCoefficient: The scattering coefficient of the
+     *     material.
+     * @arg nestedDielectrics: The stack of dielectrics that we have
+     *     entered without exiting.
+     * @arg numNestedDielectrics: The number of dielectrics in the
+     *     stack.
+     * @arg rayColour: The colour of the ray.
+     * @arg throughput: The throughput of the ray.
+     * @arg previousMaterialPDF: The PDF of the last material interacted
+     *     with.
      */
-    float sampleRandomLightData(
-            const float3 &seed,
-            const float3 &pointOnSurface,
+    void materialInteraction(
+            const float pixelFootprint,
+            const float distance,
+            const float3 &intersectionPosition,
             const float3 &surfaceNormal,
-            const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
-            const int numEmissive,
-            const bool sampleHDRI,
-            float3 &lightDirection,
-            float &distanceToLight,
-            int &selectedLight)
+            const int objectId,
+            const bool doRefraction,
+            const float numLights,
+            float3 &seed,
+            float3 &direction,
+            float3 &origin,
+            float4 &diffusivity,
+            float4 &specularity,
+            float4 &transmittance,
+            float4 &emittance,
+            float &specularRoughness,
+            float &transmissionRoughness,
+            float &refractiveIndex,
+            float4 &scatteringCoefficient,
+            float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
+            int &numNestedDielectrics,
+            float4 &rayColour,
+            float4 &throughput,
+            float &previousMaterialPDF)
     {
-        const float rng = random(random(seed.x + seed.y) + random(seed.z));
-        const int numSamplingOptions = (
-            numEmissive
-            + _lightTextureWidth
-            + sampleHDRI
+        // Use the noise to modify the surface properties
+        noiseMaterialInteraction(
+            objectId - 1,
+            intersectionPosition,
+            diffusivity,
+            specularity,
+            transmittance,
+            emittance,
+            specularRoughness,
+            transmissionRoughness,
+            refractiveIndex
         );
-        selectedLight = max(0, (int) floor(rng * (numSamplingOptions - 0.0001f)));
 
-        return sampleLightData(
-            seed,
-            pointOnSurface,
-            surfaceNormal,
-            emissiveIndices,
-            numEmissive,
-            numSamplingOptions,
-            selectedLight,
-            lightDirection,
-            distanceToLight
+        // Compute the amount we would offset a point to escape the surface
+        const float offset = 2.0f * pixelFootprint * _shadowBias;
+
+        const float4 extinctionCoefficient = getExtinctionCoefficient(
+            nestedDielectrics,
+            numNestedDielectrics
         );
+        throughput *= exp(-distance * extinctionCoefficient);
+
+        origin = intersectionPosition;
+
+        // Get material data for material and light sampling
+        float4 materialBRDF;
+        float3 bounceDirection;
+        float materialLightPDF;
+        const float materialPDF = sampleMaterial(
+            seed,
+            surfaceNormal,
+            direction,
+            diffusivity,
+            offset,
+            transmittance,
+            doRefraction,
+            refractiveIndex,
+            scatteringCoefficient,
+            transmissionRoughness,
+            specularity,
+            specularRoughness,
+            objectId,
+            isExitingObject(
+                nestedDielectrics[numNestedDielectrics][OBJECT_ID] - 1,
+                objectId - 1
+            ),
+            materialBRDF,
+            bounceDirection,
+            origin,
+            nestedDielectrics,
+            numNestedDielectrics,
+            materialLightPDF
+        );
+
+        if (
+            __lightSamplingEnabled
+            && _doSecondaryLightSampling
+            && materialLightPDF > 0.0f
+            && _lightTextureWidth > 0
+        ) {
+            const float3 offsetPosition = offsetPoint(
+                origin,
+                surfaceNormal,
+                offset
+            );
+            // Perform MIS light sampling
+            rayColour += sampleArtificialLights(
+                offsetPosition,
+                surfaceNormal,
+                throughput,
+                materialBRDF,
+                materialLightPDF
+            );
+        }
+
+        const float radius = getRadius(objectId - 1);
+        const float visibleSurfaceArea = 2.0f * PI * radius * radius;
+
+        rayColour += multipleImportanceSample(
+            emittance,
+            throughput,
+            previousMaterialPDF,
+            sampleLightsPDF(numLights, visibleSurfaceArea)
+        );
+
+        throughput *= materialBRDF / materialPDF;
+
+        // Prepare the variables for the next march
+        previousMaterialPDF = materialPDF;
+
+        direction = bounceDirection;
     }
 
 
     /**
-     * Compute the combined intensity of all lights on the surface of an
-     * object.
+     * March a path through the scene, with only MIS material and
+     * artifical light sampling.
      *
-     * @arg pointOnSurface: The point on the surface to compute the
-     *     light intensity at.
-     * @arg surfaceNormal: The normal direction to the surface.
-     * @arg surfaceColour: The colour of the object.
-     * @arg surface: The surface properties of the object.
-     * @arg lightColour: Will store the light colour.
+     * @arg rayOrigin: The origin of the ray.
+     * @arg rayDirection: The direction of the ray.
+     * @arg initialSeed: The seed to use in randomization.
+     * @arg sampleHDRI: Whether or not to sample the HDRI. If there are
+     *     lights in the scene this will increase the noise, but will be
+     *     more accurate.
+     * @arg maxRayDistance: The maximum distance the ray can travel.
+     * @arg currentNestedDielectrics: The stack of dielectrics that we
+     *     have entered without exiting.
+     * @arg currentNumNestedDielectrics: The number of dielectrics in
+     *     the stack.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg distanceTravelled: Location to store the distance the ray
+     *     actually travels.
      *
-     * @returns: The light intensity.
+     * @returns: The ray colour.
      */
     inline float4 marchPath(
             const float3 &rayOrigin,
@@ -1610,8 +2102,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             distanceTravelled += stepDistance;
             distanceSinceLastBounce += stepDistance;
 
-            pixelFootprint += _hitTolerance * stepDistance;
-
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
             {
@@ -1623,76 +2113,30 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     pixelFootprint
                 );
 
-                noiseMaterialInteraction(
-                    objectId - 1,
+                materialInteraction(
+                    pixelFootprint,
+                    distanceSinceLastBounce,
                     intersectionPosition,
+                    surfaceNormal,
+                    objectId,
+                    doRefraction,
+                    numLights,
+                    seed,
+                    direction,
+                    origin,
                     diffusivity,
                     specularity,
                     transmittance,
                     emittance,
                     specularRoughness,
                     transmissionRoughness,
-                    refractiveIndex
-                );
-
-                const float reflectionOffset = pixelFootprint * _shadowBias;
-                const float transmissionOffset = (
-                    (2.0f * pixelFootprint + stepDistance)
-                    * _shadowBias
-                );
-
-                const float4 extinctionCoefficient = getExtinctionCoefficient(
-                    nestedDielectrics,
-                    numNestedDielectrics
-                );
-
-                // Get material data for material and light sampling
-                float4 materialBRDF;
-                float3 bounceDirection;
-                float materialLightPDF;
-                const float materialPDF = sampleMaterial(
-                    seed,
-                    surfaceNormal,
-                    direction,
-                    diffusivity,
-                    reflectionOffset,
-                    transmissionOffset,
-                    transmittance,
-                    doRefraction,
                     refractiveIndex,
                     scatteringCoefficient,
-                    transmissionRoughness,
-                    specularity,
-                    specularRoughness,
-                    objectId,
-                    isExitingObject(
-                        nestedDielectrics[numNestedDielectrics][OBJECT_ID] - 1,
-                        objectId - 1
-                    ),
-                    materialBRDF,
-                    bounceDirection,
-                    intersectionPosition,
                     nestedDielectrics,
                     numNestedDielectrics,
-                    materialLightPDF
-                );
-
-                const float radius = dimensions(objectId - 1, 0, 0);
-                const float visibleSurfaceArea = 2.0f * PI * radius * radius;
-
-                rayColour += (
-                    emittance
-                    * throughput
-                    * balanceHeuristic(
-                        previousMaterialPDF,
-                        sampleLightsPDF(numLights, visibleSurfaceArea)
-                    )
-                );
-
-                throughput *= (
-                    materialBRDF
-                    * exp(-distanceSinceLastBounce * extinctionCoefficient)
-                    / materialPDF
+                    rayColour,
+                    throughput,
+                    previousMaterialPDF
                 );
 
                 // Exit if we have reached the bounce limit
@@ -1706,32 +2150,30 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 if (
                     ++bounces >= _maxLightSamplingBounces
                     || emittance.w > 0.0f
-                    || exitProbability <= rng
+                    || (_roulette && exitProbability <= rng)
                 ) {
                     return rayColour;
                 }
-
-                // Prepare the variables for the next march
-                previousMaterialPDF = materialPDF;
-
-                distanceSinceLastBounce = 0.0f;
-
-                direction = bounceDirection;
-                origin = intersectionPosition;
-
-                // Account for the lost intensity from the early exits
-                throughput /= exitProbability;
-
-                // Reset the pixel footprint so multiple reflections don't
-                // reduce precision
-                pixelFootprint = _hitTolerance;
+                if (_roulette)
+                {
+                    // Account for the lost intensity from the early exits
+                    throughput /= exitProbability;
+                }
 
                 // Update the random seed
-                seed = 5.3749f * random(
+                seed = RAND_CONST_8 * random(
                     seed
                     + rng
                     + random(fabs(intersectionPosition + direction))
                 );
+
+                // Reset the pixel footprint so multiple reflections don't
+                // reduce precision
+                pixelFootprint = _hitTolerance;
+            }
+            else if (_levelOfDetail)
+            {
+                pixelFootprint += _hitTolerance * stepDistance;
             }
 
             lastStepDistance = signedStepDistance;
@@ -1766,17 +2208,46 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Perform direct illumination light sampling on a chosen light in
+     * the scene.
+     *
+     * @arg seed: The seed to use in randomization.
+     * @arg throughput: The throughput of the ray.
+     * @arg materialBRDF: The BRDF of the surface at the position we
+     *     are sampling the illumination of.
+     * @arg distanceToLight: The distance to the light's surface.
+     * @arg surfaceNormal: The normal to the surface at the position we
+     *     are sampling the illumination of.
+     * @arg position: The position on the surface to sample the
+     *     illumination of.
+     * @arg lightDirection: The direction from the surface to the light.
+     * @arg lightPDF: The PDF of the light we are sampling the
+     *     direct illumination of.
+     * @arg materialPDF: The PDF of the material we are sampling the
+     *     direct illumination of.
+     * @arg selectedLight: The index of the chosen light to sample.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg sampleHDRI: Whether or not to sample the HDRI. If there are
+     *     lights in the scene this will increase the noise, but will be
+     *     more accurate.
+     * @arg nestedDielectrics: The stack of dielectrics that we have
+     *     entered without exiting.
+     * @arg numNestedDielectrics: The number of dielectrics in the
+     *     stack.
+     *
+     * @returns: The colour of the sampled light.
+     */
     float4 sampleLight(
             const float3 &seed,
             const float4 &throughput,
-            const float4 &lightBRDF,
+            const float4 &materialBRDF,
             const float distanceToLight,
             const float3 &surfaceNormal,
             const float3 &position,
             const float3 &lightDirection,
             const float lightPDF,
             const float materialPDF,
-            const float offset,
             const int selectedLight,
             const int numEmissive,
             const bool sampleHDRI,
@@ -1784,27 +2255,24 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const int numNestedDielectrics)
     {
         float4 lightColour = float4(0);
-        float lightGeometryFactor = 1.0f;
+        float lightGeometryFactor;
+
         if (selectedLight < _lightTextureWidth)
         {
             lightColour = sampleArtificialLight(
                 position,
                 surfaceNormal,
-                offset,
                 lightDirection,
                 distanceToLight,
                 selectedLight
             );
+            lightGeometryFactor = saturate(dot(lightDirection, surfaceNormal));
         }
         else if (selectedLight - _lightTextureWidth - sampleHDRI < numEmissive)
         {
             float actualDistance;
             lightColour = marchPath(
-                offsetPoint(
-                    position,
-                    surfaceNormal,
-                    offset
-                ),
+                position,
                 lightDirection,
                 seed,
                 sampleHDRI,
@@ -1821,27 +2289,50 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        return (
-            lightColour
-            * throughput
-            * lightBRDF
-            * lightGeometryFactor
-            * balanceHeuristic(
-                lightPDF,
-                materialPDF * saturate(dot(lightDirection, surfaceNormal)) * lightGeometryFactor
-            ) / lightPDF
+        return multipleImportanceSample(
+            lightColour,
+            throughput * materialBRDF * lightGeometryFactor / lightPDF,
+            lightPDF,
+            materialPDF * lightGeometryFactor
         );
     }
 
 
+
+    /**
+     * Perform direct illumination light sampling on a random light in
+     * the scene.
+     *
+     * @arg seed: The seed to use in randomization.
+     * @arg throughput: The throughput of the ray.
+     * @arg materialBRDF: The BRDF of the surface at the position we
+     *     are sampling the illumination of.
+     * @arg surfaceNormal: The normal to the surface at the position we
+     *     are sampling the illumination of.
+     * @arg position: The position on the surface to sample the
+     *     illumination of.
+     * @arg materialPDF: The PDF of the material we are sampling the
+     *     direct illumination of.
+     * @arg emissiveIndices: The indices of the emissive objects in the
+     *     scene.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg sampleHDRI: Whether or not to sample the HDRI. If there are
+     *     lights in the scene this will increase the noise, but will be
+     *     more accurate.
+     * @arg nestedDielectrics: The stack of dielectrics that we have
+     *     entered without exiting.
+     * @arg numNestedDielectrics: The number of dielectrics in the
+     *     stack.
+     *
+     * @returns: The colour of the sampled light.
+     */
     inline float4 sampleRandomLight(
             const float3 &seed,
             const float4 &throughput,
-            const float4 &lightBRDF,
+            const float4 &materialBRDF,
             const float3 &surfaceNormal,
             const float3 &position,
             const float materialPDF,
-            const float offset,
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numEmissive,
             const bool sampleHDRI,
@@ -1867,16 +2358,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Perform MIS light sampling
         return sampleLight(
-            seed * 1.6912f,
+            seed * RAND_CONST_2,
             throughput,
-            lightBRDF,
+            materialBRDF,
             distanceToLight,
             surfaceNormal,
             position,
             lightDirection,
             lightPDF,
             materialPDF,
-            offset,
             selectedLight,
             numEmissive,
             sampleHDRI,
@@ -1886,14 +2376,40 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Perform direct illumination light sampling on every light in the
+     * scene.
+     *
+     * @arg seed: The seed to use in randomization.
+     * @arg throughput: The throughput of the ray.
+     * @arg materialBRDF: The BRDF of the surface at the position we
+     *     are sampling the illumination of.
+     * @arg surfaceNormal: The normal to the surface at the position we
+     *     are sampling the illumination of.
+     * @arg position: The position on the surface to sample the
+     *     illumination of.
+     * @arg materialPDF: The PDF of the material we are sampling the
+     *     direct illumination of.
+     * @arg emissiveIndices: The indices of the emissive objects in the
+     *     scene.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg sampleHDRI: Whether or not to sample the HDRI. If there are
+     *     lights in the scene this will increase the noise, but will be
+     *     more accurate.
+     * @arg nestedDielectrics: The stack of dielectrics that we have
+     *     entered without exiting.
+     * @arg numNestedDielectrics: The number of dielectrics in the
+     *     stack.
+     *
+     * @returns: The colour of the sampled light.
+     */
     inline float4 sampleLights(
             const float3 &seed,
             const float4 &throughput,
-            const float4 &lightBRDF,
+            const float4 &materialBRDF,
             const float3 &surfaceNormal,
             const float3 &position,
             const float materialPDF,
-            const float offset,
             const int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES],
             const int numEmissive,
             const bool sampleHDRI,
@@ -1909,7 +2425,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             float distanceToLight = 0.0f;
 
             const float lightPDF = sampleLightData(
-                seed * 1.79132f / (path + 1),
+                seed * RAND_CONST_3 / (path + 1),
                 position,
                 surfaceNormal,
                 emissiveIndices,
@@ -1921,16 +2437,15 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             lightColour += sampleLight(
-                seed * 1.12752f * (path + 1),
+                seed * RAND_CONST_4 * (path + 1),
                 throughput,
-                lightBRDF,
+                materialBRDF,
                 distanceToLight,
                 surfaceNormal,
                 position,
                 lightDirection,
                 lightPDF,
                 materialPDF,
-                offset,
                 path,
                 numEmissive,
                 sampleHDRI,
@@ -1939,17 +2454,39 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
-        // Read the hdri diffuse light contribution
-        if (_usePrecomputedIrradiance)
-        {
-            lightColour += readIrradianceValue(surfaceNormal);
-        }
-
         return lightColour;
     }
 
 
-    float4 doLightSampling(
+    /**
+     * Perform direct illumination light sampling.
+     *
+     * @arg seed: The seed to use in randomization.
+     * @arg throughput: The throughput of the ray.
+     * @arg materialBRDF: The BRDF of the surface at the position we
+     *     are sampling the illumination of.
+     * @arg surfaceNormal: The normal to the surface at the position we
+     *     are sampling the illumination of.
+     * @arg position: The position on the surface to sample the
+     *     illumination of.
+     * @arg materialPDF: The PDF of the material we are sampling the
+     *     direct illumination of.
+     * @arg offset: The amount to offset the ray in order to escape the
+     *     surface.
+     * @arg emissiveIndices: The indices of the emissive objects in the
+     *     scene.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg sampleHDRI: Whether or not to sample the HDRI. If there are
+     *     lights in the scene this will increase the noise, but will be
+     *     more accurate.
+     * @arg nestedDielectrics: The stack of dielectrics that we have
+     *     entered without exiting.
+     * @arg numNestedDielectrics: The number of dielectrics in the
+     *     stack.
+     *
+     * @returns: The colour of the sampled light.
+     */
+    inline float4 lightSampling(
             const float3 &seed,
             const float4 &throughput,
             const float4 &materialBRDF,
@@ -1963,6 +2500,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             const float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
             const int numNestedDielectrics)
     {
+        const float3 offsetPosition = offsetPoint(
+            position,
+            surfaceNormal,
+            offset
+        );
         if (_sampleAllLights)
         {
             return sampleLights(
@@ -1970,9 +2512,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 throughput,
                 materialBRDF,
                 surfaceNormal,
-                position,
+                offsetPosition,
                 materialPDF,
-                offset,
                 emissiveIndices,
                 numEmissive,
                 sampleHDRI,
@@ -1985,9 +2526,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             throughput,
             materialBRDF,
             surfaceNormal,
-            position,
+            offsetPosition,
             materialPDF,
-            offset,
             emissiveIndices,
             numEmissive,
             sampleHDRI,
@@ -1998,7 +2538,25 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     * Perform equi-angular sampling for participating media.
      *
+     * @arg seed: The seed to use in randomization.
+     * @arg intersectionPosition: The position at which the ray
+     *     intersects the geometry.
+     * @arg rayOrigin: The ray origin.
+     * @arg rayDirection: The incoming ray direction.
+     * @arg distanceSinceLastBounce: The distance travelled since the
+     *     last bounce.
+     * @arg emissiveIndices: The indices of the emissive objects in the
+     *     scene.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg nestedDielectrics: The stack of dielectrics that we have
+     *     entered without exiting.
+     * @arg numNestedDielectrics: The number of dielectrics in the
+     *     stack.
+     * @arg throughput: The throughput of the ray.
+     *
+     * @returns: The colour of the ray.
      */
     float4 sampleEquiangular(
             const float3 &seed,
@@ -2051,13 +2609,13 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         {
             const float uniform = (step + offset - 1) / (float) _equiangularSamples;
 
-            float3 surfaceNormal = randomUnitVector(seed * 1.7324f);
+            float3 surfaceNormal = randomUnitVector(seed * RAND_CONST_5);
             float3 lightDirection = surfaceNormal;
             float distanceToLight = 0.0f;
             int selectedLight;
 
             const float lightPDF = sampleRandomLightData(
-                seed * 1.3734f * step,
+                seed * RAND_CONST_6 * step,
                 intersectionPosition,
                 surfaceNormal,
                 emissiveIndices,
@@ -2096,11 +2654,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
             float scatteringNoise = noiseValue;
             float extinctionNoise = noiseValue;
-            if (noiseValue < 0.0f || !(noiseOptions & 1024))
+            if (noiseValue < 0.0f || !(noiseOptions & SCATTERING_NOISE))
             {
                 scatteringNoise = 1.0f;
             }
-            if (noiseValue < 0.0f || !(noiseOptions & 2048))
+            if (noiseValue < 0.0f || !(noiseOptions & EXTINCTION_NOISE))
             {
                 extinctionNoise = 1.0f;
             }
@@ -2114,7 +2672,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
 
             scatteredColour += scatteringCoefficient * scatteringNoise * sampleLight(
-                seed * 1.9757f / step,
+                seed * RAND_CONST_7 / step,
                 throughput,
                 lightBRDF,
                 distanceToLight,
@@ -2123,7 +2681,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 lightDirection,
                 equiangularPDF,
                 lightPDF,
-                0.0f,
                 selectedLight,
                 numEmissive,
                 _sampleHDRIEquiangular,
@@ -2143,41 +2700,49 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
-    void noiseMaterialInteraction(
-            const int objectIndex,
-            const float3 &intersectionPosition,
-            float4 &diffusivity,
-            float4 &specularity,
-            float4 &transmittance,
-            float4 &emittance,
-            float &specularRoughness,
-            float &transmissionRoughness,
-            float &refractiveIndex)
-    {
-        int noiseOptions;
-        const float noiseValue = getNoiseValue(
-            objectIndex,
-            intersectionPosition,
-            noiseOptions
-        );
-        if (noiseValue >= 0.0f)
-        {
-            useNoiseOnMaterial(
-                noiseOptions,
-                noiseValue,
-                diffusivity,
-                specularity,
-                transmittance,
-                emittance,
-                specularRoughness,
-                transmissionRoughness,
-                refractiveIndex
-            );
-        }
-    }
-
-
-    float4 materialInteraction(
+    /**
+     * Handle the interaction between a ray and the surface of a material.
+     *
+     * @arg stepDistance: The last step size to be marched.
+     * @arg pixelFootprint: A value proportional to the amount of world
+     *     space that fills a pixel, like the distance from camera.
+     * @arg distance: The distance travelled since the last bounce.
+     * @arg intersectionPosition: The position at which the ray
+     *     intersects the geometry.
+     * @arg surfaceNormal: The surface normal at the intersection point.
+     * @arg objectId: The ID of the object that was hit.
+     * @arg emissiveIndices: The indices of the emissive objects in the
+     *     scene.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg doRefraction: Whether or not refraction is enabled on the
+     *     material.
+     * @arg numLights: The number of lights in the scene.
+     * @arg seed: The seed to use in randomization.
+     * @arg direction: The incoming ray direction.
+     * @arg origin: The ray origin.
+     * @arg diffusivity: The diffuse values of the surface.
+     * @arg specularity: The specular values of the surface.
+     * @arg transmittance: The extinction coefficient and transmissive
+     *     probability of the surface.
+     * @arg emittance: The emissive values of the surface.
+     * @arg specularRoughness: The specular roughness of the surface.
+     * @arg transmissionRoughness: The transmissive roughness of the
+     *     surface.
+     * @arg refractiveIndex: The refractive index of the material.
+     * @arg scatteringCoefficient: The scattering coefficient of the
+     *     material.
+     * @arg nestedDielectrics: The stack of dielectrics that we have
+     *     entered without exiting.
+     * @arg numNestedDielectrics: The number of dielectrics in the
+     *     stack.
+     * @arg rayColour: The colour of the ray.
+     * @arg throughput: The throughput of the ray.
+     * @arg previousMaterialPDF: The PDF of the last material interacted
+     *     with.
+     * @arg usedPrecomputedIrradiance: Whether or not we have used the
+     *     precomputed irradiance.
+     */
+    void materialInteraction(
             const float stepDistance,
             const float pixelFootprint,
             const float distance,
@@ -2203,7 +2768,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             int &numNestedDielectrics,
             float4 &rayColour,
             float4 &throughput,
-            float &previousMaterialPDF)
+            float &previousMaterialPDF,
+            bool &usedPrecomputedIrradiance)
     {
         // Use the noise to modify the surface properties
         noiseMaterialInteraction(
@@ -2219,11 +2785,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         );
 
         // Compute the amount we would offset a point to escape the surface
-        const float reflectionOffset = pixelFootprint * _shadowBias;
-        const float transmissionOffset = (
-            (2.0f * pixelFootprint + stepDistance)
-            * _shadowBias
-        );
+        const float offset = 2.0f * pixelFootprint * _shadowBias;
 
         // Perform Equi-Angular Sampling
         rayColour += sampleEquiangular(
@@ -2246,12 +2808,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         float3 bounceDirection;
         float materialLightPDF;
         const float materialPDF = sampleMaterial(
-            seed * 1.73901f,
+            seed * RAND_CONST_8,
             surfaceNormal,
             direction,
             diffusivity,
-            reflectionOffset,
-            transmissionOffset,
+            offset,
             transmittance,
             doRefraction,
             refractiveIndex,
@@ -2278,14 +2839,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             && numLights > 0
         ) {
             // Perform MIS light sampling
-            rayColour += doLightSampling(
-                seed * 1.593284f,
+            rayColour += lightSampling(
+                seed * RAND_CONST_9,
                 throughput,
                 materialBRDF,
                 surfaceNormal,
                 origin,
                 materialLightPDF,
-                reflectionOffset,
+                offset,
                 emissiveIndices,
                 numEmissive,
                 _sampleHDRI,
@@ -2294,20 +2855,35 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             );
         }
 
+        if (_usePrecomputedIrradiance && materialLightPDF > 0.0f)
+        {
+            rayColour += (
+                diffusivity
+                * diffusivity.w
+                * throughput
+                * readIrradianceValue(surfaceNormal)
+            );
+            usedPrecomputedIrradiance = true;
+        }
+
         // Perform MIS material sampling
-        const float radius = dimensions(objectId - 1, 0, 0);
+        const float radius = getRadius(objectId - 1);
         const float visibleSurfaceArea = 2.0f * PI * radius * radius;
 
-        rayColour += (
-            emittance
-            * throughput
-            * balanceHeuristic(
-                previousMaterialPDF,
-                sampleLightsPDF(numLights, visibleSurfaceArea)
-            )
+        rayColour += multipleImportanceSample(
+            emittance,
+            throughput,
+            previousMaterialPDF,
+            sampleLightsPDF(numLights, visibleSurfaceArea)
         );
 
-        throughput *= materialBRDF / materialPDF;
+        float materialGeometryFactor = 1.0f;
+        if (materialLightPDF > 0.0f)
+        {
+            materialGeometryFactor = saturate(dot(bounceDirection, surfaceNormal));
+        }
+
+        throughput *= materialBRDF * materialGeometryFactor / materialPDF;
 
         // Prepare the variables for the next march
         previousMaterialPDF = materialPDF;
@@ -2317,11 +2893,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * March a ray through the scene.
+     * March a path through the scene.
      *
      * @arg rayOrigin: The origin of the ray.
      * @arg rayDirection: The direction of the ray.
-     * @arg seed: A random value to use as the seed for roughness.
+     * @arg emissiveIndices: The indices of the emissive objects in the
+     *     scene.
+     * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg seed: The seed to use in randomization.
      *
      * @returns: The ray colour.
      */
@@ -2373,11 +2952,14 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
         float previousMaterialPDF = 1.0f;
 
+        bool usedPrecomputedIrradiance = false;
+
         // March the ray
         while (
             distanceTravelled < _maxRayDistance
             && iterations < _maxRaySteps
             && sumComponent(throughput) > _hitTolerance
+            && length(rayColour) < _maxBrightness
         ) {
             positionOnRay = origin + distanceSinceLastBounce * direction;
 
@@ -2413,8 +2995,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             // Keep track of the distance the ray has travelled
             distanceTravelled += stepDistance;
             distanceSinceLastBounce += stepDistance;
-
-            pixelFootprint += _hitTolerance * stepDistance;
 
             // Have we hit the nearest object?
             if (stepDistance < pixelFootprint)
@@ -2481,7 +3061,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     numNestedDielectrics,
                     rayColour,
                     throughput,
-                    previousMaterialPDF
+                    previousMaterialPDF,
+                    usedPrecomputedIrradiance
                 );
 
                 // Exit if we have reached the bounce limit
@@ -2492,8 +3073,12 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                     throughput.y,
                     throughput.z
                 );
-                if (++bounces >= __bouncesPerRay || exitProbability <= rng)
-                {
+                if (
+                    ++bounces > __bouncesPerRay
+                    || emittance.w >= 1.0f
+                    || usedPrecomputedIrradiance
+                    || (_roulette && exitProbability <= rng)
+                ) {
                     return finalAOVs(
                         _outputType,
                         iterations,
@@ -2502,22 +3087,28 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                         rayColour
                     );
                 }
-
-                // Account for the lost intensity from the early exits
-                throughput /= exitProbability;
-
-                // Reset the pixel footprint so multiple reflections don't
-                // reduce precision
-                pixelFootprint = _hitTolerance;
+                if (_roulette)
+                {
+                    // Account for the lost intensity from the early exits
+                    throughput /= exitProbability;
+                }
 
                 // Update the random seed
-                seed = 7.134f * random(
+                seed = RAND_CONST_12 * random(
                     seed
                     + rng
                     + random(fabs(intersectionPosition + direction))
                 );
 
                 distanceSinceLastBounce = 0.0f;
+
+                // Reset the pixel footprint so multiple reflections don't
+                // reduce precision
+                pixelFootprint = _hitTolerance;
+            }
+            else if (_levelOfDetail)
+            {
+                pixelFootprint += _hitTolerance * stepDistance;
             }
 
             lastStepDistance = signedStepDistance;
@@ -2565,358 +3156,11 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
-     * March a ray through the scene.
+     * Get the indices of all the emissive objects in the scene.
      *
-     * @arg rayOrigin: The origin of the ray.
-     * @arg rayDirection: The direction of the ray.
-     * @arg seed: A random value to use as the seed for roughness.
+     * @arg emissiveIndices: The array to store the indices in.
      *
-     * @returns: The ray colour.
-     */
-    float4 marchRay(
-            const float3 &rayOrigin,
-            const float3 &rayDirection,
-            float3 &seed)
-    {
-        // const int lastRay = min(MAX_RAYS_PER_SUBPIXEL, _maxSpawnableRays);
-
-        // // rayOrigin, rayDirection, rayIntensity, index of refraction
-        // float rays[MAX_RAYS_PER_SUBPIXEL][3 + 3 + 1 + 1];
-        // rays[0][0] = rayOrigin.x;
-        // rays[0][1] = rayOrigin.y;
-        // rays[0][2] = rayOrigin.z;
-
-        // rays[0][3] = rayDirection.x;
-        // rays[0][4] = rayDirection.y;
-        // rays[0][5] = rayDirection.z;
-
-        // rays[0][6] = 1.0f;
-
-        // rays[0][7] = _refractiveIndex;
-
-        // int numRays = 1;
-        // int currentRayIndex = 0;
-
-        // float4 diffusivity;
-        // float4 specularity;
-        // float4 transmittance;
-        // float4 emittance;
-
-        // float4 rayColour = float4(0);
-        // float4 lightColour = float4(0);
-
-        // float lastStepDistance = 1.0f;
-
-        // float firstObjectId = 0.0f;
-
-        // float pixelFootprint = _hitTolerance;
-
-        // float id = 0.0f;
-        // float depth = 0.0f;
-
-        // int bounces = 0;
-        // int iterations = 1;
-
-        // // While we have not reached the ray limit
-        // while (currentRayIndex < numRays)
-        // {
-        //     // Reset these values
-        //     float lightIntensity = 1;
-        //     float distanceTravelled = 0;
-        //     bool madeContact = false;
-
-        //     // Get the next ray
-        //     float3 origin = float3(
-        //         rays[currentRayIndex][0],
-        //         rays[currentRayIndex][1],
-        //         rays[currentRayIndex][2]
-        //     );
-        //     const float3 direction = float3(
-        //         rays[currentRayIndex][3],
-        //         rays[currentRayIndex][4],
-        //         rays[currentRayIndex][5]
-        //     );
-        //     const float rayIntensity = rays[currentRayIndex][6];
-
-        //     float3 positionOnRay = origin;
-
-        //     // March the ray
-        //     while (
-        //         distanceTravelled < _maxRayDistance
-        //         && iterations < _maxRaySteps
-        //         && rayIntensity > _hitTolerance
-        //     ) {
-        //         positionOnRay = origin + distanceTravelled * direction;
-
-        //         // Get the closest distance to an object
-        //         bool doRefraction = true;
-        //         float4 refractedScatteringCoefficient = float4(0);
-        //         float transmissionRoughness = 0.0f;
-        //         float refractedRefractiveIndex = 1.0f;
-        //         int objectId = 0;
-
-        //         // Get the closest distance to an object
-        //         const float signedStepDistance = getMinDistanceToObjectInScene(
-        //             positionOnRay,
-        //             pixelFootprint,
-        //             diffusivity,
-        //             specularity,
-        //             transmittance,
-        //             emittance,
-        //             refractedScatteringCoefficient,
-        //             transmissionRoughness,
-        //             refractedRefractiveIndex,
-        //             doRefraction,
-        //             objectId
-        //         );
-
-        //         // Get the absolute value, the true shortest distance to a
-        //         // surface
-        //         const float stepDistance = fabs(signedStepDistance);
-
-        //         // Keep track of the distance the ray has travelled
-        //         distanceTravelled += stepDistance;
-
-        //         pixelFootprint += _hitTolerance * stepDistance;
-
-        //         // Have we hit the nearest object?
-        //         if (stepDistance < pixelFootprint)
-        //         {
-        //             float3 intersectionPosition = positionOnRay + stepDistance * direction;
-
-        //             // The normal to the surface at that position
-        //             float3 surfaceNormal = sign(lastStepDistance) * estimateSurfaceNormal(
-        //                 intersectionPosition,
-        //                 pixelFootprint
-        //             );
-
-        //             // Roughen the surface
-        //             if (diffusivity.w > 0.0f)
-        //             {
-        //                 surfaceNormal = uniformDirectionInSolidAngle(
-        //                     surfaceNormal,
-        //                     diffusivity.w * diffusivity.w,
-        //                     seed
-        //                 );
-        //             }
-
-        //             // Keep the ID of the first object hit, so we can
-        //             // store it in the alpha channel
-        //             if (bounces == 0)
-        //             {
-        //                 // Keep the ID of the first object hit, so we can
-        //                 // store it in the alpha channel
-        //                 firstObjectId = objectId;
-
-        //                 // Early exit for the various AOVs that are not 'beauty'
-        //                 if (_outputType > BEAUTY_AOV && _outputType < STATS_AOV)
-        //                 {
-        //                     return earlyExitAOVs(
-        //                         _outputType,
-        //                         intersectionPosition,
-        //                         worldToLocal(firstObjectId - 1, intersectionPosition),
-        //                         surfaceNormal,
-        //                         fabs(matmul(
-        //                             _cameraWorldMatrix.invert(),
-        //                             float4(
-        //                                 intersectionPosition.x,
-        //                                 intersectionPosition.y,
-        //                                 intersectionPosition.z,
-        //                                 1.0f
-        //                             )
-        //                         )[2]),
-        //                         firstObjectId
-        //                     );
-        //                 }
-        //             }
-
-        //             int noiseOptions;
-        //             const float noiseValue = getNoiseValue(
-        //                 objectId - 1,
-        //                 intersectionPosition,
-        //                 noiseOptions
-        //             );
-        //             if (noiseValue >= 0.0f)
-        //             {
-        //                 useNoiseOnMaterial(
-        //                     noiseOptions,
-        //                     noiseValue,
-        //                     diffusivity,
-        //                     specularity,
-        //                     transmittance,
-        //                     emittance,
-        //                     transmissionRoughness,
-        //                     refractedRefractiveIndex
-        //                 );
-        //             }
-
-        //             const float diffuseProbability = saturate(1 - specularity.w - transmittance.w);
-
-        //             // Get the light intensity
-        //             lightColour = float4(0);
-        //             // sampleLights(
-        //             //     seed,
-        //             //     throughput,
-        //             //     lightBRDF,
-        //             //     surfaceNormal,
-        //             //     intersectionPosition,
-        //             //     materialPDF,
-        //             //     pixelFootprint * _shadowBias,
-        //             //     emissiveIndices,
-        //             //     numEmissive,
-        //             //     _sampleHDRI,
-        //             //     nestedDielectrics,
-        //             //     numNestedDielectrics
-        //             // );
-
-        //             // Update the colour of the ray
-        //             rayColour = blend(
-        //                 lightColour * diffusivity,
-        //                 rayColour,
-        //                 rayIntensity * diffuseProbability * length(lightColour)
-        //             );
-
-        //             // Exit if we have reached the bounce limit
-        //             if (++bounces >= __bouncesPerRay)
-        //             {
-        //                 return finalAOVs(
-        //                     _outputType,
-        //                     iterations,
-        //                     bounces,
-        //                     firstObjectId,
-        //                     rayColour
-        //                 );
-        //             }
-
-        //             // Otherwise compute the refraction values
-        //             const float incidentRefractiveIndex = rays[currentRayIndex][7];
-        //             const float reflectivity = schlickReflectionCoefficient(
-        //                 direction,
-        //                 surfaceNormal,
-        //                 incidentRefractiveIndex,
-        //                 refractedRefractiveIndex
-        //             );
-        //             const float refraction = saturate(transmittance.w * (1 - reflectivity));
-        //             float intensity = rayIntensity * refraction;
-        //             float reflection = specularity.w;
-
-        //             // And spawn a refracted ray using them
-        //             if (numRays < lastRay && intensity > _hitTolerance)
-        //             {
-        //                 reflection = clamp(reflection + reflectivity, 0.0f, 1.0f - refraction);
-
-        //                 const float3 refractedDirection = refractRayThroughSurface(
-        //                     direction,
-        //                     surfaceNormal,
-        //                     incidentRefractiveIndex,
-        //                     refractedRefractiveIndex
-        //                 );
-
-        //                 // Offset the point so that it doesn't get trapped on
-        //                 // surface.
-        //                 const float3 refractedOrigin = offsetPoint(
-        //                     intersectionPosition,
-        //                     -surfaceNormal + refractedDirection,
-        //                     (2.0f * pixelFootprint + stepDistance) * _shadowBias
-        //                 );
-
-        //                 rays[numRays][0] = refractedOrigin.x;
-        //                 rays[numRays][1] = refractedOrigin.y;
-        //                 rays[numRays][2] = refractedOrigin.z;
-
-        //                 rays[numRays][3] = refractedDirection.x;
-        //                 rays[numRays][4] = refractedDirection.y;
-        //                 rays[numRays][5] = refractedDirection.z;
-
-        //                 rays[numRays][6] = intensity;
-
-        //                 rays[numRays][7] = refractedRefractiveIndex;
-
-        //                 numRays++;
-        //             }
-
-        //             // Also spawn a reflected ray
-        //             intensity = rayIntensity * reflection;
-        //             if (numRays < lastRay && intensity > _hitTolerance)
-        //             {
-        //                 const float3 reflectedDirection = reflectRayOffSurface(
-        //                     direction,
-        //                     surfaceNormal
-        //                 );
-
-        //                 // Offset the point so that it doesn't get trapped on
-        //                 // surface.
-        //                 const float3 reflectedOrigin = offsetPoint(
-        //                     intersectionPosition,
-        //                     surfaceNormal,
-        //                     pixelFootprint * _shadowBias
-        //                 );
-
-        //                 rays[numRays][0] = reflectedOrigin.x;
-        //                 rays[numRays][1] = reflectedOrigin.y;
-        //                 rays[numRays][2] = reflectedOrigin.z;
-
-        //                 rays[numRays][3] = reflectedDirection.x;
-        //                 rays[numRays][4] = reflectedDirection.y;
-        //                 rays[numRays][5] = reflectedDirection.z;
-
-        //                 rays[numRays][6] = intensity;
-
-        //                 rays[numRays][7] = incidentRefractiveIndex;
-
-        //                 numRays++;
-        //             }
-
-        //             // Flag that we have collided with at least one object.
-        //             madeContact = true;
-        //             pixelFootprint = _hitTolerance;
-
-        //             // Update the random seed
-        //             seed = 5.689f * random(
-        //                 seed + random(fabs(intersectionPosition + direction))
-        //             );
-
-        //             break;
-        //         }
-
-        //         lastStepDistance = signedStepDistance;
-        //         iterations++;
-        //     }
-
-        //     // If we are not computing the scene value and we have missed all
-        //     // objects, return black.
-        //     if (_outputType > 0)
-        //     {
-        //         return rayMissAOVs(
-        //             _outputType,
-        //             iterations,
-        //             bounces,
-        //             firstObjectId
-        //         );
-        //     }
-
-        //     // Otherwise, if we missed all objects, read the hdri value
-        //     // in the direction the ray was last travelling
-        //     if (!madeContact)
-        //     {
-        //         rayColour = blend(
-        //             saturate(readHDRIValue(direction)),
-        //             rayColour,
-        //             rayIntensity
-        //         );
-        //     }
-
-        //     currentRayIndex++;
-        // }
-
-        // rayColour.w = (bounces > 0) * firstObjectId;
-        // return rayColour;
-        return float4(0);
-    }
-
-
-    /**
-     *
+     * @returns: The total number of emissive objects found.
      */
     int getEmissiveIndices(int emissiveIndices[MAX_MIS_EMISSIVE_SHAPES])
     {
@@ -2933,6 +3177,16 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Create a ray out of the camera. It will be either a standard ray,
+     * a latlong ray, or a ray that will result in depth of field.
+     *
+     * @arg seed: The seed to use in randomization.
+     * @arg pixelLocation: The x, and y locations of the pixel.
+     * @arg rayOrigin: The location to store the origin of the new ray.
+     * @arg rayDirection: The location to store the direction of the new
+     *     ray.
+     */
     void getCameraRay(
             const float3 &seed,
             const float2 &pixelLocation,
@@ -2986,7 +3240,7 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
     void process(int2 pos)
     {
         SampleType(noise) noisePixel = noise();
-        float3 seed = 43.67f * random(float3(noisePixel.x, noisePixel.y, noisePixel.z));
+        float3 seed = random(float3(noisePixel.x, noisePixel.y, noisePixel.z));
 
         const float4 variancePixel = variance();
 
@@ -2995,7 +3249,8 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
             _maxPathsPerPixel,
             float3(variancePixel.x, variancePixel.y, variancePixel.z)
         );
-        const float totalPaths = numPaths + _numRaysPerPixel;
+        const float numPrecomputedPaths = variancePixel.w;
+        const float totalPaths = numPaths + numPrecomputedPaths;
 
         float4 resultPixel = float4(0);
 
@@ -3004,28 +3259,6 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
         int emissiveMISOptions[MAX_MIS_EMISSIVE_SHAPES];
 
         const int numEmissive = getEmissiveIndices(emissiveMISOptions);
-
-        for (int ray=1; ray <= _numRaysPerPixel; ray++)
-        {
-            // Generate a ray from the camera
-            float3 rayOrigin;
-            float3 rayDirection;
-            getCameraRay(
-                seed,
-                pixelLocation,
-                rayOrigin,
-                rayDirection
-            );
-
-            // Determine the colour of the ray
-            resultPixel += marchRay(
-                rayOrigin,
-                rayDirection,
-                seed
-            );
-
-            seed = 37.5798f * random(seed * ray * 1.79183324f);
-        }
 
         for (int path=1; path <= numPaths; path++)
         {
@@ -3046,22 +3279,20 @@ kernel PathMarchKernel : ImageComputationKernel<ePixelWise>
                 emissiveMISOptions,
                 numEmissive,
                 seed
-            );
+            ) / totalPaths;
 
-            seed = 53.1231f * random(seed * path * 1.31537f);
+            seed = RAND_CONST_10 * random(seed * path * RAND_CONST_11);
         }
 
         const uint objectId = resultPixel.w / totalPaths;
 
-        const float numPrecomputedPaths = variancePixel.w;
-
-        dst() = (resultPixel + numPrecomputedPaths * src()) / (totalPaths + numPrecomputedPaths);
+        dst() = resultPixel + numPrecomputedPaths * src() / totalPaths;
 
         if (_outputType == STATS_AOV)
         {
-            dst(2) = totalPaths + numPrecomputedPaths;
+            dst(2) = totalPaths;
         }
 
-        dst(3) = encodeTwoValuesInUint(objectId, totalPaths + numPrecomputedPaths);
+        dst(3) = encodeTwoValuesInUint(objectId, totalPaths);
     }
 };

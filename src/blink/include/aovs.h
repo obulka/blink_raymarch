@@ -17,7 +17,16 @@
 
 
 /**
+ * Get the pixel value for the chosen AOV when we are exiting early.
  *
+ * @arg aovType: The selected AOV type.
+ * @arg worldPosition: The world position at the time of exit.
+ * @arg localPosition: The local position at the time of exit.
+ * @arg normal: The surface normal at the time of exit.
+ * @arg depth: The depth at the time of exit.
+ * @arg objectId: The object ID that was last hit.
+ *
+ * @returns: The pixel colour for the AOV.
  */
 inline float4 earlyExitAOVs(
         const int aovType,
@@ -44,7 +53,16 @@ inline float4 earlyExitAOVs(
 
 
 /**
+ * Get the pixel value for the chosen AOV when we are exiting after
+ * completing all bounces.
  *
+ * @arg aovType: The selected AOV type.
+ * @arg iterations: The number of iterations while tracing.
+ * @arg bounces: The number of bounces while tracing.
+ * @arg objectId: The object ID that was last hit.
+ * @arg rayColour: The accumulated ray colour.
+ *
+ * @returns: The pixel colour for the AOV.
  */
 inline float4 finalAOVs(
         const int aovType,
@@ -62,7 +80,15 @@ inline float4 finalAOVs(
 
 
 /**
+ * Get the pixel value for the chosen AOV when we have missed everything
+ * in the scene.
  *
+ * @arg aovType: The selected AOV type.
+ * @arg iterations: The number of iterations while tracing.
+ * @arg bounces: The number of bounces while tracing.
+ * @arg objectId: The object ID that was last hit.
+ *
+ * @returns: The pixel colour for the AOV.
  */
 inline float4 rayMissAOVs(
         const int aovType,

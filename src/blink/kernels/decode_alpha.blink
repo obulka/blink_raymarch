@@ -13,7 +13,11 @@ kernel DecodeAlpha : ImageComputationKernel<ePixelWise>
     Image<eWrite> dst; // the output image
 
 
-    void process() {
+    /**
+     * Decode the multiple values stored in the alpha channel.
+     */
+    void process()
+    {
         SampleType(src) srcPixel = src();
 
         const int2 decoded = decodeTwoValuesFromUint(srcPixel.w);

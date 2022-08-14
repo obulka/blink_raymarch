@@ -37,9 +37,8 @@ Gizmo {
  repetition_spacing 1.1
  addUserKnob {26 ""}
  addUserKnob {4 blend_type l "blend type" t "The type of interaction this object will have with its children.\n    Union: All objects will appear as normal.\n    Subtraction: This object will be subtracted from all of its\n        children, leaving holes.\n    Intersection: Only the region where this object and its\n        children overlap will remain.\n    Smooth Union: All children will smoothly blend together\n        with this object according to the 'blend strength'.\n    Smooth Subtraction:This object will be subtracted from all\n        of its children,  leaving holes that are smoothed\n        according to the 'blend strength'.\n    Smooth Intersection: Only the region where this object\n        and its children overlap will remain, and the remaining\n        regions will be smoothed according to the 'blend\n        strength'." +DISABLED M {union subtraction intersection "smooth union" "smooth subtraction" "smooth intersection" "" "" ""}}
- blend_type "smooth union"
  addUserKnob {7 blend_strength l "blend strength" t "The amount to blend between this and its child objects if one of the 'Smooth' blend types are selected." +DISABLED}
- blend_strength 0.125
+ blend_strength 0.1
  addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +DISABLED +STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
@@ -127,7 +126,7 @@ add_layer {sdf_shape sdf_shape.shape_type sdf_shape.shape_operations sdf_shape.n
  Constant {
   inputs 0
   channels sdf_shape
-  color {{parent.shape} {"parent.repetition | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 ? (1 << (parent.blend_type + 6)) : 0) | (parent.is_bound ? 4096 : 0) "} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
+  color {{parent.shape} {"parent.repetition | (parent.elongate ? 4 : 0) | (parent.mirror_x ? 8 : 0) | (parent.mirror_y ? 16 : 0) | (parent.mirror_z ? 32 : 0) | (parent.hollow ? 64 : 0) | (parent.blend_type > 0 && !parent.is_bound ? (1 << (parent.blend_type + 6)) : 0) | (parent.is_bound ? 4096 : 0) "} {"parent.sdf_merge.disable ? 0 : parent.sdf_merge.input1.width"} {parent.blend_strength}}
   format "1 1 0 0 1 1 1 1x1"
   name shape
   xpos 789
@@ -212,7 +211,7 @@ add_layer {sdf_shape_mods_1 sdf_shape_mods_1.elongation_x sdf_shape_mods_1.elong
    xpos 192
    ypos -2
   }
-set N1c4267f0 [stack 0]
+set N1379a720 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -234,7 +233,7 @@ set N1c4267f0 [stack 0]
    xpos 34
    ypos -6
   }
-set N12c8a4e0 [stack 0]
+set N149e6650 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -245,7 +244,7 @@ set N12c8a4e0 [stack 0]
    xpos -98
    ypos 336
   }
-push $N1c4267f0
+push $N1379a720
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -274,7 +273,7 @@ push $N1c4267f0
    xpos 158
    ypos 167
   }
-push $N12c8a4e0
+push $N149e6650
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -367,7 +366,7 @@ push $N12c8a4e0
    xpos 192
    ypos -2
   }
-set N1cc79bd0 [stack 0]
+set N1e48f340 [stack 0]
   Dot {
    name Dot3
    xpos 329
@@ -389,7 +388,7 @@ set N1cc79bd0 [stack 0]
    xpos 34
    ypos -6
   }
-set N2f0be140 [stack 0]
+set N405a0270 [stack 0]
   Dot {
    name Dot6
    xpos -98
@@ -400,7 +399,7 @@ set N2f0be140 [stack 0]
    xpos -98
    ypos 336
   }
-push $N1cc79bd0
+push $N1e48f340
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true
@@ -429,7 +428,7 @@ push $N1cc79bd0
    xpos 158
    ypos 167
   }
-push $N2f0be140
+push $N405a0270
   Crop {
    box {0 0 {Dot1.width+Dot2.width} 1}
    reformat true

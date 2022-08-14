@@ -12,6 +12,10 @@
 /**
  * ACES tone mapping curve fit to go from HDR to LDR
  * https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve
+ *
+ * @arg colour: The linear colour to tone map.
+ *
+ * @returns: The tone mapped colour.
  */
 inline float3 ACESToneMap(const float3 &colour)
 {

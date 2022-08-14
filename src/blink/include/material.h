@@ -10,7 +10,7 @@
 
 // Increase this if you want more than MAX_NESTED_DIELECTRICS nested
 // transmissive objects
-#define MAX_NESTED_DIELECTRICS 4
+#define MAX_NESTED_DIELECTRICS 8
 
 // Number of parameters needed for nested dielectrics
 #define NESTED_DIELECTRIC_PARAMS 9
@@ -26,7 +26,30 @@
 #define SCATTERING_Z 7
 #define DO_REFRACTION 8
 
+#define NOISE_ENABLED 1
+#define FBM_NOISE 2
+#define DIFFUSE_NOISE 4
+#define SPECULAR_NOISE 8
+#define TRANSMITTANCE_NOISE 16
+#define EMITTANCE_NOISE 32
+#define REFRACTIVE_INDEX_NOISE 64
+#define TRANSMISSION_ROUGHNESS_NOISE 128
+#define SPECULAR_ROUGHNESS_NOISE 256
+#define INVERT_NOISE 512
+#define SCATTERING_NOISE 1024
+#define EXTINCTION_NOISE 2048
 
+
+/**
+ * Get the extinction coefficient from the nested dielectric stack.
+ *
+ * @arg nestedDielectrics: The stack of dielectrics that we have
+ *     entered without exiting.
+ * @arg index: The index of the dielectric to get the extinction
+ *     coefficient of.
+ *
+ * @returns: The extinction coefficient.
+ */
 inline float4 getExtinctionCoefficient(
         const float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
         const int index)
@@ -40,6 +63,16 @@ inline float4 getExtinctionCoefficient(
 }
 
 
+/**
+ * Get the scattering coefficient from the nested dielectric stack.
+ *
+ * @arg nestedDielectrics: The stack of dielectrics that we have
+ *     entered without exiting.
+ * @arg index: The index of the dielectric to get the scattering
+ *     coefficient of.
+ *
+ * @returns: The scattering coefficient.
+ */
 inline float4 getScatteringCoefficient(
         const float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
         const int index)
@@ -196,7 +229,14 @@ float reflectionCoefficient(
 
 
 /**
+ * Compute the factor which, due to surface geometry and distance from a
+ * light source, will scale the brightness.
  *
+ * @arg incidentDirection: The incident direction.
+ * @arg surfaceNormal: The normal to the surface.
+ * @arg distance: The distance to the light.
+ *
+ * @returns: The value to scale the brightness by.
  */
 inline float geometryFactor(
         const float3 &incidentDirection,
@@ -210,7 +250,36 @@ inline float geometryFactor(
 
 
 /**
+ * Modify the reflectance/transmittance based on surface geometry and
+ * ray direction.
  *
+ * @arg direction: The incoming ray direction.
+ * @arg surfaceNormal: The normal to the surface at the position we
+ *     are sampling the material of.
+ * @arg objectId: The ID of the object whose material we are sampling.
+ * @arg nestedDielectrics: The stack of dielectrics that we have
+ *     entered without exiting.
+ * @arg numNestedDielectrics: The number of dielectrics in the
+ *     stack.
+ * @arg isExiting: Whether or not we will be exiting the current
+ *     material if we transmit through it.
+ * @arg surfaceRefractiveIndex: The refractive index of the material.
+ * @arg surfaceExtinctionCoefficient: The extinction coefficient of the
+ *     material.
+ * @arg surfaceScatteringCoefficient: The scattering coefficient of the
+ *     material.
+ * @arg incidentRefractiveIndex: The refractive index of the material
+ *     the ray is currently travelling through.
+ * @arg refractedRefractiveIndex: The refractive index of the material
+ *     we will enter.
+ * @arg refractedExtinctionCoefficient: The extinction coefficient of
+ *     the material we would enter.
+ * @arg refractedScatteringCoefficient: The scattering coefficient of
+ *     the material we would enter.
+ * @arg specularProbability: The probability that we would specularly
+ *     reflect off this surface.
+ * @arg refractionProbability: The probability that we would transmit
+ *     through this surface.
  */
 inline void getReflectivityData(
         const float3 &direction,
@@ -220,9 +289,11 @@ inline void getReflectivityData(
         const int numNestedDielectrics,
         const bool isExiting,
         const float surfaceRefractiveIndex,
+        const float4 &surfaceExtinctionCoefficient,
         const float4 &surfaceScatteringCoefficient,
         float &incidentRefractiveIndex,
         float &refractedRefractiveIndex,
+        float4 &refractedExtinctionCoefficient,
         float4 &refractedScatteringCoefficient,
         float &specularProbability,
         float &refractionProbability)
@@ -233,17 +304,20 @@ inline void getReflectivityData(
     {
         // We are exiting the material we are in, get the
         // last refractive index from the top of the stack
+        refractedExtinctionCoefficient = getExtinctionCoefficient(
+            nestedDielectrics,
+            numNestedDielectrics - 1
+        );
         refractedRefractiveIndex = nestedDielectrics[numNestedDielectrics - 1][REFRACTIVE_INDEX];
-        refractedScatteringCoefficient = float4(
-            nestedDielectrics[numNestedDielectrics - 1][SCATTERING_X],
-            nestedDielectrics[numNestedDielectrics - 1][SCATTERING_Y],
-            nestedDielectrics[numNestedDielectrics - 1][SCATTERING_Z],
-            0
+        refractedScatteringCoefficient = getScatteringCoefficient(
+            nestedDielectrics,
+            numNestedDielectrics - 1
         );
     }
     else
     {
         // Otherwise we will be entering a new material
+        refractedExtinctionCoefficient = surfaceExtinctionCoefficient;
         refractedRefractiveIndex = surfaceRefractiveIndex;
         refractedScatteringCoefficient = surfaceScatteringCoefficient;
     }
@@ -271,7 +345,20 @@ inline void getReflectivityData(
 
 
 /**
+ * Perform a specular bounce of the ray.
  *
+ * @arg incidentDirection: The incoming ray direction.
+ * @arg surfaceNormal: The normal to the surface at the position we
+ *     are sampling the material of.
+ * @arg diffuseDirection: The direction the ray would travel after
+ *     a diffuse bounce.
+ * @arg roughness: The specular roughness of the material.
+ * @arg offset: The amount to offset the ray in order to escape the
+ *     surface.
+ * @arg idealSpecularDirection: The direction the ray would travel
+ *     after specular reflection if there were no roughness.
+ * @arg specularDirection: The location to store the new ray direction.
+ * @arg position: The location to store the new ray origin.
  */
 inline float specularBounce(
         const float3 &incidentDirection,
@@ -304,7 +391,20 @@ inline float specularBounce(
 
 
 /**
+ * Perform specular material sampling.
  *
+ * @arg idealRefractedDirection: The direction the ray would travel
+ *     after refraction if there were no roughness.
+ * @arg specularDirection: The direction the ray will travel.
+ * @arg specularity: The specular values of the surface.
+ * @arg specularProbability: The probability that we would specularly
+ *     reflect off this surface.
+ * @arg materialBRDF: The BRDF of the surface at the position we
+ *     are sampling the material of.
+ * @arg lightPDF: The PDF of the material we are sampling from the
+ *     perspective of the light we will be sampling.
+ *
+ * @returns: The material PDF.
  */
 inline float sampleSpecular(
         const float3 &idealSpecularDirection,
@@ -325,7 +425,26 @@ inline float sampleSpecular(
 
 
 /**
+ * Perform a transmissive bounce of the ray.
  *
+ * @arg incidentDirection: The incoming ray direction.
+ * @arg surfaceNormal: The normal to the surface at the position we
+ *     are sampling the material of.
+ * @arg diffuseDirection: The direction the ray would travel after
+ *     a diffuse bounce.
+ * @arg roughness: The transmissive roughness of the material.
+ * @arg offset: The amount to offset the ray in order to escape the
+ *     surface.
+ * @arg incidentRefractiveIndex: The refractive index of the material
+ *     the ray is currently travelling through.
+ * @arg refractedRefractiveIndex: The refractive index of the material
+ *     we will enter.
+ * @arg doRefraction: Whether or not refraction is enabled on the
+ *     material.
+ * @arg idealRefractedDirection: The direction the ray would travel
+ *     after refraction if there were no roughness.
+ * @arg refractedDirection: The location to store the new ray direction.
+ * @arg position: The location to store the new ray origin.
  */
 inline void transmissiveBounce(
         const float3 &incidentDirection,
@@ -369,14 +488,40 @@ inline void transmissiveBounce(
 
 
 /**
+ * Perform transmissive material sampling.
  *
+ * @arg idealRefractedDirection: The direction the ray would travel
+ *     after refraction if there were no roughness.
+ * @arg refractedDirection: The direction the ray will travel.
+ * @arg refractionProbability: The probability that we would transmit
+ *     through this surface.
+ * @arg refractedRefractiveIndex: The refractive index of the material.
+ * @arg refractedExtinctionCoefficient: The extinction coefficient of
+ *     the material.
+ * @arg refractedScatteringCoefficient: The scattering coefficient of
+ *     the material.
+ * @arg objectId: The ID of the object whose material we are sampling.
+ * @arg doRefraction: Whether or not refraction is enabled on the
+ *     material.
+ * @arg isExiting: Whether or not we will be exiting the current
+ *     material if we transmit through it.
+ * @arg materialBRDF: The BRDF of the surface at the position we
+ *     are sampling the material of.
+ * @arg lightPDF: The PDF of the material we are sampling from the
+ *     perspective of the light we will be sampling.
+ * @arg nestedDielectrics: The stack of dielectrics that we have
+ *     entered without exiting.
+ * @arg numNestedDielectrics: The number of dielectrics in the
+ *     stack.
+ *
+ * @returns: The material PDF.
  */
 inline float sampleTransmissive(
         const float3 &idealRefractedDirection,
         const float3 &refractedDirection,
-        const float4 &transmittance,
         const float refractionProbability,
         const float refractedRefractiveIndex,
+        const float4 &refractedExtinctionCoefficient,
         const float4 &refractedScatteringCoefficient,
         const float objectId,
         const bool doRefraction,
@@ -397,9 +542,9 @@ inline float sampleTransmissive(
         // We are not exiting the material we are in, we are entering
         // a new one, so push the next refractive index to the stack
         numNestedDielectrics++;
-        nestedDielectrics[numNestedDielectrics][EXTINCTION_X] = transmittance.x;
-        nestedDielectrics[numNestedDielectrics][EXTINCTION_Y] = transmittance.y;
-        nestedDielectrics[numNestedDielectrics][EXTINCTION_Z] = transmittance.z;
+        nestedDielectrics[numNestedDielectrics][EXTINCTION_X] = refractedExtinctionCoefficient.x;
+        nestedDielectrics[numNestedDielectrics][EXTINCTION_Y] = refractedExtinctionCoefficient.y;
+        nestedDielectrics[numNestedDielectrics][EXTINCTION_Z] = refractedExtinctionCoefficient.z;
         nestedDielectrics[numNestedDielectrics][OBJECT_ID] = objectId;
         nestedDielectrics[numNestedDielectrics][REFRACTIVE_INDEX] = refractedRefractiveIndex;
         nestedDielectrics[numNestedDielectrics][SCATTERING_X] = refractedScatteringCoefficient.x;
@@ -418,7 +563,16 @@ inline float sampleTransmissive(
 
 
 /**
+ * Perform a diffuse bounce of the ray.
  *
+ * @arg surfaceNormal: The normal to the surface at the position we
+ *     are sampling the material of.
+ * @arg diffuseDirection: The direction the ray will travel after
+ *     sampling the material.
+ * @arg offset: The amount to offset the ray in order to escape the
+ *     surface.
+ * @arg direction: The location to store the new ray direction.
+ * @arg position: The location to store the new ray origin.
  */
 inline void diffuseBounce(
         const float3 &surfaceNormal,
@@ -440,7 +594,21 @@ inline void diffuseBounce(
 
 
 /**
+ * Perform diffuse material sampling.
  *
+ * @arg surfaceNormal: The normal to the surface at the position we
+ *     are sampling the material of.
+ * @arg diffusivity: The diffuse values of the surface.
+ * @arg diffuseDirection: The direction the ray will travel after
+ *     sampling the material.
+ * @arg diffuseProbability: The probability of doing a diffuse bounce
+ *     on this material.
+ * @arg materialBRDF: The BRDF of the surface at the position we
+ *     are sampling the material of.
+ * @arg lightPDF: The PDF of the material we are sampling from the
+ *     perspective of the light we will be sampling.
+ *
+ * @returns: The material PDF.
  */
 inline float sampleDiffuse(
         const float3 &surfaceNormal,
@@ -458,20 +626,55 @@ inline float sampleDiffuse(
 
 
 /**
+ * Perform material sampling.
  *
+ * @arg seed: The seed to use in randomization.
+ * @arg surfaceNormal: The normal to the surface at the position we
+ *     are sampling the material of.
+ * @arg incidentDirection: The incoming ray direction.
+ * @arg diffusivity: The diffuse values of the surface.
+ * @arg offset: The amount to offset the ray in order to escape the
+ *     surface.
+ * @arg transmittance: The extinction coefficient and transmissive
+ *     probability of the surface.
+ * @arg doRefraction: Whether or not refraction is enabled on the
+ *     material.
+ * @arg surfaceRefractiveIndex: The refractive index of the material.
+ * @arg surfaceScatteringCoefficient: The scattering coefficient of the
+ *     material.
+ * @arg transmissionRoughness: The transmissive roughness of the
+ *     surface.
+ * @arg specularity: The specular values of the surface.
+ * @arg specularRoughness: The specular roughness of the surface.
+ * @arg objectId: The ID of the object whose material we are sampling.
+ * @arg isExiting: Whether or not we will be exiting the current
+ *     material if we transmit through it.
+ * @arg materialBRDF: The BRDF of the surface at the position we
+ *     are sampling the material of.
+ * @arg outgoingDirection: The direction the ray will travel after
+ *     sampling the material.
+ * @arg position: The position on the surface to sample the
+ *     material of.
+ * @arg nestedDielectrics: The stack of dielectrics that we have
+ *     entered without exiting.
+ * @arg numNestedDielectrics: The number of dielectrics in the
+ *     stack.
+ * @arg lightPDF: The PDF of the material we are sampling from the
+ *     perspective of the light we will be sampling.
+ *
+ * @returns: The material PDF.
  */
 inline float sampleMaterial(
         const float3 &seed,
         const float3 &surfaceNormal,
         const float3 &incidentDirection,
         const float4 &diffusivity,
-        const float reflectionOffset,
-        const float transmissionOffset,
+        const float offset,
         const float4 &transmittance,
         const bool doRefraction,
         const float surfaceRefractiveIndex,
         const float4 &surfaceScatteringCoefficient,
-        const float transmissiveRoughness,
+        const float transmissionRoughness,
         const float4 &specularity,
         const float specularRoughness,
         const float objectId,
@@ -494,6 +697,7 @@ inline float sampleMaterial(
     float incidentRefractiveIndex;
     float refractedRefractiveIndex;
     float4 refractedScatteringCoefficient;
+    float4 refractedExtinctionCoefficient;
     float specularProbability = specularity.w;
     float refractionProbability = transmittance.w;
 
@@ -507,9 +711,11 @@ inline float sampleMaterial(
             numNestedDielectrics,
             isExiting,
             surfaceRefractiveIndex,
+            transmittance,
             surfaceScatteringCoefficient,
             incidentRefractiveIndex,
             refractedRefractiveIndex,
+            refractedExtinctionCoefficient,
             refractedScatteringCoefficient,
             specularProbability,
             refractionProbability
@@ -533,7 +739,7 @@ inline float sampleMaterial(
             surfaceNormal,
             diffuseDirection,
             roughness,
-            reflectionOffset,
+            offset,
             idealSpecularDirection,
             outgoingDirection,
             position
@@ -553,14 +759,14 @@ inline float sampleMaterial(
         transmittance.w > 0.0f
         && rng <= specularProbability + refractionProbability
     ) {
-        const float roughness = transmissiveRoughness * transmissiveRoughness;
+        const float roughness = transmissionRoughness * transmissionRoughness;
         float3 idealRefractedDirection;
         transmissiveBounce(
             incidentDirection,
             surfaceNormal,
             diffuseDirection,
             roughness,
-            transmissionOffset,
+            offset,
             incidentRefractiveIndex,
             refractedRefractiveIndex,
             doRefraction,
@@ -572,9 +778,9 @@ inline float sampleMaterial(
         pdf = sampleTransmissive(
             idealRefractedDirection,
             outgoingDirection,
-            transmittance,
             refractionProbability,
             refractedRefractiveIndex,
+            refractedExtinctionCoefficient,
             refractedScatteringCoefficient,
             objectId,
             doRefraction,
@@ -584,11 +790,6 @@ inline float sampleMaterial(
             nestedDielectrics,
             numNestedDielectrics
         );
-
-        if (doRefraction)
-        {
-            materialBRDF *= fabs(dot(outgoingDirection, surfaceNormal));
-        }
     }
     // Otherwise diffuse the light
     else
@@ -596,7 +797,7 @@ inline float sampleMaterial(
         diffuseBounce(
             surfaceNormal,
             diffuseDirection,
-            reflectionOffset,
+            offset,
             outgoingDirection,
             position
         );
@@ -609,7 +810,6 @@ inline float sampleMaterial(
             materialBRDF,
             lightPDF
         );
-        materialBRDF *= fabs(dot(outgoingDirection, surfaceNormal));
     }
 
     return pdf;
@@ -617,7 +817,19 @@ inline float sampleMaterial(
 
 
 /**
+ * Modify a material based on noise.
  *
+ * @arg noiseOptions: The noise modifiers.
+ * @arg noiseValue: The noise value.
+ * @arg diffusivity: The diffuse values of the surface.
+ * @arg specularity: The specular values of the surface.
+ * @arg transmittance: The extinction coefficient and transmissive
+ *     probability of the surface.
+ * @arg emittance: The emissive values of the surface.
+ * @arg specularRoughness: The specular roughness of the surface.
+ * @arg transmissionRoughness: The transmissive roughness of the
+ *     surface.
+ * @arg refractiveIndex: The refractive index of the material.
  */
 inline void useNoiseOnMaterial(
         const int noiseOptions,
@@ -627,36 +839,36 @@ inline void useNoiseOnMaterial(
         float4 &transmittance,
         float4 &emittance,
         float &specularRoughness,
-        float &transmissiveRoughness,
+        float &transmissionRoughness,
         float &refractiveIndex)
 {
-    if (noiseOptions & 4)
+    if (noiseOptions & DIFFUSE_NOISE)
     {
         diffusivity.x *= noiseValue;
         diffusivity.y *= noiseValue;
         diffusivity.z *= noiseValue;
     }
-    if (noiseOptions & 8)
+    if (noiseOptions & SPECULAR_NOISE)
     {
         specularity.w *= noiseValue;
     }
-    if (noiseOptions & 16)
+    if (noiseOptions & TRANSMITTANCE_NOISE)
     {
         transmittance.w *= noiseValue;
     }
-    if (noiseOptions & 32)
+    if (noiseOptions & EMITTANCE_NOISE)
     {
         emittance *= noiseValue;
     }
-    if (noiseOptions & 64)
+    if (noiseOptions & REFRACTIVE_INDEX_NOISE)
     {
         refractiveIndex = (refractiveIndex - 1.0f) * noiseValue + 1.0f;
     }
-    if (noiseOptions & 128)
+    if (noiseOptions & TRANSMISSION_ROUGHNESS_NOISE)
     {
-        transmissiveRoughness *= noiseValue;
+        transmissionRoughness *= noiseValue;
     }
-    if (noiseOptions & 256)
+    if (noiseOptions & SPECULAR_ROUGHNESS_NOISE)
     {
         specularRoughness *= noiseValue;
     }
@@ -664,14 +876,18 @@ inline void useNoiseOnMaterial(
 
 
 /**
+ * Modify the emittance of a material based on noise.
  *
+ * @arg noiseOptions: The noise modifiers.
+ * @arg noiseValue: The noise value.
+ * @arg emittance: The emissive values of the surface.
  */
 void useNoiseOnEmittance(
         const int noiseOptions,
         const float noiseValue,
         float4 &emittance)
 {
-    if (noiseOptions & 32)
+    if (noiseOptions & EMITTANCE_NOISE)
     {
         emittance *= noiseValue;
     }

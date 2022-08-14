@@ -9,8 +9,28 @@
 //
 
 
+// Some random constants on the interval [1, 2]
+#define RAND_CONST_0 1.571411510193971f
+#define RAND_CONST_1 1.268632820084931f
+#define RAND_CONST_2 1.7880365647937733f
+#define RAND_CONST_3 1.3546987471558234f
+#define RAND_CONST_4 1.4365958250848703f
+#define RAND_CONST_5 1.7045380669435368f
+#define RAND_CONST_6 1.2006950006793073f
+#define RAND_CONST_7 1.3877943854025474f
+#define RAND_CONST_8 1.2513180038618783f
+#define RAND_CONST_9 1.8584270278009565f
+#define RAND_CONST_10 1.1299747498069974f
+#define RAND_CONST_11 1.394137930742262f
+#define RAND_CONST_12 1.7779101864424334f
+
+
 /**
+ * Compute a Wang hash.
  *
+ * @arg seed: The seed to hash.
+ *
+ * @returns: The hashed value.
  */
 inline uint wangHash(uint seed)
 {
@@ -24,7 +44,11 @@ inline uint wangHash(uint seed)
 
 
 /**
+ * Compute a Wang hash.
  *
+ * @arg seed: The seed to hash.
+ *
+ * @returns: The hashed value.
  */
 inline int wangHash(int seed)
 {
@@ -51,7 +75,11 @@ inline float random(const float seed)
 
 
 /**
+ * Get a random value on the interval [0, 1].
  *
+ * @arg seed: The random seed.
+ *
+ * @returns: A random value on the interval [0, 1].
  */
 inline float random(uint seed)
 {
@@ -60,7 +88,11 @@ inline float random(uint seed)
 
 
 /**
+ * Get a random value on the interval [0, 1].
  *
+ * @arg seed: The random seed.
+ *
+ * @returns: A random value on the interval [0, 1].
  */
 inline float2 random(const float2 &seed)
 {
@@ -72,7 +104,11 @@ inline float2 random(const float2 &seed)
 
 
 /**
+ * Get a random value on the interval [0, 1].
  *
+ * @arg seed: The random seed.
+ *
+ * @returns: A random value on the interval [0, 1].
  */
 inline float3 random(const float3 &seed)
 {
@@ -85,7 +121,29 @@ inline float3 random(const float3 &seed)
 
 
 /**
+ * Get a random value on the interval [0, 1].
  *
+ * @arg seed: The random seed.
+ *
+ * @returns: A random value on the interval [0, 1].
+ */
+inline float4 random(const float4 &seed)
+{
+    return float4(
+        random(seed.x),
+        random(seed.y),
+        random(seed.z),
+        random(seed.w)
+    );
+}
+
+
+/**
+ * Create a random unit vector.
+ *
+ * @arg seed: The random seed.
+ *
+ * @returns: A random unit vector.
  */
 float3 randomUnitVector(const float3 &seed)
 {
@@ -99,7 +157,12 @@ float3 randomUnitVector(const float3 &seed)
 
 
 /**
+ * Create a random unit vector in the hemisphere aligned along the
+ * z-axis.
  *
+ * @arg seed: The random seed.
+ *
+ * @returns: A random unit vector.
  */
 float3 uniformDirectionInZHemisphere(const float3 &seed)
 {
@@ -112,7 +175,13 @@ float3 uniformDirectionInZHemisphere(const float3 &seed)
 
 
 /**
+ * Create a random unit vector in the hemisphere aligned along the
+ * given axis.
  *
+ * @arg axis: The axis to align the hemisphere with.
+ * @arg seed: The random seed.
+ *
+ * @returns: A random unit vector.
  */
 float3 uniformDirectionInHemisphere(const float3 &axis, const float3 &seed)
 {
@@ -125,7 +194,11 @@ float3 uniformDirectionInHemisphere(const float3 &axis, const float3 &seed)
 
 
 /**
+ * Create a random point that lies within the unit circle.
  *
+ * @arg seed: The random seed.
+ *
+ * @returns: A random point, (radius, angle) in the unit circle.
  */
 inline float2 uniformPointInUnitCircle(const float3 &seed)
 {
@@ -134,7 +207,12 @@ inline float2 uniformPointInUnitCircle(const float3 &seed)
 
 
 /**
+ * Create a random unit vector in the hemisphere aligned along the
+ * z-axis, with a distribution that is cosine weighted.
  *
+ * @arg seed: The random seed.
+ *
+ * @returns: A random unit vector.
  */
 float3 cosineDirectionInZHemisphere(const float3 &seed)
 {
@@ -150,7 +228,13 @@ float3 cosineDirectionInZHemisphere(const float3 &seed)
 
 
 /**
+ * Create a random unit vector in the hemisphere aligned along the
+ * given axis, with a distribution that is cosine weighted.
  *
+ * @arg axis: The axis to align the hemisphere with.
+ * @arg seed: The random seed.
+ *
+ * @returns: A random unit vector.
  */
 float3 cosineDirectionInHemisphere(const float3 &axis, const float3 &seed)
 {
@@ -163,13 +247,15 @@ float3 cosineDirectionInHemisphere(const float3 &axis, const float3 &seed)
 
 
 /**
- * Get a random direction within a solid angle oriented along the z-axis.
+ * Get a random direction within a solid angle oriented along the
+ * z-axis.
  *
  * https://math.stackexchange.com/questions/56784/generate-a-random-direction-within-a-cone
  *
- * @arg axis: The direction the solid angle is aligned with.
  * @arg angle: The angle from the axis to the conical surface.
  * @arg seed: The random seed.
+ *
+ * @returns: A random unit vector.
  */
 inline float3 uniformDirectionInZSolidAngle(const float angle, const float3 &seed)
 {
@@ -193,6 +279,8 @@ inline float3 uniformDirectionInZSolidAngle(const float angle, const float3 &see
  * @arg axis: The direction the solid angle is aligned with.
  * @arg angle: The angle from the axis to the conical surface.
  * @arg seed: The random seed.
+ *
+ * @returns: A random unit vector.
  */
 float3 uniformDirectionInSolidAngle(
         const float3 &axis,

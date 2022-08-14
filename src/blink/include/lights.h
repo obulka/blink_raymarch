@@ -8,23 +8,56 @@
 // Handle Various Lights
 //
 
+#define DIRECTIONAL_LIGHT 2
+#define POINT_LIGHT 3
 
 
 /**
+ * Perform multiple importance sampling by combining probability
+ * distribution functions.
  *
+ * @arg emittance: The emissive values of the surface.
+ * @arg throughput: The throughput of the ray.
+ * @arg pdf0: The first PDF.
+ * @arg pdf1: The second PDF.
+ *
+ * @returns: The multiple importance sampled colour.
+ */
+inline float4 multipleImportanceSample(
+        const float4 &emittance,
+        const float4 &throughput,
+        const float pdf0,
+        const float pdf1)
+{
+    return emittance * throughput * balanceHeuristic(pdf0, pdf1);
+}
+
+
+/**
+ * Get the probability distribution function for equi-angular sampling.
+ *
+ * @arg uniform: A uniform step distance along the ray.
+ * @arg maxRayDistance: The maximum distance the ray can travel.
+ * @arg rayOrigin: The origin of the ray.
+ * @arg rayDirection: The direction of the ray.
+ * @arg lightPosition: The position of the light.
+ * @arg distance: The equi-angular distance.
+ *
+ * @returns: The probability distribution function.
  */
 float sampleEquiangularPDF(
         const float uniform,
-        const float maxDistance,
+        const float maxRayDistance,
         const float3 &rayOrigin,
         const float3 &rayDirection,
         const float3 &lightPosition,
         float &distance)
 {
-    // get coord of closest point to light along (infinite) ray
+    // Get the coordinate of the closest point to the light along an
+    // infinite ray
     const float delta = dot(lightPosition - rayOrigin, rayDirection);
 
-    // get distance this point is from light
+    // Get distance this point is from light
     const float D = length(rayOrigin + delta * rayDirection - lightPosition);
 
     if (D == 0.0f)
@@ -33,11 +66,11 @@ float sampleEquiangularPDF(
         return 1.0f;
     }
 
-    // get angle of endpoints
+    // Get the angle of the endpoints
     const float thetaA = atan2(-delta, D);
-    const float thetaB = atan2(maxDistance - delta, D);
+    const float thetaB = atan2(maxRayDistance - delta, D);
 
-    // take sample
+    // Take a sample
     const float t = D * tan(mix(thetaA, thetaB, uniform));
 
     distance = delta + t;
@@ -54,19 +87,18 @@ float sampleEquiangularPDF(
 /**
  * Get the direction, and distance of a spherical light.
  *
- * @arg direction: The direction the light is travelling.
+ * @arg seed: The seed to use in randomization.
+ * @arg surfaceNormal: The normal to the surface at the position we
+ *     are sampling the illumination of.
  * @arg lightDirection: Will store the direction to the light.
  * @arg distanceToLight: Will store the distance to the light.
  */
 inline void hdriLightData(
         const float3 &seed,
         const float3 &surfaceNormal,
-        const float maxRayDistance,
         float3 &lightDirection,
-        float &distanceToLight,
-        float &visibleSurfaceArea)
+        float &distanceToLight)
 {
-    visibleSurfaceArea = 1.0f;
     lightDirection = cosineDirectionInHemisphere(surfaceNormal, seed);
     distanceToLight = 1.0f;
 }
@@ -75,14 +107,20 @@ inline void hdriLightData(
 /**
  * Get the direction, and distance of a spherical light.
  *
- * @arg direction: The direction the light is travelling.
+ * @arg seed: The seed to use in randomization.
+ * @arg pointOnSurface: The point on the surface to compute the
+ *     light intensity at.
+ * @arg lightPosition: The position of the light.
+ * @arg radius: The radius of the sphere.
  * @arg lightDirection: Will store the direction to the light.
  * @arg distanceToLight: Will store the distance to the light.
+ * @arg visibleSurfaceArea: The surface area that is visible to the
+ *     position we are sampling from.
  */
 inline void sphericalLightData(
         const float3 &seed,
         const float3 &pointOnSurface,
-        const float3 &position,
+        const float3 &lightPosition,
         const float radius,
         float3 &lightDirection,
         float &distanceToLight,
@@ -90,10 +128,10 @@ inline void sphericalLightData(
 {
     visibleSurfaceArea = 2.0f * PI * radius * radius;
     float3 lightNormal = uniformDirectionInHemisphere(
-        normalize(pointOnSurface - position),
+        normalize(pointOnSurface - lightPosition),
         seed
     );
-    lightDirection = position + lightNormal * radius - pointOnSurface;
+    lightDirection = lightPosition + lightNormal * radius - pointOnSurface;
     distanceToLight = length(lightDirection);
     lightDirection = normalize(lightDirection);
 }
@@ -104,8 +142,11 @@ inline void sphericalLightData(
  * Get the direction, and distance of a directional light.
  *
  * @arg direction: The direction the light is travelling.
+ * @arg maxRayDistance: The maximum distance the ray can travel.
  * @arg lightDirection: Will store the direction to the light.
  * @arg distanceToLight: Will store the distance to the light.
+ * @arg visibleSurfaceArea: The surface area that is visible to the
+ *     position we are sampling from.
  */
 inline void directionalLightData(
         const float3 &direction,
@@ -128,6 +169,8 @@ inline void directionalLightData(
  * @arg position: The position of the light.
  * @arg lightDirection: Will store the direction to the light.
  * @arg distanceToLight: Will store the distance to the light.
+ * @arg visibleSurfaceArea: The surface area that is visible to the
+ *     position we are sampling from.
  */
 inline void pointLightData(
         const float3 &pointOnSurface,
@@ -144,7 +187,14 @@ inline void pointLightData(
 
 
 /**
+ * Get the probability distribution function for the lights in the
+ * scene.
  *
+ * @arg numLights: The number of lights in the scene.
+ * @arg visibleSurfaceArea: The surface area that is visible to the
+ *     position we are sampling from.
+ *
+ * @returns: The probability distribution function.
  */
 inline float sampleLightsPDF(const float numLights, const float visibleSurfaceArea)
 {
@@ -190,6 +240,8 @@ inline float lightIntensity(
  *     3: ambient occlusion
  * @arg maxRayDistance: The maximum distance a ray can travel.
  * @arg distanceToLight: Will store the distance to the light.
+ * @arg visibleSurfaceArea: The surface area that is visible to the
+ *     position we are sampling from.
  * @arg lightDirection: Will store the direction to the light.
  */
 inline void getLightData(
@@ -198,10 +250,10 @@ inline void getLightData(
         const int lightType,
         const float maxRayDistance,
         float &distanceToLight,
-        float &solidAngle,
+        float &visibleSurfaceArea,
         float3 &lightDirection)
 {
-    if (lightType == 2)
+    if (lightType == DIRECTIONAL_LIGHT)
     {
         // directional
         directionalLightData(
@@ -209,10 +261,10 @@ inline void getLightData(
             maxRayDistance,
             lightDirection,
             distanceToLight,
-            solidAngle
+            visibleSurfaceArea
         );
     }
-    else if (lightType == 3)
+    else if (lightType == POINT_LIGHT)
     {
         // point
         pointLightData(
@@ -220,7 +272,7 @@ inline void getLightData(
             light,
             lightDirection,
             distanceToLight,
-            solidAngle
+            visibleSurfaceArea
         );
     }
 }

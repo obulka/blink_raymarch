@@ -1,0 +1,49 @@
+// Copyright 2022 by Owen Bulka.
+// All rights reserved.
+// This file is released under the "MIT License Agreement".
+// Please see the LICENSE.md file that should have been included as part
+// of this package.
+
+#include "math.h"
+#include "random.h"
+
+
+kernel Random : ImageComputationKernel<ePixelWise>
+{
+    Image<eRead, eAccessPoint, eEdgeNone> seed; // the input image
+    Image<eWrite> dst; // the output image
+
+
+    param:
+        float2 _inclusiveRange;
+
+    local:
+        float __rangeLength;
+
+
+    /**
+     * Give the parameters labels and default values.
+     */
+    void define()
+    {
+        defineParam(_inclusiveRange, "Inclusive Range", float2(0, 1));
+    }
+
+
+    /**
+     * Initialize the local variables.
+     */
+    void init()
+    {
+        __rangeLength = _inclusiveRange.y - _inclusiveRange.x;
+    }
+
+
+    /**
+     * Compute a random pixel value.
+     */
+    void process()
+    {
+        dst() = __rangeLength * random(seed()) + _inclusiveRange.x;
+    }
+};

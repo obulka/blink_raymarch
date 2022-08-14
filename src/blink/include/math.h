@@ -136,7 +136,7 @@ inline float max(const float value0, const float value1, const float value2)
 /**
  * Saturate a value ie. clamp between 0 and 1
  *
- * @args value: The value to saturate
+ * @arg value: The value to saturate
  *
  * @returns: The clamped value
  */
@@ -149,7 +149,7 @@ inline float saturate(float value)
 /**
  * Saturate a value ie. clamp between 0 and 1
  *
- * @args value: The value to saturate
+ * @arg value: The value to saturate
  *
  * @returns: The clamped value
  */
@@ -162,7 +162,7 @@ inline float2 saturate(const float2 &value)
 /**
  * Saturate a value ie. clamp between 0 and 1
  *
- * @args value: The value to saturate
+ * @arg value: The value to saturate
  *
  * @returns: The clamped value
  */
@@ -175,7 +175,7 @@ inline float3 saturate(const float3 &value)
 /**
  * Saturate a value ie. clamp between 0 and 1
  *
- * @args value: The value to saturate
+ * @arg value: The value to saturate
  *
  * @returns: The clamped value
  */
@@ -479,7 +479,7 @@ inline float negativePart(const float value)
 /**
  * Dot product of a vector with itself.
  *
- * @args vector: The vector to take the dot product of.
+ * @arg vector: The vector to take the dot product of.
  *
  * @returns: The dot product.
  */
@@ -492,7 +492,7 @@ inline float dot2(const float2 &vector)
 /**
  * Dot product of a vector with itself.
  *
- * @args vector: The vector to take the dot product of.
+ * @arg vector: The vector to take the dot product of.
  *
  * @returns: The dot product.
  */
@@ -505,7 +505,7 @@ inline float dot2(const float3 &vector)
 /**
  * Dot product of a vector with itself.
  *
- * @args vector: The vector to take the dot product of.
+ * @arg vector: The vector to take the dot product of.
  *
  * @returns: The dot product.
  */
@@ -515,18 +515,42 @@ inline float dot2(const float4 &vector)
 }
 
 
+/**
+ * Check whether or not two vectors are identical.
+ *
+ * @arg vector0: The first vector to compare.
+ * @arg vector1: The other vector to compare.
+ *
+ * @returns: True if the vectors are identical.
+ */
 inline bool vectorsAreEqual(const float2 &vector0, const float2 &vector1)
 {
     return vector0.x == vector1.x && vector0.y == vector1.y;
 }
 
 
+/**
+ * Check whether or not two vectors are identical.
+ *
+ * @arg vector0: The first vector to compare.
+ * @arg vector1: The other vector to compare.
+ *
+ * @returns: True if the vectors are identical.
+ */
 inline bool vectorsAreEqual(const float3 &vector0, const float3 &vector1)
 {
     return vector0.x == vector1.x && vector0.y == vector1.y && vector0.z == vector1.z;
 }
 
 
+/**
+ * Check whether or not two vectors are identical.
+ *
+ * @arg vector0: The first vector to compare.
+ * @arg vector1: The other vector to compare.
+ *
+ * @returns: True if the vectors are identical.
+ */
 inline bool vectorsAreEqual(const float4 &vector0, const float4 &vector1)
 {
     return (
@@ -845,6 +869,14 @@ inline float2 normalizeAngles(const float2 &angles)
 }
 
 
+/**
+ * Get the x, y, and z angles between two vectors.
+ *
+ * @arg vector0: The first vector.
+ * @arg vector1: The other vector.
+ *
+ * @returns: The Euler angles between the two vectors.
+ */
 inline float3 anglesBetweenVectors(const float3 &vector0, const float3 &vector1)
 {
     return float3(
@@ -881,6 +913,19 @@ inline float getAngleAndAxisBetweenVectors(
 }
 
 
+/**
+ * Align a vector that has been defined relative to an axis with another
+ * axis. For example if a vector has been chosen randomly in a
+ * particular hemisphere, rotate that hemisphere to align with a new
+ * axis.
+ *
+ * @arg unalignedAxis: The axis, about which, the vector was defined.
+ * @arg alignDirection: The axis to align with.
+ * @arg vectorToAlign: The vector that was defined relative to
+ *     unalignedAxis.
+ *
+ * @returns: 
+ */
 inline float3 alignWithDirection(
         const float3 &unalignedAxis,
         const float3 &alignDirection,
@@ -1124,23 +1169,34 @@ inline void rotationFromWorldMatrix(const float4x4 &worldMatrix, float3x3 &rotat
 
 
 /**
+ * Compute the number of samples we should use between a min and max.
  *
+ * @arg minSamples: The minimum samples.
+ * @arg maxSamples: The maximum samples.
+ * @arg variance: The variance that weights the number of samples.
+ *
+ * @returns: The number of samples to take.
  */
 inline float adaptiveSamples(
-        const float minPaths,
-        const float maxPaths,
+        const float minSamples,
+        const float maxSamples,
         const float3 &variance)
 {
     return clamp(
-        round(maxPaths * length(variance)),
-        minPaths,
-        maxPaths
+        round(maxSamples * length(variance)),
+        minSamples,
+        maxSamples
     );
 }
 
 
 /**
+ * Combine two PDFs in an optimal manner.
  *
+ * @arg pdf0: The first PDF.
+ * @arg pdf1: The second PDF.
+ *
+ * @returns: The combined PDF.
  */
 inline float balanceHeuristic(const float pdf0, const float pdf1)
 {

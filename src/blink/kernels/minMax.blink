@@ -1,3 +1,9 @@
+// Copyright 2022 by Owen Bulka.
+// All rights reserved.
+// This file is released under the "MIT License Agreement".
+// Please see the LICENSE.md file that should have been included as part
+// of this package.
+
 #include "math.h"
 
 
@@ -6,14 +12,24 @@ kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
     Image<eRead, eAccessRandom, eEdgeNone> src; // the input image
     Image<eWrite> dst; // the output image
 
+    param:
+        float _maximum;
 
     local:
         float __numSamples;
 
 
     /**
-     * The init() function is run before any calls to process().
-     * Local variables can be initialized here.
+     * Give the parameters labels and default values.
+     */
+    void define()
+    {
+        defineParam(_maximum, "Inclusive Range", 99999.9f);
+    }
+
+
+    /**
+     * Initialize the local variables.
      */
     void init()
     {
@@ -21,6 +37,11 @@ kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
     }
 
 
+    /**
+     * Compute the min max and standard deviation of the image.
+     *
+     * @arg pos: The x, and y location we are currently processing.
+     */
     void process(int2 pos)
     {
         if (length(float2(pos.x, pos.y)) > 0)
@@ -30,7 +51,7 @@ kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
         }
 
         float minValue = FLT_MAX;
-        float maxValue = -FLT_MAX;
+        float maxValue = 0.0f;
         float mean = 0.0f;
 
         for (int y=src.bounds.y1; y < src.bounds.y2; y++)
@@ -62,9 +83,9 @@ kernel MinMaxMeanDeviation : ImageComputationKernel<ePixelWise>
                     src(x, y, 2)
                 );
 
-                const float3 difference = pixelValue - mean;
+                const float deviation = sumComponent(fabs(pixelValue - mean));
 
-                standardDeviation += sumComponent(difference * difference) / __numSamples;
+                standardDeviation += min(deviation * deviation, _maximum) / __numSamples;
             }
         }
 

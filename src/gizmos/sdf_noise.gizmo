@@ -2,34 +2,34 @@ Gizmo {
  inputs 0
  tile_color 0xffffffff
  addUserKnob {20 User l "SDF Noise"}
- addUserKnob {7 size R 1 300}
+ addUserKnob {7 size t "The size of the noise." R 1 300}
  size 10
- addUserKnob {4 type M {fBm turbulence}}
+ addUserKnob {4 type t "The noise type." M {fBm turbulence ""}}
  type turbulence
- addUserKnob {13 translation}
- addUserKnob {3 octaves}
+ addUserKnob {13 translation t "Translate the noise by this amount."}
+ addUserKnob {3 octaves t "The number of different frequencies to use."}
  octaves 5
- addUserKnob {7 lacunarity R 1 10}
- lacunarity 6
- addUserKnob {7 gain}
+ addUserKnob {7 lacunarity t "The per octave frequency multiplier." R 1 10}
+ lacunarity 5
+ addUserKnob {7 gain t "The per octave amplitude multiplier."}
  gain 0.5
- addUserKnob {7 gamma}
+ addUserKnob {7 gamma t "The result will be raised to 1 over this power."}
  gamma 0.5
- addUserKnob {7 black_point l "black point"}
- addUserKnob {7 white_point l "white point"}
+ addUserKnob {7 black_point l "black point" t "The black point of the noise."}
+ addUserKnob {7 white_point l "white point" t "The white point of the noise."}
  white_point 1
- addUserKnob {7 lift}
- addUserKnob {6 invert +STARTLINE}
+ addUserKnob {7 lift t "The amount to lift the noise."}
+ addUserKnob {6 invert t "Invert the noise ie. white becomes black and vice versa." +STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {6 diffuse +STARTLINE}
- addUserKnob {6 specular -STARTLINE}
- addUserKnob {6 transmission -STARTLINE}
- addUserKnob {6 emission -STARTLINE}
- addUserKnob {6 specular_roughness l "specular roughness" +STARTLINE}
- addUserKnob {6 transmission_roughness l "transmission roughness" -STARTLINE}
- addUserKnob {6 refractive_index l "refractive index" +STARTLINE}
- addUserKnob {6 scattering +STARTLINE}
- addUserKnob {6 extinction -STARTLINE}
+ addUserKnob {6 diffuse t "Apply the noise to the diffuse material property." +STARTLINE}
+ addUserKnob {6 specular t "Apply the noise to the specular material property." -STARTLINE}
+ addUserKnob {6 transmission t "Apply the noise to the transmission material property." -STARTLINE}
+ addUserKnob {6 emission t "Apply the noise to the emission material property." -STARTLINE}
+ addUserKnob {6 specular_roughness l "specular roughness" t "Apply the noise to the specular roughness material property." +STARTLINE}
+ addUserKnob {6 transmission_roughness l "transmission roughness" t "Apply the noise to the transmission roughness material property." -STARTLINE}
+ addUserKnob {6 refractive_index l "refractive index" t "Apply the noise to the refractive index material property." +STARTLINE}
+ addUserKnob {6 scattering t "Apply the noise to the scattering material property." +STARTLINE}
+ addUserKnob {6 extinction t "Apply the noise to the extinction material property." -STARTLINE}
  addUserKnob {26 div0 l "" +STARTLINE}
  addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
 }
