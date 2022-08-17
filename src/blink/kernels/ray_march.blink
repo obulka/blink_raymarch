@@ -2170,6 +2170,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 // Reset the pixel footprint so multiple reflections don't
                 // reduce precision
                 pixelFootprint = _hitTolerance;
+
+                distanceSinceLastBounce = 0.0f;
             }
             else if (_levelOfDetail)
             {
