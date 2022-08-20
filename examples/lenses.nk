@@ -77,6 +77,74 @@ FrameHold {
  xpos 943
  ypos 380
 }
+CheckerBoard2 {
+ inputs 0
+ format "2048 1024 0 0 2048 1024 1 2K_LatLong"
+ centerlinewidth 0
+ name CheckerBoard1
+ xpos 745
+ ypos 198
+}
+Grade {
+ white 0.05
+ name Grade1
+ xpos 745
+ ypos 279
+}
+Axis2 {
+ inputs 0
+ rotate {0 -5 0}
+ name Axis2
+ xpos 593
+ ypos 140
+}
+Camera3 {
+ translate {0 0 6}
+ focal 19.4
+ name Camera1
+ xpos 593
+ ypos 228
+}
+Dot {
+ name Dot4
+ xpos 617
+ ypos 335
+}
+sdf_material {
+ inputs 0
+ name sdf_material10
+ tile_color 0xffb24cff
+ xpos 459
+ ypos 232
+ colour {0 0 0}
+ transmission 1
+ refractive_index 1.52
+ extinction_colour {1 0.7 0.3}
+ extinction_coefficient 0.585
+ scattering_colour {1 0.7 0.3}
+}
+push 0
+sdf_material {
+ inputs 0
+ name sdf_material11
+ tile_color 0xe64cffff
+ xpos 284
+ ypos 228
+ colour {0 0 0}
+ transmission 1
+ refractive_index 2.08
+ extinction_colour {0.9 0.3 1}
+ extinction_coefficient 1
+ scattering_colour {0.9 0.3 1}
+}
+push 0
+sdf_material {
+ inputs 0
+ name sdf_material5
+ xpos -33
+ ypos 320
+ emission 5
+}
 sdf_material {
  inputs 0
  name sdf_material13
@@ -126,42 +194,6 @@ sdf_primitive {
  blend_type "smooth subtraction"
  blend_strength 0.095
 }
-sdf_material {
- inputs 0
- name sdf_material10
- tile_color 0xffb24cff
- xpos 459
- ypos 232
- colour {0 0 0}
- transmission 1
- refractive_index 1.52
- extinction_colour {1 0.7 0.3}
- extinction_coefficient 0.585
- scattering_colour {1 0.7 0.3}
-}
-push 0
-sdf_material {
- inputs 0
- name sdf_material11
- tile_color 0xe64cffff
- xpos 284
- ypos 228
- colour {0 0 0}
- transmission 1
- refractive_index 2.08
- extinction_colour {0.9 0.3 1}
- extinction_coefficient 1
- scattering_colour {0.9 0.3 1}
-}
-push 0
-sdf_material {
- inputs 0
- name sdf_material5
- xpos -33
- ypos 320
- emission 5
-}
-push 0
 push 0
 sdf_primitive {
  inputs 3
@@ -186,7 +218,6 @@ sdf_primitive {
  blend_type "smooth intersection"
  blend_strength 0.095
 }
-set N9d0b880 [stack 0]
 sdf_primitive {
  inputs 3
  name sdf_primitive11
@@ -202,40 +233,6 @@ sdf_primitive {
  blend_type "smooth intersection"
  blend_strength 0.095
 }
-CheckerBoard2 {
- inputs 0
- format "2048 1024 0 0 2048 1024 1 2K_LatLong"
- centerlinewidth 0
- name CheckerBoard1
- xpos 745
- ypos 198
-}
-Grade {
- white 0.05
- name Grade1
- xpos 745
- ypos 279
-}
-Axis2 {
- inputs 0
- rotate {0 -5 0}
- name Axis2
- xpos 593
- ypos 140
-}
-Camera3 {
- translate {0 0 6}
- focal 19.4
- name Camera1
- xpos 593
- ypos 228
-}
-Dot {
- name Dot4
- xpos 617
- ypos 335
-}
-push $N9d0b880
 Dot {
  name Dot3
  xpos 493
@@ -246,16 +243,14 @@ ray_march {
  name ray_march1
  xpos 745
  ypos 404
- max_paths_per_pixel 3
  ray_distance 12
  max_bounces 8
  max_light_sampling_bounces 8
  light_sampling_bias 0.95
- equiangular_samples 8
+ equiangular_samples 14
  scattering_coefficient 1
  format 0
 }
-set Na2442c0 [stack 0]
 Write {
  channels all
  file /home/ob1/software/nuke/dev/raymarch/images/lens_2/lens_2.####.exr
@@ -265,16 +260,4 @@ Write {
  name Write1
  xpos 745
  ypos 507
-}
-push $Na2442c0
-Viewer {
- frame_range 1001-1111
- gain 0.72
- colour_sample_bbox {-0.4656249881 0.03125 -0.4640625119 0.03281249851}
- samplepoints {{-0.279687494 0.0078125}
-   }
- monitorOutOutputTransform rec709
- name Viewer1
- xpos 890
- ypos 496
 }
