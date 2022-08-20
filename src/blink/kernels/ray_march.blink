@@ -2011,14 +2011,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      */
     inline float4 marchPath(
             const float3 &rayOrigin,
-            const float3 &rayDirection,
             const float3 &initialSeed,
             const bool sampleHDRI,
             const float maxRayDistance,
             const float currentNestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
             const int currentNumNestedDielectrics,
             const int numEmissive,
-            float &distanceTravelled)
+            float &distanceTravelled,
+            float3 &direction,
+            float3 &lightNormal)
     {
         const int numLights = _lightTextureWidth + numEmissive + sampleHDRI;
 
@@ -2049,7 +2050,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         // Get the next ray
         float3 origin = rayOrigin;
-        float3 direction = rayDirection;
         float3 positionOnRay = origin;
 
         float4 diffusivity;
@@ -2149,9 +2149,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 );
                 if (
                     ++bounces >= _maxLightSamplingBounces
-                    || emittance.w > 0.0f
+                    || length(emittance) > 0.0f
                     || (_roulette && exitProbability <= rng)
                 ) {
+                    lightNormal = surfaceNormal;
                     return rayColour;
                 }
                 if (_roulette)
@@ -2205,6 +2206,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 )
             )
         );
+
+        lightNormal = -direction;
 
         return rayColour;
     }
@@ -2273,20 +2276,23 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         else if (selectedLight - _lightTextureWidth - sampleHDRI < numEmissive)
         {
             float actualDistance;
+            float3 actualDirection = lightDirection;
+            float3 lightNormal;
             lightColour = marchPath(
                 position,
-                lightDirection,
                 seed,
                 sampleHDRI,
                 distanceToLight * 2.0f,
                 nestedDielectrics,
                 numNestedDielectrics,
                 numEmissive,
-                actualDistance
+                actualDistance,
+                actualDirection,
+                lightNormal
             );
             lightGeometryFactor = geometryFactor(
-                lightDirection,
-                surfaceNormal,
+                actualDirection,
+                lightNormal,
                 actualDistance
             );
         }
