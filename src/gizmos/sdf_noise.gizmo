@@ -37,7 +37,7 @@ add_layer {sdf_noise_params0 sdf_noise_params0.options sdf_noise_params0.x sdf_n
  Constant {
   inputs 0
   channels sdf_noise_params0
-  color {{"(parent.extinction << 11) | (parent.scattering << 10) | (parent.invert << 9) | (parent.specular_roughness << 8) | (parent.transmission_roughness << 7) | (parent.refractive_index << 6) | (parent.emission << 5) | (parent.transmission << 4) | (parent.specular << 3) | (parent.diffuse << 2) | (parent.type << 1) | 1"} {parent.translation.x} {parent.translation.y} {parent.translation.z}}
+  color {{"(parent.extinction << 11) | (parent.scattering << 10) | (parent.invert << 9) | (parent.specular_roughness << 8) | (parent.transmission_roughness << 7) | (parent.refractive_index << 6) | (parent.emission << 5) | (parent.transmission << 4) | (parent.specular << 3) | (parent.diffuse << 2) | (parent.type << 1) | 1"} {-parent.translation.x} {-parent.translation.y} {-parent.translation.z}}
   format "1 1 0 0 1 1 1 1x1"
   name noise_params0
   xpos 841

@@ -1,5 +1,5 @@
 #! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
-#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/lens_2/lens_2.%04d.exr" format:"1280 720 1" chans:":rgba.red:rgba.green:rgba.blue:rgba.alpha:variance.red:variance.green:variance.blue:variance.num_paths:" framerange:"1001 1111" fps:"0" colorspace:"default (linear)" datatype:"16 bit half" transfer:"unknown" views:"main" colorManagement:"Nuke"
+#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/lenses_final/lenses_final.%04d.exr" format:"1280 720 1" chans:":rgba.red:rgba.green:rgba.blue:rgba.alpha:variance.blue:variance.green:variance.num_paths:variance.red:" framerange:"1001 1111" fps:"0" colorspace:"default (linear)" datatype:"16 bit half" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 13.2 v2
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
@@ -34,7 +34,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/examples/lenses.nk
- frame 1003
+ frame 1027
  first_frame 1001
  last_frame 1111
  format "1280 720 0 0 1280 720 1 HD_720"
@@ -51,45 +51,49 @@ BackdropNode {
  inputs 0
  name BackdropNode1
  label "Set the read and write nodes to point to the\nsame sequence after rendering the first frame\nwithout any 'previous' input, this will create a\nfeedback loop allowing for adaptive sampling\nand allowing you to save and watch back the\nimprovement over time. The alternative to\nthis method of adaptive sampling is to simply\nplug the path_march node into another path_march\nnode's 'previous' input, but you will only save the\nfinal output."
- xpos 889
+ xpos 945
  ypos 111
  bdwidth 256
- bdheight 331
+ bdheight 332
 }
 Read {
  inputs 0
  file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/lens_2/lens_2.####.exr
+ file /home/ob1/software/nuke/dev/raymarch/images/lenses_final/lenses_final.####.exr
  format "1280 720 0 0 1280 720 1 HD_720"
  first 1001
- last 1500
+ last 1100
  origfirst 1001
- origlast 1500
+ origlast 1002
  origset true
- on_error "nearest frame"
  name Read1
- xpos 943
- ypos 296
+ xpos 999
+ ypos 285
 }
 FrameHold {
  firstFrame {{frame-1}}
  name FrameHold1
- xpos 943
- ypos 380
+ xpos 999
+ ypos 398
 }
 CheckerBoard2 {
  inputs 0
  format "2048 1024 0 0 2048 1024 1 2K_LatLong"
  centerlinewidth 0
  name CheckerBoard1
- xpos 745
- ypos 198
+ xpos 703
+ ypos 184
 }
 Grade {
  white 0.05
  name Grade1
- xpos 745
- ypos 279
+ xpos 703
+ ypos 265
+}
+Dot {
+ name Dot2
+ xpos 737
+ ypos 335
 }
 Axis2 {
  inputs 0
@@ -157,8 +161,8 @@ sdf_material {
  extinction_colour {0.5 1 0.3}
  extinction_coefficient 1
 }
-set N9577e00 [stack 0]
-push $N9577e00
+set N8b0cc40 [stack 0]
+push $N8b0cc40
 push 0
 push 0
 sdf_primitive {
@@ -239,25 +243,26 @@ Dot {
  ypos 408
 }
 ray_march {
- inputs 3
+ inputs 4
  name ray_march1
- xpos 745
+ xpos 804
  ypos 404
  ray_distance 12
  max_bounces 8
+ seeds {{random()} {random()} {random()}}
  max_light_sampling_bounces 8
  light_sampling_bias 0.95
- equiangular_samples 14
+ equiangular_samples 9
  scattering_coefficient 1
  format 0
 }
 Write {
  channels all
- file /home/ob1/software/nuke/dev/raymarch/images/lens_2/lens_2.####.exr
+ file /home/ob1/software/nuke/dev/raymarch/images/lenses_final/lenses_final.####.exr
  file_type exr
  first_part rgba
- version 3
+ version 31
  name Write1
- xpos 745
- ypos 507
+ xpos 804
+ ypos 476
 }

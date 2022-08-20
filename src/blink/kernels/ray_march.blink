@@ -2600,6 +2600,24 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             return scatteredColour;
         }
 
+        float3 surfaceNormal = randomUnitVector(seed * RAND_CONST_5);
+        float3 lightDirection = surfaceNormal;
+        float distanceToLight = 0.0f;
+        int selectedLight;
+
+        const float lightPDF = sampleRandomLightData(
+            seed * RAND_CONST_6,
+            intersectionPosition,
+            surfaceNormal,
+            emissiveIndices,
+            numEmissive,
+            _sampleHDRIEquiangular,
+            lightDirection,
+            distanceToLight,
+            selectedLight
+        );
+        const float3 lightPosition = intersectionPosition + lightDirection * distanceToLight;
+
         int objectIndex = nestedDielectrics[numNestedDielectrics][OBJECT_ID] - 1;
         if (objectIndex < 0)
         {
@@ -2616,24 +2634,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         for (int step=1; step <= _equiangularSamples; step++)
         {
             const float uniform = (step + offset - 1) / (float) _equiangularSamples;
-
-            float3 surfaceNormal = randomUnitVector(seed * RAND_CONST_5);
-            float3 lightDirection = surfaceNormal;
-            float distanceToLight = 0.0f;
-            int selectedLight;
-
-            const float lightPDF = sampleRandomLightData(
-                seed * RAND_CONST_6 * step,
-                intersectionPosition,
-                surfaceNormal,
-                emissiveIndices,
-                numEmissive,
-                _sampleHDRIEquiangular,
-                lightDirection,
-                distanceToLight,
-                selectedLight
-            );
-            const float3 lightPosition = intersectionPosition + lightDirection * distanceToLight;
 
             float equiangularDistance;
             float equiangularPDF = _equiangularSamples * sampleEquiangularPDF(
@@ -2702,7 +2702,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             * extinctionNoiseSum
             * distanceSinceLastBounce
             / (float) _equiangularSamples
-        );
+        ) / lightPDF;
 
         return scatteredColour;
     }
