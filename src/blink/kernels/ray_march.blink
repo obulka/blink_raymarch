@@ -1834,6 +1834,98 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
 
     /**
+     * Perform simplified equi-angular sampling for participating media.
+     *
+     * @arg seed: The seed to use in randomization.
+     * @arg intersectionPosition: The position at which the ray
+     *     intersects the geometry.
+     * @arg rayOrigin: The ray origin.
+     * @arg rayDirection: The incoming ray direction.
+     * @arg distanceSinceLastBounce: The distance travelled since the
+     *     last bounce.
+     * @arg lightPosition: The world position of the light.
+     * @arg nestedDielectrics: The stack of dielectrics that we have
+     *     entered without exiting.
+     * @arg numNestedDielectrics: The number of dielectrics in the
+     *     stack.
+     * @arg throughput: The throughput of the ray will be modified.
+     */
+    void sampleEquiangular(
+            const float3 &seed,
+            const float3 &intersectionPosition,
+            const float3 &rayOrigin,
+            const float3 &rayDirection,
+            const float distanceSinceLastBounce,
+            const float3 &lightPosition,
+            const float nestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
+            const int numNestedDielectrics,
+            float4 &throughput)
+    {
+        const float4 extinctionCoefficient = getExtinctionCoefficient(
+            nestedDielectrics,
+            numNestedDielectrics
+        );
+        if (!__equiangularSamplingEnabled || length(extinctionCoefficient) <= 0.0f)
+        {
+            throughput *= exp(-extinctionCoefficient * distanceSinceLastBounce);
+            return;
+        }
+
+        int objectIndex = nestedDielectrics[numNestedDielectrics][OBJECT_ID] - 1;
+        if (objectIndex < 0)
+        {
+            // blink cannot handle single pixel images in versions < 12.1
+            // so we have a weird dummy pixel when only one object is passed
+            // to the scene
+            objectIndex = _objectTextureWidth == 0 ? 1 : _objectTextureWidth;
+        }
+
+        const float offset = random(random(seed.z) + random(seed.y + random(seed.x)));
+
+        float extinctionNoiseSum = 0.0f;
+
+        for (int step=1; step <= _equiangularSamples; step++)
+        {
+            const float uniform = (step + offset - 1) / (float) _equiangularSamples;
+
+            float equiangularDistance;
+            float equiangularPDF = _equiangularSamples * sampleEquiangularPDF(
+                uniform,
+                distanceSinceLastBounce,
+                rayOrigin,
+                rayDirection,
+                lightPosition,
+                equiangularDistance
+            );
+
+            const float3 particlePosition = rayOrigin + equiangularDistance * rayDirection;
+
+            int noiseOptions;
+            float noiseValue = getNoiseValue(
+                objectIndex,
+                particlePosition,
+                noiseOptions
+            );
+            float extinctionNoise = noiseValue;
+            if (noiseValue < 0.0f || !(noiseOptions & EXTINCTION_NOISE))
+            {
+                extinctionNoiseSum = _equiangularSamples;
+                break;
+            }
+
+            extinctionNoiseSum += extinctionNoise;
+        }
+
+        throughput *= exp(
+            -extinctionCoefficient
+            * extinctionNoiseSum
+            * distanceSinceLastBounce
+            / (float) _equiangularSamples
+        );
+    }
+
+
+    /**
      * Handle the interaction between a ray and the surface of a material.
      *
      * @arg pixelFootprint: A value proportional to the amount of world
@@ -1846,6 +1938,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      * @arg doRefraction: Whether or not refraction is enabled on the
      *     material.
      * @arg numLights: The number of lights in the scene.
+     * @arg lightPosition: The world position of the light.
      * @arg seed: The seed to use in randomization.
      * @arg direction: The incoming ray direction.
      * @arg origin: The ray origin.
@@ -1877,6 +1970,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const int objectId,
             const bool doRefraction,
             const float numLights,
+            const float3 &lightPosition,
             float3 &seed,
             float3 &direction,
             float3 &origin,
@@ -1910,11 +2004,17 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         // Compute the amount we would offset a point to escape the surface
         const float offset = 2.0f * pixelFootprint * _shadowBias;
 
-        const float4 extinctionCoefficient = getExtinctionCoefficient(
+        sampleEquiangular(
+            seed * RAND_CONST_13,
+            intersectionPosition,
+            origin,
+            direction,
+            distance,
+            lightPosition,
             nestedDielectrics,
-            numNestedDielectrics
+            numNestedDielectrics,
+            throughput
         );
-        throughput *= exp(-distance * extinctionCoefficient);
 
         origin = intersectionPosition;
 
@@ -2004,6 +2104,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
      * @arg currentNumNestedDielectrics: The number of dielectrics in
      *     the stack.
      * @arg numEmissive: The number of emissive objects in the scene.
+     * @arg lightPosition: The world position of the light.
      * @arg distanceTravelled: Location to store the distance the ray
      *     actually travels.
      *
@@ -2017,6 +2118,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             const float currentNestedDielectrics[MAX_NESTED_DIELECTRICS][NESTED_DIELECTRIC_PARAMS],
             const int currentNumNestedDielectrics,
             const int numEmissive,
+            const float3 &lightPosition,
             float &distanceTravelled,
             float3 &direction,
             float3 &lightNormal)
@@ -2121,6 +2223,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                     objectId,
                     doRefraction,
                     numLights,
+                    lightPosition,
                     seed,
                     direction,
                     origin,
@@ -2286,6 +2389,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 nestedDielectrics,
                 numNestedDielectrics,
                 numEmissive,
+                position + distanceToLight * lightDirection,
                 actualDistance,
                 actualDirection,
                 lightNormal

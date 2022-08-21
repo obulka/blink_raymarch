@@ -1,5 +1,4 @@
 #! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
-#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/nested_dielectrics/nested_dielectrics.%04d.exr" format:"1280 720 1" chans:":rgba.red:rgba.green:rgba.blue:rgba.alpha:variance.blue:variance.green:variance.num_paths:variance.red:" framerange:"1001 1111" fps:"0" colorspace:"default (linear)" datatype:"32 bit float" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 13.2 v2
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
@@ -13,7 +12,6 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <splitter orientation="2">
                 <split size="783"/>
                 <dock id="" activePageId="Viewer.1">
-                    <page id="Viewer.1"/>
                     <page id="Viewer.1"/>
                 </dock>
                 <split size="550"/>
@@ -35,7 +33,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/examples/nested_dielectrics.nk
- frame 1004
+ frame 1100
  first_frame 1001
  last_frame 1111
  format "1280 720 0 0 1280 720 1 HD_720"
@@ -260,28 +258,18 @@ Dot {
 }
 ray_march {
  inputs 6
- name ray_march1
+ name ray_march2
  xpos 730
  ypos 446
- ray_distance 25
+ min_paths_per_pixel 0
+ ray_distance 20
  max_bounces 9
  hit_tolerance 0.001
  max_light_sampling_bounces 9
- light_sampling_bias 0.98
  equiangular_samples 14
- extinction_coefficient 0.35
+ extinction_coefficient 0.7
  scattering_coefficient 1
  hdri_offset_angle 90
+ variance_range 2
  format 0
-}
-Write {
- channels all
- file /home/ob1/software/nuke/dev/raymarch/images/nested_dielectrics/nested_dielectrics.####.exr
- file_type exr
- datatype "32 bit float"
- first_part rgba
- version 16
- name Write1
- xpos 730
- ypos 503
 }
