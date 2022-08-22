@@ -953,7 +953,7 @@ inline float3 alignWithDirection(
 /**
  * Convert a cartesion unit vector to spherical.
  *
- * @arg angles: The cartesion unit vector.
+ * @arg rayDirection: The cartesion unit vector.
  * @arg thetaOffset: Offset the theta angle by this amount.
  *
  * @returns: The spherical angles in radians.
@@ -972,7 +972,7 @@ inline float2 cartesionUnitVectorToSpherical(
 /**
  * Convert a cartesion unit vector to spherical.
  *
- * @arg angles: The cartesion unit vector.
+ * @arg rayDirection: The cartesion unit vector.
  *
  * @returns: The spherical angles in radians.
  */
