@@ -905,6 +905,18 @@ inline float getAngleAndAxisBetweenVectors(
     {
         axis = normalize(perpendicularVector);
     }
+    else if (vector1.z != 0.0f || vector1.y != 0.0f)
+    {
+        axis = normalize(cross(float3(1, 0, 0), vector1));
+    }
+    else if (vector1.x != 0.0f || vector1.z != 0.0f)
+    {
+        axis = normalize(cross(float3(0, 1, 0), vector1));
+    }
+    else if (vector1.x != 0.0f || vector1.y != 0.0f)
+    {
+        axis = normalize(cross(float3(0, 0, 1), vector1));
+    }
     else
     {
         axis = vector0;

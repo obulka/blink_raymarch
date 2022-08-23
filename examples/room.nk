@@ -1,5 +1,5 @@
 #! /usr/local/Nuke13.2v2/libnuke-13.2.2.so -nx
-#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/room_test/room_test.%04d.exr" format:"2048 1556 1" chans:":rgba.red:rgba.green:rgba.blue:rgba.alpha:variance.blue:variance.green:variance.num_paths:variance.red:" framerange:"1001 1100" fps:"0" colorspace:"default (linear)" datatype:"32 bit float" transfer:"unknown" views:"main" colorManagement:"Nuke"
+#write_info Write1 file:"/home/ob1/software/nuke/dev/raymarch/images/room_test/room_test.%04d.exr" format:"1024 778 1" chans:":rgba.red:rgba.green:rgba.blue:rgba.alpha:variance.blue:variance.green:variance.num_paths:variance.red:" framerange:"1001 1100" fps:"0" colorspace:"default (linear)" datatype:"32 bit float" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 13.2 v2
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
@@ -34,10 +34,10 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /home/ob1/software/nuke/dev/raymarch/examples/room.nk
- frame 1033
+ frame 1060
  first_frame 1001
  last_frame 1100
- format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
  proxy_type scale
  proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
  colorManagement Nuke
@@ -49,32 +49,11 @@ Root {
  logLut Cineon
  floatLut linear
 }
-Read {
- inputs 0
- file_type exr
- file /home/ob1/software/nuke/dev/raymarch/images/room_test/room_test.####.exr
- format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
- first 1001
- last 1100
- origfirst 1001
- origlast 1100
- origset true
- name Read1
- xpos 147
- ypos -242
-}
-FrameHold {
- firstFrame {{frame-1}}
- name FrameHold1
- xpos 147
- ypos -158
-}
-push 0
 Axis2 {
  inputs 0
  name Axis1
  xpos 1
- ypos -334
+ ypos -310
 }
 Camera2 {
  translate {0 1 2.9}
@@ -92,10 +71,19 @@ sdf_material {
 }
 sdf_material {
  inputs 0
+ name sdf_material5
+ tile_color 0xffff33ff
+ xpos -413
+ ypos -156
+ colour {1 1 0.2}
+}
+push 0
+sdf_material {
+ inputs 0
  name sdf_material2
  tile_color 0xff3333ff
  xpos -410
- ypos -156
+ ypos -194
  colour {1 0.2 0.2}
 }
 push 0
@@ -104,7 +92,7 @@ sdf_material {
  name sdf_material1
  tile_color 0x33ff33ff
  xpos -410
- ypos -196
+ ypos -234
  colour {0.2 1 0.2}
 }
 push 0
@@ -113,17 +101,8 @@ sdf_material {
  name sdf_material3
  tile_color 0x3333ffff
  xpos -409
- ypos -236
- colour {0.2 0.2 1}
-}
-push 0
-sdf_material {
- inputs 0
- name sdf_material5
- tile_color 0xffff33ff
- xpos -410
  ypos -274
- colour {1 1 0.2}
+ colour {0.2 0.2 1}
 }
 push 0
 sdf_material {
@@ -247,22 +226,10 @@ sdf_primitive {
 }
 sdf_primitive {
  inputs 3
- name sdf_primitive7
- label plane
- xpos -274
- ypos -280
- shape plane
- dimension_x 0
- dimension_y 0
- dimension_z -1
- translate {0 0 3}
-}
-sdf_primitive {
- inputs 3
  name sdf_primitive5
  label plane
  xpos -274
- ypos -242
+ ypos -280
  shape plane
  dimension_x 1
  dimension_y 0
@@ -274,7 +241,7 @@ sdf_primitive {
  name sdf_primitive4
  label plane
  xpos -274
- ypos -202
+ ypos -240
  shape plane
  dimension_x -1
  dimension_y 0
@@ -286,12 +253,24 @@ sdf_primitive {
  name sdf_primitive3
  label plane
  xpos -274
- ypos -162
+ ypos -200
  shape plane
  dimension_x 0
  dimension_y 0
  dimension_z 1
  translate {0 0 -3}
+}
+sdf_primitive {
+ inputs 3
+ name sdf_primitive7
+ label plane
+ xpos -274
+ ypos -162
+ shape plane
+ dimension_x 0
+ dimension_y 0
+ dimension_z -1
+ translate {0 0 3}
 }
 push 0
 sdf_primitive {
@@ -307,13 +286,12 @@ sdf_primitive {
  translate {0 -3 0}
 }
 ray_march {
- inputs 4
+ inputs 2
  name ray_march2
  xpos -9
  ypos -73
  ray_distance 30
  max_bounces 8
- seeds {{random()} {random()} {random()}}
  max_light_sampling_bounces 8
  sample_all_lights false
  equiangular_samples 0
@@ -325,7 +303,7 @@ Write {
  file_type exr
  datatype "32 bit float"
  first_part rgba
- version 16
+ version 19
  name Write1
  xpos -9
  ypos -20

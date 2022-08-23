@@ -3187,7 +3187,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 );
                 if (
                     ++bounces > __bouncesPerRay
-                    || emittance.w >= 1.0f
                     || usedPrecomputedIrradiance
                     || (_roulette && exitProbability <= rng)
                 ) {
