@@ -10,7 +10,7 @@ This project contains six gizmos that allow you to ray march, and path march, a 
 
 ![test_trap_bulb_done_reduced](https://user-images.githubusercontent.com/21975584/164989470-d13cabe2-8eb1-42de-becb-bd2672b14538.png)
 
-![room_test_reformat](https://user-images.githubusercontent.com/21975584/185876084-a8320eec-7c78-4b8d-8a71-089be6368577.png)
+![room_test_reformat](https://user-images.githubusercontent.com/21975584/186101042-f09914e6-4bab-487b-857c-e09459137add.png)
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/21975584/165710806-19b473e3-8d11-4cd8-8b49-55bf3d1a4544.gif" alt="animated" />
