@@ -26,7 +26,7 @@ This project has been tested in Nuke 12.0v8, 12.1v5, and 13.0v2. I recommend usi
 
 ## Gizmos
 
-### path_march
+### ray_march
 
 This gizmo renders the scene using a ray marching algorithm, with support for:
 - global illumination
@@ -36,13 +36,13 @@ This gizmo renders the scene using a ray marching algorithm, with support for:
     - includes volumetric caustics if you lower the 'light sampling bias' and increase the 'max light sampling bounces' knobs
     - increase the 'equi-angular samples' knob for clearer results when using an 'sdf_noise' node with 'scattering' enabled
 - adaptive sampling using a normalized variance AOV
-    - plug a 'path_march' node's output into the 'previous' input of another 'path_march' node
+    - plug a 'path_march' node's output, or a previous render with different seeds, into the 'previous' input of another 'path_march' node
     - set the minimum and maximum paths to trace, and the node will adaptively interpolate between the values
     - the first node in the chain will always trace the maximum paths
     - be sure to change the seed on each chained node
 - nested dielectrics
 - depth of field based on the camera input, simply check the 'enable dof' knob
-- hdri image based lighting
+- hdr image based lighting
 
 The alpha channel contains unique ids for each object that is hit on the first bounce.
 
@@ -51,7 +51,8 @@ You can input a standard nuke camera and the perspective projection, axes, and w
 The AOV options are:
 - beauty
 - normal
-- position
+- world position
+- local position
 - depth
 - stats
 
@@ -124,18 +125,6 @@ This gizmo allows you to light the scene with a few different light types, namel
 - directional
 
 You can choose the colour, intensity, and falloff of the light. You can also soften the shadows with a slider.
-
-### ray_march
-
-Updated to work with the v2.0.0 codebase, but no features added since v1.0.0. I lost my Nuke license so I may not upgrade this to include the many features of the 'path_march' node.
-
-This gizmo renders the scene using a ray marching algorithm, with support for hdri image based lighting. You can input a standard nuke camera and the perspective projection, axes, and world space coordinates, will match that of Nuke's native scanline renderer, and general 3D system.
-
-The AOV options are:
-- beauty
-- normal
-- position
-- depth
 
 ## References
 - https://iquilezles.org/articles/distfunctions/
