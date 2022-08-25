@@ -6,7 +6,7 @@ This project contains six gizmos that allow you to ray march, and path march, a 
 
 ![blended](https://user-images.githubusercontent.com/21975584/179328892-de242ee0-f3ec-4f9f-bcd4-eba3d76b6ea6.png)
 
-![room_test](https://user-images.githubusercontent.com/21975584/186385823-266f5c2c-1bed-4671-a1a7-70ba50fc1d80.png)
+![room_test](https://user-images.githubusercontent.com/21975584/186559860-cf376ee5-8875-4865-8a08-3c2e57a5587c.png)
 
 ![mandelbox_trap_test1_reduced](https://user-images.githubusercontent.com/21975584/164989275-4eb4791c-df89-4332-981d-aac79b607762.png)
 
