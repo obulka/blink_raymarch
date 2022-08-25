@@ -1,6 +1,6 @@
 # BlinkScript Ray/Path Marcher for Nuke
 
-This project contains six gizmos that allow you to ray march, and path march, a wide variety of shapes, including fractals, utilizing the GPU.
+This project contains five gizmos that allow you to ray march, and path march, a wide variety of shapes, including fractals, utilizing the GPU.
 
 ![nested_dielectrics_final](https://user-images.githubusercontent.com/21975584/185783312-db9a7f74-cf07-4655-b566-57b265afcf58.png)
 
