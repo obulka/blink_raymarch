@@ -36,7 +36,7 @@ This gizmo renders the scene using a ray marching algorithm, with support for:
     - includes volumetric caustics if you lower the 'light sampling bias' and increase the 'max light sampling bounces' knobs
     - increase the 'equi-angular samples' knob for clearer results when using an 'sdf_noise' node with 'scattering' enabled
 - adaptive sampling using a normalized variance AOV
-    - plug a 'path_march' node's output, or a previous render with different seeds, into the 'previous' input of another 'path_march' node
+    - plug a 'ray_march' node's output, or a previous render with different seeds, into the 'previous' input of another 'ray_march' node
     - set the minimum and maximum paths to trace, and the node will adaptively interpolate between the values
     - the first node in the chain will always trace the maximum paths
     - be sure to change the seed on each chained node
