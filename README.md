@@ -22,7 +22,7 @@ Simply clone/download this repo and add the following line to your `init.py`: `n
 
 ## Requirements
 
-This project has been tested in Nuke 12.0v8, 12.1v5, and 13.0v2. I recommend using 12.0 if you do not have much GPU memory, because it still uses OpenCL for blinkscript, rather than cuda. The cuda version will continue to increase memory consumption until crashing. You will want to have a GPU, the above examples were rendered using an NVIDIA GeForce GTX 980 Ti.
+This project has been tested in Nuke 12.0v8, 12.1v5, and 13.0v2. Note that after Nuke 12.0 the VRAM cache limits are determined by the same settings as the CPU cache limits in Edit->Preferences->Performance->Caching, so if the limits exceed what your GPU can handle, then the VRAM will continue to fill up until Nuke either crashes or falls back to the CPU, which is very slow for these nodes. For that reason you will want to have a GPU. The above examples were rendered using an NVIDIA GeForce GTX 980 Ti.
 
 ## Gizmos
 
