@@ -872,8 +872,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         }
                     }
 
-                    do
+                    // Simple fix for the removal of do-while loops
+                    bool firstIteration = true;
+                    while (firstIteration || (numChildren <= 0.0f && --stackLastIndex >= 0))
                     {
+                        firstIteration = false;
+
                         // Decrement the number of children each parent has
                         for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
                         {
@@ -885,7 +889,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         // to process the rest of them before the parent itself
                         numChildren = parentStack[stackLastIndex][NUM_CHILDREN];
                     }
-                    while (numChildren <= 0.0f && --stackLastIndex >= 0);
 
                     parentStackLength = stackLastIndex + 1;
                 }
@@ -1230,8 +1233,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         }
                     }
 
-                    do
+                    // Simple fix for the removal of do-while loops
+                    bool firstIteration = true;
+                    while (firstIteration || (numChildren <= 0.0f && --stackLastIndex >= 0))
                     {
+                        firstIteration = false;
+
                         // Decrement the number of children each parent has
                         for (int parentIndex=stackLastIndex; parentIndex >= 0; parentIndex--)
                         {
@@ -1243,7 +1250,6 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                         // to process the rest of them before the parent itself
                         numChildren = parentStack[stackLastIndex][NUM_CHILDREN];
                     }
-                    while (numChildren <= 0.0f && --stackLastIndex >= 0);
 
                     parentStackLength = stackLastIndex + 1;
                 }
