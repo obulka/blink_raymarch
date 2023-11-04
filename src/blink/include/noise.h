@@ -629,3 +629,159 @@ float turbulenceNoise(
     }
     return pow(output / denom, 1.0f / gamma);
 }
+
+
+inline float rawNoise4d(
+        const float4 &position,
+        const int simplex[64][4],
+        const int perm[512],
+        const int grad4[32][4])
+{
+    const float x = position.x;
+    const float y = position.y;
+    const float z = position.z;
+    const float w = position.w;
+    float F4 = (sqrt(5.0f)-1.0f)/4.0f;
+    float G4 = (5.0f-sqrt(5.0f))/20.0f;
+    float n0, n1, n2, n3, n4;
+    // float s = sumComponent(position) * F4;
+    // int4 ijkl = floor(position + s);
+    // float t = sumComponent(ijkl) * G4;
+    // float X0 = ijkl - t;
+    float s = (x + y + z + w) * F4;
+    int i = floor(x + s);
+    int j = floor(y + s);
+    int k = floor(z + s);
+    int l = floor(w + s);
+    float t = (i + j + k + l) * G4;
+    float X0 = i - t;
+    float Y0 = j - t;
+    float Z0 = k - t;
+    float W0 = l - t;
+
+    float x0 = x - X0;
+    float y0 = y - Y0;
+    float z0 = z - Z0;
+    float w0 = w - W0;
+    int c1 = (x0 > y0) ? 32 : 0;
+    int c2 = (x0 > z0) ? 16 : 0;
+    int c3 = (y0 > z0) ? 8 : 0;
+    int c4 = (x0 > w0) ? 4 : 0;
+    int c5 = (y0 > w0) ? 2 : 0;
+    int c6 = (z0 > w0) ? 1 : 0;
+    int c = c1 + c2 + c3 + c4 + c5 + c6;
+
+    int i1, j1, k1, l1;
+    int i2, j2, k2, l2;
+    int i3, j3, k3, l3;
+    i1 = simplex[c][0]>=3 ? 1 : 0;
+    j1 = simplex[c][1]>=3 ? 1 : 0;
+    k1 = simplex[c][2]>=3 ? 1 : 0;
+    l1 = simplex[c][3]>=3 ? 1 : 0;
+    i2 = simplex[c][0]>=2 ? 1 : 0;
+    j2 = simplex[c][1]>=2 ? 1 : 0;
+    k2 = simplex[c][2]>=2 ? 1 : 0;
+    l2 = simplex[c][3]>=2 ? 1 : 0;
+    i3 = simplex[c][0]>=1 ? 1 : 0;
+    j3 = simplex[c][1]>=1 ? 1 : 0;
+    k3 = simplex[c][2]>=1 ? 1 : 0;
+    l3 = simplex[c][3]>=1 ? 1 : 0;
+    float x1 = x0 - i1 + G4;
+    float y1 = y0 - j1 + G4;
+    float z1 = z0 - k1 + G4;
+    float w1 = w0 - l1 + G4;
+    float x2 = x0 - i2 + 2.0*G4;
+    float y2 = y0 - j2 + 2.0*G4;
+    float z2 = z0 - k2 + 2.0*G4;
+    float w2 = w0 - l2 + 2.0*G4;
+    float x3 = x0 - i3 + 3.0*G4;
+    float y3 = y0 - j3 + 3.0*G4;
+    float z3 = z0 - k3 + 3.0*G4;
+    float w3 = w0 - l3 + 3.0*G4;
+    float x4 = x0 - 1.0 + 4.0*G4;
+    float y4 = y0 - 1.0 + 4.0*G4;
+    float z4 = z0 - 1.0 + 4.0*G4;
+    float w4 = w0 - 1.0 + 4.0*G4;
+    int ii = i & 255;
+    int jj = j & 255;
+    int kk = k & 255;
+    int ll = l & 255;
+    int gi0 = perm[ii+perm[jj+perm[kk+perm[ll]]]] % 32;
+    int gi1 = perm[ii+i1+perm[jj+j1+perm[kk+k1+perm[ll+l1]]]] % 32;
+    int gi2 = perm[ii+i2+perm[jj+j2+perm[kk+k2+perm[ll+l2]]]] % 32;
+    int gi3 = perm[ii+i3+perm[jj+j3+perm[kk+k3+perm[ll+l3]]]] % 32;
+    int gi4 = perm[ii+1+perm[jj+1+perm[kk+1+perm[ll+1]]]] % 32;
+    float t0 = 0.6 - x0*x0 - y0*y0 - z0*z0 - w0*w0;
+    if(t0<0) n0 = 0.0;
+    else {
+        t0 *= t0;
+        n0 = t0 * t0 * dot(float4(grad4[gi0][0],grad4[gi0][2],grad4[gi0][3],grad4[gi0][3]), float4(x0, y0, z0, w0));
+    }
+    float t1 = 0.6 - x1*x1 - y1*y1 - z1*z1 - w1*w1;
+    if(t1<0) n1 = 0.0;
+    else {
+        t1 *= t1;
+        n1 = t1 * t1 * dot(float4(grad4[gi1][0],grad4[gi1][2],grad4[gi1][3],grad4[gi1][3]), float4(x1, y1, z1, w1));
+    }
+    float t2 = 0.6 - x2*x2 - y2*y2 - z2*z2 - w2*w2;
+    if(t2<0) n2 = 0.0;
+    else {
+        t2 *= t2;
+        n2 = t2 * t2 * dot(float4(grad4[gi2][0],grad4[gi2][2],grad4[gi2][3],grad4[gi2][3]), float4(x2, y2, z2, w2));
+    }
+    float t3 = 0.6 - x3*x3 - y3*y3 - z3*z3 - w3*w3;
+    if(t3<0) n3 = 0.0;
+    else {
+        t3 *= t3;
+        n3 = t3 * t3 * dot(float4(grad4[gi3][0],grad4[gi3][2],grad4[gi3][3],grad4[gi3][3]), float4(x3, y3, z3, w3));
+    }
+    float t4 = 0.6 - x4*x4 - y4*y4 - z4*z4 - w4*w4;
+    if(t4<0) n4 = 0.0;
+    else {
+        t4 *= t4;
+        n4 = t4 * t4 * dot(float4(grad4[gi4][0],grad4[gi4][2],grad4[gi4][3],grad4[gi4][3]), float4(x4, y4, z4, w4));
+    }
+    return 27.0 * (n0 + n1 + n2 + n3 + n4);
+}
+
+
+float octaveNoise4d(
+        const float octaves,
+        const float lacunarity,
+        const float gain,
+        const float4 &position,
+        const float4 &lowFrequency,
+        const float4 &highFrequency,
+        const float4 &lowFrequencyEvolution,
+        const float4 &highFrequencyEvolution,
+        const int simplex[64][4],
+        const int perm[512],
+        const int grad4[32][4])
+{
+    float total = 0.0f;
+    float current;
+    float last = 1.0f;
+    float frequency = lacunarity;
+    float amplitude = 1.0f;
+    float maxAmplitude = 0.0f;
+    float4 evolution;
+    float4 tempFrequency;
+
+    for (int i=0; i < octaves; i++)
+    {
+        tempFrequency = (highFrequency * (i/(octaves-1.0f)))+(lowFrequency * (1-(i/(octaves-1.0f))));       
+        evolution = (highFrequencyEvolution * (i/(octaves-1.0f)))+(lowFrequencyEvolution * (1-(i/(octaves-1.0f))));
+        current =  rawNoise4d(
+            (position * tempFrequency + evolution) * frequency,
+            simplex,
+            perm,
+            grad4
+        ) * amplitude;
+
+        total += current;
+        frequency *= 2.0f;
+        maxAmplitude += amplitude;
+        amplitude *= gain;
+    }
+    return float(total / maxAmplitude);
+}
