@@ -13,6 +13,108 @@
 
 
 /**
+ * Convert a float vector to an int vector.
+ *
+ * @arg value: The value to convert.
+ *
+ * @returns: The converted vector.
+ */
+inline int2 floatToInt(const float2 value)
+{
+    return int2(
+        value.x,
+        value.y
+    );
+}
+
+
+/**
+ * Convert a float vector to an int vector.
+ *
+ * @arg value: The value to convert.
+ *
+ * @returns: The converted vector.
+ */
+inline int3 floatToInt(const float3 value)
+{
+    return int3(
+        value.x,
+        value.y,
+        value.z
+    );
+}
+
+
+/**
+ * Convert a float vector to an int vector.
+ *
+ * @arg value: The value to convert.
+ *
+ * @returns: The converted vector.
+ */
+inline int4 floatToInt(const float4 value)
+{
+    return int4(
+        value.x,
+        value.y,
+        value.z,
+        value.w
+    );
+}
+
+
+/**
+ * Convert an int vector to a float vector.
+ *
+ * @arg value: The value to convert.
+ *
+ * @returns: The converted vector.
+ */
+inline float2 intToFloat(const int2 value)
+{
+    return float2(
+        value.x,
+        value.y
+    );
+}
+
+
+/**
+ * Convert an int vector to a float vector.
+ *
+ * @arg value: The value to convert.
+ *
+ * @returns: The converted vector.
+ */
+inline float3 intToFloat(const int3 value)
+{
+    return float3(
+        value.x,
+        value.y,
+        value.z
+    );
+}
+
+
+/**
+ * Convert an int vector to a float vector.
+ *
+ * @arg value: The value to convert.
+ *
+ * @returns: The converted vector.
+ */
+inline float4 intToFloat(const int4 value)
+{
+    return float4(
+        value.x,
+        value.y,
+        value.z,
+        value.w
+    );
+}
+
+
+/**
  * Convert a float to a uint without changing the bit values.
  *
  * @arg floatValue: The float value to convert.
