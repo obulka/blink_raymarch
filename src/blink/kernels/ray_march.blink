@@ -452,22 +452,28 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float noiseValue;
         if (noiseOptions & TURBULENCE_NOISE)
         {
-            noiseValue = turbulenceNoise(
-                octaves,
-                lacunarity,
-                size,
-                gain,
-                gamma,
-                noisePosition
-            );
+            // noiseValue = turbulenceNoise(
+            //     octaves,
+            //     lacunarity,
+            //     size,
+            //     gain,
+            //     gamma,
+            //     noisePosition
+            // );
         }
         else
         {
-            const float4 noisePosition4d = float4(noisePosition.x, noisePosition.y, noisePosition.z, size);
+            const float4 noisePosition4d = float4(
+                noisePosition.x,
+                noisePosition.y,
+                noisePosition.z,
+                size
+            );
             noiseValue = fractalBrownianMotionNoise(
                 octaves,
                 lacunarity,
                 gain,
+                gamma,
                 noisePosition4d,
                 lowFrequency,
                 highFrequency,

@@ -99,7 +99,7 @@ float grad(const int hash, const float x, const float y, const float z)
  * 1D Perlin simplex noise
  * Takes around 74ns on an AMD APU.
  *
- * @arg x: float coordinate.
+ * @arg seed: The seed for the noise.
  *
  * @returns: Noise value in the range [-1, 1], value of 0 on all integer
  *     coordinates.
@@ -135,8 +135,7 @@ float perlinSimplexNoise(const float seed)
  * 2D Perlin simplex noise
  * Takes around 150ns on an AMD APU.
  *
- * @arg x: float coordinate
- * @arg y: float coordinate
+ * @arg seed: The seed for the noise.
  *
  * @returns: Noise value in the range [-1, 1], value of 0 on all integer
  *     coordinates.
@@ -236,9 +235,7 @@ float perlinSimplexNoise(const float2 &seed)
 /**
  * 3D Perlin simplex noise
  *
- * @arg x: float coordinate
- * @arg y: float coordinate
- * @arg z: float coordinate
+ * @arg seed: The seed for the noise.
  *
  * @returns: Noise value in the range [-1, 1], value of 0 on all integer
  *     coordinates.
@@ -362,275 +359,14 @@ float perlinSimplexNoise(const float3 &seed)
 }
 
 
-// Copyright 2022 by Owen Bulka.
-// All rights reserved.
-// This file is released under the "MIT License Agreement".
-// Please see the LICENSE.md file that should have been included as part
-// of this package.
-
-//
-// Use the perlin simplex noise
-//
-
-
 /**
- * fBM noise.
+ * 4D Perlin simplex noise
  *
- * @arg octaves: The number of different frequencies to use.
- * @arg lacunarity: The per octave frequency multiplier.
- * @arg size: The size of the noise.
- * @arg gain: The per octave amplitude multiplier.
- * @arg gamma: The result will be raised to 1 over this power.
- * @arg position: The position to seed the noise.
+ * @arg seed: The seed for the noise.
  *
- * @returns: The noise value in the range [-1, 1], with a value of 0 on
- *     all integer coordinates.
+ * @returns: Noise value in the range [-1, 1], value of 0 on all integer
+ *     coordinates.
  */
-float fractalBrownianMotionNoise(
-        const int octaves,
-        const float lacunarity,
-        const float size,
-        const float gain,
-        const float gamma,
-        const float position)
-{
-    float output = 0.0f;
-    float denom = 0.0f;
-    float frequency = lacunarity;
-    float amplitude = gain;
-
-    for (int i = 0; i < octaves; i++)
-    {
-        output += amplitude * perlinSimplexNoise(position * frequency / size);
-        denom += amplitude;
-
-        frequency *= lacunarity;
-        amplitude *= gain;
-    }
-
-    if (denom == 0.0f || gamma == 0.0f)
-    {
-        return 1.0f;
-    }
-    return pow(output / denom, 1.0f / gamma);
-}
-
-
-/**
- * fBM noise.
- *
- * @arg octaves: The number of different frequencies to use.
- * @arg lacunarity: The per octave frequency multiplier.
- * @arg size: The size of the noise.
- * @arg gain: The per octave amplitude multiplier.
- * @arg gamma: The result will be raised to 1 over this power.
- * @arg position: The position to seed the noise.
- *
- * @returns: The noise value in the range [-1, 1], with a value of 0 on
- *     all integer coordinates.
- */
-float fractalBrownianMotionNoise(
-        const int octaves,
-        const float lacunarity,
-        const float size,
-        const float gain,
-        const float gamma,
-        const float2 &position)
-{
-    float output = 0.0f;
-    float denom = 0.0f;
-    float frequency = lacunarity;
-    float amplitude = gain;
-
-    for (int i = 0; i < octaves; i++)
-    {
-        output += amplitude * perlinSimplexNoise(position * frequency / size);
-        denom += amplitude;
-
-        frequency *= lacunarity;
-        amplitude *= gain;
-    }
-
-    if (denom == 0.0f || gamma == 0.0f)
-    {
-        return 1.0f;
-    }
-    return pow(output / denom, 1.0f / gamma);
-}
-
-
-/**
- * fBM noise.
- *
- * @arg octaves: The number of different frequencies to use.
- * @arg lacunarity: The per octave frequency multiplier.
- * @arg size: The size of the noise.
- * @arg gain: The per octave amplitude multiplier.
- * @arg gamma: The result will be raised to 1 over this power.
- * @arg position: The position to seed the noise.
- *
- * @returns: The noise value in the range [-1, 1], with a value of 0 on
- *     all integer coordinates.
- */
-float fractalBrownianMotionNoise(
-        const int octaves,
-        const float lacunarity,
-        const float size,
-        const float gain,
-        const float gamma,
-        const float3 &position)
-{
-    float output = 0.0f;
-    float denom = 0.0f;
-    float frequency = lacunarity;
-    float amplitude = gain;
-
-    for (int i = 0; i < octaves; i++)
-    {
-        output += amplitude * perlinSimplexNoise(position * frequency / size);
-        denom += amplitude;
-
-        frequency *= lacunarity;
-        amplitude *= gain;
-    }
-
-    if (denom == 0.0f || gamma == 0.0f)
-    {
-        return 1.0f;
-    }
-    return pow(output / denom, 1.0f / gamma);
-}
-
-
-/**
- * Turbulence noise.
- *
- * @arg octaves: The number of different frequencies to use.
- * @arg lacunarity: The per octave frequency multiplier.
- * @arg size: The size of the noise.
- * @arg gain: The per octave amplitude multiplier.
- * @arg gamma: The result will be raised to 1 over this power.
- * @arg position: The position to seed the noise.
- *
- * @returns: The noise value in the range [0, 1], with a value of 0 on
- *     all integer coordinates.
- */
-float turbulenceNoise(
-        const int octaves,
-        const float lacunarity,
-        const float size,
-        const float gain,
-        const float gamma,
-        const float position)
-{
-    float output = 0.0f;
-    float denom = 0.0f;
-    float frequency = lacunarity;
-    float amplitude = gain;
-
-    for (int i = 0; i < octaves; i++)
-    {
-        output += fabs(amplitude * perlinSimplexNoise(position * frequency / size));
-        denom += amplitude;
-
-        frequency *= lacunarity;
-        amplitude *= gain;
-    }
-
-    if (denom == 0.0f || gamma == 0.0f)
-    {
-        return 1.0f;
-    }
-    return pow(output / denom, 1.0f / gamma);
-}
-
-
-/**
- * Turbulence noise.
- *
- * @arg octaves: The number of different frequencies to use.
- * @arg lacunarity: The per octave frequency multiplier.
- * @arg size: The size of the noise.
- * @arg gain: The per octave amplitude multiplier.
- * @arg gamma: The result will be raised to 1 over this power.
- * @arg position: The position to seed the noise.
- *
- * @returns: The noise value in the range [0, 1], with a value of 0 on
- *     all integer coordinates.
- */
-float turbulenceNoise(
-        const int octaves,
-        const float lacunarity,
-        const float size,
-        const float gain,
-        const float gamma,
-        const float2 &position)
-{
-    float output = 0.0f;
-    float denom = 0.0f;
-    float frequency = lacunarity;
-    float amplitude = gain;
-
-    for (int i = 0; i < octaves; i++)
-    {
-        output += fabs(amplitude * perlinSimplexNoise(position * frequency / size));
-        denom += amplitude;
-
-        frequency *= lacunarity;
-        amplitude *= gain;
-    }
-
-    if (denom == 0.0f || gamma == 0.0f)
-    {
-        return 1.0f;
-    }
-    return pow(output / denom, 1.0f / gamma);
-}
-
-
-/**
- * Turbulence noise.
- *
- * @arg octaves: The number of different frequencies to use.
- * @arg lacunarity: The per octave frequency multiplier.
- * @arg size: The size of the noise.
- * @arg gain: The per octave amplitude multiplier.
- * @arg gamma: The result will be raised to 1 over this power.
- * @arg position: The position to seed the noise.
- *
- * @returns: The noise value in the range [0, 1], with a value of 0 on
- *     all integer coordinates.
- */
-float turbulenceNoise(
-        const int octaves,
-        const float lacunarity,
-        const float size,
-        const float gain,
-        const float gamma,
-        const float3 &position)
-{
-    float output = 0.0f;
-    float denom = 0.0f;
-    float frequency = lacunarity;
-    float amplitude = gain;
-
-    for (int i = 0; i < octaves; i++)
-    {
-        output += fabs(amplitude * perlinSimplexNoise(position * frequency / size));
-        denom += amplitude;
-
-        frequency *= lacunarity;
-        amplitude *= gain;
-    }
-
-    if (denom == 0.0f || gamma == 0.0f)
-    {
-        return 1.0f;
-    }
-    return pow(output / denom, 1.0f / gamma);
-}
-
-
 inline float perlinSimplexNoise(
         const float4 &seed,
         const int simplex[64][4],
@@ -781,34 +517,418 @@ inline float perlinSimplexNoise(
 }
 
 
+// Copyright 2022 by Owen Bulka.
+// All rights reserved.
+// This file is released under the "MIT License Agreement".
+// Please see the LICENSE.md file that should have been included as part
+// of this package.
+
+//
+// Use the perlin simplex noise
+//
+
+
+/**
+ * fBM noise.
+ *
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
+ *
+ * @returns: The noise value in the range [-1, 1], with a value of 0 on
+ *     all integer coordinates.
+ */
 float fractalBrownianMotionNoise(
+        const int octaves,
+        const float lacunarity,
+        const float size,
+        const float gain,
+        const float gamma,
+        const float position)
+{
+    float output = 0.0f;
+    float denom = 0.0f;
+    float frequency = lacunarity;
+    float amplitude = gain;
+
+    for (int octave = 0; octave < octaves; octave++)
+    {
+        output += amplitude * perlinSimplexNoise(position * frequency / size);
+        denom += amplitude;
+
+        frequency *= lacunarity;
+        amplitude *= gain;
+    }
+
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
+    return pow(output / denom, 1.0f / gamma);
+}
+
+
+/**
+ * fBM noise.
+ *
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
+ *
+ * @returns: The noise value in the range [-1, 1], with a value of 0 on
+ *     all integer coordinates.
+ */
+float fractalBrownianMotionNoise(
+        const int octaves,
+        const float lacunarity,
+        const float size,
+        const float gain,
+        const float gamma,
+        const float2 &position)
+{
+    float output = 0.0f;
+    float denom = 0.0f;
+    float frequency = lacunarity;
+    float amplitude = gain;
+
+    for (int octave = 0; octave < octaves; octave++)
+    {
+        output += amplitude * perlinSimplexNoise(position * frequency / size);
+        denom += amplitude;
+
+        frequency *= lacunarity;
+        amplitude *= gain;
+    }
+
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
+    return pow(output / denom, 1.0f / gamma);
+}
+
+
+/**
+ * fBM noise.
+ *
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
+ *
+ * @returns: The noise value in the range [-1, 1], with a value of 0 on
+ *     all integer coordinates.
+ */
+float fractalBrownianMotionNoise(
+        const int octaves,
+        const float lacunarity,
+        const float size,
+        const float gain,
+        const float gamma,
+        const float3 &position)
+{
+    float output = 0.0f;
+    float denom = 0.0f;
+    float frequency = lacunarity;
+    float amplitude = gain;
+
+    for (int octave = 0; octave < octaves; octave++)
+    {
+        output += amplitude * perlinSimplexNoise(position * frequency / size);
+        denom += amplitude;
+
+        frequency *= lacunarity;
+        amplitude *= gain;
+    }
+
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
+    return pow(output / denom, 1.0f / gamma);
+}
+
+
+// /**
+//  * fBM noise.
+//  */
+// float fractalBrownianMotionNoise(
+//         const float octaves,
+//         const float lacunarity,
+//         const float gain,
+//         const float gamma,
+//         const float4 &position,
+//         const float4 &lowFrequencyScale,
+//         const float4 &highFrequencyScale,
+//         const float4 &lowFrequencyEvolution,
+//         const float4 &highFrequencyEvolution,
+//         const int simplex[64][4],
+//         const int perm[512],
+//         const int grad4[32][4])
+// {
+//     float output = 0.0f;
+//     float frequency = lacunarity;
+//     float amplitude = 1.0f;
+//     float denom = 0.0f;
+//     float4 evolution;
+//     float4 frequencyScale;
+
+//     for (int octave=0; octave < octaves; octave++)
+//     {
+//         const float octaveFraction = octave / (octaves - 1.0f);
+//         frequencyScale = (
+//             (highFrequencyScale * octaveFraction)
+//             + (lowFrequencyScale * (1 - octaveFraction))
+//         );       
+//         evolution = (
+//             (highFrequencyEvolution * octaveFraction)
+//             + (lowFrequencyEvolution * (1 - octaveFraction))
+//         );
+
+//         output += amplitude * perlinSimplexNoise(
+//             (position * frequencyScale + evolution) * frequency,
+//             simplex,
+//             perm,
+//             grad4
+//         );
+
+//         frequency *= 2.0f;
+//         denom += amplitude;
+//         amplitude *= gain;
+//     }
+
+//     if (denom == 0.0f || gamma == 0.0f)
+//     {
+//         return 1.0f;
+//     }
+//     return pow(output / denom, 1.0f / gamma);
+// }
+
+
+/**
+ * Turbulence noise.
+ *
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
+ *
+ * @returns: The noise value in the range [0, 1], with a value of 0 on
+ *     all integer coordinates.
+ */
+float turbulenceNoise(
+        const int octaves,
+        const float lacunarity,
+        const float size,
+        const float gain,
+        const float gamma,
+        const float position)
+{
+    float output = 0.0f;
+    float denom = 0.0f;
+    float frequency = lacunarity;
+    float amplitude = gain;
+
+    for (int octave = 0; octave < octaves; octave++)
+    {
+        output += fabs(amplitude * perlinSimplexNoise(position * frequency / size));
+        denom += amplitude;
+
+        frequency *= lacunarity;
+        amplitude *= gain;
+    }
+
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
+    return pow(output / denom, 1.0f / gamma);
+}
+
+
+/**
+ * Turbulence noise.
+ *
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
+ *
+ * @returns: The noise value in the range [0, 1], with a value of 0 on
+ *     all integer coordinates.
+ */
+float turbulenceNoise(
+        const int octaves,
+        const float lacunarity,
+        const float size,
+        const float gain,
+        const float gamma,
+        const float2 &position)
+{
+    float output = 0.0f;
+    float denom = 0.0f;
+    float frequency = lacunarity;
+    float amplitude = gain;
+
+    for (int octave = 0; octave < octaves; octave++)
+    {
+        output += fabs(amplitude * perlinSimplexNoise(position * frequency / size));
+        denom += amplitude;
+
+        frequency *= lacunarity;
+        amplitude *= gain;
+    }
+
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
+    return pow(output / denom, 1.0f / gamma);
+}
+
+
+/**
+ * Turbulence noise.
+ *
+ * @arg octaves: The number of different frequencies to use.
+ * @arg lacunarity: The per octave frequency multiplier.
+ * @arg size: The size of the noise.
+ * @arg gain: The per octave amplitude multiplier.
+ * @arg gamma: The result will be raised to 1 over this power.
+ * @arg position: The position to seed the noise.
+ *
+ * @returns: The noise value in the range [0, 1], with a value of 0 on
+ *     all integer coordinates.
+ */
+float turbulenceNoise(
+        const int octaves,
+        const float lacunarity,
+        const float size,
+        const float gain,
+        const float gamma,
+        const float3 &position)
+{
+    float output = 0.0f;
+    float denom = 0.0f;
+    float frequency = lacunarity;
+    float amplitude = gain;
+
+    for (int octave = 0; octave < octaves; octave++)
+    {
+        output += fabs(amplitude * perlinSimplexNoise(position * frequency / size));
+        denom += amplitude;
+
+        frequency *= lacunarity;
+        amplitude *= gain;
+    }
+
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
+    return pow(output / denom, 1.0f / gamma);
+}
+
+
+/**
+ * Turbulence noise.
+ */
+float turbulenceNoise(
         const float octaves,
         const float lacunarity,
         const float gain,
+        const float gamma,
         const float4 &position,
-        const float4 &lowFrequency,
-        const float4 &highFrequency,
+        const float4 &lowFrequencyScale,
+        const float4 &highFrequencyScale,
         const float4 &lowFrequencyEvolution,
         const float4 &highFrequencyEvolution,
         const int simplex[64][4],
         const int perm[512],
         const int grad4[32][4])
 {
-    float total = 0.0f;
-    float current;
-    float last = 1.0f;
+    float output = 0.0f;
     float frequency = lacunarity;
     float amplitude = 1.0f;
-    float maxAmplitude = 0.0f;
+    float denom = 0.0f;
     float4 evolution;
-    float4 tempFrequency;
+    float4 frequencyScale;
 
     for (int octave=0; octave < octaves; octave++)
     {
         const float octaveFraction = octave / (octaves - 1.0f);
-        tempFrequency = (
-            (highFrequency * octaveFraction)
-            + (lowFrequency * (1 - octaveFraction))
+        frequencyScale = (
+            (highFrequencyScale * octaveFraction)
+            + (lowFrequencyScale * (1 - octaveFraction))
+        );       
+        evolution = (
+            (highFrequencyEvolution * octaveFraction)
+            + (lowFrequencyEvolution * (1 - octaveFraction))
+        );
+
+        output += fabs(
+            amplitude * perlinSimplexNoise(
+                (position * frequencyScale + evolution) * frequency,
+                simplex,
+                perm,
+                grad4
+            )
+        );
+
+        frequency *= 2.0f;
+        denom += amplitude;
+        amplitude *= gain;
+    }
+
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
+    return pow(output / denom, 1.0f / gamma);
+}
+
+
+float fractalBrownianMotionNoise(
+        const float octaves,
+        const float lacunarity,
+        const float gain,
+        const float gamma,
+        const float4 &position,
+        const float4 &lowFrequencyScale,
+        const float4 &highFrequencyScale,
+        const float4 &lowFrequencyEvolution,
+        const float4 &highFrequencyEvolution,
+        const int simplex[64][4],
+        const int perm[512],
+        const int grad4[32][4])
+{
+    float output = 0.0f;
+    float current;
+    float last = 1.0f;
+    float frequency = lacunarity;
+    float amplitude = 1.0f;
+    float denom = 0.0f;
+    float4 evolution;
+    float4 tempFrequencyScale;
+
+    for (int octave=0; octave < octaves; octave++)
+    {
+        const float octaveFraction = octave / (octaves - 1.0f);
+        tempFrequencyScale = (
+            (highFrequencyScale * octaveFraction)
+            + (lowFrequencyScale * (1 - octaveFraction))
         );       
         evolution = (
             (highFrequencyEvolution * octaveFraction)
@@ -816,17 +936,21 @@ float fractalBrownianMotionNoise(
         );
 
         current = perlinSimplexNoise(
-            (position * tempFrequency + evolution) * frequency,
+            (position * tempFrequencyScale + evolution) * frequency,
             simplex,
             perm,
             grad4
         ) * amplitude;
 
-        total += current;
+        output += current;
         frequency *= 2.0f;
-        maxAmplitude += amplitude;
+        denom += amplitude;
         amplitude *= gain;
     }
 
-    return total / maxAmplitude;
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
+    return pow(output / denom, 1.0f / gamma);
 }
