@@ -657,60 +657,60 @@ float fractalBrownianMotionNoise(
 }
 
 
-// /**
-//  * fBM noise.
-//  */
-// float fractalBrownianMotionNoise(
-//         const float octaves,
-//         const float lacunarity,
-//         const float gain,
-//         const float gamma,
-//         const float4 &position,
-//         const float4 &lowFrequencyScale,
-//         const float4 &highFrequencyScale,
-//         const float4 &lowFrequencyEvolution,
-//         const float4 &highFrequencyEvolution,
-//         const int simplex[64][4],
-//         const int perm[512],
-//         const int grad4[32][4])
-// {
-//     float output = 0.0f;
-//     float frequency = lacunarity;
-//     float amplitude = 1.0f;
-//     float denom = 0.0f;
-//     float4 evolution;
-//     float4 frequencyScale;
+/**
+ * fBM noise.
+ */
+float fractalBrownianMotionNoise(
+        const float octaves,
+        const float lacunarity,
+        const float gain,
+        const float gamma,
+        const float4 &position,
+        const float4 &lowFrequencyScale,
+        const float4 &highFrequencyScale,
+        const float4 &lowFrequencyEvolution,
+        const float4 &highFrequencyEvolution,
+        const int simplex[64][4],
+        const int perm[512],
+        const int grad4[32][4])
+{
+    float output = 0.0f;
+    float frequency = lacunarity;
+    float amplitude = 1.0f;
+    float denom = 0.0f;
+    float4 evolution;
+    float4 frequencyScale;
 
-//     for (int octave=0; octave < octaves; octave++)
-//     {
-//         const float octaveFraction = octave / (octaves - 1.0f);
-//         frequencyScale = (
-//             (highFrequencyScale * octaveFraction)
-//             + (lowFrequencyScale * (1 - octaveFraction))
-//         );       
-//         evolution = (
-//             (highFrequencyEvolution * octaveFraction)
-//             + (lowFrequencyEvolution * (1 - octaveFraction))
-//         );
+    for (int octave=0; octave < octaves; octave++)
+    {
+        const float octaveFraction = octave / (octaves - 1.0f);
+        frequencyScale = (
+            (highFrequencyScale * octaveFraction)
+            + (lowFrequencyScale * (1 - octaveFraction))
+        );       
+        evolution = (
+            (highFrequencyEvolution * octaveFraction)
+            + (lowFrequencyEvolution * (1 - octaveFraction))
+        );
 
-//         output += amplitude * perlinSimplexNoise(
-//             (position * frequencyScale + evolution) * frequency,
-//             simplex,
-//             perm,
-//             grad4
-//         );
+        output += amplitude * perlinSimplexNoise(
+            (position * frequencyScale + evolution) * frequency,
+            simplex,
+            perm,
+            grad4
+        );
 
-//         frequency *= 2.0f;
-//         denom += amplitude;
-//         amplitude *= gain;
-//     }
+        frequency *= 2.0f;
+        denom += amplitude;
+        amplitude *= gain;
+    }
 
-//     if (denom == 0.0f || gamma == 0.0f)
-//     {
-//         return 1.0f;
-//     }
-//     return pow(output / denom, 1.0f / gamma);
-// }
+    if (denom == 0.0f || gamma == 0.0f)
+    {
+        return 1.0f;
+    }
+    return pow(output / denom, 1.0f / gamma);
+}
 
 
 /**
@@ -887,62 +887,6 @@ float turbulenceNoise(
             )
         );
 
-        frequency *= 2.0f;
-        denom += amplitude;
-        amplitude *= gain;
-    }
-
-    if (denom == 0.0f || gamma == 0.0f)
-    {
-        return 1.0f;
-    }
-    return pow(output / denom, 1.0f / gamma);
-}
-
-
-float fractalBrownianMotionNoise(
-        const float octaves,
-        const float lacunarity,
-        const float gain,
-        const float gamma,
-        const float4 &position,
-        const float4 &lowFrequencyScale,
-        const float4 &highFrequencyScale,
-        const float4 &lowFrequencyEvolution,
-        const float4 &highFrequencyEvolution,
-        const int simplex[64][4],
-        const int perm[512],
-        const int grad4[32][4])
-{
-    float output = 0.0f;
-    float current;
-    float last = 1.0f;
-    float frequency = lacunarity;
-    float amplitude = 1.0f;
-    float denom = 0.0f;
-    float4 evolution;
-    float4 tempFrequencyScale;
-
-    for (int octave=0; octave < octaves; octave++)
-    {
-        const float octaveFraction = octave / (octaves - 1.0f);
-        tempFrequencyScale = (
-            (highFrequencyScale * octaveFraction)
-            + (lowFrequencyScale * (1 - octaveFraction))
-        );       
-        evolution = (
-            (highFrequencyEvolution * octaveFraction)
-            + (lowFrequencyEvolution * (1 - octaveFraction))
-        );
-
-        current = perlinSimplexNoise(
-            (position * tempFrequencyScale + evolution) * frequency,
-            simplex,
-            perm,
-            grad4
-        ) * amplitude;
-
-        output += current;
         frequency *= 2.0f;
         denom += amplitude;
         amplitude *= gain;
