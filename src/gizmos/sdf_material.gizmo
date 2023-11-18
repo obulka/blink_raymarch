@@ -37,7 +37,7 @@ Gizmo {
  addUserKnob {6 emission_use_trap_colour l "use trap colour" t "Use the trap colour for emitted light." -STARTLINE}
  emission_use_trap_colour true
  addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
+ addUserKnob {26 info l "" +STARTLINE T "v2.1.0 - (c) Owen Bulka - 2022"}
 }
  Input {
   inputs 0

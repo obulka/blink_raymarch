@@ -455,14 +455,15 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
             noisePosition.x,
             noisePosition.y,
             noisePosition.z,
-            1.0f
-        ) / size;
+            0.0f
+        );
         float noiseValue;
-        if (noiseOptions & TURBULENCE_NOISE)
+        if (noiseOptions & FBM_NOISE)
         {
-            noiseValue = turbulenceNoise(
+            noiseValue = fractalBrownianMotionNoise(
                 octaves,
                 lacunarity,
+                size,
                 gain,
                 gamma,
                 noisePosition4d,
@@ -477,9 +478,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         }
         else
         {
-            noiseValue = fractalBrownianMotionNoise(
+            noiseValue = turbulenceNoise(
                 octaves,
                 lacunarity,
+                size,
                 gain,
                 gamma,
                 noisePosition4d,
@@ -627,17 +629,17 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     {
         float scale = 1.0f;
 
-        for (int j=0; j <= objectIndex; j++)
+        for (int object=0; object <= objectIndex; object++)
         {
-            const float numChildren = shapeProperties(j, 0, 2);
+            const float numChildren = shapeProperties(object, 0, 2);
 
-            if (j + numChildren < objectIndex)
+            if (object + numChildren < objectIndex)
             {
-                j += numChildren;
+                object += numChildren;
                 continue;
             }
 
-            scale *= positions(j, 0, 3);
+            scale *= positions(object, 0, 3);
         }
 
         return scale;
@@ -669,23 +671,23 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float3 worldToLocal(const int objectIndex, const float3 &worldPosition)
     {
         float3 localPosition = worldPosition;
-        for (int j=0; j <= objectIndex; j++)
+        for (int object=0; object <= objectIndex; object++)
         {
-            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
+            SampleType(shapeProperties) shapeProperty = shapeProperties(object, 0);
             const float numChildren = shapeProperty.z;
 
-            if (j + numChildren < objectIndex)
+            if (object + numChildren < objectIndex)
             {
-                j += numChildren;
+                object += numChildren;
                 continue;
             }
 
             // Read in the shape properties
-            const SampleType(positions) position = positions(j, 0);
-            const SampleType(rotations) rotation = rotations(j, 0);
-            const SampleType(dimensions) dimension = dimensions(j, 0);
-            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
-            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
+            const SampleType(positions) position = positions(object, 0);
+            const SampleType(rotations) rotation = rotations(object, 0);
+            const SampleType(dimensions) dimension = dimensions(object, 0);
+            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(object, 0);
+            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(object, 0);
 
             // const float scale = position.w;
             const int modifications = (int) shapeProperty.y;
@@ -717,22 +719,22 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float3 localToWorld(const int objectIndex, const float3 &localPosition)
     {
         float3 worldPosition = localPosition;
-        for (int j=objectIndex; j >= 0; j--)
+        for (int object=objectIndex; object >= 0; object--)
         {
-            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
+            SampleType(shapeProperties) shapeProperty = shapeProperties(object, 0);
             const float numChildren = shapeProperty.z;
 
-            if (j + numChildren < objectIndex)
+            if (object + numChildren < objectIndex)
             {
                 continue;
             }
 
             // Read in the shape properties
-            const SampleType(positions) position = positions(j, 0);
-            const SampleType(rotations) rotation = rotations(j, 0);
-            const SampleType(dimensions) dimension = dimensions(j, 0);
-            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
-            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
+            const SampleType(positions) position = positions(object, 0);
+            const SampleType(rotations) rotation = rotations(object, 0);
+            const SampleType(dimensions) dimension = dimensions(object, 0);
+            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(object, 0);
+            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(object, 0);
 
             // const float scale = position.w;
             const int modifications = (int) shapeProperty.y;

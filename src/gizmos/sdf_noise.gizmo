@@ -4,22 +4,25 @@ Gizmo {
  addUserKnob {20 User l "SDF Noise"}
  addUserKnob {7 size t "The size of the noise." R 1 300}
  size 1
- addUserKnob {4 type t "The noise type." M {fBm turbulence ""}}
+ addUserKnob {4 type t "The noise type." M {turbulence fBm "" ""}}
+ type fBm
  addUserKnob {13 translation t "Translate the noise by this amount."}
  addUserKnob {3 octaves t "The number of different frequencies to use."}
- octaves 4
+ octaves 10
  addUserKnob {7 lacunarity t "The per octave frequency multiplier." R 1 10}
  lacunarity 2
  addUserKnob {7 gain t "The per octave amplitude multiplier."}
- gain 1
+ gain 0.5
  addUserKnob {7 gamma t "The result will be raised to 1 over this power."}
- gamma 1
+ gamma 0.5
  addUserKnob {19 low_frequency_scale l "low frequency scale"}
- low_frequency_scale 1
+ low_frequency_scale {1 1 1 1}
  addUserKnob {19 high_frequency_scale l "high frequency scale"}
- high_frequency_scale 1
- addUserKnob {19 low_frequency_evolution l "low frequency evolution"}
- addUserKnob {19 high_frequency_evolution l "high frequency evolution"}
+ high_frequency_scale {1 1 1 1}
+ addUserKnob {19 low_frequency_translation l "low frequency translation"}
+ low_frequency_translation {0 0 0 0}
+ addUserKnob {19 high_frequency_translation l "high frequency translation"}
+ high_frequency_translation {0 0 0 0}
  addUserKnob {7 black_point l "black point" t "The black point of the noise."}
  addUserKnob {7 white_point l "white point" t "The white point of the noise."}
  white_point 1
@@ -36,7 +39,7 @@ Gizmo {
  addUserKnob {6 scattering t "Apply the noise to the scattering material property." +STARTLINE}
  addUserKnob {6 extinction t "Apply the noise to the extinction material property." -STARTLINE}
  addUserKnob {26 div0 l "" +STARTLINE}
- addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
+ addUserKnob {26 info l "" +STARTLINE T "v2.1.0 - (c) Owen Bulka - 2022"}
 }
 add_layer {sdf_noise_params0 sdf_noise_params0.noise_options sdf_noise_params0.translationX sdf_noise_params0.translationY sdf_noise_params0.translationZ sdf_noise_params0.options sdf_noise_params0.x sdf_noise_params0.y sdf_noise_params0.z}
  Constant {
@@ -121,11 +124,11 @@ add_layer {sdf_noise_params4 sdf_noise_params4.highFrequencyX sdf_noise_params4.
   xpos 1349
   ypos 714
  }
-add_layer {sdf_noise_params5 sdf_noise_params5.lowFrequencyEvolutionX sdf_noise_params5.lowFrequencyEvolutionY sdf_noise_params5.lowFrequencyEvolutionZ sdf_noise_params5.lowFrequencyEvolutionW}
+add_layer {sdf_noise_params5 sdf_noise_params5.lowFrequencyTranslationX sdf_noise_params5.lowFrequencyTranslationY sdf_noise_params5.lowFrequencyTranslationZ sdf_noise_params5.lowFrequencyTranslationW}
  Constant {
   inputs 0
   channels sdf_noise_params5
-  color {{parent.low_frequency_evolution} {parent.low_frequency_evolution} {parent.low_frequency_evolution} {parent.low_frequency_evolution}}
+  color {{parent.low_frequency_translation} {parent.low_frequency_translation} {parent.low_frequency_translation} {parent.low_frequency_translation}}
   format "1 1 0 0 1 1 1 1x1"
   name noise_params5
   xpos 1477
@@ -138,11 +141,11 @@ add_layer {sdf_noise_params5 sdf_noise_params5.lowFrequencyEvolutionX sdf_noise_
   xpos 1477
   ypos 714
  }
-add_layer {sdf_noise_params6 sdf_noise_params6.highFrequencyEvolutionX sdf_noise_params6.highFrequencyEvolutionY sdf_noise_params6.highFrequencyEvolutionZ sdf_noise_params6.highFrequencyEvolutionW}
+add_layer {sdf_noise_params6 sdf_noise_params6.highFrequencyTranslationX sdf_noise_params6.highFrequencyTranslationY sdf_noise_params6.highFrequencyTranslationZ sdf_noise_params6.highFrequencyTranslationW}
  Constant {
   inputs 0
   channels sdf_noise_params6
-  color {{parent.high_frequency_evolution} {parent.high_frequency_evolution} {parent.high_frequency_evolution} {parent.high_frequency_evolution}}
+  color {{parent.high_frequency_translation} {parent.high_frequency_translation} {parent.high_frequency_translation} {parent.high_frequency_translation}}
   format "1 1 0 0 1 1 1 1x1"
   name noise_params6
   xpos 1594

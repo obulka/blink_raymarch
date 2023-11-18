@@ -20,7 +20,7 @@ Gizmo {
  shadow_hardness 1
  addUserKnob {6 soften_shadows l "soften shadows" t "Soften the shadows using a non-phisically accurate effect." -STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
+ addUserKnob {26 info l "" +STARTLINE T "v2.1.0 - (c) Owen Bulka - 2022"}
 }
  Input {
   inputs 0

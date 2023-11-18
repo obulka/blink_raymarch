@@ -241,12 +241,12 @@ float performDistanceModification(
  * @returns: The transformed ray origin.
  */
 float3 transformRay(
-    const float3 &rayOrigin,
-    const float3 &translation,
-    const float3 &rotation,
-    const int modifications,
-    const float4 &repetition,
-    const float4 &elongation)
+        const float3 &rayOrigin,
+        const float3 &translation,
+        const float3 &rotation,
+        const int modifications,
+        const float4 &repetition,
+        const float4 &elongation)
 {
     float3x3 rotMatrix;
     rotationMatrix(rotation, rotMatrix);
@@ -285,12 +285,12 @@ float3 transformRay(
  * @returns: The transformed ray origin.
  */
 float3 inverseTransformRay(
-    const float3 &rayOrigin,
-    const float3 &translation,
-    const float3 &rotation,
-    const int modifications,
-    const float4 &repetition,
-    const float4 &elongation)
+        const float3 &rayOrigin,
+        const float3 &translation,
+        const float3 &rotation,
+        const int modifications,
+        const float4 &repetition,
+        const float4 &elongation)
 {
     float3 transformedRay = rayOrigin;
     performShapeModification(
