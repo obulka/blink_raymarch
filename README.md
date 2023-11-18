@@ -79,6 +79,8 @@ The material properties include:
 
 This gizmo allows you to vary the material properties of an 'sdf_material' node, or blend between them. It allows for a position seeded, turbulence or fBm noise, with all the properties of Nuke's built-in noise node, plus the additional ability to modify the black and white points, and lift. You can also invert the noise, and select which material properties will be affected by it. This node can be passed into a material, and it will affect that material and that material only. You can also pass it directly into the 'path_march' node's 'noise' input for use with the global scattering coefficient.
 
+If you want the noise to appear to change with time you can add an expression to the 'low/high frequency translation' knob's alpha value, which animates the 4th dimension translation of the noise.
+
 ### sdf_primitive
 
 This gizmo lets you choose the shape, dimensions, and location of an object. It takes other sdf_primitives as inputs, and all nodes in the 'children' input will be positioned relative to it. The children will also interact with the shape according to your selection, allowing you to intersect, subtract, and blend the objects. You can also use any shape as a bounding volume of its children in order to improve performance.

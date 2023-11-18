@@ -507,7 +507,6 @@ inline float distanceToCapsule(
 }
 
 
-
 /**
  * Compute the min distance from a point to a cone
  * (y-axis aligned). The tip of the cone is at the origin, and it opens

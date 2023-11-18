@@ -305,6 +305,45 @@ inline float sumComponent(const float4 &vector)
 
 
 /**
+ * Sum the components of a vector.
+ *
+ * @arg vector: The vector to sum the components of.
+ *
+ * @returns: The sum of the components.
+ */
+inline int sumComponent(const int2 &vector)
+{
+    return vector.x + vector.y;
+}
+
+
+/**
+ * Sum the components of a vector.
+ *
+ * @arg vector: The vector to sum the components of.
+ *
+ * @returns: The sum of the components.
+ */
+inline int sumComponent(const int3 &vector)
+{
+    return vector.x + vector.y + vector.z;
+}
+
+
+/**
+ * Sum the components of a vector.
+ *
+ * @arg vector: The vector to sum the components of.
+ *
+ * @returns: The sum of the components.
+ */
+inline int sumComponent(const int4 &vector)
+{
+    return vector.x + vector.y + vector.z + vector.w;
+}
+
+
+/**
  * The maximum component of a vector.
  *
  * @arg vector: The vector.

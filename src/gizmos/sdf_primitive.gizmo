@@ -41,7 +41,7 @@ Gizmo {
  blend_strength 0.1
  addUserKnob {6 is_bound l "is bound" t "If enabled, this object will act as a bounding volume for all its children. This means that until a ray hits the bounding volume, none of the child object's signed distance fields will be computed. This can vastly improve performance, especially when many complex objects are far from the camera. This option does not always play well with lighting effects that depend on the number of iterations in the computation such as 'ambient occlusion' and 'softened shadows' due to the variation near the surface of the bounding object." +DISABLED +STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {26 info l "" +STARTLINE T "v2.0.0 - (c) Owen Bulka - 2022"}
+ addUserKnob {26 info l "" +STARTLINE T "v2.1.0 - (c) Owen Bulka - 2022"}
 }
  Input {
   inputs 0

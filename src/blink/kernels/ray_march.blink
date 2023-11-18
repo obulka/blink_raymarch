@@ -8,10 +8,10 @@
 // BlinkScript Ray Marcher
 //
 
+#include "conversion.h"
 #include "math.h"
 #include "random.h"
 #include "noise.h"
-#include "conversion.h"
 #include "aovs.h"
 #include "lights.h"
 #include "material.h"
@@ -124,6 +124,11 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     // size.x
     Image<eRead, eAccessRandom, eEdgeNone> noiseParams2;
 
+    Image<eRead, eAccessRandom, eEdgeNone> noiseParams3;
+    Image<eRead, eAccessRandom, eEdgeNone> noiseParams4;
+    Image<eRead, eAccessRandom, eEdgeNone> noiseParams5;
+    Image<eRead, eAccessRandom, eEdgeNone> noiseParams6;
+
     // the input lights direction/position.xyz intensity.w
     Image<eRead, eAccessRandom, eEdgeNone> lights;
 
@@ -215,6 +220,9 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         float3 __offset2;
         float3 __offset3;
 
+        int __simplex[64][4];
+        int __perm[512];
+        int __grad4[32][4];
 
     /**
      * Give the parameters labels and default values.
@@ -293,7 +301,7 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
 
         __equiangularSamplingEnabled = _equiangularSamples > 0;
 
-        float aspect = aspectRatio(_formatHeight, _formatWidth);
+        const float aspect = aspectRatio(_formatHeight, _formatWidth);
         float4x4 cameraProjectionMatrix = projectionMatrix(
             _focalLength,
             _horizontalAperture,
@@ -319,6 +327,79 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         __offset1 = 0.5773f * float3(-1, -1, 1);
         __offset2 = 0.5773f * float3(-1, 1, -1);
         __offset3 = 0.5773f * float3(1, 1, 1);
+
+        const int simplexInit[64][4] = {
+            {0, 1, 2, 3}, {0, 1, 3, 2}, {0, 0, 0, 0}, {0, 2, 3, 1},
+            {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {1, 2, 3, 0},
+            {0, 2, 1, 3}, {0, 0, 0, 0}, {0, 3, 1, 2}, {0, 3, 2, 1},
+            {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {1, 3, 2, 0},
+            {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0},
+            {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0},
+            {1, 2, 0, 3}, {0, 0, 0, 0}, {1, 3, 0, 2}, {0, 0, 0, 0},
+            {0, 0, 0, 0}, {0, 0, 0, 0}, {2, 3, 0, 1}, {2, 3, 1, 0},
+            {1, 0, 2, 3}, {1, 0, 3, 2}, {0, 0, 0, 0}, {0, 0, 0, 0},
+            {0, 0, 0, 0}, {2, 0, 3, 1}, {0, 0, 0, 0}, {2, 1, 3, 0},
+            {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0},
+            {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0},
+            {2, 0, 1, 3}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0},
+            {3, 0, 1, 2}, {3, 0, 2, 1}, {0, 0, 0, 0}, {3, 1, 2, 0},
+            {2, 1, 0, 3}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0},
+            {3, 1, 0, 2}, {0, 0, 0, 0}, {3, 2, 0, 1}, {3, 2, 1, 0}
+        };
+
+        for (int i = 0; i < 64; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                __simplex[i][j] = simplexInit[i][j];
+            }
+        }
+
+        const int permInit[256] = {
+            151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233,
+            7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23,
+            190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219,
+            203, 117, 35, 11, 32, 57, 177, 33, 88, 237, 149, 56, 87, 174,
+            20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48,
+            27, 166, 77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133,
+            230, 220, 105, 92, 41, 55, 46, 245, 40, 244, 102, 143, 54, 65,
+            25, 63, 161, 1, 216, 80, 73, 209, 76, 132, 187, 208, 89, 18,
+            169, 200, 196, 135, 130, 116, 188, 159, 86, 164, 100, 109, 198,
+            173, 186, 3, 64, 52, 217, 226, 250, 124, 123, 5, 202, 38, 147,
+            118, 126, 255, 82, 85, 212, 207, 206, 59, 227, 47, 16, 58, 17,
+            182, 189, 28, 42, 223, 183, 170, 213, 119, 248, 152, 2, 44,
+            154, 163, 70, 221, 153, 101, 155, 167, 43, 172, 9, 129, 22,
+            39, 253, 19, 98, 108, 110, 79, 113, 224, 232, 178, 185, 112,
+            104, 218, 246, 97, 228, 251, 34, 242, 193, 238, 210, 144, 12,
+            191, 179, 162, 241, 81, 51, 145, 235, 249, 14, 239, 107, 49,
+            192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176, 115, 121,
+            50, 45, 127, 4, 150, 254, 138, 236, 205, 93, 222, 114, 67, 29,
+            24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
+        };
+
+        for (int i = 0; i < 512; i++)
+        {
+            __perm[i] = permInit[i % 256];
+        }
+
+        const int grad4Init[32][4]= {
+            {0, 1, 1, 1},  {0, 1, 1, -1},  {0, 1, -1, 1},  {0, 1, -1, -1},
+            {0, -1, 1, 1}, {0, -1, 1, -1}, {0, -1, -1, 1}, {0, -1, -1, -1},
+            {1, 0, 1, 1},  {1, 0, 1, -1},  {1, 0, -1, 1},  {1, 0, -1, -1},
+            {-1, 0, 1, 1}, {-1, 0, 1, -1}, {-1, 0, -1, 1}, {-1, 0, -1, -1},
+            {1, 1, 0, 1},  {1, 1, 0, -1},  {1, -1, 0, 1},  {1, -1, 0, -1},
+            {-1, 1, 0, 1}, {-1, 1, 0, -1}, {-1, -1, 0, 1}, {-1, -1, 0, -1},
+            {1, 1, 1, 0},  {1, 1, -1, 0},  {1, -1, 1, 0},  {1, -1, -1, 0},
+            {-1, 1, 1, 0}, {-1, 1, -1, 0}, {-1, -1, 1, 0}, {-1, -1, -1, 0}
+        };
+
+        for (int i = 0; i < 32; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                __grad4[i][j] = grad4Init[i][j];
+            }
+        }
     }
 
 
@@ -335,7 +416,8 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     {
         // Make sure there is a noise node plugged into the object.
         noiseOptions = (int) noiseParams0(index, 0, 0);
-        if ((noiseOptions & NOISE_ENABLED) == 0)
+        const float size = noiseParams2(index, 0, 0);
+        if ((noiseOptions & NOISE_ENABLED) == 0 || size == 0.0f)
         {
             return -1.0f;
         }
@@ -351,7 +433,10 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         const float lacunarity = noiseParams1(index, 0, 1);
         const float gain = noiseParams1(index, 0, 2);
         const float gamma = noiseParams1(index, 0, 3);
-        const float size = noiseParams2(index, 0, 0);
+        const float4 lowFrequency = noiseParams3(index, 0);
+        const float4 highFrequency = noiseParams4(index, 0);
+        const float4 lowFrequencyEvolution = noiseParams5(index, 0);
+        const float4 highFrequencyEvolution = noiseParams6(index, 0);
 
         // Translate the noise, and convert the position to the local
         // coordinate system
@@ -366,6 +451,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         }
 
         // Get the noise value based on which type of noise we are using
+        const float4 noisePosition4d = float4(
+            noisePosition.x,
+            noisePosition.y,
+            noisePosition.z,
+            0.0f
+        );
         float noiseValue;
         if (noiseOptions & FBM_NOISE)
         {
@@ -375,7 +466,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 size,
                 gain,
                 gamma,
-                noisePosition
+                noisePosition4d,
+                lowFrequency,
+                highFrequency,
+                lowFrequencyEvolution,
+                highFrequencyEvolution,
+                __simplex,
+                __perm,
+                __grad4
             );
         }
         else
@@ -386,7 +484,14 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
                 size,
                 gain,
                 gamma,
-                noisePosition
+                noisePosition4d,
+                lowFrequency,
+                highFrequency,
+                lowFrequencyEvolution,
+                highFrequencyEvolution,
+                __simplex,
+                __perm,
+                __grad4
             );
         }
 
@@ -524,17 +629,17 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     {
         float scale = 1.0f;
 
-        for (int j=0; j <= objectIndex; j++)
+        for (int object=0; object <= objectIndex; object++)
         {
-            const float numChildren = shapeProperties(j, 0, 2);
+            const float numChildren = shapeProperties(object, 0, 2);
 
-            if (j + numChildren < objectIndex)
+            if (object + numChildren < objectIndex)
             {
-                j += numChildren;
+                object += numChildren;
                 continue;
             }
 
-            scale *= positions(j, 0, 3);
+            scale *= positions(object, 0, 3);
         }
 
         return scale;
@@ -566,23 +671,23 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float3 worldToLocal(const int objectIndex, const float3 &worldPosition)
     {
         float3 localPosition = worldPosition;
-        for (int j=0; j <= objectIndex; j++)
+        for (int object=0; object <= objectIndex; object++)
         {
-            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
+            SampleType(shapeProperties) shapeProperty = shapeProperties(object, 0);
             const float numChildren = shapeProperty.z;
 
-            if (j + numChildren < objectIndex)
+            if (object + numChildren < objectIndex)
             {
-                j += numChildren;
+                object += numChildren;
                 continue;
             }
 
             // Read in the shape properties
-            const SampleType(positions) position = positions(j, 0);
-            const SampleType(rotations) rotation = rotations(j, 0);
-            const SampleType(dimensions) dimension = dimensions(j, 0);
-            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
-            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
+            const SampleType(positions) position = positions(object, 0);
+            const SampleType(rotations) rotation = rotations(object, 0);
+            const SampleType(dimensions) dimension = dimensions(object, 0);
+            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(object, 0);
+            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(object, 0);
 
             // const float scale = position.w;
             const int modifications = (int) shapeProperty.y;
@@ -614,22 +719,22 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
     float3 localToWorld(const int objectIndex, const float3 &localPosition)
     {
         float3 worldPosition = localPosition;
-        for (int j=objectIndex; j >= 0; j--)
+        for (int object=objectIndex; object >= 0; object--)
         {
-            SampleType(shapeProperties) shapeProperty = shapeProperties(j, 0);
+            SampleType(shapeProperties) shapeProperty = shapeProperties(object, 0);
             const float numChildren = shapeProperty.z;
 
-            if (j + numChildren < objectIndex)
+            if (object + numChildren < objectIndex)
             {
                 continue;
             }
 
             // Read in the shape properties
-            const SampleType(positions) position = positions(j, 0);
-            const SampleType(rotations) rotation = rotations(j, 0);
-            const SampleType(dimensions) dimension = dimensions(j, 0);
-            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(j, 0);
-            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(j, 0);
+            const SampleType(positions) position = positions(object, 0);
+            const SampleType(rotations) rotation = rotations(object, 0);
+            const SampleType(dimensions) dimension = dimensions(object, 0);
+            const SampleType(shapeModParameters0) modParameters0 = shapeModParameters0(object, 0);
+            const SampleType(shapeModParameters1) modParameters1 = shapeModParameters1(object, 0);
 
             // const float scale = position.w;
             const int modifications = (int) shapeProperty.y;
@@ -1726,12 +1831,12 @@ kernel RayMarchKernel : ImageComputationKernel<ePixelWise>
         int lightType = (int) lightProperty.w;
         int absLightType = abs(lightType);
 
-        if (absLightType == 0)
+        if (absLightType == AMBIENT_LIGHT)
         {
             // Ambient light, simply return the intensity.
             intensity = float2(light.w, 1);
         }
-        else if (absLightType == 1)
+        else if (absLightType == AMBIENT_OCCLUSION)
         {
             intensity = float2(
                 1.0f,

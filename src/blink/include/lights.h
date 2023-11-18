@@ -8,6 +8,8 @@
 // Handle Various Lights
 //
 
+#define AMBIENT_LIGHT 0
+#define AMBIENT_OCCLUSION 1
 #define DIRECTIONAL_LIGHT 2
 #define POINT_LIGHT 3
 
